@@ -4,6 +4,9 @@
 
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./User.ts" />
+/// <reference path="./Zone.ts" />
+/// <reference path="./Profil.ts" />
+/// <reference path="./Timeline.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -53,7 +56,7 @@ class SDI extends ModelItf {
      * @property _zones
      * @type Array<Zone>
      */
-//    private _zones : Array<Zone>;
+    private _zones : Array<Zone>;
 
     /**
      * Lazy loading for Zones property.
@@ -69,7 +72,7 @@ class SDI extends ModelItf {
      * @property _profils
      * @type Array<Profil>
      */
-//    private _profils : Array<Profil>;
+    private _profils : Array<Profil>;
 
     /**
      * Lazy loading for Profils property.
@@ -85,7 +88,7 @@ class SDI extends ModelItf {
      * @property _timelines
      * @type Array<Timeline>
      */
-//    private _timelines : Array<Timeline>;
+    private _timelines : Array<Timeline>;
 
     /**
      * Lazy loading for Timelines property.
@@ -119,6 +122,18 @@ class SDI extends ModelItf {
         }
 
         this._allowedHost = allowedHost;
+
+        this._users = new Array<User>();
+        this._users_loaded = false;
+
+        this._zones = new Array<Zone>();
+        this._zones_loaded = false;
+
+        this._profils = new Array<Profil>();
+        this._profils_loaded = false;
+
+        this._timelines = new Array<Timeline>();
+        this._timelines_loaded = false;
     }
 
     /**
@@ -135,6 +150,49 @@ class SDI extends ModelItf {
         return this._allowedHost;
     }
 
+    /**
+     * Return the User's roles.
+     */
+    users() {
+        if(! this._users_loaded) {
+            // TODO : Retrieve from database.
+            this._users_loaded = true;
+        }
+        return this._users;
+    }
+
+    /**
+     * Return the User's roles.
+     */
+    zones() {
+        if(! this._zones_loaded) {
+            // TODO : Retrieve from database.
+            this._zones_loaded = true;
+        }
+        return this._zones;
+    }
+
+    /**
+     * Return the SDI's profils.
+     */
+    profils() {
+        if(! this._profils_loaded) {
+            // TODO : Retrieve from database.
+            this._profils_loaded = true;
+        }
+        return this._profils;
+    }
+
+    /**
+     * Return the SDI's timelines.
+     */
+    timelines() {
+        if(! this._timelines_loaded) {
+            // TODO : Retrieve from database.
+            this._timelines_loaded = true;
+        }
+        return this._timelines;
+    }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
