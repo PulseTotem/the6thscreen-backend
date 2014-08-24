@@ -7,13 +7,14 @@
 /// <reference path="../../libsdef/socket.io-0.9.10.d.ts" />
 
 /// <reference path="./core/Logger.ts" />
+/// <reference path="./client/ClientManager.ts" />
 
 var http = require("http");
 var express = require("express");
 var sio = require("socket.io");
 
 /**
- * Represents the The 6th Screen's Backend.
+ * Represents The 6th Screen's Backend.
  *
  * @class The6thScreenBackend
  */
@@ -35,16 +36,42 @@ class The6thScreenBackend {
             res.send('<h1>Are you lost ? * <--- You are here !</h1>');
         });
 
-        io.on('connection', function(socket){
+        //TODO : io.origins("allowedHosts"); // see : http://socket.io/docs/server-api/#server#origins(v:string):server
+
+        var clientNamespace = io.of("/clients");
+
+        clientNamespace.on('connection', function(socket){
             Logger.info("New The 6th Screen Client Connection");
+
+            new ClientManager(socket);
 
             socket.on('disconnect', function(){
                 Logger.info("The 6th Screen Client disconnected.");
             });
         });
 
+        var sourcesNamespace = io.of("/sources");
+
+        sourcesNamespace.on('connection', function(socket){
+            Logger.info("New The 6th Screen Sources Server Connection");
+
+            socket.on('disconnect', function(){
+                Logger.info("The 6th Screen Sources Server disconnected.");
+            });
+        });
+
+        var customizerNamespace = io.of("/customizers");
+
+        customizerNamespace.on('connection', function(socket){
+            Logger.info("New The 6th Screen Customizer Connection");
+
+            socket.on('disconnect', function(){
+                Logger.info("The 6th Screen Customizer disconnected.");
+            });
+        });
+
         httpServer.listen(listeningPort, function(){
-            Logger.info("The 6th Screen Client's Manager listening on *:" + listeningPort);
+            Logger.info("The 6th Screen's Backend listening on *:" + listeningPort);
         });
     }
 }
