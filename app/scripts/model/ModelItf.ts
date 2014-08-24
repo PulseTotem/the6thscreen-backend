@@ -67,4 +67,14 @@ class ModelItf {
     delete() {
         Logger.error("ModelItf - delete : Method need to be implemented.");
     }
+
+    /**
+     * Retrieve all models from database and create corresponding model instances.
+     *
+     * @return {Array<ModelItf>} The model instances.
+     */
+    static all() : Array<ModelItf> {
+        Logger.error("ModelItf - all : Method need to be implemented.");
+        return null;
+    }
 }
