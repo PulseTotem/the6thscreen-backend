@@ -3,6 +3,7 @@
  */
 
 /// <reference path="../core/Logger.ts" />
+/// <reference path="../model/User.ts" />
 
 /**
  * Manage connection with client.
