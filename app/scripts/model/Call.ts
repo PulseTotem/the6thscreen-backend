@@ -3,6 +3,7 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./ParamValue.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -23,6 +24,38 @@ class Call extends ModelItf {
     private _name : string;
 
     /**
+     * Source property.
+     *
+     * @property _source
+     * @type Source
+     */
+    private _source : Source;
+
+    /**
+     * Lazy loading for Source property.
+     *
+     * @property _source_loaded
+     * @type boolean
+     */
+    private _source_loaded : boolean;
+
+    /**
+     * ParamValues property.
+     *
+     * @property _param_values
+     * @type Array<ParamValue>
+     */
+    private _param_values : Array<ParamValue>;
+
+    /**
+     * Lazy loading for ParamValues property.
+     *
+     * @property _param_values_loaded
+     * @type boolean
+     */
+    private _param_values_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -38,6 +71,12 @@ class Call extends ModelItf {
         }
 
         this._name = name;
+
+        this._source = null;
+        this._source_loaded = false;
+
+        this._param_values = new Array<ParamValue>();
+        this._param_values_loaded = false;
     }
 
     /**
@@ -45,6 +84,28 @@ class Call extends ModelItf {
      */
     name() {
         return this._name;
+    }
+
+    /**
+     * Return the Call's source.
+     */
+    source() {
+        if(! this._source_loaded) {
+            // TODO : Retrieve from database.
+            this._source_loaded = true;
+        }
+        return this._source;
+    }
+
+    /**
+     * Return the Call's paramValues.
+     */
+    paramValues() {
+        if(! this._param_values_loaded) {
+            // TODO : Retrieve from database.
+            this._param_values_loaded = true;
+        }
+        return this._param_values;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////

@@ -140,6 +140,18 @@ class CallType extends ModelItf {
 
         this._description = description;
 
+        this._source = null;
+        this._source_loaded = false;
+
+        this._renderer = null;
+        this._renderer_loaded = false;
+
+        this._receive_policy = null;
+        this._receive_policy_loaded = false;
+
+        this._render_policy = null;
+        this._render_policy_loaded = false;
+
         this._calls = new Array<Call>();
         this._calls_loaded = false;
     }
