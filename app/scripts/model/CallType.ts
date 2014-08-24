@@ -3,6 +3,11 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./Source.ts" />
+/// <reference path="./Renderer.ts" />
+/// <reference path="./ReceivePolicy.ts" />
+/// <reference path="./RenderPolicy.ts" />
+/// <reference path="./Call.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -31,6 +36,86 @@ class CallType extends ModelItf {
     private _description : string;
 
     /**
+     * Source property.
+     *
+     * @property _source
+     * @type Source
+     */
+    private _source : Source;
+
+    /**
+     * Lazy loading for Source property.
+     *
+     * @property _source_loaded
+     * @type boolean
+     */
+    private _source_loaded : boolean;
+
+    /**
+     * Renderer property.
+     *
+     * @property _renderer
+     * @type Renderer
+     */
+    private _renderer : Renderer;
+
+    /**
+     * Lazy loading for Renderer property.
+     *
+     * @property _renderer_loaded
+     * @type boolean
+     */
+    private _renderer_loaded : boolean;
+
+    /**
+     * ReceivePolicy property.
+     *
+     * @property _receive_policy
+     * @type ReceivePolicy
+     */
+    private _receive_policy : ReceivePolicy;
+
+    /**
+     * Lazy loading for ReceivePolicy property.
+     *
+     * @property _receive_policy_loaded
+     * @type boolean
+     */
+    private _receive_policy_loaded : boolean;
+
+    /**
+     * RenderPolicy property.
+     *
+     * @property _render_policy
+     * @type RenderPolicy
+     */
+    private _render_policy : RenderPolicy;
+
+    /**
+     * Lazy loading for RenderPolicy property.
+     *
+     * @property _render_policy_loaded
+     * @type boolean
+     */
+    private _render_policy_loaded : boolean;
+
+    /**
+     * Calls property.
+     *
+     * @property _calls
+     * @type Array<Call>
+     */
+    private _calls : Array<Call>;
+
+    /**
+     * Lazy loading for Calls property.
+     *
+     * @property _calls_loaded
+     * @type boolean
+     */
+    private _calls_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -54,6 +139,9 @@ class CallType extends ModelItf {
         }
 
         this._description = description;
+
+        this._calls = new Array<Call>();
+        this._calls_loaded = false;
     }
 
     /**
@@ -68,6 +156,61 @@ class CallType extends ModelItf {
      */
     description() {
         return this._description;
+    }
+
+    /**
+     * Return the CallType's source.
+     */
+    source() {
+        if(! this._source_loaded) {
+            // TODO : Retrieve from database.
+            this._source_loaded = true;
+        }
+        return this._source;
+    }
+
+    /**
+     * Return the CallType's renderer.
+     */
+    renderer() {
+        if(! this._renderer_loaded) {
+            // TODO : Retrieve from database.
+            this._renderer_loaded = true;
+        }
+        return this._renderer;
+    }
+
+    /**
+     * Return the CallType's receivePolicy.
+     */
+    receivePolicy() {
+        if(! this._receive_policy_loaded) {
+            // TODO : Retrieve from database.
+            this._receive_policy_loaded = true;
+        }
+        return this._receive_policy;
+    }
+
+    /**
+     * Return the CallType's renderPolicy.
+     */
+    renderPolicy() {
+        if(! this._render_policy_loaded) {
+            // TODO : Retrieve from database.
+            this._render_policy_loaded = true;
+        }
+        return this._render_policy;
+    }
+
+    /**
+     * Return the CallType's calls.
+     */
+    calls() {
+        if(! this._calls_loaded) {
+            // TODO : Retrieve from database.
+            this._calls_loaded = true;
+        }
+        return this._calls;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
