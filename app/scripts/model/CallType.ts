@@ -3,17 +3,16 @@
  */
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./Profil.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
 /**
- * Model : Timeline
+ * Model : CallType
  *
- * @class Timeline
+ * @class CallType
  * @extends ModelItf
  */
-class Timeline extends ModelItf {
+class CallType extends ModelItf {
 
     /**
      * Name property.
@@ -32,73 +31,43 @@ class Timeline extends ModelItf {
     private _description : string;
 
     /**
-     * Profils property.
-     *
-     * @property _profils
-     * @type Array<Profil>
-     */
-    private _profils : Array<Profil>;
-
-    /**
-     * Lazy loading for Profils property.
-     *
-     * @property _profils_loaded
-     * @type boolean
-     */
-    private _profils_loaded : boolean;
-
-    /**
      * Constructor.
      *
      * @constructor
-     * @param {string} name - The Timeline's name.
-     * @param {string} description - The Timeline's description.
-     * @param {number} id - The Timeline's ID.
+     * @param {string} name - The CallType's name.
+     * @param {string} description - The CallType's description.
+     * @param {number} id - The CallType's ID.
      */
     constructor(name : string, description : string, id : number = null) {
         super(id);
 
         if(this._name == null || this._name == "") {
-            Logger.error("A Timeline needs to have a name.");
+            Logger.error("A CallType needs to have a name.");
             // TODO : Throw an Exception ?
         }
 
         this._name = name;
 
         if(this._description == null || this._description == "") {
-            Logger.error("A Timeline needs to have a description.");
+            Logger.error("A CallType needs to have a description.");
             // TODO : Throw an Exception ?
         }
 
         this._description = description;
-
-        this._profils = new Array<Profil>();
-        this._profils_loaded = false;
     }
 
     /**
-     * Return the Timeline's name.
+     * Return the CallType's name.
      */
     name() {
         return this._name;
     }
 
     /**
-     * Return the Timeline's description.
+     * Return the CallType's description.
      */
     description() {
         return this._description;
-    }
-
-    /**
-     * Return the Timeline's profils.
-     */
-    profils() {
-        if(! this._profils_loaded) {
-            // TODO : Retrieve from database.
-            this._profils_loaded = true;
-        }
-        return this._profils;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
@@ -113,9 +82,9 @@ class Timeline extends ModelItf {
     /**
      * Retrieve model description from database and create model instance.
      *
-     * @return {Timeline} The model instance.
+     * @return {CallType} The model instance.
      */
-    static read(id : number) : Timeline {
+    static read(id : number) : CallType {
         // TODO
         return null;
     }
@@ -137,9 +106,9 @@ class Timeline extends ModelItf {
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
-     * @return {Array<Timeline>} The model instances.
+     * @return {Array<CallType>} The model instances.
      */
-    static all() : Array<Timeline> {
+    static all() : Array<CallType> {
         // TODO
         return null;
     }

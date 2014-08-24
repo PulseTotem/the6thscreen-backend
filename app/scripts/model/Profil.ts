@@ -3,6 +3,8 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./Call.ts" />
+/// <reference path="./Timeline.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -31,6 +33,38 @@ class Profil extends ModelItf {
     private _description : string;
 
     /**
+     * Calls property.
+     *
+     * @property _calls
+     * @type Array<Call>
+     */
+    private _calls : Array<Call>;
+
+    /**
+     * Lazy loading for Calls property.
+     *
+     * @property _calls_loaded
+     * @type boolean
+     */
+    private _calls_loaded : boolean;
+
+    /**
+     * Timelines property.
+     *
+     * @property _timelines
+     * @type Array<Timeline>
+     */
+    private _timelines : Array<Timeline>;
+
+    /**
+     * Lazy loading for Timelines property.
+     *
+     * @property _timelines_loaded
+     * @type boolean
+     */
+    private _timelines_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -54,6 +88,12 @@ class Profil extends ModelItf {
         }
 
         this._description = description;
+
+        this._calls = new Array<Call>();
+        this._calls_loaded = false;
+
+        this._timelines = new Array<Timeline>();
+        this._timelines_loaded = false;
     }
 
     /**
@@ -68,6 +108,28 @@ class Profil extends ModelItf {
      */
     description() {
         return this._description;
+    }
+
+    /**
+     * Return the Profil's calls.
+     */
+    calls() {
+        if(! this._calls_loaded) {
+            // TODO : Retrieve from database.
+            this._calls_loaded = true;
+        }
+        return this._calls;
+    }
+
+    /**
+     * Return the Profil's timelines.
+     */
+    timelines() {
+        if(! this._timelines_loaded) {
+            // TODO : Retrieve from database.
+            this._timelines_loaded = true;
+        }
+        return this._timelines;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////

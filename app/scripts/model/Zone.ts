@@ -3,6 +3,8 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./CallType.ts" />
+/// <reference path="./Call.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -39,6 +41,38 @@ class Zone extends ModelItf {
     private _position : string;
 
     /**
+     * CallTypes property.
+     *
+     * @property _call_types
+     * @type Array<CallType>
+     */
+    private _call_types : Array<CallType>;
+
+    /**
+     * Lazy loading for CallTypes property.
+     *
+     * @property _call_types_loaded
+     * @type boolean
+     */
+    private _call_types_loaded : boolean;
+
+    /**
+     * Calls property.
+     *
+     * @property _calls
+     * @type Array<Call>
+     */
+    private _calls : Array<Call>;
+
+    /**
+     * Lazy loading for Calls property.
+     *
+     * @property _calls_loaded
+     * @type boolean
+     */
+    private _calls_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -70,6 +104,12 @@ class Zone extends ModelItf {
         }
 
         this._position = position;
+
+        this._call_types = new Array<CallType>();
+        this._call_types_loaded = false;
+
+        this._calls = new Array<Call>();
+        this._calls_loaded = false;
     }
 
     /**
@@ -91,6 +131,28 @@ class Zone extends ModelItf {
      */
     position() {
         return this._position;
+    }
+
+    /**
+     * Return the Zone's CallTypes.
+     */
+    callTypes() {
+        if(! this._call_types_loaded) {
+            // TODO : Retrieve from database.
+            this._call_types_loaded = true;
+        }
+        return this._call_types;
+    }
+
+    /**
+     * Return the Zone's calls.
+     */
+    calls() {
+        if(! this._calls_loaded) {
+            // TODO : Retrieve from database.
+            this._calls_loaded = true;
+        }
+        return this._calls;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
