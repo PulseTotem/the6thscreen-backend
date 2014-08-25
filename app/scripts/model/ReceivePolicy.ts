@@ -29,7 +29,7 @@ class ReceivePolicy extends ModelItf {
      * @param {string} name - The ReceivePolicy's name.
      * @param {number} id - The ReceivePolicy's ID.
      */
-        constructor(name : string, id : number = null) {
+    constructor(name : string, id : number = null) {
         super(id);
 
         if(this._name == null || this._name == "") {

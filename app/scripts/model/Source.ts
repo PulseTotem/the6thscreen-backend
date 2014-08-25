@@ -3,6 +3,9 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./InfoType.ts" />
+/// <reference path="./ParamType.ts" />
+/// <reference path="./ParamValue.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -55,6 +58,54 @@ class Source extends ModelItf {
     private _port : number;
 
     /**
+     * InfoType property.
+     *
+     * @property _info_type
+     * @type InfoType
+     */
+    private _info_type : InfoType;
+
+    /**
+     * Lazy loading for InfoType property.
+     *
+     * @property _info_type_loaded
+     * @type boolean
+     */
+    private _info_type_loaded : boolean;
+
+    /**
+     * ParamTypes property.
+     *
+     * @property _param_types
+     * @type Array<ParamType>
+     */
+    private _param_types : Array<ParamType>;
+
+    /**
+     * Lazy loading for ParamTypes property.
+     *
+     * @property _param_types_loaded
+     * @type boolean
+     */
+    private _param_types_loaded : boolean;
+
+    /**
+     * ParamValues property.
+     *
+     * @property _param_values
+     * @type Array<ParamValue>
+     */
+    private _param_values : Array<ParamValue>;
+
+    /**
+     * Lazy loading for ParamValues property.
+     *
+     * @property _param_values_loaded
+     * @type boolean
+     */
+    private _param_values_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -102,6 +153,15 @@ class Source extends ModelItf {
         }
 
         this._port = port;
+
+        this._info_type = null;
+        this._info_type_loaded = false;
+
+        this._param_types = new Array<ParamType>();
+        this._param_types_loaded = false;
+
+        this._param_values = new Array<ParamValue>();
+        this._param_values_loaded = false;
     }
 
     /**
@@ -137,6 +197,39 @@ class Source extends ModelItf {
      */
     port() {
         return this._port;
+    }
+
+    /**
+     * Return the Source's infoType.
+     */
+    infoType() {
+        if(! this._info_type_loaded) {
+            // TODO : Retrieve from database.
+            this._info_type_loaded = true;
+        }
+        return this._info_type;
+    }
+
+    /**
+     * Return the Source's paramTypes.
+     */
+    paramTypes() {
+        if(! this._param_types_loaded) {
+            // TODO : Retrieve from database.
+            this._param_types_loaded = true;
+        }
+        return this._param_types;
+    }
+
+    /**
+     * Return the Source's paramValues.
+     */
+    paramValues() {
+        if(! this._param_values_loaded) {
+            // TODO : Retrieve from database.
+            this._param_values_loaded = true;
+        }
+        return this._param_values;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////

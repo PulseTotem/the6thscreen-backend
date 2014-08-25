@@ -3,17 +3,16 @@
  */
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./InfoType.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
 /**
- * Model : Renderer
+ * Model : ParamType
  *
- * @class Renderer
+ * @class ParamType
  * @extends ModelItf
  */
-class Renderer extends ModelItf {
+class ParamType extends ModelItf {
 
     /**
      * Name property.
@@ -32,73 +31,89 @@ class Renderer extends ModelItf {
     private _description : string;
 
     /**
-     * InfoType property.
+     * Type property.
      *
-     * @property _info_type
-     * @type InfoType
+     * @property _type
+     * @type string
      */
-    private _info_type : InfoType;
+    private _type : string;
 
     /**
-     * Lazy loading for InfoType property.
+     * Constraint property.
      *
-     * @property _info_type_loaded
-     * @type boolean
+     * @property _constraint
+     * @type string
      */
-    private _info_type_loaded : boolean;
+    private _constraint : string;
 
     /**
      * Constructor.
      *
      * @constructor
-     * @param {string} name - The Renderer's name.
-     * @param {string} description - The Renderer's description.
-     * @param {number} id - The Renderer's ID.
+     * @param {string} name - The ParamType's name.
+     * @param {string} description - The ParamType's description.
+     * @param {string} type - The ParamType's type.
+     * @param {string} constraint - The ParamType's constraint.
+     * @param {number} id - The ParamType's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string, type : string, constraint : string, id : number = null) {
         super(id);
 
         if(this._name == null || this._name == "") {
-            Logger.error("A Renderer needs to have a name.");
+            Logger.error("A ParamType needs to have a name.");
             // TODO : Throw an Exception ?
         }
 
         this._name = name;
 
         if(this._description == null || this._description == "") {
-            Logger.error("A Renderer needs to have a description.");
+            Logger.error("A ParamType needs to have a description.");
             // TODO : Throw an Exception ?
         }
 
         this._description = description;
 
-        this._info_type = null;
-        this._info_type_loaded = false;
+        if(this._type == null || this._type == "") {
+            Logger.error("A ParamType needs to have a type.");
+            // TODO : Throw an Exception ?
+        }
+
+        this._type = type;
+
+        if(this._constraint == null || this._constraint == "") {
+            Logger.error("A ParamType needs to have a constraint.");
+            // TODO : Throw an Exception ?
+        }
+
+        this._constraint = constraint;
     }
 
     /**
-     * Return the Renderer's name.
+     * Return the ParamType's name.
      */
     name() {
         return this._name;
     }
 
     /**
-     * Return the Renderer's description.
+     * Return the ParamType's description.
      */
     description() {
         return this._description;
     }
 
     /**
-     * Return the Renderer's infoType.
+     * Return the ParamType's type.
      */
-    infoType() {
-        if(! this._info_type_loaded) {
-            // TODO : Retrieve from database.
-            this._info_type_loaded = true;
-        }
-        return this._info_type;
+    type() {
+        return this._type;
+    }
+
+    /**
+     * Return the ParamType's constraint.
+     */
+    constraint() {
+        return this._constraint;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
@@ -113,9 +128,9 @@ class Renderer extends ModelItf {
     /**
      * Retrieve model description from database and create model instance.
      *
-     * @return {Renderer} The model instance.
+     * @return {ParamType} The model instance.
      */
-    static read(id : number) : Renderer {
+    static read(id : number) : ParamType {
         // TODO
         return null;
     }
@@ -137,9 +152,9 @@ class Renderer extends ModelItf {
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
-     * @return {Array<Renderer>} The model instances.
+     * @return {Array<ParamType>} The model instances.
      */
-    static all() : Array<Renderer> {
+    static all() : Array<ParamType> {
         // TODO
         return null;
     }
