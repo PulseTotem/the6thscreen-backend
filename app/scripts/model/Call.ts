@@ -3,6 +3,7 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./Source.ts" />
 /// <reference path="./ParamValue.ts" />
 
 /// <reference path="../core/Logger.ts" />
