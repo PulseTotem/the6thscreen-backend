@@ -7,6 +7,7 @@
 /// <reference path="../../libsdef/socket.io-0.9.10.d.ts" />
 
 /// <reference path="./core/Logger.ts" />
+
 /// <reference path="./client/ClientManager.ts" />
 
 var http = require("http");

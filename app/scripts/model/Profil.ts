@@ -7,6 +7,7 @@
 /// <reference path="./Timeline.ts" />
 
 /// <reference path="../core/Logger.ts" />
+/// <reference path="../core/RestClient.ts" />
 
 /**
  * Model : Profil
@@ -148,6 +149,11 @@ class Profil extends ModelItf {
      */
     static read(id : number) : Profil {
         // TODO
+        RestClient.get("http://localhost:9000", function(data, response) {
+            Logger.debug("YEAHH!!!");
+            Logger.debug(data);
+            Logger.debug(response);
+        });
         return null;
     }
 

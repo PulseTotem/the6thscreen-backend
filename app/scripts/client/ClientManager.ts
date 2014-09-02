@@ -3,7 +3,7 @@
  */
 
 /// <reference path="../core/Logger.ts" />
-/// <reference path="../model/User.ts" />
+/// <reference path="../model/Profil.ts" />
 
 /**
  * Manage connection with client.
@@ -33,25 +33,30 @@ class ClientManager {
 
     /**
      * Prepare socket for orders from Client.
+     *
+     * @method listenClient
      */
     listenClient() {
         var self = this;
 
-        this._clientSocket.on("RetrieveSDIDescription", function(sdiInformation) {
-            // sdiInformation : {"userID" : string, "sdiID" : string, "timelineID" : string}
-            self.sendSDIDescription(sdiInformation.userID, sdiInformation.sdiID, sdiInformation.timelineID);
+        this._clientSocket.on("RetrieveProfilDescription", function(profilDescription) {
+            // profilDescription : {"userID" : string, "sdiID" : string, "profilID" : string}
+            self.sendProfilDescription(profilDescription.userID, profilDescription.sdiID, profilDescription.profilID);
         });
     }
 
     /**
-     * Retrieve SDI instance description and send it to client.
+     * Retrieve Profil instance description and send it to client.
      *
+     * @method sendProfilDescription
      * @param {string} userID - The User ID.
      * @param {string} sdiID - The SDI ID.
-     * @param {string} timelineID - The Timeline ID.
+     * @param {string} profilID - The Profil ID.
      */
-    sendSDIDescription(userID : string, sdiID : string, timelineID : string) {
+    sendProfilDescription(userID : string, sdiID : string, profilID : string) {
         //TODO Retrieve information from model
-        this._clientSocket.emit("SDIDescription", {"test" : "super!"});
+        var profil = Profil.read(parseInt(profilID));
+        Logger.debug(profil);
+        this._clientSocket.emit("ProfilDescription", {"test" : "super!"});
     }
 }
