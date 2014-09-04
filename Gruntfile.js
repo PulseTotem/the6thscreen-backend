@@ -6,6 +6,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-typescript');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     // tasks
     grunt.initConfig({
@@ -15,6 +16,15 @@ module.exports = function (grunt) {
 // ---------------------------------------------
 //                          build and dist tasks
 // ---------------------------------------------
+        copy: {
+            buildConnectionInfosFile: {
+                files: 	[{'build/js/connection_infos.json': 'app/scripts/core/connection_infos.json'}]
+            },
+            distConnectionInfosFile: {
+                files: 	[{'dist/js/connection_infos.json': 'app/scripts/core/connection_infos.json'}]
+            }
+        },
+
         typescript: {
             build: {
                 src: [
@@ -95,13 +105,13 @@ module.exports = function (grunt) {
     grunt.registerTask('build', function () {
         grunt.task.run(['clean:build']);
 
-        grunt.task.run(['typescript:build']);
+        grunt.task.run(['copy:buildConnectionInfosFile', 'typescript:build']);
     });
 
     grunt.registerTask('dist', function () {
         grunt.task.run(['clean:dist']);
 
-        grunt.task.run(['typescript:dist']);
+        grunt.task.run(['copy:distConnectionInfosFile', 'typescript:dist']);
     });
 
     grunt.registerTask('develop', ['build', 'express:build', 'watch']);
