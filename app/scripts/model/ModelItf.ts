@@ -77,4 +77,15 @@ class ModelItf {
         Logger.error("ModelItf - all : Method need to be implemented.");
         return null;
     }
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        Logger.error("ModelItf - getTableName : Method need to be implemented.");
+        return "";
+    }
 }

@@ -3,9 +3,13 @@
  */
 
 /// <reference path="../../../libsdef/node-rest-client.d.ts" />
+
 /// <reference path="./Logger.ts" />
 
 var Client = require('node-rest-client').Client;
+
+var async = require('asyncawait/async');
+var await = require('asyncawait/await');
 
 /**
  * Represents a REST client.
@@ -37,7 +41,7 @@ class RestClient {
     }
 
     /**
-     * Send a GET message to URL in parameter.
+     * Send a GET message to URL in parameter, in an asynchronous way.
      *
      * @method get
      * @static
@@ -69,7 +73,38 @@ class RestClient {
     }
 
     /**
-     * Send a POST message to URL in parameter.
+     * Send a GET message to URL in parameter, in a synchronous way.
+     *
+     * @method getSync
+     * @static
+     * @param {string} url - The url to get.
+     */
+    static getSync(url : string) {
+
+        return async(function() {
+            var result = null;
+
+            var success = function(data, response) {
+                result = new Object();
+                result["success"] = true;
+                result["data"] = data;
+                result["response"] = response;
+            };
+
+            var fail = function(error) {
+                result = new Object();
+                result["success"] = false;
+                result["error"] = error;
+            };
+
+            await(RestClient.getClient().get(url, success).on('error',fail));
+
+            return result;
+        });
+    }
+
+    /**
+     * Send a POST message to URL in parameter, in an asynchronous way.
      *
      * @method post
      * @static
@@ -106,7 +141,44 @@ class RestClient {
     }
 
     /**
-     * Send a PUT message to URL in parameter.
+     * Send a POST message to URL in parameter, in a synchronous way.
+     *
+     * @method postSync
+     * @static
+     * @param {string} url - The url to post.
+     * @param {JSONObject} data - The data for POST message.
+     */
+    static postSync(url : string, data : any) {
+
+        return async(function() {
+            var result = null;
+
+            var args = new Object();
+            args["data"] = data;
+            args["headers"] = new Object();
+            args["headers"]["Content-Type"] = "application/json";
+
+            var success = function(data, response) {
+                result = new Object();
+                result["success"] = true;
+                result["data"] = data;
+                result["response"] = response;
+            };
+
+            var fail = function(error) {
+                result = new Object();
+                result["success"] = false;
+                result["error"] = error;
+            };
+
+            await(RestClient.getClient().post(url, args, success).on('error',fail));
+
+            return result;
+        });
+    }
+
+    /**
+     * Send a PUT message to URL in parameter, in an asynchronous way.
      *
      * @method put
      * @static
@@ -143,7 +215,44 @@ class RestClient {
     }
 
     /**
-     * Send a PATCH message to URL in parameter.
+     * Send a PUT message to URL in parameter, in a synchronous way.
+     *
+     * @method putSync
+     * @static
+     * @param {string} url - The url to put.
+     * @param {JSONObject} data - The data for PUT message.
+     */
+    static putSync(url : string, data : any) {
+
+        return async(function() {
+            var result = null;
+
+            var args = new Object();
+            args["data"] = data;
+            args["headers"] = new Object();
+            args["headers"]["Content-Type"] = "application/json";
+
+            var success = function(data, response) {
+                result = new Object();
+                result["success"] = true;
+                result["data"] = data;
+                result["response"] = response;
+            };
+
+            var fail = function(error) {
+                result = new Object();
+                result["success"] = false;
+                result["error"] = error;
+            };
+
+            await(RestClient.getClient().put(url, args, success).on('error',fail));
+
+            return result;
+        });
+    }
+
+    /**
+     * Send a PATCH message to URL in parameter, in an asynchronous way.
      *
      * @method patch
      * @static
@@ -177,6 +286,43 @@ class RestClient {
         }
 
         RestClient.getClient().patch(url, args, success).on('error',fail);
+    }
+
+    /**
+     * Send a PATCH message to URL in parameter, in a synchronous way.
+     *
+     * @method patchSync
+     * @static
+     * @param {string} url - The url to patch.
+     * @param {JSONObject} data - The data for PATCH message.
+     */
+    static patchSync(url : string, data : any) {
+
+        return async(function() {
+            var result = null;
+
+            var args = new Object();
+            args["data"] = data;
+            args["headers"] = new Object();
+            args["headers"]["Content-Type"] = "application/json";
+
+            var success = function(data, response) {
+                result = new Object();
+                result["success"] = true;
+                result["data"] = data;
+                result["response"] = response;
+            };
+
+            var fail = function(error) {
+                result = new Object();
+                result["success"] = false;
+                result["error"] = error;
+            };
+
+            await(RestClient.getClient().patch(url, args, success).on('error',fail));
+
+            return result;
+        });
     }
 
 }

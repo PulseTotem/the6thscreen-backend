@@ -8,6 +8,7 @@
 
 /// <reference path="../core/Logger.ts" />
 /// <reference path="../core/RestClient.ts" />
+/// <reference path="../core/DatabaseConnection.ts" />
 
 /**
  * Model : Profil
@@ -149,12 +150,17 @@ class Profil extends ModelItf {
      */
     static read(id : number) : Profil {
         // TODO
-        RestClient.get("http://localhost:9000", function(data, response) {
+        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + id.toString());
+
+        if(result.success) {
             Logger.debug("YEAHH!!!");
-            Logger.debug(data);
-            Logger.debug(response);
-        });
-        return null;
+            Logger.debug(result.data);
+            return result.data;
+        } else {
+            Logger.debug("OHHHHHHH !!!!");
+            Logger.debug(result.error);
+            return null;
+        }
     }
 
     /**
@@ -179,5 +185,15 @@ class Profil extends ModelItf {
     static all() : Array<Profil> {
         // TODO
         return null;
+    }
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "Profils";
     }
 }
