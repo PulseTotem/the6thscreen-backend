@@ -8,8 +8,7 @@
 
 var Client = require('node-rest-client').Client;
 
-var async = require('asyncawait/async');
-var await = require('asyncawait/await');
+var deasync = require('deasync');
 
 /**
  * Represents a REST client.
@@ -81,7 +80,7 @@ class RestClient {
      */
     static getSync(url : string) {
 
-        return async(function() {
+            var done = false;
             var result = null;
 
             var success = function(data, response) {
@@ -89,18 +88,25 @@ class RestClient {
                 result["success"] = true;
                 result["data"] = data;
                 result["response"] = response;
+
+                done = true;
             };
 
             var fail = function(error) {
                 result = new Object();
                 result["success"] = false;
                 result["error"] = error;
+
+                done = true;
             };
 
-            await(RestClient.getClient().get(url, success).on('error',fail));
+            RestClient.getClient().get(url, success).on('error',fail);
+
+            while(!done) {
+                deasync.sleep(5);
+            }
 
             return result;
-        });
     }
 
     /**
@@ -150,31 +156,38 @@ class RestClient {
      */
     static postSync(url : string, data : any) {
 
-        return async(function() {
-            var result = null;
+        var done = false;
+        var result = null;
 
-            var args = new Object();
-            args["data"] = data;
-            args["headers"] = new Object();
-            args["headers"]["Content-Type"] = "application/json";
+        var args = new Object();
+        args["data"] = data;
+        args["headers"] = new Object();
+        args["headers"]["Content-Type"] = "application/json";
 
-            var success = function(data, response) {
-                result = new Object();
-                result["success"] = true;
-                result["data"] = data;
-                result["response"] = response;
-            };
+        var success = function(data, response) {
+            result = new Object();
+            result["success"] = true;
+            result["data"] = data;
+            result["response"] = response;
 
-            var fail = function(error) {
-                result = new Object();
-                result["success"] = false;
-                result["error"] = error;
-            };
+            done = true;
+        };
 
-            await(RestClient.getClient().post(url, args, success).on('error',fail));
+        var fail = function(error) {
+            result = new Object();
+            result["success"] = false;
+            result["error"] = error;
 
-            return result;
-        });
+            done = true;
+        };
+
+        RestClient.getClient().post(url, args, success).on('error',fail);
+
+        while(!done) {
+            deasync.sleep(5);
+        }
+
+        return result;
     }
 
     /**
@@ -224,31 +237,38 @@ class RestClient {
      */
     static putSync(url : string, data : any) {
 
-        return async(function() {
-            var result = null;
+        var done = false;
+        var result = null;
 
-            var args = new Object();
-            args["data"] = data;
-            args["headers"] = new Object();
-            args["headers"]["Content-Type"] = "application/json";
+        var args = new Object();
+        args["data"] = data;
+        args["headers"] = new Object();
+        args["headers"]["Content-Type"] = "application/json";
 
-            var success = function(data, response) {
-                result = new Object();
-                result["success"] = true;
-                result["data"] = data;
-                result["response"] = response;
-            };
+        var success = function(data, response) {
+            result = new Object();
+            result["success"] = true;
+            result["data"] = data;
+            result["response"] = response;
 
-            var fail = function(error) {
-                result = new Object();
-                result["success"] = false;
-                result["error"] = error;
-            };
+            done = true;
+        };
 
-            await(RestClient.getClient().put(url, args, success).on('error',fail));
+        var fail = function(error) {
+            result = new Object();
+            result["success"] = false;
+            result["error"] = error;
 
-            return result;
-        });
+            done = true;
+        };
+
+        RestClient.getClient().put(url, args, success).on('error',fail);
+
+        while(!done) {
+            deasync.sleep(5);
+        }
+
+        return result;
     }
 
     /**
@@ -298,31 +318,38 @@ class RestClient {
      */
     static patchSync(url : string, data : any) {
 
-        return async(function() {
-            var result = null;
+        var done = false;
+        var result = null;
 
-            var args = new Object();
-            args["data"] = data;
-            args["headers"] = new Object();
-            args["headers"]["Content-Type"] = "application/json";
+        var args = new Object();
+        args["data"] = data;
+        args["headers"] = new Object();
+        args["headers"]["Content-Type"] = "application/json";
 
-            var success = function(data, response) {
-                result = new Object();
-                result["success"] = true;
-                result["data"] = data;
-                result["response"] = response;
-            };
+        var success = function(data, response) {
+            result = new Object();
+            result["success"] = true;
+            result["data"] = data;
+            result["response"] = response;
 
-            var fail = function(error) {
-                result = new Object();
-                result["success"] = false;
-                result["error"] = error;
-            };
+            done = true;
+        };
 
-            await(RestClient.getClient().patch(url, args, success).on('error',fail));
+        var fail = function(error) {
+            result = new Object();
+            result["success"] = false;
+            result["error"] = error;
 
-            return result;
-        });
+            done = true;
+        };
+
+        RestClient.getClient().patch(url, args, success).on('error',fail);
+
+        while(!done) {
+            deasync.sleep(5);
+        }
+
+        return result;
     }
 
 }
