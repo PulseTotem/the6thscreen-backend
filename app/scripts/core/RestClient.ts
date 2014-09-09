@@ -86,7 +86,7 @@ class RestClient {
             var success = function(data, response) {
                 result = new Object();
                 result["success"] = true;
-                result["data"] = data;
+                result["data"] = JSON.parse(data);
                 result["response"] = response;
 
                 done = true;
@@ -167,7 +167,7 @@ class RestClient {
         var success = function(data, response) {
             result = new Object();
             result["success"] = true;
-            result["data"] = data;
+            result["data"] = JSON.parse(data);
             result["response"] = response;
 
             done = true;
@@ -248,7 +248,7 @@ class RestClient {
         var success = function(data, response) {
             result = new Object();
             result["success"] = true;
-            result["data"] = data;
+            result["data"] = JSON.parse(data);
             result["response"] = response;
 
             done = true;
@@ -329,7 +329,7 @@ class RestClient {
         var success = function(data, response) {
             result = new Object();
             result["success"] = true;
-            result["data"] = data;
+            result["data"] = JSON.parse(data);
             result["response"] = response;
 
             done = true;
@@ -344,6 +344,76 @@ class RestClient {
         };
 
         RestClient.getClient().patch(url, args, success).on('error',fail);
+
+        while(!done) {
+            deasync.sleep(5);
+        }
+
+        return result;
+    }
+
+    /**
+     * Send a DELETE message to URL in parameter, in an asynchronous way.
+     *
+     * @method delete
+     * @static
+     * @param {string} url - The url to post.
+     * @param {any} successCallback - The callback function when success.
+     * @param {any} failCallback - The callback function when fail.
+     */
+    static delete(url : string, successCallback : any = null, failCallback : any = null) {
+        var success = null;
+        var fail = null;
+
+        if(successCallback != null) {
+            success = successCallback;
+        } else {
+            success = function() {
+                Logger.info("RestClient : Success to send PATCH message to URL '" + url + "'.");
+            };
+        }
+
+        if(failCallback != null) {
+            fail = failCallback;
+        } else {
+            fail = function() {
+                Logger.warn("RestClient : Fail to send PATCH message to URL '" + url + "'.");
+            };
+        }
+
+        RestClient.getClient().delete(url, success).on('error',fail);
+    }
+
+    /**
+     * Send a DELETE message to URL in parameter, in a synchronous way.
+     *
+     * @method deleteSync
+     * @static
+     * @param {string} url - The url to patch.
+     */
+    static deleteSync(url : string) {
+
+        var done = false;
+        var result = null;
+
+        var success = function(data, response) {
+            result = new Object();
+            result["success"] = true;
+            result["data"] = JSON.parse(data);
+            result["response"] = response;
+
+            done = true;
+        };
+
+        var fail = function(error) {
+            result = new Object();
+            result["success"] = false;
+            result["error"] = error;
+
+            done = true;
+        };
+
+        RestClient.getClient().delete(url, success).on('error',fail);
 
         while(!done) {
             deasync.sleep(5);

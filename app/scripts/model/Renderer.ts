@@ -105,14 +105,21 @@ class Renderer extends ModelItf {
 
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
+    create() : boolean {
         // TODO
+        return false;
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {Renderer} The model instance.
      */
     static read(id : number) : Renderer {
@@ -122,25 +129,45 @@ class Renderer extends ModelItf {
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
+    update() : boolean {
         // TODO
+        return false;
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
+    delete() : boolean {
         // TODO
+        return false;
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<Renderer>} The model instances.
      */
     static all() : Array<Renderer> {
         // TODO
         return null;
+    }
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        // TODO
+        return "";
     }
 }

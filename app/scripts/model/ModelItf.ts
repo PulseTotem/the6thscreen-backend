@@ -31,6 +31,7 @@ class ModelItf {
     /**
      * Returns ID of model.
      *
+     * @method getId
      * @return {number} The model's ID.
      */
     getId() : number {
@@ -39,14 +40,21 @@ class ModelItf {
 
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
+    create() : boolean {
         Logger.error("ModelItf - create : Method need to be implemented.");
+        return false;
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {ModelItf} The model instance.
      */
     static read(id : number) : ModelItf {
@@ -56,21 +64,30 @@ class ModelItf {
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
+    update() : boolean {
         Logger.error("ModelItf - update : Method need to be implemented.");
+        return false;
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
+    delete() : boolean {
         Logger.error("ModelItf - delete : Method need to be implemented.");
+        return false;
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<ModelItf>} The model instances.
      */
     static all() : Array<ModelItf> {

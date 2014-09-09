@@ -28,7 +28,7 @@
  */
 class CleanAndInitDatabase {
 
-    static toClean = [Role, User];
+    static toClean = [Profil];
 
     /**
      * Method to clean and fulfill database with some data.
@@ -36,8 +36,8 @@ class CleanAndInitDatabase {
      * @method run
      */
     run() {
-        cleanAll();
-        fulfill();
+        this.cleanAll();
+        this.fulfill();
     }
 
     /**
@@ -48,9 +48,9 @@ class CleanAndInitDatabase {
     cleanAll() {
         for(var i in CleanAndInitDatabase.toClean) {
             var modelToClean = CleanAndInitDatabase.toClean[i];
-            var instances : Array<ModelItf> = modelToClean.all();
+            var instances = modelToClean.all();
             for(var j in instances) {
-                var toDelete : ModelItf = instances[j];
+                var toDelete = instances[j];
                 toDelete.delete();
             }
         }
@@ -62,9 +62,22 @@ class CleanAndInitDatabase {
      * @method fulfill
      */
     fulfill() {
-        //TODO
+        /*
+        var p : Profil = new Profil("profil1", "description de profil1");
+        p.create();
+
+        p.setName("profil 5");
+
+        p.update();
+
+        var p2 : Profil = Profil.read(2);
+        p2.delete();
+        */
+
+        Logger.debug(Profil.all());
     }
 }
 
 var caid = new CleanAndInitDatabase();
 caid.run();
+//caid.fulfill();

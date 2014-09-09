@@ -36,6 +36,16 @@ module.exports = function (grunt) {
                     basePath: 'app/scripts'
                 }
             },
+            dbinit: {
+                src: [
+                    'app/scripts/CleanAndInitDatabase.ts'
+                ],
+                dest: 'build/js/CleanAndInitDatabase.js',
+                options: {
+                    module: 'commonjs',
+                    basePath: 'app/scripts'
+                }
+            },
             dist: {
                 src: [
                     'app/scripts/The6thScreenBackend.ts'
@@ -106,6 +116,12 @@ module.exports = function (grunt) {
         grunt.task.run(['clean:build']);
 
         grunt.task.run(['copy:buildConnectionInfosFile', 'typescript:build']);
+    });
+
+    grunt.registerTask('dbinit', function () {
+        grunt.task.run(['clean:build']);
+
+        grunt.task.run(['copy:buildConnectionInfosFile', 'typescript:dbinit']);
     });
 
     grunt.registerTask('dist', function () {

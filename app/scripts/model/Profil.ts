@@ -77,19 +77,9 @@ class Profil extends ModelItf {
     constructor(name : string, description : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A Profil needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
+        this.setName(name);
 
-        this._name = name;
-
-        if(this._description == null || this._description == "") {
-            Logger.error("A Profil needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._description = description;
+        this.setDescription(description);
 
         this._calls = new Array<Call>();
         this._calls_loaded = false;
@@ -100,22 +90,59 @@ class Profil extends ModelItf {
 
     /**
      * Return the Profil's name.
+     *
+     * @method name
+     * @return {string} The Profil's name.
      */
     name() {
         return this._name;
     }
 
     /**
-     * Return the Profil's description.
+     * Set the Profil's name.
+     *
+     * @method setName
      */
-    description() {
+    setName(name : string) {
+        if(name == null || name == "") {
+            Logger.error("A Profil needs to have a name.");
+            // TODO : Throw an Exception ?
+        }
+
+        this._name = name;
+    }
+
+    /**
+     * Return the Profil's description.
+     *
+     * @method description
+     * @return {string} The Profil's description.
+     */
+    description() : string {
         return this._description;
     }
 
     /**
-     * Return the Profil's calls.
+     * Set the Profil's description.
+     *
+     * @method setDescription
      */
-    calls() {
+    setDescription(description : string) {
+        if(description == null || description == "") {
+            Logger.error("A Profil needs to have a description.");
+            // TODO : Throw an Exception ?
+        }
+
+        this._description = description;
+    }
+
+    /**
+     * Return the Profil's calls.
+     *
+     * @method calls
+     * @return {Array<Call>} The Profil's calls.
+     */
+    calls() : Array<Call> {
         if(! this._calls_loaded) {
             // TODO : Retrieve from database.
             this._calls_loaded = true;
@@ -125,8 +152,11 @@ class Profil extends ModelItf {
 
     /**
      * Return the Profil's timelines.
+     *
+     * @method timelines
+     * @return {Array<Timeline>} The Profil's timelines.
      */
-    timelines() {
+    timelines() : Array<Timeline> {
         if(! this._timelines_loaded) {
             // TODO : Retrieve from database.
             this._timelines_loaded = true;
@@ -138,53 +168,155 @@ class Profil extends ModelItf {
 
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+
+        if(this.getId() != undefined) {
+            return this.update();
+        }
+
+        var data = new Object();
+        data["name"] = this.name();
+        data["description"] = this.description();
+
+        var result = RestClient.postSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName(), data);
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return false;
+                } else {
+                    this._id = response.data.id;
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {Profil} The model instance.
      */
     static read(id : number) : Profil {
-        // TODO
         var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + id.toString());
 
         if(result.success) {
-            Logger.debug("YEAHH!!!");
-            Logger.debug(result.data);
-            return result.data;
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return null;
+                } else {
+                    return new Profil(response.data.name, response.data.description, response.data.id);
+                }
+            } else {
+                return null;
+            }
         } else {
-            Logger.debug("OHHHHHHH !!!!");
-            Logger.debug(result.error);
             return null;
         }
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+        if(this.getId() == undefined) {
+            return this.create();
+        }
+
+        var data = new Object();
+        data["name"] = this.name();
+        data["description"] = this.description();
+
+        var result = RestClient.putSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + this.getId().toString(), data);
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        if(this.getId() == undefined) {
+            return false;
+        }
+
+        var result = RestClient.deleteSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + this.getId().toString());
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<Profil>} The model instances.
      */
     static all() : Array<Profil> {
-        // TODO
-        return null;
+        var allProfils : Array<Profil> = new Array<Profil>();
+
+        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName());
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length > 0) {
+                    for(var i = 0; i < response.data.length; i++) {
+                        var p = response.data[i];
+                        allProfils.push(new Profil(p.name, p.description, p.id));
+                    }
+                }
+                return allProfils;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     /**
