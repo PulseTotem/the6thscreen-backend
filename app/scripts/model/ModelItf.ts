@@ -96,6 +96,32 @@ class ModelItf {
     }
 
     /**
+     * Return a ModelItf instance from a JSON string.
+     *
+     * @method parseJSON
+     * @static
+     * @param {string} json - The JSON string
+     * @return {ModelItf} The model instance.
+     */
+    static parseJSON(jsonString : string) : ModelItf {
+        Logger.error("ModelItf - parseJSON : Method need to be implemented. It will look like : 'return \"ModelItf\".fromJSONObject(JSON.parse(jsonString));'");
+        return null;
+    }
+
+    /**
+     * Return a ModelItf instance from a JSON Object.
+     *
+     * @method fromJSONObject
+     * @static
+     * @param {JSONObject} json - The JSON Object
+     * @return {ModelItf} The model instance.
+     */
+    static fromJSONObject(jsonObject : any) : ModelItf {
+        Logger.error("ModelItf - fromJSONObject : Method need to be implemented.");
+        return null;
+    }
+
+    /**
      * Retrieve DataBase Table Name.
      *
      * @method getTableName

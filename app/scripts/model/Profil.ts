@@ -307,7 +307,7 @@ class Profil extends ModelItf {
                 if(Object.keys(response.data).length > 0) {
                     for(var i = 0; i < response.data.length; i++) {
                         var p = response.data[i];
-                        allProfils.push(new Profil(p.name, p.description, p.id));
+                        allProfils.push(Profil.fromJSONObject(p));
                     }
                 }
                 return allProfils;
@@ -316,6 +316,34 @@ class Profil extends ModelItf {
             }
         } else {
             return null;
+        }
+    }
+
+    /**
+     * Return a ModelItf instance from a JSON string.
+     *
+     * @method parseJSON
+     * @static
+     * @param {string} json - The JSON string
+     * @return {Profil} The model instance.
+     */
+    static parseJSON(jsonString : string) : Profil {
+        return Profil.fromJSONObject(JSON.parse(jsonString));
+    }
+
+    /**
+     * Return a ModelItf instance from a JSON Object.
+     *
+     * @method fromJSONObject
+     * @static
+     * @param {JSONObject} json - The JSON Object
+     * @return {Profil} The model instance.
+     */
+    static fromJSONObject(jsonObject : any) : Profil {
+        if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
+            return null;
+        } else {
+            return new Profil(jsonObject.name, jsonObject.description, jsonObject.id);
         }
     }
 
