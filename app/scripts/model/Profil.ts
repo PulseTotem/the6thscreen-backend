@@ -144,7 +144,26 @@ class Profil extends ModelItf {
      */
     calls() : Array<Call> {
         if(! this._calls_loaded) {
-            // TODO : Retrieve from database.
+            if(this.getId() != undefined) {
+                var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + this.getId().toString() + "/" + Call.getTableName());
+
+                if(result.success) {
+                    var response = result.data;
+                    if(response.status == "success") {
+                        if(Object.keys(response.data).length > 0) {
+                            for(var i = 0; i < response.data.length; i++) {
+                                var c = response.data[i];
+                                this._calls.push(Call.fromJSONObject(c));
+                            }
+                        }
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            }
+
             this._calls_loaded = true;
         }
         return this._calls;
@@ -218,7 +237,7 @@ class Profil extends ModelItf {
                 if(Object.keys(response.data).length == 0) {
                     return null;
                 } else {
-                    return new Profil(response.data.name, response.data.description, response.data.id);
+                    return Profil.fromJSONObject(response.data);
                 }
             } else {
                 return null;
@@ -320,7 +339,7 @@ class Profil extends ModelItf {
     }
 
     /**
-     * Return a ModelItf instance from a JSON string.
+     * Return a Profil instance from a JSON string.
      *
      * @method parseJSON
      * @static
@@ -332,7 +351,7 @@ class Profil extends ModelItf {
     }
 
     /**
-     * Return a ModelItf instance from a JSON Object.
+     * Return a Profil instance from a JSON Object.
      *
      * @method fromJSONObject
      * @static

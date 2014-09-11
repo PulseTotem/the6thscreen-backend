@@ -7,6 +7,8 @@
 /// <reference path="./ParamValue.ts" />
 
 /// <reference path="../core/Logger.ts" />
+/// <reference path="../core/RestClient.ts" />
+/// <reference path="../core/DatabaseConnection.ts" />
 
 /**
  * Model : Call
@@ -66,12 +68,7 @@ class Call extends ModelItf {
     constructor(name : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A Call needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
+        this.setName(name);
 
         this._source = null;
         this._source_loaded = false;
@@ -85,6 +82,20 @@ class Call extends ModelItf {
      */
     name() {
         return this._name;
+    }
+
+    /**
+     * Set the Call's name.
+     *
+     * @method setName
+     */
+    setName(name : string) {
+        if(name == null || name == "") {
+            Logger.error("A Call needs to have a name.");
+            // TODO : Throw an Exception ?
+        }
+
+        this._name = name;
     }
 
     /**
@@ -118,8 +129,30 @@ class Call extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        if(this.getId() != undefined) {
+            return this.update();
+        }
+
+        var data = new Object();
+        data["name"] = this.name();
+
+        var result = RestClient.postSync(DatabaseConnection.getBaseURL() + "/" + Call.getTableName(), data);
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return false;
+                } else {
+                    this._id = response.data.id;
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -131,8 +164,22 @@ class Call extends ModelItf {
      * @return {Call} The model instance.
      */
     static read(id : number) : Call {
-        // TODO
-        return null;
+        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + id.toString());
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return null;
+                } else {
+                    return Call.fromJSONObject(response.data);
+                }
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -142,8 +189,29 @@ class Call extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+        if(this.getId() == undefined) {
+            return this.create();
+        }
+
+        var data = new Object();
+        data["name"] = this.name();
+
+        var result = RestClient.putSync(DatabaseConnection.getBaseURL() + "/" + Call.getTableName() + "/" + this.getId().toString(), data);
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -153,8 +221,26 @@ class Call extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        if(this.getId() == undefined) {
+            return false;
+        }
+
+        var result = RestClient.deleteSync(DatabaseConnection.getBaseURL() + "/" + Call.getTableName() + "/" + this.getId().toString());
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -164,8 +250,54 @@ class Call extends ModelItf {
      * @return {Array<Call>} The model instances.
      */
     static all() : Array<Call> {
-        // TODO
-        return null;
+        var allCalls : Array<Call> = new Array<Call>();
+
+        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Call.getTableName());
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length > 0) {
+                    for(var i = 0; i < response.data.length; i++) {
+                        var c = response.data[i];
+                        allCalls.push(Call.fromJSONObject(c));
+                    }
+                }
+                return allCalls;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Return a Call instance from a JSON string.
+     *
+     * @method parseJSON
+     * @static
+     * @param {string} json - The JSON string
+     * @return {Call} The model instance.
+     */
+    static parseJSON(jsonString : string) : Call {
+        return Call.fromJSONObject(JSON.parse(jsonString));
+    }
+
+    /**
+     * Return a Call instance from a JSON Object.
+     *
+     * @method fromJSONObject
+     * @static
+     * @param {JSONObject} json - The JSON Object
+     * @return {Call} The model instance.
+     */
+    static fromJSONObject(jsonObject : any) : Call {
+        if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
+            return null;
+        } else {
+            return new Call(jsonObject.name, jsonObject.id);
+        }
     }
 
     /**
@@ -175,7 +307,6 @@ class Call extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "Calls";
     }
 }

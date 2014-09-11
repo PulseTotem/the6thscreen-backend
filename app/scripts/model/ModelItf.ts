@@ -3,6 +3,8 @@
  */
 
 /// <reference path="../core/Logger.ts" />
+/// <reference path="../core/RestClient.ts" />
+/// <reference path="../core/DatabaseConnection.ts" />
 
 /**
  * Model Interface
@@ -37,6 +39,128 @@ class ModelItf {
     getId() : number {
         return this._id;
     }
+
+    /**
+     * Create model object in database.
+     *
+     * @method createObject
+     * @param {ModelItf Class} modelClass - The model to create.
+     * @param {Object} data - The data necessary to create object.
+     * @return {boolean} Create status
+     */
+    createObject(modelClass : any, data : any) : boolean {
+        if(this.getId() != undefined) {
+            return this.update();
+        }
+
+        var result = RestClient.postSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName(), data);
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return false;
+                } else {
+                    this._id = response.data.id;
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Retrieve model description from database and create model instance.
+     *
+     * @method readObject
+     * @static
+     * @param {ModelItf Class} modelClass - The model to retrieve.
+     * @param {number} id - The model instance's id.
+     */
+    static readObject(modelClass : any, id : number) {
+        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + id.toString());
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return null;
+                } else {
+                    return modelClass.fromJSONObject(response.data);
+                }
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Update model object in database.
+     *
+     * @method updateObject
+     * @param {ModelItf Class} modelClass - The model to update.
+     * @param {Object} data - The data necessary to update object.
+     * @return {boolean} Update status
+     */
+     updateObject(modelClass : any, data : any) : boolean {
+        if(this.getId() == undefined) {
+            return this.create();
+        }
+
+        var result = RestClient.putSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString(), data);
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Delete model object in database.
+     *
+     * @method deleteObject
+     * @param {ModelItf Class} modelClass - The model to delete.
+     * @return {boolean} Delete status
+     */
+    deleteObject(modelClass : any) : boolean {
+        if(this.getId() == undefined) {
+            return false;
+        }
+
+        var result = RestClient.deleteSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString());
+
+        if(result.success) {
+            var response = result.data;
+            if(response.status == "success") {
+                if(Object.keys(response.data).length == 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
      * Create model in database.
