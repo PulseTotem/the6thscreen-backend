@@ -192,32 +192,11 @@ class Profil extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-
-        if(this.getId() != undefined) {
-            return this.update();
-        }
-
         var data = new Object();
         data["name"] = this.name();
         data["description"] = this.description();
 
-        var result = RestClient.postSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName(), data);
-
-        if(result.success) {
-            var response = result.data;
-            if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return false;
-                } else {
-                    this._id = response.data.id;
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return this.createObject(Profil, data);
     }
 
     /**
@@ -229,22 +208,7 @@ class Profil extends ModelItf {
      * @return {Profil} The model instance.
      */
     static read(id : number) : Profil {
-        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + id.toString());
-
-        if(result.success) {
-            var response = result.data;
-            if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return null;
-                } else {
-                    return Profil.fromJSONObject(response.data);
-                }
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
+        return ModelItf.readObject(Profil, id);
     }
 
     /**
@@ -254,30 +218,11 @@ class Profil extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        if(this.getId() == undefined) {
-            return this.create();
-        }
-
         var data = new Object();
         data["name"] = this.name();
         data["description"] = this.description();
 
-        var result = RestClient.putSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + this.getId().toString(), data);
-
-        if(result.success) {
-            var response = result.data;
-            if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return false;
-                } else {
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return this.updateObject(Profil, data);
     }
 
     /**
@@ -287,55 +232,18 @@ class Profil extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        if(this.getId() == undefined) {
-            return false;
-        }
-
-        var result = RestClient.deleteSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + this.getId().toString());
-
-        if(result.success) {
-            var response = result.data;
-            if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return this.deleteObject(Profil);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
      * @method all
+     * @static
      * @return {Array<Profil>} The model instances.
      */
     static all() : Array<Profil> {
-        var allProfils : Array<Profil> = new Array<Profil>();
-
-        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName());
-
-        if(result.success) {
-            var response = result.data;
-            if(response.status == "success") {
-                if(Object.keys(response.data).length > 0) {
-                    for(var i = 0; i < response.data.length; i++) {
-                        var p = response.data[i];
-                        allProfils.push(Profil.fromJSONObject(p));
-                    }
-                }
-                return allProfils;
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
+        return ModelItf.allObjects(Profil);
     }
 
     /**

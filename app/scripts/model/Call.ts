@@ -129,30 +129,10 @@ class Call extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        if(this.getId() != undefined) {
-            return this.update();
-        }
-
         var data = new Object();
         data["name"] = this.name();
 
-        var result = RestClient.postSync(DatabaseConnection.getBaseURL() + "/" + Call.getTableName(), data);
-
-        if(result.success) {
-            var response = result.data;
-            if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return false;
-                } else {
-                    this._id = response.data.id;
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return this.createObject(Call, data);
     }
 
     /**
@@ -164,22 +144,7 @@ class Call extends ModelItf {
      * @return {Call} The model instance.
      */
     static read(id : number) : Call {
-        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + id.toString());
-
-        if(result.success) {
-            var response = result.data;
-            if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return null;
-                } else {
-                    return Call.fromJSONObject(response.data);
-                }
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
+        return ModelItf.readObject(Call, id);
     }
 
     /**
@@ -189,29 +154,10 @@ class Call extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        if(this.getId() == undefined) {
-            return this.create();
-        }
-
         var data = new Object();
         data["name"] = this.name();
 
-        var result = RestClient.putSync(DatabaseConnection.getBaseURL() + "/" + Call.getTableName() + "/" + this.getId().toString(), data);
-
-        if(result.success) {
-            var response = result.data;
-            if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return false;
-                } else {
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return this.updateObject(Call, data);
     }
 
     /**
@@ -221,26 +167,7 @@ class Call extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        if(this.getId() == undefined) {
-            return false;
-        }
-
-        var result = RestClient.deleteSync(DatabaseConnection.getBaseURL() + "/" + Call.getTableName() + "/" + this.getId().toString());
-
-        if(result.success) {
-            var response = result.data;
-            if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return this.deleteObject(Call);
     }
 
     /**
@@ -250,26 +177,7 @@ class Call extends ModelItf {
      * @return {Array<Call>} The model instances.
      */
     static all() : Array<Call> {
-        var allCalls : Array<Call> = new Array<Call>();
-
-        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Call.getTableName());
-
-        if(result.success) {
-            var response = result.data;
-            if(response.status == "success") {
-                if(Object.keys(response.data).length > 0) {
-                    for(var i = 0; i < response.data.length; i++) {
-                        var c = response.data[i];
-                        allCalls.push(Call.fromJSONObject(c));
-                    }
-                }
-                return allCalls;
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
+        return ModelItf.allObjects(Call);
     }
 
     /**
