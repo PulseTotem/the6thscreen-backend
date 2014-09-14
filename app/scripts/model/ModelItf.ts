@@ -161,6 +161,35 @@ class ModelItf {
         }
     }
 
+	/**
+	 * Associate two objects in database.
+	 *
+	 * @method associateObject
+	 * @param {ModelItf Class} modelClass1 - the first model class
+	 * @param {number} id1 - the ID of the first object
+	 * @param {ModelItf Class} modelClass2 - the second model class
+	 * @param {number} id2 - the ID of the second object
+	 * @return {boolean} Association status
+	 */
+	associateObject(modelClass1 : any, id1 : number, modelClass2: any, id2 : number) : boolean {
+		if (id1 == undefined || id2 == undefined) {
+			return false;
+		}
+
+		var result = RestClient.putSync(DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + id1.toString() + "/" + modelClass2.getTableName() + "/" + id2.toString(), {});
+
+		if(result.success) {
+			var response = result.data;
+			if(response.status == "success") {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
     /**
      * Retrieve all model objects in database.
      *

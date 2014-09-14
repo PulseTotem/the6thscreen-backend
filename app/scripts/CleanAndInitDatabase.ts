@@ -62,6 +62,12 @@ class CleanAndInitDatabase {
      * @method fulfill
      */
     fulfill() {
+
+	    var s : SDI = new SDI("SDItruc", "*");
+	    s.create();
+
+	    s.associateUser(1);
+
         /*
         var p : Profil = new Profil("profil1", "description de profil1");
         p.create();
@@ -74,10 +80,10 @@ class CleanAndInitDatabase {
         p2.delete();
         */
 
-        Logger.debug(Profil.all());
+        Logger.debug(SDI.all());
     }
 }
 
 var caid = new CleanAndInitDatabase();
 caid.run();
-//caid.fulfill();
+caid.fulfill();

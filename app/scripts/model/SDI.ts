@@ -151,18 +151,36 @@ class SDI extends ModelItf {
     }
 
     /**
-     * Return the User's roles.
+     * Return the Users
      */
     users() {
         if(! this._users_loaded) {
-            // TODO : Retrieve from database.
+	        if(this.getId() != undefined) {
+		        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + SDI.getTableName() + "/" + this.getId().toString() + "/" + User.getTableName());
+
+		        if(result.success) {
+			        var response = result.data;
+			        if(response.status == "success") {
+				        if(Object.keys(response.data).length > 0) {
+					        for(var i = 0; i < response.data.length; i++) {
+						        var u = response.data[i];
+						        this._users.push(User.fromJSONObject(u));
+					        }
+				        }
+			        } else {
+				        return null;
+			        }
+		        } else {
+			        return null;
+		        }
+	        }
             this._users_loaded = true;
         }
         return this._users;
     }
 
     /**
-     * Return the User's roles.
+     * Return the zones
      */
     zones() {
         if(! this._zones_loaded) {
@@ -173,7 +191,7 @@ class SDI extends ModelItf {
     }
 
     /**
-     * Return the SDI's profils.
+     * Return the SDI's profiles.
      */
     profils() {
         if(! this._profils_loaded) {
@@ -203,8 +221,12 @@ class SDI extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        var data = {
+	        "description": this.description(),
+	        "allowedHost": this.allowedHost()
+        };
+
+        return this.createObject(SDI, data);
     }
 
     /**
@@ -216,8 +238,7 @@ class SDI extends ModelItf {
      * @return {SDI} The model instance.
      */
     static read(id : number) : SDI {
-        // TODO
-        return null;
+        return this.readObject(SDI, id);
     }
 
     /**
@@ -227,8 +248,12 @@ class SDI extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+	    var data = {
+		    "description": this.description(),
+		    "allowedHost": this.allowedHost()
+	    };
+
+	    return this.updateObject(SDI, data);
     }
 
     /**
@@ -249,18 +274,50 @@ class SDI extends ModelItf {
      * @return {Array<SDI>} The model instances.
      */
     static all() : Array<SDI> {
-        // TODO
-        return null;
+        return this.allObjects(SDI);
     }
 
-    /**
+	/**
+	 * Return a SDI instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {SDI} The model instance.
+	 */
+	static parseJSON(jsonString : string) : Profil {
+		return SDI.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a SDI instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {SDI} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : Profil {
+		if(typeof(jsonObject.description) == "undefined" || typeof(jsonObject.allowedHost) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new Profil(jsonObject.description, jsonObject.allowedHost, jsonObject.id);
+		}
+	}
+
+	associateUser(userID : number) : boolean {
+		this.associateObject(SDI, this.getId(), User, userID);
+	}
+
+	/**
      * Retrieve DataBase Table Name.
      *
      * @method getTableName
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "SDIs";
     }
+
+
 }
