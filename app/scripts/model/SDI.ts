@@ -285,7 +285,7 @@ class SDI extends ModelItf {
 	 * @param {string} json - The JSON string
 	 * @return {SDI} The model instance.
 	 */
-	static parseJSON(jsonString : string) : Profil {
+	static parseJSON(jsonString : string) : SDI {
 		return SDI.fromJSONObject(JSON.parse(jsonString));
 	}
 
@@ -297,16 +297,16 @@ class SDI extends ModelItf {
 	 * @param {JSONObject} json - The JSON Object
 	 * @return {SDI} The model instance.
 	 */
-	static fromJSONObject(jsonObject : any) : Profil {
+	static fromJSONObject(jsonObject : any) : SDI {
 		if(typeof(jsonObject.description) == "undefined" || typeof(jsonObject.allowedHost) == "undefined" || typeof(jsonObject.id) == "undefined") {
 			return null;
 		} else {
-			return new Profil(jsonObject.description, jsonObject.allowedHost, jsonObject.id);
+			return new SDI(jsonObject.description, jsonObject.allowedHost, jsonObject.id);
 		}
 	}
 
 	associateUser(userID : number) : boolean {
-		this.associateObject(SDI, this.getId(), User, userID);
+		return this.associateObject(SDI, this.getId(), User, userID);
 	}
 
 	/**

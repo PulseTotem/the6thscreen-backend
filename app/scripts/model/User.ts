@@ -167,6 +167,34 @@ class User extends ModelItf {
         return null;
     }
 
+	/**
+	 * Return a SDI instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {SDI} The model instance.
+	 */
+	static parseJSON(jsonString : string) : User {
+		return User.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a SDI instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {SDI} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : User {
+		if(typeof(jsonObject.username) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new User(jsonObject.username, jsonObject.id);
+		}
+	}
+
     /**
      * Retrieve DataBase Table Name.
      *
@@ -174,7 +202,6 @@ class User extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "Users";
     }
 }
