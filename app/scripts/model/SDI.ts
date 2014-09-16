@@ -241,6 +241,19 @@ class SDI extends ModelItf {
         return this.readObject(SDI, id);
     }
 
+	loadAssociations() {
+		this.users();
+		this.profils();
+		this.zones();
+		this.timelines();
+	}
+
+	static readWithAssociations(id : number) : SDI {
+		var result = this.read(id);
+		result.loadAssociations();
+		return result;
+	}
+
     /**
      * Update in database the model with current id.
      *

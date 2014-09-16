@@ -75,6 +75,9 @@ class CleanAndInitDatabase {
 	    // to check if doublons are created
 	    u.associateSDI(s);
 
+	    s.loadAssociations();
+	    Logger.debug(s);
+
 
         /*
         var p : Profil = new Profil("profil1", "description de profil1");
