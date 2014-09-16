@@ -117,8 +117,8 @@ class User extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        var data = { "username": this.username() };
+        return this.createObject(User, data);
     }
 
     /**
@@ -130,8 +130,7 @@ class User extends ModelItf {
      * @return {User} The model instance.
      */
     static read(id : number) : User {
-        // TODO
-        return null;
+        return this.readObject(User, id);
     }
 
     /**
@@ -163,12 +162,20 @@ class User extends ModelItf {
      * @return {Array<User>} The model instances.
      */
     static all() : Array<User> {
-        // TODO
-        return null;
+        return this.allObjects(User);
     }
 
 	/**
-	 * Return a SDI instance from a JSON string.
+	 * Associate a SDI to the user
+	 * @param s
+	 * @returns {boolean}
+	 */
+	associateSDI(s : SDI) : boolean {
+		return this.associateObject(User, SDI, s.getId());
+	}
+
+	/**
+	 * Return a User instance from a JSON string.
 	 *
 	 * @method parseJSON
 	 * @static
@@ -180,7 +187,7 @@ class User extends ModelItf {
 	}
 
 	/**
-	 * Return a SDI instance from a JSON Object.
+	 * Return a User instance from a JSON Object.
 	 *
 	 * @method fromJSONObject
 	 * @static

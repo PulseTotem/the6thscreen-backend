@@ -305,8 +305,8 @@ class SDI extends ModelItf {
 		}
 	}
 
-	associateUser(userID : number) : boolean {
-		return this.associateObject(SDI, this.getId(), User, userID);
+	associateUser(u : User) : boolean {
+		return this.associateObject(SDI, User, u.getId());
 	}
 
 	/**

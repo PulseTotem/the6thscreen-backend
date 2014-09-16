@@ -46,8 +46,10 @@ class CleanAndInitDatabase {
      * @method cleanAll
      */
     cleanAll() {
-        for(var i in CleanAndInitDatabase.toClean) {
+        for(var i = 0; i < CleanAndInitDatabase.toClean.length; i++) {
             var modelToClean = CleanAndInitDatabase.toClean[i];
+	        Logger.debug("Iterating on models to clean");
+	        Logger.debug(modelToClean);
             var instances = modelToClean.all();
             for(var j in instances) {
                 var toDelete = instances[j];
@@ -62,11 +64,17 @@ class CleanAndInitDatabase {
      * @method fulfill
      */
     fulfill() {
-
 	    var s : SDI = new SDI("SDItruc", "*");
 	    s.create();
 
-	    s.associateUser(1);
+	    var u : User = new User("toto");
+	    u.create();
+
+	    Logger.debug("Associate user");
+	    s.associateUser(u);
+	    // to check if doublons are created
+	    u.associateSDI(s);
+
 
         /*
         var p : Profil = new Profil("profil1", "description de profil1");
@@ -86,4 +94,3 @@ class CleanAndInitDatabase {
 
 var caid = new CleanAndInitDatabase();
 caid.run();
-caid.fulfill();

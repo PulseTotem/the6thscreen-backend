@@ -171,12 +171,12 @@ class ModelItf {
 	 * @param {number} id2 - the ID of the second object
 	 * @return {boolean} Association status
 	 */
-	associateObject(modelClass1 : any, id1 : number, modelClass2: any, id2 : number) : boolean {
-		if (id1 == undefined || id2 == undefined) {
+	associateObject(modelClass1 : any, modelClass2: any, id2 : number) : boolean {
+		if (this.getId() == undefined || id2 == undefined) {
 			return false;
 		}
 
-		var result = RestClient.putSync(DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + id1.toString() + "/" + modelClass2.getTableName() + "/" + id2.toString(), {});
+		var result = RestClient.putSync(DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + this.getId().toString() + "/" + modelClass2.getTableName() + "/" + id2.toString(), {});
 
 		if(result.success) {
 			var response = result.data;
