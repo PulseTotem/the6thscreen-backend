@@ -155,26 +155,7 @@ class SDI extends ModelItf {
      */
     users() {
         if(! this._users_loaded) {
-	        if(this.getId() != undefined) {
-		        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + SDI.getTableName() + "/" + this.getId().toString() + "/" + User.getTableName());
-
-		        if(result.success) {
-			        var response = result.data;
-			        if(response.status == "success") {
-				        if(Object.keys(response.data).length > 0) {
-					        for(var i = 0; i < response.data.length; i++) {
-						        var u = response.data[i];
-						        this._users.push(User.fromJSONObject(u));
-					        }
-				        }
-			        } else {
-				        return null;
-			        }
-		        } else {
-			        return null;
-		        }
-	        }
-            this._users_loaded = true;
+	        this._users_loaded = this.getAssociatedObjects(SDI, User, this._users);
         }
         return this._users;
     }
@@ -184,8 +165,7 @@ class SDI extends ModelItf {
      */
     zones() {
         if(! this._zones_loaded) {
-            // TODO : Retrieve from database.
-            this._zones_loaded = true;
+            this._zones_loaded = this.getAssociatedObjects(SDI, Zone, this._zones);
         }
         return this._zones;
     }
@@ -195,8 +175,7 @@ class SDI extends ModelItf {
      */
     profils() {
         if(! this._profils_loaded) {
-            // TODO : Retrieve from database.
-            this._profils_loaded = true;
+            this._profils_loaded = this.getAssociatedObjects(SDI, Profil, this._profils);
         }
         return this._profils;
     }
@@ -206,8 +185,7 @@ class SDI extends ModelItf {
      */
     timelines() {
         if(! this._timelines_loaded) {
-            // TODO : Retrieve from database.
-            this._timelines_loaded = true;
+            this._timelines_loaded = this.getAssociatedObjects(SDI, Timeline, this._timelines);
         }
         return this._timelines;
     }
@@ -248,12 +226,6 @@ class SDI extends ModelItf {
 		this.timelines();
 	}
 
-	static readWithAssociations(id : number) : SDI {
-		var result = this.read(id);
-		result.loadAssociations();
-		return result;
-	}
-
     /**
      * Update in database the model with current id.
      *
@@ -276,8 +248,7 @@ class SDI extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(SDI);
     }
 
     /**

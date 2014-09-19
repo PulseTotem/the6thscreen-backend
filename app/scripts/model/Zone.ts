@@ -157,6 +157,15 @@ class Zone extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name(),
+			"description": this.description(),
+			"position": this.position()
+		};
+		return data;
+	}
+
     /**
      * Create model in database.
      *
@@ -164,8 +173,7 @@ class Zone extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        return this.createObject(Zone, this.toJSONObject());
     }
 
     /**
@@ -177,8 +185,7 @@ class Zone extends ModelItf {
      * @return {Zone} The model instance.
      */
     static read(id : number) : Zone {
-        // TODO
-        return null;
+        return this.readObject(Zone, id);
     }
 
     /**
@@ -188,8 +195,7 @@ class Zone extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+        return this.updateObject(Zone, this.toJSONObject());
     }
 
     /**
@@ -199,8 +205,7 @@ class Zone extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(Zone);
     }
 
     /**
@@ -210,8 +215,7 @@ class Zone extends ModelItf {
      * @return {Array<Zone>} The model instances.
      */
     static all() : Array<Zone> {
-        // TODO
-        return null;
+        return this.allObjects(Zone);
     }
 
     /**
@@ -221,7 +225,6 @@ class Zone extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "Zones";
     }
 }

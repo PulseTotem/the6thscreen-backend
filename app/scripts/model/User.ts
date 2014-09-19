@@ -91,8 +91,7 @@ class User extends ModelItf {
      */
     roles() {
         if(! this._roles_loaded) {
-            // TODO : Retrieve from database.
-            this._roles_loaded = true;
+            this._roles_loaded = this.getAssociatedObjects(User, Role, this._roles);
         }
         return this._roles;
     }
@@ -102,13 +101,17 @@ class User extends ModelItf {
      */
     sdis() {
         if(! this._sdis_loaded) {
-            // TODO : Retrieve from database.
-            this._sdis_loaded  =true;
+            this._sdis_loaded  = this.getAssociatedObjects(User, SDI, this._sdis);
         }
         return this._sdis;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	toJSONObject() : Object {
+		var data = { "username": this.username() };
+		return data;
+	}
 
     /**
      * Create model in database.
@@ -117,8 +120,7 @@ class User extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        var data = { "username": this.username() };
-        return this.createObject(User, data);
+        return this.createObject(User, this.toJSONObject());
     }
 
     /**
@@ -140,8 +142,7 @@ class User extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+       return this.updateObject(User, this.toJSONObject());
     }
 
     /**
@@ -151,8 +152,7 @@ class User extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(User);
     }
 
     /**

@@ -40,6 +40,7 @@ class ModelItf {
         return this._id;
     }
 
+	// TODO : In all following methods, we need to log errors!
     /**
      * Create model object in database.
      *
@@ -182,6 +183,39 @@ class ModelItf {
 			var response = result.data;
 			if(response.status == "success") {
 				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Retrieve all associated objects
+	 *
+	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
+	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
+	 * @param assoName - the array in which the objects have to be pushed
+	 * @returns {boolean}
+	 */
+	getAssociatedObjects(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) : boolean {
+		if (this.getId() == undefined) {
+			return false;
+		}
+
+		var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString() + "/" + modelClassAssociated.getTableName());
+
+		if(result.success) {
+			var response = result.data;
+			if(response.status == "success") {
+				if(Object.keys(response.data).length > 0) {
+					for(var i = 0; i < response.data.length; i++) {
+						var object = response.data[i];
+						assoName.push(modelClassAssociated.fromJSONObject(object));
+					}
+					return true;
+				}
 			} else {
 				return false;
 			}
