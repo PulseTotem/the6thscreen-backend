@@ -175,8 +175,7 @@ class CallType extends ModelItf {
      */
     source() {
         if(! this._source_loaded) {
-            // TODO : Retrieve from database.
-            this._source_loaded = true;
+            this._source_loaded = this.getUniquelyAssociatedObject(CallType, Source, this._source);
         }
         return this._source;
     }
@@ -186,8 +185,7 @@ class CallType extends ModelItf {
      */
     renderer() {
         if(! this._renderer_loaded) {
-            // TODO : Retrieve from database.
-            this._renderer_loaded = true;
+            this._renderer_loaded = this.getUniquelyAssociatedObject(CallType, Renderer, this._renderer);
         }
         return this._renderer;
     }
@@ -197,8 +195,7 @@ class CallType extends ModelItf {
      */
     receivePolicy() {
         if(! this._receive_policy_loaded) {
-            // TODO : Retrieve from database.
-            this._receive_policy_loaded = true;
+            this._receive_policy_loaded = this.getUniquelyAssociatedObject(CallType, ReceivePolicy, this._receive_policy);
         }
         return this._receive_policy;
     }
@@ -208,8 +205,7 @@ class CallType extends ModelItf {
      */
     renderPolicy() {
         if(! this._render_policy_loaded) {
-            // TODO : Retrieve from database.
-            this._render_policy_loaded = true;
+            this._render_policy_loaded = this.getUniquelyAssociatedObject(CallType, RenderPolicy, this._render_policy);
         }
         return this._render_policy;
     }
@@ -219,8 +215,7 @@ class CallType extends ModelItf {
      */
     calls() {
         if(! this._calls_loaded) {
-            // TODO : Retrieve from database.
-            this._calls_loaded = true;
+            this._calls_loaded = this.getAssociatedObjects(CallType, Call, this._calls);
         }
         return this._calls;
     }
@@ -228,7 +223,11 @@ class CallType extends ModelItf {
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	loadAssociations() : void {
-		// TODO
+		this.source();
+		this.renderer();
+		this.receivePolicy();
+		this.renderPolicy();
+		this.calls();
 	}
 
 	toJSONObject() : Object  {
@@ -240,6 +239,33 @@ class CallType extends ModelItf {
 		return data;
 	}
 
+	// TODO : consider associated elements as loaded ?
+	setSource(s : Source) : boolean {
+		if (this.associateObject(CallType, Source, s.getId())) {
+			this._source = s;
+			this._source_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	setRenderer(r : Renderer) : boolean {
+		return this.associateObject(CallType, Renderer, r.getId());
+	}
+
+	setReceivePolicy(rp : ReceivePolicy) : boolean {
+		return this.associateObject(CallType, ReceivePolicy, rp.getId());
+	}
+
+	setRenderPolicy(rp : RenderPolicy) : boolean {
+		return this.associateObject(CallType, RenderPolicy, rp.getId());
+	}
+
+	addCall(c : Call) : boolean {
+		return this.associateObject(CallType, Call, c.getId());
+	}
+
     /**
      * Create model in database.
      *
@@ -247,8 +273,7 @@ class CallType extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        return this.createObject(CallType, this.toJSONObject());
     }
 
     /**
@@ -260,8 +285,7 @@ class CallType extends ModelItf {
      * @return {CallType} The model instance.
      */
     static read(id : number) : CallType {
-        // TODO
-        return null;
+        return this.readObject(CallType, id);
     }
 
     /**
@@ -271,8 +295,7 @@ class CallType extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+        return this.updateObject(CallType, this.toJSONObject());
     }
 
     /**
@@ -282,8 +305,7 @@ class CallType extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(CallType);
     }
 
     /**
@@ -293,9 +315,36 @@ class CallType extends ModelItf {
      * @return {Array<CallType>} The model instances.
      */
     static all() : Array<CallType> {
-        // TODO
-        return null;
+        return this.allObjects(CallType);
     }
+
+	/**
+	 * Return a CallType instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Call} The model instance.
+	 */
+	static parseJSON(jsonString : string) : CallType {
+		return CallType.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a CallType instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Call} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : CallType {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new CallType(jsonObject.name, jsonObject.description, jsonObject.id);
+		}
+	}
 
     /**
      * Retrieve DataBase Table Name.
@@ -304,7 +353,6 @@ class CallType extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "CallTypes";
     }
 }
