@@ -49,6 +49,14 @@ class ReceivePolicy extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name()
+		};
+
+		return data;
+	}
+
     /**
      * Create model in database.
      *
@@ -56,8 +64,7 @@ class ReceivePolicy extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        return this.createObject(ReceivePolicy, this.toJSONObject());
     }
 
     /**
@@ -69,8 +76,7 @@ class ReceivePolicy extends ModelItf {
      * @return {ReceivePolicy} The model instance.
      */
     static read(id : number) : ReceivePolicy {
-        // TODO
-        return null;
+        return this.readObject(ReceivePolicy, id);
     }
 
     /**
@@ -80,8 +86,7 @@ class ReceivePolicy extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+        return this.updateObject(ReceivePolicy, this.toJSONObject());
     }
 
     /**
@@ -91,8 +96,7 @@ class ReceivePolicy extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(ReceivePolicy);
     }
 
     /**
@@ -102,9 +106,36 @@ class ReceivePolicy extends ModelItf {
      * @return {Array<ReceivePolicy>} The model instances.
      */
     static all() : Array<ReceivePolicy> {
-        // TODO
-        return null;
+        return this.allObjects(ReceivePolicy);
     }
+
+	/**
+	 * Return a ReceivePolicy instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {ReceivePolicy} The model instance.
+	 */
+	static parseJSON(jsonString : string) : ReceivePolicy {
+		return ReceivePolicy.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a ReceivePolicy instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {ReceivePolicy} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : ReceivePolicy {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new ReceivePolicy(jsonObject.name, jsonObject.id);
+		}
+	}
 
     /**
      * Retrieve DataBase Table Name.
@@ -113,7 +144,6 @@ class ReceivePolicy extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "ReceivePolicys";
     }
 }

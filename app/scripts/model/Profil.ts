@@ -177,6 +177,14 @@ class Profil extends ModelItf {
 		return data;
 	}
 
+	addCall(c : Call) : boolean {
+		return this.associateObject(Profil, Call, c.getId());
+	}
+
+	addTimeline(t : Timeline) : boolean {
+		return this.associateObject(Profil, Timeline, t.getId());
+	}
+
     /**
      * Create model in database.
      *
