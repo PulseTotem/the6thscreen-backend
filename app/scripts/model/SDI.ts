@@ -192,19 +192,46 @@ class SDI extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-    /**
+	loadAssociations() {
+		this.users();
+		this.profils();
+		this.zones();
+		this.timelines();
+	}
+
+	toJSONObject() : Object {
+		var data = {
+			"description": this.description(),
+			"allowedHost": this.allowedHost()
+		};
+
+		return data;
+	}
+
+	addUser(u : User) : boolean {
+		return this.associateObject(SDI, User, u.getId());
+	}
+
+	addZone(z : Zone) : boolean {
+		return this.associateObject(SDI, Zone, z.getId());
+	}
+
+	addProfil(p : Profil) : boolean {
+		return this.associateObject(SDI, Profil, p.getId());
+	}
+
+	addTimeline(t : Timeline) : boolean {
+		return this.associateObject(SDI, Timeline, t.getId());
+	}
+
+	/**
      * Create model in database.
      *
      * @method create
      * @return {boolean} Create status
      */
     create() : boolean {
-        var data = {
-	        "description": this.description(),
-	        "allowedHost": this.allowedHost()
-        };
-
-        return this.createObject(SDI, data);
+        return this.createObject(SDI, this.toJSONObject());
     }
 
     /**
@@ -219,13 +246,6 @@ class SDI extends ModelItf {
         return this.readObject(SDI, id);
     }
 
-	loadAssociations() {
-		this.users();
-		this.profils();
-		this.zones();
-		this.timelines();
-	}
-
     /**
      * Update in database the model with current id.
      *
@@ -233,12 +253,7 @@ class SDI extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-	    var data = {
-		    "description": this.description(),
-		    "allowedHost": this.allowedHost()
-	    };
-
-	    return this.updateObject(SDI, data);
+	    return this.updateObject(SDI, this.toJSONObject());
     }
 
     /**
@@ -287,10 +302,6 @@ class SDI extends ModelItf {
 		} else {
 			return new SDI(jsonObject.description, jsonObject.allowedHost, jsonObject.id);
 		}
-	}
-
-	associateUser(u : User) : boolean {
-		return this.associateObject(SDI, User, u.getId());
 	}
 
 	/**
