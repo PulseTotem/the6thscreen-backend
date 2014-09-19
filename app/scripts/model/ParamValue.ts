@@ -22,6 +22,22 @@ class ParamValue extends ModelItf {
      */
     private _value : string;
 
+	/**
+	 * ParamType property.
+	 *
+	 * @property _paramType
+	 * @type ParamType
+	 */
+	private _paramType : ParamType;
+
+	/**
+	 * Lazy loading for ParamType property.
+	 *
+	 * @property _paramType_loaded
+	 * @type boolean
+	 */
+	private _paramType_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -47,7 +63,47 @@ class ParamValue extends ModelItf {
         return this._value;
     }
 
+	/**
+	 * Set the ParamValue's value.
+	 *
+	 * @method setName
+	 */
+	setValue(value : string) {
+		if(value == null || value == "") {
+			Logger.error("A ParamValue needs to have a value.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._value = value;
+	}
+
+	/**
+	 * Return the ParamValue's ParamType.
+	 */
+	paramType() {
+		if(! this._paramType_loaded) {
+			this._paramType_loaded = this.getUniquelyAssociatedObject(ParamValue, ParamType, this._paramType);
+		}
+		return this._paramType;
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	loadAssociations() : void {
+		this.paramType();
+	}
+
+	toJSONObject() : Object {
+		var data = {
+			"value": this.value()
+		};
+
+		return data;
+	}
+
+	setParamType(p : ParamType) : boolean {
+		return this.associateObject(ParamValue, ParamType, p.getId());
+	}
 
     /**
      * Create model in database.
@@ -56,8 +112,7 @@ class ParamValue extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        return this.createObject(ParamValue, this.toJSONObject());
     }
 
     /**
@@ -69,8 +124,7 @@ class ParamValue extends ModelItf {
      * @return {ParamValue} The model instance.
      */
     static read(id : number) : ParamValue {
-        // TODO
-        return null;
+        return this.readObject(ParamValue, id);
     }
 
     /**
@@ -80,8 +134,7 @@ class ParamValue extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+        return this.updateObject(ParamValue, this.toJSONObject());
     }
 
     /**
@@ -91,8 +144,7 @@ class ParamValue extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(ParamValue);
     }
 
     /**
@@ -102,9 +154,36 @@ class ParamValue extends ModelItf {
      * @return {Array<ParamValue>} The model instances.
      */
     static all() : Array<ParamValue> {
-        // TODO
-        return null;
+        return this.allObjects(ParamValue);
     }
+
+	/**
+	 * Return a ParamValue instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {ParamValue} The model instance.
+	 */
+	static parseJSON(jsonString : string) : ParamValue {
+		return ParamValue.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a ParamValue instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {ParamValue} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : ParamValue {
+		if(typeof(jsonObject.value) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new ParamValue(jsonObject.value, jsonObject.id);
+		}
+	}
 
     /**
      * Retrieve DataBase Table Name.
@@ -113,7 +192,6 @@ class ParamValue extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "ParamValues";
     }
 }
