@@ -290,6 +290,10 @@ class ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	loadAssociations() : void {
+
+	}
+
     /**
      * Create model in database.
      *

@@ -118,6 +118,17 @@ class ParamType extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	toJSONObject() : Object {
+		var data = {
+			"name" : this.name(),
+			"description": this.description(),
+			"type": this.type(),
+			"constraint": this.constraint()
+		};
+
+		return data;
+	}
+
     /**
      * Create model in database.
      *
@@ -125,8 +136,7 @@ class ParamType extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+       return this.createObject(ParamType, this.toJSONObject());
     }
 
     /**
@@ -138,8 +148,7 @@ class ParamType extends ModelItf {
      * @return {ParamType} The model instance.
      */
     static read(id : number) : ParamType {
-        // TODO
-        return null;
+        return this.readObject(ParamType, id);
     }
 
     /**
@@ -149,8 +158,7 @@ class ParamType extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+        return this.updateObject(ParamType, this.toJSONObject());
     }
 
     /**
@@ -160,8 +168,7 @@ class ParamType extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(ParamType);
     }
 
     /**
@@ -171,9 +178,36 @@ class ParamType extends ModelItf {
      * @return {Array<ParamType>} The model instances.
      */
     static all() : Array<ParamType> {
-        // TODO
-        return null;
+        return this.allObjects(ParamType);
     }
+
+	/**
+	 * Return a ParamType instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Call} The model instance.
+	 */
+	static parseJSON(jsonString : string) : ParamType {
+		return ParamType.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a ParamType instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Call} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : ParamType {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.type) == "undefined" || typeof(jsonObject.constraint) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new ParamType(jsonObject.name, jsonObject.description, jsonObject.type, jsonObject.constraint, jsonObject.id);
+		}
+	}
 
     /**
      * Retrieve DataBase Table Name.
@@ -182,7 +216,6 @@ class ParamType extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "ParamTypes";
     }
 }
