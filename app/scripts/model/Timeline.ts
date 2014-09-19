@@ -95,13 +95,28 @@ class Timeline extends ModelItf {
      */
     profils() {
         if(! this._profils_loaded) {
-            // TODO : Retrieve from database.
-            this._profils_loaded = true;
+            this._profils_loaded = this.getAssociatedObjects(Timeline, Profil, this._profils);
         }
         return this._profils;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	loadAssociations() : void {
+		this.profils();
+	}
+
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name(),
+			"description": this.description()
+		};
+		return data;
+	}
+
+	addProfil(p : Profil) : boolean {
+		return this.associateObject(Timeline, Profil, p.getId());
+	}
 
     /**
      * Create model in database.
@@ -110,8 +125,7 @@ class Timeline extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        return this.createObject(Timeline, this.toJSONObject());
     }
 
     /**
@@ -123,8 +137,7 @@ class Timeline extends ModelItf {
      * @return {Timeline} The model instance.
      */
     static read(id : number) : Timeline {
-        // TODO
-        return null;
+        return this.readObject(Timeline, id);
     }
 
     /**
@@ -134,8 +147,7 @@ class Timeline extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+        return this.updateObject(Timeline, this.toJSONObject());
     }
 
     /**
@@ -145,8 +157,7 @@ class Timeline extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(Timeline);
     }
 
     /**
@@ -156,9 +167,36 @@ class Timeline extends ModelItf {
      * @return {Array<Timeline>} The model instances.
      */
     static all() : Array<Timeline> {
-        // TODO
-        return null;
+        return this.allObjects(Timeline);
     }
+
+	/**
+	 * Return a Timeline instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Timeline} The model instance.
+	 */
+	static parseJSON(jsonString : string) : Timeline {
+		return Timeline.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a Timeline instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Timeline} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : Timeline {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new Timeline(jsonObject.name, jsonObject.description, jsonObject.id);
+		}
+	}
 
     /**
      * Retrieve DataBase Table Name.
@@ -167,7 +205,6 @@ class Timeline extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "Timelines";
     }
 }
