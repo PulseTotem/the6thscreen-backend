@@ -95,13 +95,29 @@ class Renderer extends ModelItf {
      */
     infoType() {
         if(! this._info_type_loaded) {
-            // TODO : Retrieve from database.
-            this._info_type_loaded = true;
+            this._info_type_loaded = this.getUniquelyAssociatedObject(Renderer, InfoType, this._info_type);
         }
         return this._info_type;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	loadAssociations() : void {
+		this.infoType();
+	}
+
+	toJSONObject() : Object {
+		var data = {
+			"name" : this.name(),
+			"description": this.description()
+		};
+
+		return data;
+	}
+
+	setInfoType(i : InfoType) : boolean {
+		return this.associateObject(Renderer, InfoType, i.getId());
+	}
 
     /**
      * Create model in database.
@@ -110,8 +126,7 @@ class Renderer extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        return this.createObject(Renderer, this.toJSONObject())
     }
 
     /**
@@ -123,8 +138,7 @@ class Renderer extends ModelItf {
      * @return {Renderer} The model instance.
      */
     static read(id : number) : Renderer {
-        // TODO
-        return null;
+        return this.readObject(Renderer, id);
     }
 
     /**
@@ -134,8 +148,7 @@ class Renderer extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+        return this.updateObject(Renderer, this.toJSONObject());
     }
 
     /**
@@ -145,8 +158,7 @@ class Renderer extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(Renderer);
     }
 
     /**
@@ -156,9 +168,36 @@ class Renderer extends ModelItf {
      * @return {Array<Renderer>} The model instances.
      */
     static all() : Array<Renderer> {
-        // TODO
-        return null;
+        return this.allObjects(Renderer);
     }
+
+	/**
+	 * Return a Renderer instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Renderer} The model instance.
+	 */
+	static parseJSON(jsonString : string) : Renderer {
+		return Renderer.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a Renderer instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Renderer} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : Renderer {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id);
+		}
+	}
 
     /**
      * Retrieve DataBase Table Name.
@@ -167,7 +206,6 @@ class Renderer extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "Renderers";
     }
 }
