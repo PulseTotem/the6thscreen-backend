@@ -49,6 +49,13 @@ class Role extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name()
+		};
+		return data;
+	}
+
     /**
      * Create model in database.
      *
@@ -56,8 +63,7 @@ class Role extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        return this.createObject(Role, this.toJSONObject());
     }
 
     /**
@@ -69,8 +75,7 @@ class Role extends ModelItf {
      * @return {Role} The model instance.
      */
     static read(id : number) : Role {
-        // TODO
-        return null;
+        return this.readObject(Role, id);
     }
 
     /**
@@ -80,8 +85,7 @@ class Role extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+        return this.updateObject(Role, this.toJSONObject());
     }
 
     /**
@@ -91,8 +95,7 @@ class Role extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(Role);
     }
 
     /**
@@ -102,9 +105,36 @@ class Role extends ModelItf {
      * @return {Array<Role>} The model instances.
      */
     static all() : Array<Role> {
-        // TODO
-        return null;
+        return this.allObjects(Role);
     }
+
+	/**
+	 * Return a Role instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Role} The model instance.
+	 */
+	static parseJSON(jsonString : string) : Role {
+		return Role.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a Role instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Role} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : Role {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new Role(jsonObject.name, jsonObject.id);
+		}
+	}
 
     /**
      * Retrieve DataBase Table Name.
@@ -113,7 +143,6 @@ class Role extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "Roles";
     }
 }
