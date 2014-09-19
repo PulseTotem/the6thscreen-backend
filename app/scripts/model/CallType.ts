@@ -227,6 +227,19 @@ class CallType extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	loadAssociations() : void {
+		// TODO
+	}
+
+	toJSONObject() : Object  {
+		var data = {
+			"name" : this.name(),
+			"description" : this.description()
+		};
+
+		return data;
+	}
+
     /**
      * Create model in database.
      *

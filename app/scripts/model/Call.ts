@@ -120,9 +120,23 @@ class Call extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	loadAssociations() : void {
+		this.source();
+		this.paramValues();
+	}
+
 	toJSONObject() : Object {
 		var data = { "name": this.name() };
 		return data;
+	}
+
+	setSource(s : Source) : boolean {
+		return this.associateObject(Call, Source, s.getId());
+	}
+
+	// TODO : Can we associate an object twice?
+	addParamValue(p : ParamValue) : boolean {
+		return this.associateObject(Call, ParamValue, p.getId());
 	}
 
     /**
