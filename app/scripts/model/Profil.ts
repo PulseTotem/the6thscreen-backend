@@ -144,27 +144,7 @@ class Profil extends ModelItf {
      */
     calls() : Array<Call> {
         if(! this._calls_loaded) {
-            if(this.getId() != undefined) {
-                var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + Profil.getTableName() + "/" + this.getId().toString() + "/" + Call.getTableName());
-
-                if(result.success) {
-                    var response = result.data;
-                    if(response.status == "success") {
-                        if(Object.keys(response.data).length > 0) {
-                            for(var i = 0; i < response.data.length; i++) {
-                                var c = response.data[i];
-                                this._calls.push(Call.fromJSONObject(c));
-                            }
-                        }
-                    } else {
-                        return null;
-                    }
-                } else {
-                    return null;
-                }
-            }
-
-            this._calls_loaded = true;
+            this._calls_loaded = this.getAssociatedObjects(Profil, Call, this._calls);
         }
         return this._calls;
     }
@@ -177,13 +157,25 @@ class Profil extends ModelItf {
      */
     timelines() : Array<Timeline> {
         if(! this._timelines_loaded) {
-            // TODO : Retrieve from database.
-            this._timelines_loaded = true;
+            this._timelines_loaded = this.getAssociatedObjects(Profil, Timeline, this._timelines);
         }
         return this._timelines;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	loadAssociations() : void {
+		this.calls();
+		this.timelines();
+	}
+
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name(),
+			"description": this.description()
+		};
+		return data;
+	}
 
     /**
      * Create model in database.
@@ -192,11 +184,7 @@ class Profil extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        var data = new Object();
-        data["name"] = this.name();
-        data["description"] = this.description();
-
-        return this.createObject(Profil, data);
+        return this.createObject(Profil, this.toJSONObject());
     }
 
     /**
@@ -218,11 +206,7 @@ class Profil extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        var data = new Object();
-        data["name"] = this.name();
-        data["description"] = this.description();
-
-        return this.updateObject(Profil, data);
+        return this.updateObject(Profil, this.toJSONObject());
     }
 
     /**
