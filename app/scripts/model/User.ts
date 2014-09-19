@@ -108,6 +108,11 @@ class User extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	loadAssociations() : void {
+		this.roles();
+		this.sdis();
+	}
+
 	toJSONObject() : Object {
 		var data = { "username": this.username() };
 		return data;

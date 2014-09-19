@@ -103,8 +103,7 @@ class Call extends ModelItf {
      */
     source() {
         if(! this._source_loaded) {
-            // TODO : Retrieve from database.
-            this._source_loaded = true;
+            this._source_loaded = this.getUniquelyAssociatedObject(Call, Source, this._source);
         }
         return this._source;
     }
@@ -114,13 +113,17 @@ class Call extends ModelItf {
      */
     paramValues() {
         if(! this._param_values_loaded) {
-            // TODO : Retrieve from database.
-            this._param_values_loaded = true;
+            this._param_values_loaded = this.getAssociatedObjects(Call, ParamValue, this._param_values);
         }
         return this._param_values;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	toJSONObject() : Object {
+		var data = { "name": this.name() };
+		return data;
+	}
 
     /**
      * Create model in database.
@@ -129,10 +132,7 @@ class Call extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        var data = new Object();
-        data["name"] = this.name();
-
-        return this.createObject(Call, data);
+        return this.createObject(Call, this.toJSONObject());
     }
 
     /**
@@ -144,7 +144,7 @@ class Call extends ModelItf {
      * @return {Call} The model instance.
      */
     static read(id : number) : Call {
-        return ModelItf.readObject(Call, id);
+        return this.readObject(Call, id);
     }
 
     /**
@@ -154,10 +154,7 @@ class Call extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        var data = new Object();
-        data["name"] = this.name();
-
-        return this.updateObject(Call, data);
+        return this.updateObject(Call, this.toJSONObject());
     }
 
     /**
@@ -177,7 +174,7 @@ class Call extends ModelItf {
      * @return {Array<Call>} The model instances.
      */
     static all() : Array<Call> {
-        return ModelItf.allObjects(Call);
+        return this.allObjects(Call);
     }
 
     /**

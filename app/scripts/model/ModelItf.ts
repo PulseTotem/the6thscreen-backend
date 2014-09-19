@@ -224,6 +224,39 @@ class ModelItf {
 		}
 	}
 
+	/**
+	 * Retrieve all associated objects
+	 *
+	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
+	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
+	 * @param assoName - where the object have to be saved
+	 * @returns {boolean}
+	 */
+	getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, assoName : ModelItf) : boolean {
+		if (this.getId() == undefined) {
+			return false;
+		}
+
+		var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString() + "/" + modelClassAssociated.getTableName());
+
+		if(result.success) {
+			var response = result.data;
+			if(response.status == "success") {
+				if(Object.keys(response.data).length === 1) {
+					for(var i = 0; i < response.data.length; i++) {
+						var object = response.data[i];
+						assoName = modelClassAssociated.fromJSONObject(object);
+					}
+					return true;
+				}
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
     /**
      * Retrieve all model objects in database.
      *
