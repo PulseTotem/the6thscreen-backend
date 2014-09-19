@@ -138,8 +138,7 @@ class Zone extends ModelItf {
      */
     callTypes() {
         if(! this._call_types_loaded) {
-            // TODO : Retrieve from database.
-            this._call_types_loaded = true;
+            this._call_types_loaded = this.getAssociatedObjects(Zone, CallType, this._call_types);
         }
         return this._call_types;
     }
@@ -149,13 +148,17 @@ class Zone extends ModelItf {
      */
     calls() {
         if(! this._calls_loaded) {
-            // TODO : Retrieve from database.
-            this._calls_loaded = true;
+            this._calls_loaded = this.getAssociatedObjects(Zone, Call, this._calls);
         }
         return this._calls;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	loadAssociations() : void {
+		this.calls();
+		this.callTypes();
+	}
 
 	toJSONObject() : Object {
 		var data = {
@@ -164,6 +167,14 @@ class Zone extends ModelItf {
 			"position": this.position()
 		};
 		return data;
+	}
+
+	addCallType(ct : CallType) : boolean {
+		return this.associateObject(Zone, CallType, ct.getId());
+	}
+
+	addCall(c : Call) : boolean {
+		return this.associateObject(Zone, Call, c.getId());
 	}
 
     /**
@@ -217,6 +228,37 @@ class Zone extends ModelItf {
     static all() : Array<Zone> {
         return this.allObjects(Zone);
     }
+
+	/**
+	 * Return a Zone instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Zone} The model instance.
+	 */
+	static parseJSON(jsonString : string) : Zone {
+		return Zone.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a Zone instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Zone} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : Zone {
+		if(typeof(jsonObject.name) == "undefined" ||
+			typeof(jsonObject.description) == "undefined" ||
+			typeof(jsonObject.position) == "undefined" ||
+			typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new Zone(jsonObject.name, jsonObject.description, jsonObject.position, jsonObject.id);
+		}
+	}
 
     /**
      * Retrieve DataBase Table Name.

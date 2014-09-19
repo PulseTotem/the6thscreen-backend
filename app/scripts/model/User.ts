@@ -118,6 +118,19 @@ class User extends ModelItf {
 		return data;
 	}
 
+	/**
+	 * Associate a SDI to the user
+	 * @param s
+	 * @returns {boolean}
+	 */
+	addSDI(s : SDI) : boolean {
+		return this.associateObject(User, SDI, s.getId());
+	}
+
+	addRole(r : Role) : boolean {
+		return this.associateObject(User, Role, r.getId());
+	}
+
     /**
      * Create model in database.
      *
@@ -169,15 +182,6 @@ class User extends ModelItf {
     static all() : Array<User> {
         return this.allObjects(User);
     }
-
-	/**
-	 * Associate a SDI to the user
-	 * @param s
-	 * @returns {boolean}
-	 */
-	associateSDI(s : SDI) : boolean {
-		return this.associateObject(User, SDI, s.getId());
-	}
 
 	/**
 	 * Return a User instance from a JSON string.
