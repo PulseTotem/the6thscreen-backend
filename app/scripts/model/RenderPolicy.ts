@@ -72,6 +72,14 @@ class RenderPolicy extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name(),
+			"description": this.description()
+		};
+		return data;
+	}
+
     /**
      * Create model in database.
      *
@@ -79,8 +87,7 @@ class RenderPolicy extends ModelItf {
      * @return {boolean} Create status
      */
     create() : boolean {
-        // TODO
-        return false;
+        return this.createObject(RenderPolicy, this.toJSONObject());
     }
 
     /**
@@ -92,8 +99,7 @@ class RenderPolicy extends ModelItf {
      * @return {RenderPolicy} The model instance.
      */
     static read(id : number) : RenderPolicy {
-        // TODO
-        return null;
+        return this.readObject(RenderPolicy, id);
     }
 
     /**
@@ -103,8 +109,7 @@ class RenderPolicy extends ModelItf {
      * @return {boolean} Update status
      */
     update() : boolean {
-        // TODO
-        return false;
+        return this.updateObject(RenderPolicy, this.toJSONObject());
     }
 
     /**
@@ -114,8 +119,7 @@ class RenderPolicy extends ModelItf {
      * @return {boolean} Delete status
      */
     delete() : boolean {
-        // TODO
-        return false;
+        return this.deleteObject(RenderPolicy);
     }
 
     /**
@@ -125,9 +129,36 @@ class RenderPolicy extends ModelItf {
      * @return {Array<RenderPolicy>} The model instances.
      */
     static all() : Array<RenderPolicy> {
-        // TODO
-        return null;
+        return this.allObjects(RenderPolicy);
     }
+
+	/**
+	 * Return a RenderPolicy instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {RenderPolicy} The model instance.
+	 */
+	static parseJSON(jsonString : string) : RenderPolicy {
+		return RenderPolicy.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a RenderPolicy instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {RenderPolicy} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : RenderPolicy {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new RenderPolicy(jsonObject.name, jsonObject.description, jsonObject.id);
+		}
+	}
 
     /**
      * Retrieve DataBase Table Name.
@@ -136,7 +167,6 @@ class RenderPolicy extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        // TODO
-        return "";
+        return "RenderPolicys";
     }
 }
