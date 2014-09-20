@@ -28,7 +28,7 @@
  */
 class CleanAndInitDatabase {
 
-    static toClean = [Profil];
+    static toClean : Array<any> = [Profil,SDI];
 
     /**
      * Method to clean and fulfill database with some data.
@@ -58,12 +58,32 @@ class CleanAndInitDatabase {
         }
     }
 
+	createSources() : void {
+		var picture_album = new InfoType("PictureAlbum");
+		picture_album.create();
+
+		var recherche_flickr = new Source("RechercheFlickR","FlickR","Recherche à partir de l'API FlickR","localhost",4000);
+		recherche_flickr.create();
+
+		var param_recherche_flickr = new ParamType("Recherche","Champs de recherche pour FlickR","String","None");
+		param_recherche_flickr.create();
+
+		var limit_recherche_flickr = new ParamType("Limite","Limiter le nombre de résultats","Entier","Positif");
+		limit_recherche_flickr.create();
+
+		recherche_flickr.addParamType(param_recherche_flickr);
+		recherche_flickr.setInfoType(picture_album);
+		recherche_flickr.addParamType(limit_recherche_flickr);
+
+	}
+
     /**
      * Method to fulfill database with some data.
      *
      * @method fulfill
      */
     fulfill() {
+	    this.createSources();
 	    var s : SDI = new SDI("SDItruc", "*");
 	    s.create();
 
@@ -71,9 +91,9 @@ class CleanAndInitDatabase {
 	    u.create();
 
 	    Logger.debug("Associate user");
-	    s.associateUser(u);
+	    s.addUser(u);
 	    // to check if doublons are created
-	    u.associateSDI(s);
+	    u.addSDI(s);
 
 	    s.loadAssociations();
 	    Logger.debug(s);

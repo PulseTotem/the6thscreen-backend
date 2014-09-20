@@ -176,8 +176,9 @@ class ModelItf {
 		if (this.getId() == undefined || id2 == undefined) {
 			return false;
 		}
-
-		var result = RestClient.putSync(DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + this.getId().toString() + "/" + modelClass2.getTableName() + "/" + id2.toString(), {});
+		var associationURL = DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + this.getId().toString() + "/" + modelClass2.getTableName() + "/" + id2.toString();
+		Logger.debug("ModelItf Associate Object with the following URL: "+associationURL);
+		var result = RestClient.putSync(associationURL, {});
 
 		if(result.success) {
 			var response = result.data;
