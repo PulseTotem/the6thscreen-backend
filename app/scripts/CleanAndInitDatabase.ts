@@ -100,8 +100,8 @@ class CleanAndInitDatabase {
     fulfill() {
 	    this.createSources();
 
-        var feed_node = new InfoType("FeedNode");
-        feed_node.create();
+        /*var feed_node = new InfoType("FeedNode");
+        feed_node.create();*/
 
         var feed_content = new InfoType("FeedContent");
         feed_content.create();
@@ -146,13 +146,17 @@ class CleanAndInitDatabase {
         var renderer : Renderer = new Renderer("FeedContentRendererGeneric", "Renderer générique pour les infos de type FeedContent.");
         renderer.create();
 
+        renderer.setInfoType(feed_content);
+
         ct.setRenderer(renderer);
 
+        //Receive : La politique de réception => ???
         var rp : ReceivePolicy = new ReceivePolicy("Last");
         rp.create();
 
         ct.setReceivePolicy(rp);
 
+        //Render : La politique d'affichage => ???
         var renderP : RenderPolicy = new RenderPolicy("Ordered");
         renderP.create();
 
@@ -168,7 +172,7 @@ class CleanAndInitDatabase {
         var c : Call = new Call("FilUNS");
         c.create();
 
-        c.setSource(rss_feed_reader);
+        c.setCallType(ct);
 
         var feedUrl_pv : ParamValue = new ParamValue("http://filuns.unice.fr/accueil/atom.xml");
         feedUrl_pv.create();
@@ -180,6 +184,11 @@ class CleanAndInitDatabase {
 
         c.addParamValue(feedUrl_pv);
         c.addParamValue(limit_pv);
+
+        p.addCall(c);
+
+        //Enlever le lien call -> source
+        //Enlever le lien call -> zone
 
         //
 
