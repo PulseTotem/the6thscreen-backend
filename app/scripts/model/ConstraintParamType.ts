@@ -3,8 +3,7 @@
  */
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./Source.ts" />
-/// <reference path="./Renderer.ts" />
+/// <reference path="./TypeParamType.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -31,6 +30,22 @@ class ConstraintParamType extends ModelItf {
 	 * @type string
 	 */
 	private _description : string;
+
+	/**
+	 * Type property: a constraint only apply on a specific type.
+	 *
+	 * @property _type
+	 * @type TypeParamType
+	 */
+	private _type : TypeParamType;
+
+	/**
+	 * Lazy loading for Type property
+	 *
+	 * @property _type_loading
+	 * @type boolean
+	 */
+	private _type_loading : boolean;
 
 	/**
 	 * Constructor.
@@ -71,7 +86,21 @@ class ConstraintParamType extends ModelItf {
 		return this._description;
 	}
 
+	/**
+	 * Return the ConstraintParamType's type
+	 */
+	type() {
+		if (!this._type_loading) {
+			this._type_loading = this.getUniquelyAssociatedObject(ConstraintParamType, TypeParamType, this._type);
+		}
+		return this._type;
+	}
+
 	//////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	loadAssociations() : void {
+		this.type();
+	}
 
 	toJSONObject() : Object {
 		var data = {
@@ -80,6 +109,10 @@ class ConstraintParamType extends ModelItf {
 		};
 
 		return data;
+	}
+
+	setType(t : TypeParamType) : boolean {
+		return this.associateObject(ConstraintParamType, TypeParamType, t.getId());
 	}
 
 	/**

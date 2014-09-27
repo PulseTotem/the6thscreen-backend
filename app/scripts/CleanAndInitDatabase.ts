@@ -114,9 +114,11 @@ class CleanAndInitDatabase {
 
 	    var urlConstraint = new ConstraintParamType("URL", "Ensure the string is an URL");
 	    urlConstraint.create();
+	    urlConstraint.setType(chaineTypeInfoType);
 
 	    var positiveNumberConstraint = new ConstraintParamType("Positive", "Ensure the number is >= 0");
 	    positiveNumberConstraint.create();
+	    positiveNumberConstraint.setType(entierTypeInfoType);
 
         /*var feed_node = new InfoType("FeedNode");
         feed_node.create();*/
