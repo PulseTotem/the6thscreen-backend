@@ -6,6 +6,8 @@
 /// <reference path="./CallType.ts" />
 /// <reference path="./Call.ts" />
 
+
+/// <reference path="../customizedTypes/Percentage.ts" />
 /// <reference path="../core/Logger.ts" />
 
 /**
@@ -33,12 +35,36 @@ class Zone extends ModelItf {
     private _description : string;
 
     /**
-     * Position property.
+     * Width property.
      *
-     * @property _position
-     * @type string
+     * @property _width
+     * @type Percentage
      */
-    private _position : string;
+    private _width : Percentage;
+
+	/**
+	 * Height property.
+	 *
+	 * @property _height
+	 * @type Percentage
+	 */
+	private _height : Percentage;
+
+	/**
+	 * PositionFromTop property.
+	 *
+	 * @property _position_from_top
+	 * @type Percentage
+	 */
+	private _position_from_top : Percentage;
+
+	/**
+	 * PositionFromLeft property.
+	 *
+	 * @property _position_from_left
+	 * @type Percentage
+	 */
+	private _position_from_left : Percentage;
 
     /**
      * CallTypes property.
@@ -81,29 +107,11 @@ class Zone extends ModelItf {
      * @param {string} position - The Zone's position.
      * @param {number} id - The Zone's ID.
      */
-    constructor(name : string, description : string, position : string, id : number = null) {
+    constructor(name : string, description : string, width : number, height : number, positionFromTop : number, positionFromLeft : number, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A Zone needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
-
-        if(this._description == null || this._description == "") {
-            Logger.error("A Zone needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._description = description;
-
-        if(this._position == null || this._position == "") {
-            Logger.error("A Zone needs to have a position.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._position = position;
+        this.setName(name);
+	    this.setDescription(description);
 
         this._call_types = new Array<CallType>();
         this._call_types_loaded = false;
@@ -111,6 +119,84 @@ class Zone extends ModelItf {
         this._calls = new Array<Call>();
         this._calls_loaded = false;
     }
+
+	/**
+	 * Set the Zone's name
+	 * @param name A new name
+	 */
+	setName(name : string) : void {
+		if(name == null || name == "") {
+			Logger.error("A Zone needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
+
+	/**
+	 * Set the Zone's description
+	 * @param description a new description
+	 */
+	setDescription(description : string) : void {
+		if(description == null || description == "") {
+			Logger.error("A Zone needs to have a description.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._description = description;
+	}
+
+	/**
+	 * Set the Zone's width
+	 * @param width a new width
+	 */
+	setWidth(width : number) : void {
+		if(width == null || width == "") {
+			Logger.error("A Zone needs to have a width.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._width = new Percentage(width);
+	}
+
+	/**
+	 * Set the Zone's height
+	 * @param height a new height
+	 */
+	setHeight(height : number) : void {
+		if(height == null || height == "") {
+			Logger.error("A Zone needs to have a height.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._height = new Percentage(height);
+	}
+
+	/**
+	 * Set the Zone's positionFromTop
+	 * @param positionFromTop a new positionFromTop
+	 */
+	setPositionFromTop(positionFromTop : number) : void {
+		if(positionFromTop == null || positionFromTop == "") {
+			Logger.error("A Zone needs to have a positionFromTop.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._position_from_top = new Percentage(positionFromTop);
+	}
+
+	/**
+	 * Set the Zone's positionFromLeft
+	 * @param positionFromTop a new positionFromTop
+	 */
+	setPositionFromLeft(positionFromLeft : number) : void {
+		if(positionFromLeft == null || positionFromLeft == "") {
+			Logger.error("A Zone needs to have a positionFromLeft.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._position_from_left = new Percentage(positionFromLeft);
+	}
 
     /**
      * Return the Zone's name.
@@ -126,12 +212,33 @@ class Zone extends ModelItf {
         return this._description;
     }
 
-    /**
-     * Return the Zone's position.
-     */
-    position() {
-        return this._position;
+	/**
+	 * Return the Zone's width
+	 */
+    width() {
+		return this._width.value();
     }
+
+	/**
+	 * Return the Zone's height
+	 */
+	height() {
+		return this._height.value();
+	}
+
+	/**
+	 * Return the Zone's positionFromTop
+	 */
+	positionFromTop() {
+		return this._position_from_top.value();
+	}
+
+	/**
+	 * Return the Zone's positionFromLeft
+	 */
+	positionFromLeft() {
+		return this._position_from_left.value();
+	}
 
     /**
      * Return the Zone's CallTypes.
@@ -164,7 +271,10 @@ class Zone extends ModelItf {
 		var data = {
 			"name": this.name(),
 			"description": this.description(),
-			"position": this.position()
+			"width": this.width(),
+			"height": this.height(),
+			"positionFromTop": this.positionFromTop(),
+			"positionFromLeft": this.positionFromLeft()
 		};
 		return data;
 	}
@@ -252,11 +362,14 @@ class Zone extends ModelItf {
 	static fromJSONObject(jsonObject : any) : Zone {
 		if(typeof(jsonObject.name) == "undefined" ||
 			typeof(jsonObject.description) == "undefined" ||
-			typeof(jsonObject.position) == "undefined" ||
+			typeof(jsonObject.width) == "undefined" ||
+			typeof(jsonObject.height) == "undefined" ||
+			typeof(jsonObject.positionFromTop) == "undefined" ||
+			typeof(jsonObject.positionFromLeft) == "undefined" ||
 			typeof(jsonObject.id) == "undefined") {
 			return null;
 		} else {
-			return new Zone(jsonObject.name, jsonObject.description, jsonObject.position, jsonObject.id);
+			return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id);
 		}
 	}
 
