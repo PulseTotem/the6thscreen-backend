@@ -8,6 +8,7 @@
 /// <reference path="./ReceivePolicy.ts" />
 /// <reference path="./RenderPolicy.ts" />
 /// <reference path="./Call.ts" />
+/// <reference path="./CallType.ts" />
 
 /// <reference path="../core/Logger.ts" />
 

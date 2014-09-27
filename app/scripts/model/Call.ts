@@ -3,8 +3,9 @@
  */
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./Source.ts" />
 /// <reference path="./ParamValue.ts" />
+/// <reference path="./CallType.ts" />
+/// <reference path="./Profil.ts" />
 
 /// <reference path="../core/Logger.ts" />
 /// <reference path="../core/RestClient.ts" />
@@ -26,21 +27,37 @@ class Call extends ModelItf {
      */
     private _name : string;
 
-    /**
-     * Source property.
-     *
-     * @property _source
-     * @type Source
-     */
-    private _source : Source;
+	/**
+	 * CallType property.
+	 *
+	 * @property _call_type
+	 * @type CallType
+	 */
+	private _call_type : CallType;
 
-    /**
-     * Lazy loading for Source property.
-     *
-     * @property _source_loaded
-     * @type boolean
-     */
-    private _source_loaded : boolean;
+	/**
+	 * Lazy loading for CallType property.
+	 *
+	 * @property _call_type_loaded
+	 * @type boolean
+	 */
+	private _call_type_loaded : boolean;
+
+	/**
+	 * Profil property.
+	 *
+	 * @property _profil
+	 * @type Profil
+	 */
+	private _profil : Profil;
+
+	/**
+	 * Lazy loading for Profil property.
+	 *
+	 * @property _profil_loaded
+	 * @type boolean
+	 */
+	private _profil_loaded : boolean;
 
     /**
      * ParamValues property.
@@ -70,11 +87,14 @@ class Call extends ModelItf {
 
         this.setName(name);
 
-        this._source = null;
-        this._source_loaded = false;
-
         this._param_values = new Array<ParamValue>();
         this._param_values_loaded = false;
+
+	    this._call_type = null;
+	    this._call_type_loaded = false;
+
+	    this._profil = null;
+	    this._profil_loaded = false;
     }
 
     /**
@@ -99,16 +119,6 @@ class Call extends ModelItf {
     }
 
     /**
-     * Return the Call's source.
-     */
-    source() {
-        if(! this._source_loaded) {
-            this._source_loaded = this.getUniquelyAssociatedObject(Call, Source, this._source);
-        }
-        return this._source;
-    }
-
-    /**
      * Return the Call's paramValues.
      */
     paramValues() {
@@ -118,11 +128,32 @@ class Call extends ModelItf {
         return this._param_values;
     }
 
+	/**
+	 * Return the Call's profil.
+	 */
+	profil() {
+		if(! this._profil_loaded) {
+			this._profil_loaded = this.getUniquelyAssociatedObject(Call, Profil, this._profil);
+		}
+		return this._profil_loaded;
+	}
+
+	/**
+	 * Return the Call's type.
+	 */
+	callType() {
+		if(! this._call_type_loaded) {
+			this._call_type_loaded = this.getUniquelyAssociatedObject(Call, CallType, this._call_type);
+		}
+		return this._call_type_loaded;
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	loadAssociations() : void {
-		this.source();
 		this.paramValues();
+		this.profil();
+		this.callType();
 	}
 
 	toJSONObject() : Object {
@@ -130,13 +161,17 @@ class Call extends ModelItf {
 		return data;
 	}
 
-	setSource(s : Source) : boolean {
-		return this.associateObject(Call, Source, s.getId());
-	}
-
 	// TODO : Can we associate an object twice?
 	addParamValue(p : ParamValue) : boolean {
 		return this.associateObject(Call, ParamValue, p.getId());
+	}
+
+	setProfil(p : Profil) : boolean {
+		return this.associateObject(Call, Profil, p.getId());
+	}
+
+	setCallType(ct : CallType) : boolean {
+		return this.associateObject(Call, CallType, ct.getId());
 	}
 
     /**
