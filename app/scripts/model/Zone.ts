@@ -112,6 +112,10 @@ class Zone extends ModelItf {
 
         this.setName(name);
 	    this.setDescription(description);
+	    this.setWidth(width);
+	    this.setHeight(height);
+	    this.setPositionFromTop(positionFromTop);
+	    this.setPositionFromLeft(positionFromLeft);
 
         this._call_types = new Array<CallType>();
         this._call_types_loaded = false;
@@ -151,7 +155,7 @@ class Zone extends ModelItf {
 	 * @param width a new width
 	 */
 	setWidth(width : number) : void {
-		if(width == null || width == "") {
+		if(width == null) {
 			Logger.error("A Zone needs to have a width.");
 			// TODO : Throw an Exception ?
 		}
@@ -164,7 +168,7 @@ class Zone extends ModelItf {
 	 * @param height a new height
 	 */
 	setHeight(height : number) : void {
-		if(height == null || height == "") {
+		if(height == null) {
 			Logger.error("A Zone needs to have a height.");
 			// TODO : Throw an Exception ?
 		}
@@ -177,7 +181,7 @@ class Zone extends ModelItf {
 	 * @param positionFromTop a new positionFromTop
 	 */
 	setPositionFromTop(positionFromTop : number) : void {
-		if(positionFromTop == null || positionFromTop == "") {
+		if(positionFromTop == null) {
 			Logger.error("A Zone needs to have a positionFromTop.");
 			// TODO : Throw an Exception ?
 		}
@@ -190,7 +194,7 @@ class Zone extends ModelItf {
 	 * @param positionFromTop a new positionFromTop
 	 */
 	setPositionFromLeft(positionFromLeft : number) : void {
-		if(positionFromLeft == null || positionFromLeft == "") {
+		if(positionFromLeft == null) {
 			Logger.error("A Zone needs to have a positionFromLeft.");
 			// TODO : Throw an Exception ?
 		}

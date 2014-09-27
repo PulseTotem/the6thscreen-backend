@@ -14,6 +14,8 @@
 /// <reference path="./model/InfoType.ts" />
 /// <reference path="./model/ParamValue.ts" />
 /// <reference path="./model/ParamType.ts" />
+/// <reference path="./model/TypeParamType.ts" />
+/// <reference path="./model/ConstraintParamType.ts" />
 /// <reference path="./model/ReceivePolicy.ts" />
 /// <reference path="./model/Renderer.ts"/>
 /// <reference path="./model/RenderPolicy.ts" />
@@ -59,7 +61,7 @@ class CleanAndInitDatabase {
     }
 
 	createSources() : void {
-		var picture_album = new InfoType("PictureAlbum");
+		/*var picture_album = new InfoType("PictureAlbum");
 		picture_album.create();
 
 		var recherche_flickr = new Source("RechercheFlickR","FlickR","Recherche à partir de l'API FlickR","localhost",4000);
@@ -81,7 +83,7 @@ class CleanAndInitDatabase {
 		recherche_flickr.infoType();
 		Logger.debug("Après le lazy loading: ");
 		Logger.debug(recherche_flickr);
-        /*
+
         var feed_node = new InfoType("FeedNode");
         feed_node.create();
 
@@ -104,7 +106,17 @@ class CleanAndInitDatabase {
      * @method fulfill
      */
     fulfill() {
-	    this.createSources();
+	    var chaineTypeInfoType = new TypeParamType("String");
+	    chaineTypeInfoType.create();
+
+	    var entierTypeInfoType = new TypeParamType("Entier");
+	    entierTypeInfoType.create();
+
+	    var urlConstraint = new ConstraintParamType("URL", "Ensure the string is an URL");
+	    urlConstraint.create();
+
+	    var positiveNumberConstraint = new ConstraintParamType("Positive", "Ensure the number is >= 0");
+	    positiveNumberConstraint.create();
 
         /*var feed_node = new InfoType("FeedNode");
         feed_node.create();*/
@@ -115,11 +127,15 @@ class CleanAndInitDatabase {
         var rss_feed_reader = new Source("RSSFeedReader", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 4000);
         rss_feed_reader.create();
 
-        var url_rss_feed_reader = new ParamType("FeedURL","Lien du flux RSS","String","URL");
+        var url_rss_feed_reader = new ParamType("FeedURL","Lien du flux RSS");
         url_rss_feed_reader.create();
+	    url_rss_feed_reader.setType(chaineTypeInfoType);
+	    url_rss_feed_reader.setConstraint(urlConstraint);
 
-        var limit_rss_feed_reader = new ParamType("Limite","Limiter le nombre de résultats","Entier","Positif");
+        var limit_rss_feed_reader = new ParamType("Limite","Limiter le nombre de résultats");
         limit_rss_feed_reader.create();
+	    limit_rss_feed_reader.setType(entierTypeInfoType);
+	    limit_rss_feed_reader.setConstraint(positiveNumberConstraint);
 
         rss_feed_reader.addParamType(url_rss_feed_reader);
         rss_feed_reader.addParamType(limit_rss_feed_reader);
@@ -139,7 +155,7 @@ class CleanAndInitDatabase {
 	    s.loadAssociations(); // ???
 	    Logger.debug(s);
 
-        var z : Zone = new Zone("MainZone", "Zone principale de SDItruc", "0");
+        var z : Zone = new Zone("MainZone", "Zone principale de SDItruc", 20, 10, 0, 0);
         z.create();
 
         s.addZone(z);
