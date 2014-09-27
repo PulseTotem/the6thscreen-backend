@@ -75,6 +75,12 @@ class CleanAndInitDatabase {
 		recherche_flickr.setInfoType(picture_album);
 		recherche_flickr.addParamType(limit_recherche_flickr);
 
+		Logger.debug("Avant le lazy loading: ");
+		Logger.debug(recherche_flickr);
+
+		recherche_flickr.infoType();
+		Logger.debug("Après le lazy loading: ");
+		Logger.debug(recherche_flickr);
 	}
 
     /**
