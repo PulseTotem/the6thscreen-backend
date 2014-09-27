@@ -81,6 +81,21 @@ class CleanAndInitDatabase {
 		recherche_flickr.infoType();
 		Logger.debug("Après le lazy loading: ");
 		Logger.debug(recherche_flickr);
+        /*
+        var feed_node = new InfoType("FeedNode");
+        feed_node.create();
+
+        var feed_content = new InfoType("FeedContent");
+        feed_content.create();
+
+        var rss_feed_reader = new Source("RSSFeedReader", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 4000);
+        rss_feed_reader.create();
+
+        var limit_rss_feed_reader = new ParamType("Limite","Limiter le nombre de résultats","Entier","Positif");
+        limit_rss_feed_reader.create();
+
+        rss_feed_reader.addParamType(limit_rss_feed_reader);
+        rss_feed_reader.setInfoType(feed_content);*/
 	}
 
     /**
@@ -90,6 +105,26 @@ class CleanAndInitDatabase {
      */
     fulfill() {
 	    this.createSources();
+
+        /*var feed_node = new InfoType("FeedNode");
+        feed_node.create();*/
+
+        var feed_content = new InfoType("FeedContent");
+        feed_content.create();
+
+        var rss_feed_reader = new Source("RSSFeedReader", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 4000);
+        rss_feed_reader.create();
+
+        var url_rss_feed_reader = new ParamType("FeedURL","Lien du flux RSS","String","URL");
+        url_rss_feed_reader.create();
+
+        var limit_rss_feed_reader = new ParamType("Limite","Limiter le nombre de résultats","Entier","Positif");
+        limit_rss_feed_reader.create();
+
+        rss_feed_reader.addParamType(url_rss_feed_reader);
+        rss_feed_reader.addParamType(limit_rss_feed_reader);
+        rss_feed_reader.setInfoType(feed_content);
+
 	    var s : SDI = new SDI("SDItruc", "*");
 	    s.create();
 
@@ -101,9 +136,67 @@ class CleanAndInitDatabase {
 	    // to check if doublons are created
 	    u.addSDI(s);
 
-	    s.loadAssociations();
+	    s.loadAssociations(); // ???
 	    Logger.debug(s);
 
+        var z : Zone = new Zone("MainZone", "Zone principale de SDItruc", "0");
+        z.create();
+
+        s.addZone(z);
+
+        var ct : CallType = new CallType("RSSMainZone","Display RSS feeds in the main zone with a specific renderer");
+        ct.create();
+
+        ct.setSource(rss_feed_reader);
+
+        var renderer : Renderer = new Renderer("FeedContentRendererGeneric", "Renderer générique pour les infos de type FeedContent.");
+        renderer.create();
+
+        renderer.setInfoType(feed_content);
+
+        ct.setRenderer(renderer);
+
+        //Receive : La politique de réception => ???
+        var rp : ReceivePolicy = new ReceivePolicy("Last");
+        rp.create();
+
+        ct.setReceivePolicy(rp);
+
+        //Render : La politique d'affichage => ???
+        var renderP : RenderPolicy = new RenderPolicy("Ordered","Alphabetically sort the informations");
+        renderP.create();
+
+        ct.setRenderPolicy(renderP);
+
+        z.addCallType(ct);
+
+        var p : Profil = new Profil("ProfilSDItruc1", "Profil n°1 de SDItruc");
+        p.create();
+
+        s.addProfil(p);
+
+        var c : Call = new Call("FilUNS");
+        c.create();
+
+        c.setCallType(ct);
+
+        var feedUrl_pv : ParamValue = new ParamValue("http://filuns.unice.fr/accueil/atom.xml");
+        feedUrl_pv.create();
+        feedUrl_pv.setParamType(url_rss_feed_reader);
+
+        var limit_pv : ParamValue = new ParamValue("10");
+        limit_pv.create();
+        limit_pv.setParamType(limit_rss_feed_reader);
+
+        c.addParamValue(feedUrl_pv);
+        c.addParamValue(limit_pv);
+
+        p.addCall(c);
+
+        //Enlever le lien call -> source
+        //Enlever le lien call -> zone
+
+        //
 
         /*
         var p : Profil = new Profil("profil1", "description de profil1");
