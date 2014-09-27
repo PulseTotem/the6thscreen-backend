@@ -24,6 +24,8 @@ class InfoType extends ModelItf {
      */
     private _name : string;
 
+
+	// TODO: Do we really need those attributes?
     /**
      * Sources property.
      *
