@@ -3,6 +3,9 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./TypeParamType.ts" />
+/// <reference path="./ConstraintParamType.ts" />
+/// <reference path="./ParamValue.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -30,21 +33,56 @@ class ParamType extends ModelItf {
      */
     private _description : string;
 
-    /**
-     * Type property.
-     *
-     * @property _type
-     * @type string
-     */
-    private _type : string;
+	/**
+	 * Type property
+	 *
+	 * @property _type
+	 * @type TypeParamType
+	 */
+	private _type : TypeParamType;
 
-    /**
-     * Constraint property.
-     *
-     * @property _constraint
-     * @type string
-     */
-    private _constraint : string;
+	/**
+	 * Lazy loading for Type property
+	 *
+	 * @property _type_loaded
+	 * @type boolean
+	 */
+	private _type_loaded : boolean;
+
+
+	/**
+	 * Constraint property
+	 *
+	 * @property _constraint
+	 * @type ConstraintParamType
+	 */
+	private _constraint : ConstraintParamType;
+
+
+	/**
+	 * Lazy loading for Constraint property
+	 *
+	 * @property _constraint_loaded
+	 * @type boolean
+	 */
+	private _constraint_loaded : boolean;
+
+
+	/**
+	 * DefaultValue property
+	 *
+	 * @property _default_value
+	 * @type ParamValue
+	 */
+	private _default_value : ParamValue;
+
+	/**
+	 * Lazy loading for DefaultValue property
+	 *
+	 * @property _default_value_property
+	 * @type boolean
+	 */
+	private _default_value_loaded : boolean;
 
     /**
      * Constructor.
@@ -52,11 +90,9 @@ class ParamType extends ModelItf {
      * @constructor
      * @param {string} name - The ParamType's name.
      * @param {string} description - The ParamType's description.
-     * @param {string} type - The ParamType's type.
-     * @param {string} constraint - The ParamType's constraint.
      * @param {number} id - The ParamType's ID.
      */
-    constructor(name : string, description : string, type : string, constraint : string, id : number = null) {
+    constructor(name : string, description : string, id : number = null) {
         super(id);
 
         if(this._name == null || this._name == "") {
@@ -72,20 +108,6 @@ class ParamType extends ModelItf {
         }
 
         this._description = description;
-
-        if(this._type == null || this._type == "") {
-            Logger.error("A ParamType needs to have a type.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._type = type;
-
-        if(this._constraint == null || this._constraint == "") {
-            Logger.error("A ParamType needs to have a constraint.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._constraint = constraint;
     }
 
     /**
@@ -105,28 +127,62 @@ class ParamType extends ModelItf {
     /**
      * Return the ParamType's type.
      */
+
+    //TODO : check if it works! We use specific foreign keys in relations between the tables. Maybe we need to improve the generic function.
     type() {
-        return this._type;
+	    if(! this._type_loaded) {
+		    this._type_loaded = this.getUniquelyAssociatedObject(ParamType, TypeParamType, this._type);
+	    }
+	    return this._type;
     }
 
     /**
      * Return the ParamType's constraint.
      */
     constraint() {
-        return this._constraint;
+	    if(! this._constraint_loaded) {
+		    this._constraint_loaded = this.getUniquelyAssociatedObject(ParamType, ConstraintParamType, this._constraint);
+	    }
+	    return this._constraint;
     }
 
+	/**
+	 * Return the ParamType's default value.
+	 */
+	defaultValue() {
+		if(! this._default_value_loaded) {
+			this._default_value_loaded = this.getUniquelyAssociatedObject(ParamType, ParamValue, this._default_value);
+		}
+		return this._default_value;
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	loadAssociations() : void {
+		this.type();
+		this.constraint();
+		this.defaultValue();
+	}
 
 	toJSONObject() : Object {
 		var data = {
 			"name" : this.name(),
-			"description": this.description(),
-			"type": this.type(),
-			"constraint": this.constraint()
+			"description": this.description()
 		};
 
 		return data;
+	}
+
+	setType(t : TypeParamType) : boolean {
+		return this.associateObject(ParamType, TypeParamType, t.getId());
+	}
+
+	setConstraint(c : ConstraintParamType) : boolean {
+		return this.associateObject(ParamType, ConstraintParamType, c.getId());
+	}
+
+	setDefaultValue(d : ParamValue) : boolean {
+		return this.associateObject(ParamType, ParamValue, d.getId());
 	}
 
     /**
@@ -202,10 +258,10 @@ class ParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ParamType {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.type) == "undefined" || typeof(jsonObject.constraint) == "undefined" || typeof(jsonObject.id) == "undefined") {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
 			return null;
 		} else {
-			return new ParamType(jsonObject.name, jsonObject.description, jsonObject.type, jsonObject.constraint, jsonObject.id);
+			return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id);
 		}
 	}
 

@@ -135,7 +135,7 @@ class Call extends ModelItf {
 		if(! this._profil_loaded) {
 			this._profil_loaded = this.getUniquelyAssociatedObject(Call, Profil, this._profil);
 		}
-		return this._profil_loaded;
+		return this._profil;
 	}
 
 	/**
@@ -145,7 +145,7 @@ class Call extends ModelItf {
 		if(! this._call_type_loaded) {
 			this._call_type_loaded = this.getUniquelyAssociatedObject(Call, CallType, this._call_type);
 		}
-		return this._call_type_loaded;
+		return this._call_type;
 	}
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
