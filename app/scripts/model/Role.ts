@@ -32,13 +32,22 @@ class Role extends ModelItf {
     constructor(name : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A Role needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
+        this.setName(name);
     }
+
+	/**
+	 * Set the Role's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("A Role needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
 
     /**
      * Return the Role's name.
@@ -49,6 +58,12 @@ class Role extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"name": this.name()
