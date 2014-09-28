@@ -57,14 +57,34 @@ class ConstraintParamType extends ModelItf {
 	constructor(name : string, description : string, id : number = null) {
 		super(id);
 
-		if(this._name == null || this._name == "") {
+		this.setName(name);
+		this.setDescription(description);
+
+		this._type = null;
+		this._type_loading = false;
+	}
+
+	/**
+	 * Set the ConstraintParamType's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
 			Logger.error("A ConstraintParamType needs to have a name.");
 			// TODO : Throw an Exception ?
 		}
 
 		this._name = name;
+	}
 
-		if(this._description == null || this._description == "") {
+	/**
+	 * Set the ConstraintParamType's description.
+	 *
+	 * @method setDescription
+	 */
+	setDescription(description : string) {
+		if(description == null || description == "") {
 			Logger.error("A ConstraintParamType needs to have a description.");
 			// TODO : Throw an Exception ?
 		}
@@ -98,10 +118,20 @@ class ConstraintParamType extends ModelItf {
 
 	//////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
 	loadAssociations() : void {
 		this.type();
 	}
 
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, description: string}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"name": this.name(),
@@ -111,8 +141,51 @@ class ConstraintParamType extends ModelItf {
 		return data;
 	}
 
+	/**
+	 * Set the type of the ConstraintParamType.
+	 * As a ConstraintParamType can only have one type, if the value is already set, this method throws an exception: you need first to unset the type.
+	 * Moreover the given type must be created in database.
+	 *
+	 * @param {TypeParamType} t The type to associate with the ConstraintParamType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
 	setType(t : TypeParamType) : boolean {
-		return this.associateObject(ConstraintParamType, TypeParamType, t.getId());
+		if (this.type() !== null) {
+			throw new Error("The type is already set for this ConstraintParamType.");
+		}
+
+		if (t === null || t.getId() === undefined) {
+			throw new Error("The type must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(ConstraintParamType, TypeParamType, t.getId())) {
+			this._type = t;
+			this._type_loading = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current type from the constraintParamType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A type must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the type is well unset and the association removed in database.
+	 */
+	unsetType() : boolean {
+		if (this.type() === null) {
+			throw new Error("No type has been set for this constraintParamType.");
+		}
+
+		if (this.deleteObjectAssociation(ConstraintParamType, TypeParamType, this.type().getId())) {
+			this._type = null;
+			this._type_loading = false; // TODO: do we still consider the type is loaded or not?
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**

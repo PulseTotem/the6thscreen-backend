@@ -152,7 +152,7 @@ class CallType extends ModelItf {
 	 */
 	setName(name : string) {
 		if(name == null || name == "") {
-			Logger.error("A Call needs to have a name.");
+			Logger.error("A CallType needs to have a name.");
 			// TODO : Throw an Exception ?
 		}
 
@@ -166,7 +166,7 @@ class CallType extends ModelItf {
 	 */
 	setDescription(description : string) {
 		if(description == null || description == "") {
-			Logger.error("A Call needs to have a description.");
+			Logger.error("A CallType needs to have a description.");
 			// TODO : Throw an Exception ?
 		}
 
