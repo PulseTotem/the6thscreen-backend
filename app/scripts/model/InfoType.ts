@@ -68,12 +68,7 @@ class InfoType extends ModelItf {
     constructor(name : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A InfoType needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
+        this.setName(name);
 
         this._sources = new Array<Source>();
         this._sources_loaded = false;
@@ -81,6 +76,20 @@ class InfoType extends ModelItf {
         this._renderers = new Array<Renderer>();
         this._renderers_loaded = false;
     }
+
+	/**
+	 * Set the InfoType's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("An InfoType needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
 
     /**
      * Return the InfoType's name.
