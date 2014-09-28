@@ -41,20 +41,37 @@ class RenderPolicy extends ModelItf {
     constructor(name : string, description : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A RenderPolicy needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
-
-        if(this._description == null || this._description == "") {
-            Logger.error("A RenderPolicy needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._description = description;
+        this.setName(name);
+	    this.setDescription(description);
     }
+
+	/**
+	 * Set the RenderPolicy's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("A RenderPolicy needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
+
+	/**
+	 * Set the RenderPolicy's description.
+	 *
+	 * @method setDescription
+	 */
+	setDescription(description : string) {
+		if(description == null || description == "") {
+			Logger.error("A RenderPolicy needs to have a description.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._description = description;
+	}
 
     /**
      * Return the RenderPolicy's name.
@@ -72,6 +89,12 @@ class RenderPolicy extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, description: string}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"name": this.name(),
@@ -167,6 +190,6 @@ class RenderPolicy extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "RenderPolicys";
+        return "RenderPolicies";
     }
 }

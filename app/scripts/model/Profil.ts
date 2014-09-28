@@ -78,7 +78,6 @@ class Profil extends ModelItf {
         super(id);
 
         this.setName(name);
-
         this.setDescription(description);
 
         this._calls = new Array<Call>();
@@ -164,11 +163,29 @@ class Profil extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
 	loadAssociations() : void {
 		this.calls();
 		this.timelines();
 	}
 
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._calls_loaded = false;
+		this._timelines_loaded = false;
+	}
+
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, description: string}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"name": this.name(),
@@ -177,12 +194,96 @@ class Profil extends ModelItf {
 		return data;
 	}
 
+	/**
+	 * Add a new Call to the Profil and associate it in the database.
+	 * A Call can only be added once.
+	 *
+	 * @param {Call} c The Call to add inside the Profil. It cannot be a null value.
+	 * @returns {boolean} Returns true if the association is realized in database.
+	 */
 	addCall(c : Call) : boolean {
-		return this.associateObject(Profil, Call, c.getId());
+		if (this.calls().indexOf(c) !== -1) {
+			throw new Error("You cannot add twice a Call in a Profil.");  // TODO: cannot it be useful sometimes?
+		}
+		if (c === null || c.getId() === undefined || c.getId() === null) {
+			throw new Error("The Call must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(Profil, Call, c.getId())) {
+			c.desynchronize();
+			this.calls().push(c);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * Remove a Call from the Profil: the association is removed both in the object and in database.
+	 * The Call can only be removed if it exists first in the list of associated Calls, else an exception is thrown.
+	 *
+	 * @param {Call} c The Call to remove from that Profil
+	 * @returns {boolean} Returns true if the association is deleted in database.
+	 */
+	removeCall(c : Call) : boolean {
+		var indexValue = this.calls().indexOf(c);
+		if (indexValue === -1) {
+			throw new Error("The Call you try to remove has not been added to the current Profil");
+		}
+
+		if (this.deleteObjectAssociation(Profil, Call, c.getId())) {
+			c.desynchronize();
+			this.calls().splice(indexValue, 1);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Add a new Timeline to the Profil and associate it in the database.
+	 * A Timeline can only be added once.
+	 *
+	 * @param {Timeline} t The Timeline to add inside the Profil. It cannot be a null value.
+	 * @returns {boolean} Returns true if the association is realized in database.
+	 */
 	addTimeline(t : Timeline) : boolean {
-		return this.associateObject(Profil, Timeline, t.getId());
+		if (this.timelines().indexOf(t) !== -1) {
+			throw new Error("You cannot add twice a Timeline in a Profil.");  // TODO: cannot it be useful sometimes?
+		}
+		if (t === null || t.getId() === undefined || t.getId() === null) {
+			throw new Error("The Timeline must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(Profil, Timeline, t.getId())) {
+			t.desynchronize();
+			this.timelines().push(t);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Remove a Timeline from the Profil: the association is removed both in the object and in database.
+	 * The Timeline can only be removed if it exists first in the list of associated Timelines, else an exception is thrown.
+	 *
+	 * @param {Timeline} t The Timeline to remove from that Profil
+	 * @returns {boolean} Returns true if the association is deleted in database.
+	 */
+	removeTimeline(t : Timeline) : boolean {
+		var indexValue = this.timelines().indexOf(t);
+		if (indexValue === -1) {
+			throw new Error("The Timeline you try to remove has not been added to the current Profil");
+		}
+
+		if (this.deleteObjectAssociation(Profil, Timeline, t.getId())) {
+			t.desynchronize();
+			this.timelines().splice(indexValue, 1);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
     /**

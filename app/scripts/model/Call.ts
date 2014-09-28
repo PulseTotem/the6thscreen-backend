@@ -162,6 +162,15 @@ class Call extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._call_type_loaded = false;
+		this._param_values_loaded = false;
+		this._profil_loaded = false;
+	}
+
+	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
@@ -183,11 +192,12 @@ class Call extends ModelItf {
 		if (this.paramValues().indexOf(p) !== -1) {
 			throw new Error("You cannot add twice a parameter in a call.");  // TODO: cannot it be useful sometimes?
 		}
-		if (p === null || p.getId() === undefined) {
+		if (p === null || p.getId() === undefined || p.getId() === null) {
 			throw new Error("The ParamValue must be an existing object to be associated.");
 		}
 
 		if (this.associateObject(Call, ParamValue, p.getId())) {
+			p.desynchronize();
 			this.paramValues().push(p);
 			return true;
 		} else {
@@ -209,6 +219,7 @@ class Call extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Call, ParamValue, p.getId())) {
+			p.desynchronize();
 			this.paramValues().splice(indexValue, 1);
 			return true;
 		} else {
@@ -228,11 +239,12 @@ class Call extends ModelItf {
 		if (this.profil() !== null) {
 			throw new Error("The profil is already set for the call : "+this+".");
 		}
-		if (p === null || p.getId() === undefined) {
+		if (p === null || p.getId() === undefined || p.getId() === null) {
 			throw new Error("The Profil must be an existing object to be associated.");
 		}
 
 		if (this.associateObject(Call, Profil, p.getId())) {
+			p.desynchronize();
 			this._profil = p;
 			this._profil_loaded = true;
 			return true;
@@ -254,8 +266,8 @@ class Call extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Call, Profil, this.profil().getId())) {
+			this.profil().desynchronize();
 			this._profil = null;
-			this._profil_loaded = false; // TODO: do we still consider the profil is loaded or not?
 			return true;
 		} else {
 			return false;
@@ -274,11 +286,12 @@ class Call extends ModelItf {
 		if (this.callType() !== null) {
 			throw new Error("The CallType is already set for the call : "+this+".");
 		}
-		if (ct === undefined || ct === null) {
+		if (ct === null || ct.getId() === undefined || ct.getId() === null) {
 			throw new Error("The CallType must be an existing object to be associated.");
 		}
 
 		if (this.associateObject(Call, CallType, ct.getId())) {
+			ct.desynchronize();
 			this._call_type = ct;
 			this._call_type_loaded = true;
 			return true;
@@ -300,15 +313,13 @@ class Call extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Call, CallType, this.callType().getId())) {
+			this.callType().desynchronize();
 			this._call_type = null;
-			this._call_type_loaded = false;
 			return true;
 		} else {
 			return false;
 		}
 	}
-
-
 
     /**
      * Create model in database.

@@ -143,7 +143,7 @@ class CleanAndInitDatabase {
         rss_feed_reader.addParamType(limit_rss_feed_reader);
         rss_feed_reader.setInfoType(feed_content);
 
-	    var s : SDI = new SDI("SDItruc", "*");
+	    var s : SDI = new SDI("SDItruc", "Un super SDI de test ! ", "*");
 	    s.create();
 
 	    var u : User = new User("toto");
@@ -164,7 +164,7 @@ class CleanAndInitDatabase {
 
         var ct : CallType = new CallType("RSSMainZone","Display RSS feeds in the main zone with a specific renderer");
         ct.create();
-
+	    ct.setZone(z);
         ct.setSource(rss_feed_reader);
 
         var renderer : Renderer = new Renderer("FeedContentRendererGeneric", "Renderer générique pour les infos de type FeedContent.");
@@ -185,8 +185,6 @@ class CleanAndInitDatabase {
         renderP.create();
 
         ct.setRenderPolicy(renderP);
-
-        z.addCallType(ct);
 
         var p : Profil = new Profil("ProfilSDItruc1", "Profil n°1 de SDItruc");
         p.create();

@@ -67,17 +67,28 @@ class User extends ModelItf {
     constructor(username : string, id : number = null) {
         super(id);
 
-        if(this._username == null || this._username == "") {
-            Logger.error("A User needs to have a username.");
-            // TODO : Throw an Exception ?
-        }
+        this.setUsername(username);
 
-        this._username = username;
         this._roles = new Array<Role>();
         this._roles_loaded = false;
+
         this._sdis = new Array<SDI>();
         this._sdis_loaded = false;
     }
+
+	/**
+	 * Set the User's username.
+	 *
+	 * @method setUsername
+	 */
+	setUsername(username : string) {
+		if(username == null || username == "") {
+			Logger.error("A User needs to have a username.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._username = username;
+	}
 
     /**
      * Return the User's username.
@@ -108,30 +119,127 @@ class User extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
 	loadAssociations() : void {
 		this.roles();
 		this.sdis();
 	}
 
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._roles_loaded = false;
+		this._sdis_loaded = false;
+	}
+
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{username: string}}
+	 */
 	toJSONObject() : Object {
 		var data = { "username": this.username() };
 		return data;
 	}
 
 	/**
-	 * Associate a SDI to the user
-	 * @param s
-	 * @returns {boolean}
+	 * Add a new SDI to the User and associate it in the database.
+	 * A SDI can only be added once.
+	 *
+	 * @param {SDI} s The SDI to link with the User. It cannot be a null value.
+	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addSDI(s : SDI) : boolean {
-		return this.associateObject(User, SDI, s.getId());
+		if (this.sdis().indexOf(s) !== -1) {
+			throw new Error("You cannot add twice a SDI for a User.");
+		}
+		if (s === null || s.getId() === undefined || s.getId() === null) {
+			throw new Error("The SDI must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(User, SDI, s.getId())) {
+			s.desynchronize();
+			this.sdis().push(s);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * Remove a SDI from the User: the association is removed both in the object and in database.
+	 * The SDI can only be removed if it exists first in the list of associated SDIs, else an exception is thrown.
+	 *
+	 * @param {SDI} s The SDI to remove from that User
+	 * @returns {boolean} Returns true if the association is deleted in database.
+	 */
+	removeSDI(s : SDI) : boolean {
+		var indexValue = this.sdis().indexOf(s);
+		if (indexValue === -1) {
+			throw new Error("The SDI you try to remove has not been added to the current User");
+		}
+
+		if (this.deleteObjectAssociation(User, SDI, s.getId())) {
+			s.desynchronize();
+			this.sdis().splice(indexValue, 1);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Add a new Role to the User and associate it in the database.
+	 * A Role can only be added once.
+	 *
+	 * @param {Role} r The Role to link with the User. It cannot be a null value.
+	 * @returns {boolean} Returns true if the association is realized in database.
+	 */
 	addRole(r : Role) : boolean {
-		return this.associateObject(User, Role, r.getId());
+		if (this.roles().indexOf(r) !== -1) {
+			throw new Error("You cannot add twice a Role for a User.");
+		}
+		if (r === null || r.getId() === undefined || r.getId() === null) {
+			throw new Error("The Role must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(User, Role, r.getId())) {
+			r.desynchronize();
+			this.roles().push(r);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-    /**
+	/**
+	 * Remove a Role from the User: the association is removed both in the object and in database.
+	 * The Role can only be removed if it exists first in the list of associated Roles, else an exception is thrown.
+	 *
+	 * @param {Role} r The Role to remove from that User
+	 * @returns {boolean} Returns true if the association is deleted in database.
+	 */
+	removeRole(r : Role) : boolean {
+		var indexValue = this.roles().indexOf(r);
+		if (indexValue === -1) {
+			throw new Error("The Role you try to remove has not been added to the current User");
+		}
+
+		if (this.deleteObjectAssociation(User, Role, r.getId())) {
+			r.desynchronize();
+			this.roles().splice(indexValue, 1);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
      * Create model in database.
      *
      * @method create

@@ -48,13 +48,26 @@ class ParamValue extends ModelItf {
     constructor(value : string, id : number = null) {
         super(id);
 
-        if(this._value == null || this._value == "") {
-            Logger.error("A ParamValue needs to have a value.");
-            // TODO : Throw an Exception ?
-        }
+        this.setValue(value);
 
-        this._value = value;
+	    this._paramType = null;
+	    this._paramType_loaded = false;
     }
+
+	// TODO : Check the value type here?
+	/**
+	 * Set the ParamValue's value.
+	 *
+	 * @method setValue
+	 */
+	setValue(value : string) {
+		if(value == null || value == "") {
+			Logger.error("A ParamValue needs a proper value.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._value = value;
+	}
 
     /**
      * Return the ParamValue's value.
@@ -62,20 +75,6 @@ class ParamValue extends ModelItf {
     value() {
         return this._value;
     }
-
-	/**
-	 * Set the ParamValue's value.
-	 *
-	 * @method setName
-	 */
-	setValue(value : string) {
-		if(value == null || value == "") {
-			Logger.error("A ParamValue needs to have a value.");
-			// TODO : Throw an Exception ?
-		}
-
-		this._value = value;
-	}
 
 	/**
 	 * Return the ParamValue's ParamType.
@@ -89,10 +88,27 @@ class ParamValue extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
 	loadAssociations() : void {
 		this.paramType();
 	}
 
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._paramType_loaded = false;
+	}
+
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{value: string}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"value": this.value()
@@ -101,8 +117,52 @@ class ParamValue extends ModelItf {
 		return data;
 	}
 
+	/**
+	 * Set the ParamType of the ParamValue.
+	 * As a ParamValue can only have one type, if the value is already set, this method throws an exception: you need first to unset the ParamType.
+	 * Moreover the given ParamType must be created in database.
+	 *
+	 * @param {ParamType} t The ParamType to associate with the ParamValue.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
 	setParamType(p : ParamType) : boolean {
-		return this.associateObject(ParamValue, ParamType, p.getId());
+		if (this.paramType() !== null) {
+			throw new Error("The paramType is already set for this ParamValue.");
+		}
+
+		if (p === null || p.getId() === undefined || p.getId() === null) {
+			throw new Error("The ParamType must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(ParamValue, ParamType, p.getId())) {
+			p.desynchronize();
+			this._paramType = p;
+			this._paramType_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current ParamType from the ParamValue.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A ParamType must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the ParamType is well unset and the association removed in database.
+	 */
+	unsetParamType() : boolean {
+		if (this.paramType() === null) {
+			throw new Error("No ParamType has been set for this ParamValue.");
+		}
+
+		if (this.deleteObjectAssociation(ParamValue, ParamType, this.paramType().getId())) {
+			this.paramType().desynchronize();
+			this._paramType = null;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
     /**

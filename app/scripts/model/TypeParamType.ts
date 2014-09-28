@@ -34,8 +34,17 @@ class TypeParamType extends ModelItf {
 	constructor(name : string, id : number = null) {
 		super(id);
 
-		if(this._name == null || this._name == "") {
-			Logger.error("A TypeParamType needs to have a name.");
+		this.setName(name);
+	}
+
+	/**
+	 * Set the Call's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("A Call needs to have a name.");
 			// TODO : Throw an Exception ?
 		}
 
@@ -51,6 +60,12 @@ class TypeParamType extends ModelItf {
 
 	//////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"name": this.name()

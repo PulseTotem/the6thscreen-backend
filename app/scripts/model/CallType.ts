@@ -99,21 +99,21 @@ class CallType extends ModelItf {
      */
     private _render_policy_loaded : boolean;
 
-    /**
-     * Calls property.
-     *
-     * @property _calls
-     * @type Array<Call>
-     */
-    private _calls : Array<Call>;
+	/**
+	 * Zone property
+	 *
+	 * @property _zone
+	 * @type Zone
+	 */
+	private _zone : Zone;
 
-    /**
-     * Lazy loading for Calls property.
-     *
-     * @property _calls_loaded
-     * @type boolean
-     */
-    private _calls_loaded : boolean;
+	/**
+	 * Lazy loading for Zone property
+	 *
+	 * @property _zone_loaded
+	 * @type boolean
+	 */
+	private _zone_loaded : boolean;
 
     /**
      * Constructor.
@@ -141,8 +141,8 @@ class CallType extends ModelItf {
         this._render_policy = null;
         this._render_policy_loaded = false;
 
-        this._calls = new Array<Call>();
-        this._calls_loaded = false;
+	    this._zone = null;
+	    this._zone_loaded = false;
     }
 
 	/**
@@ -229,15 +229,15 @@ class CallType extends ModelItf {
         return this._render_policy;
     }
 
-    /**
-     * Return the CallType's calls.
-     */
-    calls() {
-        if(! this._calls_loaded) {
-            this._calls_loaded = this.getAssociatedObjects(CallType, Call, this._calls);
-        }
-        return this._calls;
-    }
+	/**
+	 * Return the CallType's zone.
+	 */
+	zone() {
+		if(! this._zone) {
+			this._zone_loaded = this.getUniquelyAssociatedObject(CallType, Zone, this._zone);
+		}
+		return this._zone;
+	}
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -250,7 +250,18 @@ class CallType extends ModelItf {
 		this.renderer();
 		this.receivePolicy();
 		this.renderPolicy();
-		this.calls();
+		this.zone();
+	}
+
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._source_loaded = false;
+		this._receive_policy_loaded = false;
+		this._render_policy_loaded = false;
+		this._renderer_loaded = false;
+		this._zone_loaded = false;
 	}
 
 	/**
@@ -281,11 +292,12 @@ class CallType extends ModelItf {
 			throw new Error("The source is already set for this CallType.");
 		}
 
-		if (s === null || s.getId() === undefined) {
+		if (s === null || s.getId() === undefined || s.getId() === null) {
 			throw new Error("The source must be an existing object to be associated.");
 		}
 
 		if (this.associateObject(CallType, Source, s.getId())) {
+			s.desynchronize();
 			this._source = s;
 			this._source_loaded = true;
 			return true;
@@ -307,8 +319,8 @@ class CallType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(CallType, Source, this.source().getId())) {
+			this.source().desynchronize();
 			this._source = null;
-			this._source_loaded = false; // TODO: do we still consider the source is loaded or not?
 			return true;
 		} else {
 			return false;
@@ -328,11 +340,12 @@ class CallType extends ModelItf {
 			throw new Error("The renderer is already set for this CallType.");
 		}
 
-		if (r === null || r.getId() === undefined) {
+		if (r === null || r.getId() === undefined || r.getId() === null) {
 			throw new Error("The renderer must be an existing object to be associated.");
 		}
 
 		if (this.associateObject(CallType, Renderer, r.getId())) {
+			r.desynchronize();
 			this._renderer = r;
 			this._renderer_loaded = true;
 			return true;
@@ -354,8 +367,8 @@ class CallType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(CallType, Renderer, this.renderer().getId())) {
+			this.renderer().desynchronize();
 			this._renderer = null;
-			this._renderer_loaded = false; // TODO: do we still consider the renderer is loaded or not?
 			return true;
 		} else {
 			return false;
@@ -375,11 +388,12 @@ class CallType extends ModelItf {
 			throw new Error("The receivePolicy is already set for this CallType.");
 		}
 
-		if (rp === null || rp.getId() === undefined) {
+		if (rp === null || rp.getId() === undefined || rp.getId() === null) {
 			throw new Error("The receivePolicy must be an existing object to be associated.");
 		}
 
 		if (this.associateObject(CallType, ReceivePolicy, rp.getId())) {
+			rp.desynchronize();
 			this._receive_policy = rp;
 			this._receive_policy_loaded = true;
 			return true;
@@ -401,8 +415,8 @@ class CallType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(CallType, ReceivePolicy, this.receivePolicy().getId())) {
+			this.receivePolicy().desynchronize();
 			this._receive_policy = null;
-			this._receive_policy_loaded = false; // TODO: do we still consider the receivePolicy is loaded or not?
 			return true;
 		} else {
 			return false;
@@ -422,11 +436,12 @@ class CallType extends ModelItf {
 			throw new Error("The renderPolicy is already set for this CallType.");
 		}
 
-		if (rp === null || rp.getId() === undefined) {
+		if (rp === null || rp.getId() === undefined || rp.getId() === null) {
 			throw new Error("The renderPolicy must be an existing object to be associated.");
 		}
 
 		if (this.associateObject(CallType, RenderPolicy, rp.getId())) {
+			rp.desynchronize();
 			this._render_policy = rp;
 			this._render_policy_loaded = true;
 			return true;
@@ -448,25 +463,56 @@ class CallType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId())) {
+			this.renderPolicy().desynchronize();
 			this._render_policy = null;
-			this._render_policy_loaded = false; // TODO: do we still consider the RenderPolicy is loaded or not?
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	// TODO : Do we need this method?
-	addCall(c : Call) : boolean {
-		if (this.calls().indexOf(c) !== -1) {
-			throw new Error("You cannot add twice a call in a call.");  // TODO: cannot it be useful sometimes?
-		}
-		if (c === null || c.getId() === undefined) {
-			throw new Error("The call must be an existing object to be associated.");
+	/**
+	 * Set the Zone of the CallType.
+	 * As a CallType can only have one Zone, if the value is already set, this method throws an exception: you need first to unset the Zone.
+	 * Moreover the given Zone must be created in database.
+	 *
+	 * @param {Zone} z The Zone to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setZone(z : Zone) : boolean {
+		if (this.zone() !== null) {
+			throw new Error("The zone is already set for this CallType.");
 		}
 
-		if (this.associateObject(CallType, Call, c.getId())) {
-			this.calls().push(c);
+		if (z === null || z.getId() === undefined || z.getId() === null) {
+			throw new Error("The zone must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, Zone, z.getId())) {
+			z.desynchronize();
+			this._zone = z;
+			this._zone_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current Zone from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Zone must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the Zone is well unset and the association removed in database.
+	 */
+	unsetZone() : boolean {
+		if (this.zone() === null) {
+			throw new Error("No RenderPolicy has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, Zone, this.zone().getId())) {
+			this.zone().desynchronize();
+			this._zone = null;
 			return true;
 		} else {
 			return false;

@@ -53,9 +53,10 @@ class ModelItf {
         if(this.getId() != undefined) {
             return this.update();
         }
+	    var urlCreateObject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName();
 
-        var result = RestClient.postSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName(), data);
-
+        var result = RestClient.postSync(urlCreateObject, data);
+	    Logger.debug("Create a new object : "+urlCreateObject+" with data : "+JSON.stringify(data));
         if(result.success) {
             var response = result.data;
             if(response.status == "success") {
@@ -318,9 +319,16 @@ class ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	loadAssociations() : void {
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
+	loadAssociations() : void {}
 
-	}
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {}
 
     /**
      * Create model in database.

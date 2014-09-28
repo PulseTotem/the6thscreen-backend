@@ -67,38 +67,6 @@ class Zone extends ModelItf {
 	private _position_from_left : Percentage;
 
     /**
-     * CallTypes property.
-     *
-     * @property _call_types
-     * @type Array<CallType>
-     */
-    private _call_types : Array<CallType>;
-
-    /**
-     * Lazy loading for CallTypes property.
-     *
-     * @property _call_types_loaded
-     * @type boolean
-     */
-    private _call_types_loaded : boolean;
-
-    /**
-     * Calls property.
-     *
-     * @property _calls
-     * @type Array<Call>
-     */
-    private _calls : Array<Call>;
-
-    /**
-     * Lazy loading for Calls property.
-     *
-     * @property _calls_loaded
-     * @type boolean
-     */
-    private _calls_loaded : boolean;
-
-    /**
      * Constructor.
      *
      * @constructor
@@ -116,12 +84,6 @@ class Zone extends ModelItf {
 	    this.setHeight(height);
 	    this.setPositionFromTop(positionFromTop);
 	    this.setPositionFromLeft(positionFromLeft);
-
-        this._call_types = new Array<CallType>();
-        this._call_types_loaded = false;
-
-        this._calls = new Array<Call>();
-        this._calls_loaded = false;
     }
 
 	/**
@@ -244,33 +206,14 @@ class Zone extends ModelItf {
 		return this._position_from_left.value();
 	}
 
-    /**
-     * Return the Zone's CallTypes.
-     */
-    callTypes() {
-        if(! this._call_types_loaded) {
-            this._call_types_loaded = this.getAssociatedObjects(Zone, CallType, this._call_types);
-        }
-        return this._call_types;
-    }
-
-    /**
-     * Return the Zone's calls.
-     */
-    calls() {
-        if(! this._calls_loaded) {
-            this._calls_loaded = this.getAssociatedObjects(Zone, Call, this._calls);
-        }
-        return this._calls;
-    }
-
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	loadAssociations() : void {
-		this.calls();
-		this.callTypes();
-	}
-
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, description: string, width: number, height: number, positionFromTop: number, positionFromLeft: number}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"name": this.name(),
@@ -281,14 +224,6 @@ class Zone extends ModelItf {
 			"positionFromLeft": this.positionFromLeft()
 		};
 		return data;
-	}
-
-	addCallType(ct : CallType) : boolean {
-		return this.associateObject(Zone, CallType, ct.getId());
-	}
-
-	addCall(c : Call) : boolean {
-		return this.associateObject(Zone, Call, c.getId());
 	}
 
     /**

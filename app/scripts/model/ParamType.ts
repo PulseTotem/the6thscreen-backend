@@ -95,20 +95,46 @@ class ParamType extends ModelItf {
     constructor(name : string, description : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A ParamType needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
+        this.setName(name);
+	    this.setDescription(description);
 
-        this._name = name;
+	    this._constraint = null;
+	    this._constraint_loaded = false;
 
-        if(this._description == null || this._description == "") {
-            Logger.error("A ParamType needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
+	    this._default_value = null;
+	    this._default_value_loaded = false;
 
-        this._description = description;
+	    this._type = null;
+	    this._type_loaded = false;
     }
+
+	/**
+	 * Set the ParamType's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("A ParamType needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
+
+	/**
+	 * Set the ParamType's description.
+	 *
+	 * @method setDescription
+	 */
+	setDescription(description : string) {
+		if(description == null || description == "") {
+			Logger.error("A ParamType needs to have a description.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._description = description;
+	}
 
     /**
      * Return the ParamType's name.
@@ -127,9 +153,7 @@ class ParamType extends ModelItf {
     /**
      * Return the ParamType's type.
      */
-
-    //TODO : check if it works! We use specific foreign keys in relations between the tables. Maybe we need to improve the generic function.
-    type() {
+	type() {
 	    if(! this._type_loaded) {
 		    this._type_loaded = this.getUniquelyAssociatedObject(ParamType, TypeParamType, this._type);
 	    }
@@ -158,12 +182,32 @@ class ParamType extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
 	loadAssociations() : void {
 		this.type();
 		this.constraint();
 		this.defaultValue();
 	}
 
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._type_loaded = false;
+		this._constraint_loaded = false;
+		this._default_value_loaded = false;
+	}
+
+	/**
+	 * /**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, description: string}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"name" : this.name(),
@@ -173,16 +217,148 @@ class ParamType extends ModelItf {
 		return data;
 	}
 
+	/**
+	 * Set the Type of the ParamType.
+	 * As a ParamType can only have one Type, if the value is already set, this method throws an exception: you need first to unset the Type.
+	 * Moreover the given Type must be created in database.
+	 *
+	 * @param {TypeParamType} t The Type to associate with the ParamType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
 	setType(t : TypeParamType) : boolean {
-		return this.associateObject(ParamType, TypeParamType, t.getId());
+		if (this.type() !== null) {
+			throw new Error("The type is already set for this CallType.");
+		}
+
+		if (t === null || t.getId() === undefined || t.getId() === null) {
+			throw new Error("The source must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(ParamType, TypeParamType, t.getId())) {
+			t.desynchronize();
+			this._type = t;
+			this._type_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * Unset the current Type from the ParamType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Type must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the Type is well unset and the association removed in database.
+	 */
+	unsetType() : boolean {
+		if (this.type() === null) {
+			throw new Error("No Type has been set for this ParamType.");
+		}
+
+		if (this.deleteObjectAssociation(ParamType, TypeParamType, this.type().getId())) {
+			this.type().desynchronize();
+			this._type = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the Constraint of the ParamType.
+	 * As a ParamType can only have one Constraint, if the value is already set, this method throws an exception: you need first to unset the Constraint.
+	 * Moreover the given Constraint must be created in database.
+	 *
+	 * @param {ConstraintParamType} t The Constraint to associate with the ParamType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
 	setConstraint(c : ConstraintParamType) : boolean {
-		return this.associateObject(ParamType, ConstraintParamType, c.getId());
+		if (this.constraint() !== null) {
+			throw new Error("The constraint is already set for this CallType.");
+		}
+
+		if (c === null || c.getId() === undefined || c.getId() === null) {
+			throw new Error("The constraint must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(ParamType, ConstraintParamType, c.getId())) {
+			c.desynchronize();
+			this._constraint = c;
+			this._constraint_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * Unset the current Constraint from the ParamType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Constraint must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the Constraint is well unset and the association removed in database.
+	 */
+	unsetConstraint() : boolean {
+		if (this.constraint() === null) {
+			throw new Error("No constraint has been set for this ParamType.");
+		}
+
+		if (this.deleteObjectAssociation(ParamType, ConstraintParamType, this.constraint().getId())) {
+			this.constraint().desynchronize();
+			this._constraint = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the DefaultValue of the ParamType.
+	 * As a ParamType can only have one DefaultValue, if the value is already set, this method throws an exception: you need first to unset the DefaultValue.
+	 * Moreover the given DefaultValue must be created in database.
+	 *
+	 * @param {ParamValue} t The DefaultValue to associate with the ParamType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
 	setDefaultValue(d : ParamValue) : boolean {
-		return this.associateObject(ParamType, ParamValue, d.getId());
+		if (this.defaultValue() !== null) {
+			throw new Error("The defaultValue is already set for this CallType.");
+		}
+
+		if (d === null || d.getId() === undefined || d.getId() === null) {
+			throw new Error("The defaultValue must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(ParamType, ParamValue, d.getId())) {
+			d.desynchronize();
+			this._default_value = d;
+			this._default_value_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current DefaultValue from the ParamType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A DefaultValue must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the DefaultValue is well unset and the association removed in database.
+	 */
+	unsetDefaultValue() : boolean {
+		if (this.defaultValue() === null) {
+			throw new Error("No defaultValue has been set for this ParamType.");
+		}
+
+		if (this.deleteObjectAssociation(ParamType, ParamValue, this.defaultValue().getId())) {
+			this.defaultValue().desynchronize();
+			this._default_value = null;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
     /**
