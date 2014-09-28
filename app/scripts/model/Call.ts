@@ -183,7 +183,7 @@ class Call extends ModelItf {
 		if (this.paramValues().indexOf(p) !== -1) {
 			throw new Error("You cannot add twice a parameter in a call.");  // TODO: cannot it be useful sometimes?
 		}
-		if (p === null || p.getId() === undefined) {
+		if (p === null || p.getId() === undefined || p.getId() === null) {
 			throw new Error("The ParamValue must be an existing object to be associated.");
 		}
 
@@ -228,7 +228,7 @@ class Call extends ModelItf {
 		if (this.profil() !== null) {
 			throw new Error("The profil is already set for the call : "+this+".");
 		}
-		if (p === null || p.getId() === undefined) {
+		if (p === null || p.getId() === undefined || p.getId() === null) {
 			throw new Error("The Profil must be an existing object to be associated.");
 		}
 
@@ -255,7 +255,6 @@ class Call extends ModelItf {
 
 		if (this.deleteObjectAssociation(Call, Profil, this.profil().getId())) {
 			this._profil = null;
-			this._profil_loaded = false; // TODO: do we still consider the profil is loaded or not?
 			return true;
 		} else {
 			return false;
@@ -274,7 +273,7 @@ class Call extends ModelItf {
 		if (this.callType() !== null) {
 			throw new Error("The CallType is already set for the call : "+this+".");
 		}
-		if (ct === undefined || ct === null) {
+		if (ct === null || ct.getId() === undefined || ct.getId() === null) {
 			throw new Error("The CallType must be an existing object to be associated.");
 		}
 
@@ -301,7 +300,6 @@ class Call extends ModelItf {
 
 		if (this.deleteObjectAssociation(Call, CallType, this.callType().getId())) {
 			this._call_type = null;
-			this._call_type_loaded = false;
 			return true;
 		} else {
 			return false;

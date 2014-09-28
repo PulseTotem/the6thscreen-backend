@@ -100,22 +100,6 @@ class CallType extends ModelItf {
     private _render_policy_loaded : boolean;
 
     /**
-     * Calls property.
-     *
-     * @property _calls
-     * @type Array<Call>
-     */
-    private _calls : Array<Call>;
-
-    /**
-     * Lazy loading for Calls property.
-     *
-     * @property _calls_loaded
-     * @type boolean
-     */
-    private _calls_loaded : boolean;
-
-    /**
      * Constructor.
      *
      * @constructor
@@ -140,9 +124,6 @@ class CallType extends ModelItf {
 
         this._render_policy = null;
         this._render_policy_loaded = false;
-
-        this._calls = new Array<Call>();
-        this._calls_loaded = false;
     }
 
 	/**
@@ -227,16 +208,6 @@ class CallType extends ModelItf {
         return this._render_policy;
     }
 
-    /**
-     * Return the CallType's calls.
-     */
-    calls() {
-        if(! this._calls_loaded) {
-            this._calls_loaded = this.getAssociatedObjects(CallType, Call, this._calls);
-        }
-        return this._calls;
-    }
-
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
@@ -248,7 +219,6 @@ class CallType extends ModelItf {
 		this.renderer();
 		this.receivePolicy();
 		this.renderPolicy();
-		this.calls();
 	}
 
 	/**
@@ -279,7 +249,7 @@ class CallType extends ModelItf {
 			throw new Error("The source is already set for this CallType.");
 		}
 
-		if (s === null || s.getId() === undefined) {
+		if (s === null || s.getId() === undefined || s.getId() === null) {
 			throw new Error("The source must be an existing object to be associated.");
 		}
 
@@ -306,7 +276,6 @@ class CallType extends ModelItf {
 
 		if (this.deleteObjectAssociation(CallType, Source, this.source().getId())) {
 			this._source = null;
-			this._source_loaded = false; // TODO: do we still consider the source is loaded or not?
 			return true;
 		} else {
 			return false;
@@ -326,7 +295,7 @@ class CallType extends ModelItf {
 			throw new Error("The renderer is already set for this CallType.");
 		}
 
-		if (r === null || r.getId() === undefined) {
+		if (r === null || r.getId() === undefined || r.getId() === null) {
 			throw new Error("The renderer must be an existing object to be associated.");
 		}
 
@@ -353,7 +322,6 @@ class CallType extends ModelItf {
 
 		if (this.deleteObjectAssociation(CallType, Renderer, this.renderer().getId())) {
 			this._renderer = null;
-			this._renderer_loaded = false; // TODO: do we still consider the renderer is loaded or not?
 			return true;
 		} else {
 			return false;
@@ -373,7 +341,7 @@ class CallType extends ModelItf {
 			throw new Error("The receivePolicy is already set for this CallType.");
 		}
 
-		if (rp === null || rp.getId() === undefined) {
+		if (rp === null || rp.getId() === undefined || rp.getId() === null) {
 			throw new Error("The receivePolicy must be an existing object to be associated.");
 		}
 
@@ -400,7 +368,6 @@ class CallType extends ModelItf {
 
 		if (this.deleteObjectAssociation(CallType, ReceivePolicy, this.receivePolicy().getId())) {
 			this._receive_policy = null;
-			this._receive_policy_loaded = false; // TODO: do we still consider the receivePolicy is loaded or not?
 			return true;
 		} else {
 			return false;
@@ -420,7 +387,7 @@ class CallType extends ModelItf {
 			throw new Error("The renderPolicy is already set for this CallType.");
 		}
 
-		if (rp === null || rp.getId() === undefined) {
+		if (rp === null || rp.getId() === undefined || rp.getId() === null) {
 			throw new Error("The renderPolicy must be an existing object to be associated.");
 		}
 
@@ -447,24 +414,6 @@ class CallType extends ModelItf {
 
 		if (this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId())) {
 			this._render_policy = null;
-			this._render_policy_loaded = false; // TODO: do we still consider the RenderPolicy is loaded or not?
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	// TODO : Do we need this method?
-	addCall(c : Call) : boolean {
-		if (this.calls().indexOf(c) !== -1) {
-			throw new Error("You cannot add twice a call in a call.");  // TODO: cannot it be useful sometimes?
-		}
-		if (c === null || c.getId() === undefined) {
-			throw new Error("The call must be an existing object to be associated.");
-		}
-
-		if (this.associateObject(CallType, Call, c.getId())) {
-			this.calls().push(c);
 			return true;
 		} else {
 			return false;

@@ -154,7 +154,7 @@ class ConstraintParamType extends ModelItf {
 			throw new Error("The type is already set for this ConstraintParamType.");
 		}
 
-		if (t === null || t.getId() === undefined) {
+		if (t === null || t.getId() === undefined || t.getId() === null) {
 			throw new Error("The type must be an existing object to be associated.");
 		}
 
@@ -181,7 +181,6 @@ class ConstraintParamType extends ModelItf {
 
 		if (this.deleteObjectAssociation(ConstraintParamType, TypeParamType, this.type().getId())) {
 			this._type = null;
-			this._type_loading = false; // TODO: do we still consider the type is loaded or not?
 			return true;
 		} else {
 			return false;
