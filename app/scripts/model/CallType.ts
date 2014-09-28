@@ -99,21 +99,21 @@ class CallType extends ModelItf {
      */
     private _render_policy_loaded : boolean;
 
-    /**
-     * Calls property.
-     *
-     * @property _calls
-     * @type Array<Call>
-     */
-    private _calls : Array<Call>;
+	/**
+	 * Zone property
+	 *
+	 * @property _zone
+	 * @type Zone
+	 */
+	private _zone : Zone;
 
-    /**
-     * Lazy loading for Calls property.
-     *
-     * @property _calls_loaded
-     * @type boolean
-     */
-    private _calls_loaded : boolean;
+	/**
+	 * Lazy loading for Zone property
+	 *
+	 * @property _zone_loaded
+	 * @type boolean
+	 */
+	private _zone_loaded : boolean;
 
     /**
      * Constructor.
@@ -126,19 +126,8 @@ class CallType extends ModelItf {
     constructor(name : string, description : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A CallType needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
-
-        if(this._description == null || this._description == "") {
-            Logger.error("A CallType needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._description = description;
+		this.setName(name);
+		this.setDescription(description);
 
         this._source = null;
         this._source_loaded = false;
@@ -152,9 +141,37 @@ class CallType extends ModelItf {
         this._render_policy = null;
         this._render_policy_loaded = false;
 
-        this._calls = new Array<Call>();
-        this._calls_loaded = false;
+	    this._zone = null;
+	    this._zone_loaded = false;
     }
+
+	/**
+	 * Set the CallType's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("A CallType needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
+
+	/**
+	 * Set the CallType's description.
+	 *
+	 * @method setDescription
+	 */
+	setDescription(description : string) {
+		if(description == null || description == "") {
+			Logger.error("A CallType needs to have a description.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._description = description;
+	}
 
     /**
      * Return the CallType's name.
@@ -175,8 +192,7 @@ class CallType extends ModelItf {
      */
     source() {
         if(! this._source_loaded) {
-            // TODO : Retrieve from database.
-            this._source_loaded = true;
+            this._source_loaded = this.getUniquelyAssociatedObject(CallType, Source, this._source);
         }
         return this._source;
     }
@@ -186,8 +202,7 @@ class CallType extends ModelItf {
      */
     renderer() {
         if(! this._renderer_loaded) {
-            // TODO : Retrieve from database.
-            this._renderer_loaded = true;
+            this._renderer_loaded = this.getUniquelyAssociatedObject(CallType, Renderer, this._renderer);
         }
         return this._renderer;
     }
@@ -197,8 +212,7 @@ class CallType extends ModelItf {
      */
     receivePolicy() {
         if(! this._receive_policy_loaded) {
-            // TODO : Retrieve from database.
-            this._receive_policy_loaded = true;
+            this._receive_policy_loaded = this.getUniquelyAssociatedObject(CallType, ReceivePolicy, this._receive_policy);
         }
         return this._receive_policy;
     }
@@ -208,63 +222,388 @@ class CallType extends ModelItf {
      */
     renderPolicy() {
         if(! this._render_policy_loaded) {
-            // TODO : Retrieve from database.
-            this._render_policy_loaded = true;
+            this._render_policy_loaded = this.getUniquelyAssociatedObject(CallType, RenderPolicy, this._render_policy);
         }
         return this._render_policy;
     }
 
-    /**
-     * Return the CallType's calls.
-     */
-    calls() {
-        if(! this._calls_loaded) {
-            // TODO : Retrieve from database.
-            this._calls_loaded = true;
-        }
-        return this._calls;
-    }
+	/**
+	 * Return the CallType's zone.
+	 */
+	zone() {
+		if(! this._zone) {
+			this._zone_loaded = this.getUniquelyAssociatedObject(CallType, Zone, this._zone);
+		}
+		return this._zone;
+	}
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
+	loadAssociations() : void {
+		this.source();
+		this.renderer();
+		this.receivePolicy();
+		this.renderPolicy();
+		this.zone();
+	}
+
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._source_loaded = false;
+		this._receive_policy_loaded = false;
+		this._render_policy_loaded = false;
+		this._renderer_loaded = false;
+		this._zone_loaded = false;
+	}
+
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, description: string}}
+	 */
+	toJSONObject() : Object  {
+		var data = {
+			"name" : this.name(),
+			"description" : this.description()
+		};
+
+		return data;
+	}
+
+	/**
+	 * Set the Source of the CallType.
+	 * As a CallType can only have one Source, if the value is already set, this method throws an exception: you need first to unset the Source.
+	 * Moreover the given Source must be created in database.
+	 *
+	 * @param {Source} s The Source to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setSource(s : Source) : boolean {
+		if (this.source() !== null) {
+			throw new Error("The source is already set for this CallType.");
+		}
+
+		if (s === null || s.getId() === undefined || s.getId() === null) {
+			throw new Error("The source must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, Source, s.getId())) {
+			s.desynchronize();
+			this._source = s;
+			this._source_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current Source from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Source must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the source is well unset and the association removed in database.
+	 */
+	unsetSource() : boolean {
+		if (this.source() === null) {
+			throw new Error("No source has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, Source, this.source().getId())) {
+			this.source().desynchronize();
+			this._source = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the Renderer of the CallType.
+	 * As a CallType can only have one Renderer, if the value is already set, this method throws an exception: you need first to unset the Renderer.
+	 * Moreover the given Renderer must be created in database.
+	 *
+	 * @param {Renderer} r The Renderer to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setRenderer(r : Renderer) : boolean {
+		if (this.renderer() !== null) {
+			throw new Error("The renderer is already set for this CallType.");
+		}
+
+		if (r === null || r.getId() === undefined || r.getId() === null) {
+			throw new Error("The renderer must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, Renderer, r.getId())) {
+			r.desynchronize();
+			this._renderer = r;
+			this._renderer_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current Renderer from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Renderer must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the renderer is well unset and the association removed in database.
+	 */
+	unsetRenderer() : boolean {
+		if (this.renderer() === null) {
+			throw new Error("No renderer has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, Renderer, this.renderer().getId())) {
+			this.renderer().desynchronize();
+			this._renderer = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the ReceivePolicy of the CallType.
+	 * As a CallType can only have one ReceivePolicy, if the value is already set, this method throws an exception: you need first to unset the ReceivePolicy.
+	 * Moreover the given ReceivePolicy must be created in database.
+	 *
+	 * @param {ReceivePolicy} rp The ReceivePolicy to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setReceivePolicy(rp : ReceivePolicy) : boolean {
+		if (this.receivePolicy() !== null) {
+			throw new Error("The receivePolicy is already set for this CallType.");
+		}
+
+		if (rp === null || rp.getId() === undefined || rp.getId() === null) {
+			throw new Error("The receivePolicy must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, ReceivePolicy, rp.getId())) {
+			rp.desynchronize();
+			this._receive_policy = rp;
+			this._receive_policy_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current ReceivePolicy from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A ReceivePolicy must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the ReceivePolicy is well unset and the association removed in database.
+	 */
+	unsetReceivePolicy() : boolean {
+		if (this.receivePolicy() === null) {
+			throw new Error("No receivePolicy has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, ReceivePolicy, this.receivePolicy().getId())) {
+			this.receivePolicy().desynchronize();
+			this._receive_policy = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the RenderPolicy of the CallType.
+	 * As a CallType can only have one RenderPolicy, if the value is already set, this method throws an exception: you need first to unset the RenderPolicy.
+	 * Moreover the given RenderPolicy must be created in database.
+	 *
+	 * @param {RenderPolicy} rp The RenderPolicy to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setRenderPolicy(rp : RenderPolicy) : boolean {
+		if (this.renderPolicy() !== null) {
+			throw new Error("The renderPolicy is already set for this CallType.");
+		}
+
+		if (rp === null || rp.getId() === undefined || rp.getId() === null) {
+			throw new Error("The renderPolicy must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, RenderPolicy, rp.getId())) {
+			rp.desynchronize();
+			this._render_policy = rp;
+			this._render_policy_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current RenderPolicy from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A RenderPolicy must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the RenderPolicy is well unset and the association removed in database.
+	 */
+	unsetRenderPolicy() : boolean {
+		if (this.renderPolicy() === null) {
+			throw new Error("No RenderPolicy has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId())) {
+			this.renderPolicy().desynchronize();
+			this._render_policy = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the Zone of the CallType.
+	 * As a CallType can only have one Zone, if the value is already set, this method throws an exception: you need first to unset the Zone.
+	 * Moreover the given Zone must be created in database.
+	 *
+	 * @param {Zone} z The Zone to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setZone(z : Zone) : boolean {
+		if (this.zone() !== null) {
+			throw new Error("The zone is already set for this CallType.");
+		}
+
+		if (z === null || z.getId() === undefined || z.getId() === null) {
+			throw new Error("The zone must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, Zone, z.getId())) {
+			z.desynchronize();
+			this._zone = z;
+			this._zone_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current Zone from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Zone must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the Zone is well unset and the association removed in database.
+	 */
+	unsetZone() : boolean {
+		if (this.zone() === null) {
+			throw new Error("No RenderPolicy has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, Zone, this.zone().getId())) {
+			this.zone().desynchronize();
+			this._zone = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+        return this.createObject(CallType, this.toJSONObject());
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {CallType} The model instance.
      */
     static read(id : number) : CallType {
-        // TODO
-        return null;
+        return this.readObject(CallType, id);
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+        return this.updateObject(CallType, this.toJSONObject());
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        return this.deleteObject(CallType);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<CallType>} The model instances.
      */
     static all() : Array<CallType> {
-        // TODO
-        return null;
+        return this.allObjects(CallType);
+    }
+
+	/**
+	 * Return a CallType instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Call} The model instance.
+	 */
+	static parseJSON(jsonString : string) : CallType {
+		return CallType.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a CallType instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Call} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : CallType {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new CallType(jsonObject.name, jsonObject.description, jsonObject.id);
+		}
+	}
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "CallTypes";
     }
 }

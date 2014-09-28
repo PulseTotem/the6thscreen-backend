@@ -5,3 +5,4 @@ node_modules/*
 src/**~
 *~
 .idea
+app/scripts/core/connection_infos.json

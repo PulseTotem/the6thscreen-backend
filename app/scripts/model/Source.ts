@@ -119,40 +119,11 @@ class Source extends ModelItf {
     constructor(name : string, service : string, description : string, host : string, port : number, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A Source needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
-
-        if(this._service == null || this._service == "") {
-            Logger.error("A Source needs to have a service.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._service = service;
-
-        if(this._description == null || this._description == "") {
-            Logger.error("A Source needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._description = description;
-
-        if(this._host == null || this._host == "") {
-            Logger.error("A Source needs to have a host.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._host = host;
-
-        if(this._port == null || this._port < 0) {
-            Logger.error("A Source needs to have a correct port number.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._port = port;
+        this.setName(name);
+	    this.setService(service);
+	    this.setDescription(description);
+	    this.setHost(host);
+	    this.setPort(port);
 
         this._info_type = null;
         this._info_type_loaded = false;
@@ -164,7 +135,77 @@ class Source extends ModelItf {
         this._param_values_loaded = false;
     }
 
-    /**
+	/**
+	 * Set the Source's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("A Source needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
+
+	/**
+	 * Set the Source's service.
+	 *
+	 * @method setService
+	 */
+	setService(service : string) {
+		if(service == null || service == "") {
+			Logger.error("A Source needs to have a service.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._service = service;
+	}
+
+	/**
+	 * Set the Source's description.
+	 *
+	 * @method setDescription
+	 */
+	setDescription(description : string) {
+		if(description == null || description == "") {
+			Logger.error("A Source needs to have a description.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._description = description;
+	}
+
+	/**
+	 * Set the Source's host.
+	 *
+	 * @method setHost
+	 */
+	setHost(host : string) {
+		if(host == null || host == "") {
+			Logger.error("A Source needs to have a host.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._host = host;
+	}
+
+	/**
+	 * Set the Source's port.
+	 *
+	 * @method setPort
+	 */
+	setPort(port : number) {
+		if(port == null) {
+			Logger.error("A Source needs to have a port.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._port = port;
+	}
+
+	/**
      * Return the Source's name.
      */
     name() {
@@ -204,8 +245,7 @@ class Source extends ModelItf {
      */
     infoType() {
         if(! this._info_type_loaded) {
-            // TODO : Retrieve from database.
-            this._info_type_loaded = true;
+            this._info_type_loaded = this.getUniquelyAssociatedObject(Source, InfoType, this._info_type);
         }
         return this._info_type;
     }
@@ -215,8 +255,7 @@ class Source extends ModelItf {
      */
     paramTypes() {
         if(! this._param_types_loaded) {
-            // TODO : Retrieve from database.
-            this._param_types_loaded = true;
+            this._param_types_loaded = this.getAssociatedObjects(Source, ParamType, this._param_types);
         }
         return this._param_types;
     }
@@ -226,52 +265,282 @@ class Source extends ModelItf {
      */
     paramValues() {
         if(! this._param_values_loaded) {
-            // TODO : Retrieve from database.
-            this._param_values_loaded = true;
+            this._param_values_loaded = this.getAssociatedObjects(Source, ParamValue, this._param_values);
         }
         return this._param_values;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
+	loadAssociations() : void {
+		this.paramTypes();
+		this.paramValues();
+		this.infoType();
+	}
+
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._info_type_loaded = false;
+		this._param_types_loaded = false;
+		this._param_values_loaded = false;
+	}
+
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, service: string, description: string, host: string, port: number}}
+	 */
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name(),
+			"service": this.service(),
+			"description": this.description(),
+			"host": this.host(),
+			"port": this.port()
+		};
+
+		return data;
+	}
+
+	/**
+	 * Set the InfoType of the Source.
+	 * As a Source can only have one InfoType, if the value is already set, this method throws an exception: you need first to unset the InfoType.
+	 * Moreover the given type must be created in database.
+	 *
+	 * @param {InfoType} it The InfoType to associate with the Source.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setInfoType(it : InfoType) : boolean {
+		if (this.infoType() !== null) {
+			throw new Error("The InfoType is already set for this Source.");
+		}
+
+		if (it === null || it.getId() === undefined || it.getId() === null) {
+			throw new Error("The InfoType must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(Source, InfoType, it.getId())) {
+			it.desynchronize();
+			this._info_type = it;
+			this._info_type_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current InfoType from the Source.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * An InfoType must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the InfoType is well unset and the association removed in database.
+	 */
+	unsetInfoType() : boolean {
+		if (this.infoType() === null) {
+			throw new Error("No InfoType has been set for this Source.");
+		}
+
+		if (this.deleteObjectAssociation(Source, InfoType, this.infoType().getId())) {
+			this.infoType().desynchronize();
+			this._info_type = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Add a new ParamType to the Source and associate it in the database.
+	 * A ParamType can only be added once.
+	 *
+	 * @param {ParamType} pt The ParamType to add inside the Source. It cannot be a null value.
+	 * @returns {boolean} Returns true if the association is realized in database.
+	 */
+	addParamType(pt : ParamType) : boolean {
+		if (this.paramTypes().indexOf(pt) !== -1) {
+			throw new Error("You cannot add twice a ParamType for a SDI.");
+		}
+		if (pt === null || pt.getId() === undefined || pt.getId() === null) {
+			throw new Error("The ParamType must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(Source, ParamType, pt.getId())) {
+			pt.desynchronize();
+			this.paramTypes().push(pt);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Remove a ParamType from the Source: the association is removed both in the object and in database.
+	 * The ParamType can only be removed if it exists first in the list of associated ParamTypes, else an exception is thrown.
+	 *
+	 * @param {ParamType} pt The ParamType to remove from that Source
+	 * @returns {boolean} Returns true if the association is deleted in database.
+	 */
+	removeParamType(pt : ParamType) : boolean {
+		var indexValue = this.paramTypes().indexOf(pt);
+		if (indexValue === -1) {
+			throw new Error("The ParamType you try to remove has not been added to the current Source");
+		}
+
+		if (this.deleteObjectAssociation(Source, ParamType, pt.getId())) {
+			pt.desynchronize();
+			this.paramTypes().splice(indexValue, 1);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Add a new ParamValue to the Source and associate it in the database.
+	 * A ParamValue can only be added once.
+	 *
+	 * @param {ParamValue} pv The ParamValue to add inside the Source. It cannot be a null value.
+	 * @returns {boolean} Returns true if the association is realized in database.
+	 */
+	addParamValue(pv : ParamValue) : boolean {
+		if (this.paramValues().indexOf(pv) !== -1) {
+			throw new Error("You cannot add twice a ParamValue for a SDI.");
+		}
+		if (pv === null || pv.getId() === undefined || pv.getId() === null) {
+			throw new Error("The ParamValue must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(Source, ParamValue, pv.getId())) {
+			pv.desynchronize();
+			this.paramValues().push(pv);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Remove a ParamValue from the Source: the association is removed both in the object and in database.
+	 * The ParamValue can only be removed if it exists first in the list of associated ParamValues, else an exception is thrown.
+	 *
+	 * @param {ParamValue} pv The ParamValue to remove from that Source
+	 * @returns {boolean} Returns true if the association is deleted in database.
+	 */
+	removeParamValue(pv : ParamValue) : boolean {
+		var indexValue = this.paramValues().indexOf(pv);
+		if (indexValue === -1) {
+			throw new Error("The ParamValue you try to remove has not been added to the current Source");
+		}
+
+		if (this.deleteObjectAssociation(Source, ParamValue, pv.getId())) {
+			pv.desynchronize();
+			this.paramValues().splice(indexValue, 1);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+        return this.createObject(Source, this.toJSONObject());
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {Source} The model instance.
      */
     static read(id : number) : Source {
-        // TODO
-        return null;
+        return this.readObject(Source, id);
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+        return this.updateObject(Source, this.toJSONObject());
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        return this.deleteObject(Source);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<Source>} The model instances.
      */
     static all() : Array<Source> {
-        // TODO
-        return null;
+        return this.allObjects(Source);
+    }
+
+	/**
+	 * Return a Source instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Source} The model instance.
+	 */
+	static parseJSON(jsonString : string) : Source {
+		return Source.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a Source instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Source} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : Source {
+		if(typeof(jsonObject.name) == "undefined" ||
+			typeof(jsonObject.service) == "undefined" ||
+			typeof(jsonObject.description) == "undefined" ||
+			typeof(jsonObject.host) == "undefined" ||
+			typeof(jsonObject.port) == "undefined" ||
+			typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new Source(jsonObject.name, jsonObject.service, jsonObject.description, jsonObject.host, jsonObject.port, jsonObject.id);
+		}
+	}
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "Sources";
     }
 }

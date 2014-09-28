@@ -22,6 +22,22 @@ class ParamValue extends ModelItf {
      */
     private _value : string;
 
+	/**
+	 * ParamType property.
+	 *
+	 * @property _paramType
+	 * @type ParamType
+	 */
+	private _paramType : ParamType;
+
+	/**
+	 * Lazy loading for ParamType property.
+	 *
+	 * @property _paramType_loaded
+	 * @type boolean
+	 */
+	private _paramType_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -32,13 +48,26 @@ class ParamValue extends ModelItf {
     constructor(value : string, id : number = null) {
         super(id);
 
-        if(this._value == null || this._value == "") {
-            Logger.error("A ParamValue needs to have a value.");
-            // TODO : Throw an Exception ?
-        }
+        this.setValue(value);
 
-        this._value = value;
+	    this._paramType = null;
+	    this._paramType_loaded = false;
     }
+
+	// TODO : Check the value type here?
+	/**
+	 * Set the ParamValue's value.
+	 *
+	 * @method setValue
+	 */
+	setValue(value : string) {
+		if(value == null || value == "") {
+			Logger.error("A ParamValue needs a proper value.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._value = value;
+	}
 
     /**
      * Return the ParamValue's value.
@@ -47,46 +76,182 @@ class ParamValue extends ModelItf {
         return this._value;
     }
 
+	/**
+	 * Return the ParamValue's ParamType.
+	 */
+	paramType() {
+		if(! this._paramType_loaded) {
+			this._paramType_loaded = this.getUniquelyAssociatedObject(ParamValue, ParamType, this._paramType);
+		}
+		return this._paramType;
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
+	loadAssociations() : void {
+		this.paramType();
+	}
+
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._paramType_loaded = false;
+	}
+
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{value: string}}
+	 */
+	toJSONObject() : Object {
+		var data = {
+			"value": this.value()
+		};
+
+		return data;
+	}
+
+	/**
+	 * Set the ParamType of the ParamValue.
+	 * As a ParamValue can only have one type, if the value is already set, this method throws an exception: you need first to unset the ParamType.
+	 * Moreover the given ParamType must be created in database.
+	 *
+	 * @param {ParamType} t The ParamType to associate with the ParamValue.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setParamType(p : ParamType) : boolean {
+		if (this.paramType() !== null) {
+			throw new Error("The paramType is already set for this ParamValue.");
+		}
+
+		if (p === null || p.getId() === undefined || p.getId() === null) {
+			throw new Error("The ParamType must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(ParamValue, ParamType, p.getId())) {
+			p.desynchronize();
+			this._paramType = p;
+			this._paramType_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current ParamType from the ParamValue.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A ParamType must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the ParamType is well unset and the association removed in database.
+	 */
+	unsetParamType() : boolean {
+		if (this.paramType() === null) {
+			throw new Error("No ParamType has been set for this ParamValue.");
+		}
+
+		if (this.deleteObjectAssociation(ParamValue, ParamType, this.paramType().getId())) {
+			this.paramType().desynchronize();
+			this._paramType = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
 
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+        return this.createObject(ParamValue, this.toJSONObject());
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {ParamValue} The model instance.
      */
     static read(id : number) : ParamValue {
-        // TODO
-        return null;
+        return this.readObject(ParamValue, id);
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+        return this.updateObject(ParamValue, this.toJSONObject());
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        return this.deleteObject(ParamValue);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<ParamValue>} The model instances.
      */
     static all() : Array<ParamValue> {
-        // TODO
-        return null;
+        return this.allObjects(ParamValue);
+    }
+
+	/**
+	 * Return a ParamValue instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {ParamValue} The model instance.
+	 */
+	static parseJSON(jsonString : string) : ParamValue {
+		return ParamValue.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a ParamValue instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {ParamValue} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : ParamValue {
+		if(typeof(jsonObject.value) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new ParamValue(jsonObject.value, jsonObject.id);
+		}
+	}
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "ParamValues";
     }
 }

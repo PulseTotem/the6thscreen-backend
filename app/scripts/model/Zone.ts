@@ -6,6 +6,8 @@
 /// <reference path="./CallType.ts" />
 /// <reference path="./Call.ts" />
 
+
+/// <reference path="../customizedTypes/Percentage.ts" />
 /// <reference path="../core/Logger.ts" />
 
 /**
@@ -33,44 +35,36 @@ class Zone extends ModelItf {
     private _description : string;
 
     /**
-     * Position property.
+     * Width property.
      *
-     * @property _position
-     * @type string
+     * @property _width
+     * @type Percentage
      */
-    private _position : string;
+    private _width : Percentage;
 
-    /**
-     * CallTypes property.
-     *
-     * @property _call_types
-     * @type Array<CallType>
-     */
-    private _call_types : Array<CallType>;
+	/**
+	 * Height property.
+	 *
+	 * @property _height
+	 * @type Percentage
+	 */
+	private _height : Percentage;
 
-    /**
-     * Lazy loading for CallTypes property.
-     *
-     * @property _call_types_loaded
-     * @type boolean
-     */
-    private _call_types_loaded : boolean;
+	/**
+	 * PositionFromTop property.
+	 *
+	 * @property _position_from_top
+	 * @type Percentage
+	 */
+	private _position_from_top : Percentage;
 
-    /**
-     * Calls property.
-     *
-     * @property _calls
-     * @type Array<Call>
-     */
-    private _calls : Array<Call>;
-
-    /**
-     * Lazy loading for Calls property.
-     *
-     * @property _calls_loaded
-     * @type boolean
-     */
-    private _calls_loaded : boolean;
+	/**
+	 * PositionFromLeft property.
+	 *
+	 * @property _position_from_left
+	 * @type Percentage
+	 */
+	private _position_from_left : Percentage;
 
     /**
      * Constructor.
@@ -81,36 +75,94 @@ class Zone extends ModelItf {
      * @param {string} position - The Zone's position.
      * @param {number} id - The Zone's ID.
      */
-    constructor(name : string, description : string, position : string, id : number = null) {
+    constructor(name : string, description : string, width : number, height : number, positionFromTop : number, positionFromLeft : number, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A Zone needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
-
-        if(this._description == null || this._description == "") {
-            Logger.error("A Zone needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._description = description;
-
-        if(this._position == null || this._position == "") {
-            Logger.error("A Zone needs to have a position.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._position = position;
-
-        this._call_types = new Array<CallType>();
-        this._call_types_loaded = false;
-
-        this._calls = new Array<Call>();
-        this._calls_loaded = false;
+        this.setName(name);
+	    this.setDescription(description);
+	    this.setWidth(width);
+	    this.setHeight(height);
+	    this.setPositionFromTop(positionFromTop);
+	    this.setPositionFromLeft(positionFromLeft);
     }
+
+	/**
+	 * Set the Zone's name
+	 * @param name A new name
+	 */
+	setName(name : string) : void {
+		if(name == null || name == "") {
+			Logger.error("A Zone needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
+
+	/**
+	 * Set the Zone's description
+	 * @param description a new description
+	 */
+	setDescription(description : string) : void {
+		if(description == null || description == "") {
+			Logger.error("A Zone needs to have a description.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._description = description;
+	}
+
+	/**
+	 * Set the Zone's width
+	 * @param width a new width
+	 */
+	setWidth(width : number) : void {
+		if(width == null) {
+			Logger.error("A Zone needs to have a width.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._width = new Percentage(width);
+	}
+
+	/**
+	 * Set the Zone's height
+	 * @param height a new height
+	 */
+	setHeight(height : number) : void {
+		if(height == null) {
+			Logger.error("A Zone needs to have a height.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._height = new Percentage(height);
+	}
+
+	/**
+	 * Set the Zone's positionFromTop
+	 * @param positionFromTop a new positionFromTop
+	 */
+	setPositionFromTop(positionFromTop : number) : void {
+		if(positionFromTop == null) {
+			Logger.error("A Zone needs to have a positionFromTop.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._position_from_top = new Percentage(positionFromTop);
+	}
+
+	/**
+	 * Set the Zone's positionFromLeft
+	 * @param positionFromTop a new positionFromTop
+	 */
+	setPositionFromLeft(positionFromLeft : number) : void {
+		if(positionFromLeft == null) {
+			Logger.error("A Zone needs to have a positionFromLeft.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._position_from_left = new Percentage(positionFromLeft);
+	}
 
     /**
      * Return the Zone's name.
@@ -126,75 +178,147 @@ class Zone extends ModelItf {
         return this._description;
     }
 
-    /**
-     * Return the Zone's position.
-     */
-    position() {
-        return this._position;
+	/**
+	 * Return the Zone's width
+	 */
+    width() {
+		return this._width.value();
     }
 
-    /**
-     * Return the Zone's CallTypes.
-     */
-    callTypes() {
-        if(! this._call_types_loaded) {
-            // TODO : Retrieve from database.
-            this._call_types_loaded = true;
-        }
-        return this._call_types;
-    }
+	/**
+	 * Return the Zone's height
+	 */
+	height() {
+		return this._height.value();
+	}
 
-    /**
-     * Return the Zone's calls.
-     */
-    calls() {
-        if(! this._calls_loaded) {
-            // TODO : Retrieve from database.
-            this._calls_loaded = true;
-        }
-        return this._calls;
-    }
+	/**
+	 * Return the Zone's positionFromTop
+	 */
+	positionFromTop() {
+		return this._position_from_top.value();
+	}
+
+	/**
+	 * Return the Zone's positionFromLeft
+	 */
+	positionFromLeft() {
+		return this._position_from_left.value();
+	}
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, description: string, width: number, height: number, positionFromTop: number, positionFromLeft: number}}
+	 */
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name(),
+			"description": this.description(),
+			"width": this.width(),
+			"height": this.height(),
+			"positionFromTop": this.positionFromTop(),
+			"positionFromLeft": this.positionFromLeft()
+		};
+		return data;
+	}
+
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+        return this.createObject(Zone, this.toJSONObject());
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {Zone} The model instance.
      */
     static read(id : number) : Zone {
-        // TODO
-        return null;
+        return this.readObject(Zone, id);
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+        return this.updateObject(Zone, this.toJSONObject());
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        return this.deleteObject(Zone);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<Zone>} The model instances.
      */
     static all() : Array<Zone> {
-        // TODO
-        return null;
+        return this.allObjects(Zone);
+    }
+
+	/**
+	 * Return a Zone instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Zone} The model instance.
+	 */
+	static parseJSON(jsonString : string) : Zone {
+		return Zone.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a Zone instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Zone} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : Zone {
+		if(typeof(jsonObject.name) == "undefined" ||
+			typeof(jsonObject.description) == "undefined" ||
+			typeof(jsonObject.width) == "undefined" ||
+			typeof(jsonObject.height) == "undefined" ||
+			typeof(jsonObject.positionFromTop) == "undefined" ||
+			typeof(jsonObject.positionFromLeft) == "undefined" ||
+			typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id);
+		}
+	}
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "Zones";
     }
 }

@@ -67,17 +67,28 @@ class User extends ModelItf {
     constructor(username : string, id : number = null) {
         super(id);
 
-        if(this._username == null || this._username == "") {
-            Logger.error("A User needs to have a username.");
-            // TODO : Throw an Exception ?
-        }
+        this.setUsername(username);
 
-        this._username = username;
         this._roles = new Array<Role>();
         this._roles_loaded = false;
+
         this._sdis = new Array<SDI>();
         this._sdis_loaded = false;
     }
+
+	/**
+	 * Set the User's username.
+	 *
+	 * @method setUsername
+	 */
+	setUsername(username : string) {
+		if(username == null || username == "") {
+			Logger.error("A User needs to have a username.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._username = username;
+	}
 
     /**
      * Return the User's username.
@@ -91,8 +102,7 @@ class User extends ModelItf {
      */
     roles() {
         if(! this._roles_loaded) {
-            // TODO : Retrieve from database.
-            this._roles_loaded = true;
+            this._roles_loaded = this.getAssociatedObjects(User, Role, this._roles);
         }
         return this._roles;
     }
@@ -102,52 +112,220 @@ class User extends ModelItf {
      */
     sdis() {
         if(! this._sdis_loaded) {
-            // TODO : Retrieve from database.
-            this._sdis_loaded  =true;
+            this._sdis_loaded  = this.getAssociatedObjects(User, SDI, this._sdis);
         }
         return this._sdis;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-    /**
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
+	loadAssociations() : void {
+		this.roles();
+		this.sdis();
+	}
+
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._roles_loaded = false;
+		this._sdis_loaded = false;
+	}
+
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{username: string}}
+	 */
+	toJSONObject() : Object {
+		var data = { "username": this.username() };
+		return data;
+	}
+
+	/**
+	 * Add a new SDI to the User and associate it in the database.
+	 * A SDI can only be added once.
+	 *
+	 * @param {SDI} s The SDI to link with the User. It cannot be a null value.
+	 * @returns {boolean} Returns true if the association is realized in database.
+	 */
+	addSDI(s : SDI) : boolean {
+		if (this.sdis().indexOf(s) !== -1) {
+			throw new Error("You cannot add twice a SDI for a User.");
+		}
+		if (s === null || s.getId() === undefined || s.getId() === null) {
+			throw new Error("The SDI must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(User, SDI, s.getId())) {
+			s.desynchronize();
+			this.sdis().push(s);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Remove a SDI from the User: the association is removed both in the object and in database.
+	 * The SDI can only be removed if it exists first in the list of associated SDIs, else an exception is thrown.
+	 *
+	 * @param {SDI} s The SDI to remove from that User
+	 * @returns {boolean} Returns true if the association is deleted in database.
+	 */
+	removeSDI(s : SDI) : boolean {
+		var indexValue = this.sdis().indexOf(s);
+		if (indexValue === -1) {
+			throw new Error("The SDI you try to remove has not been added to the current User");
+		}
+
+		if (this.deleteObjectAssociation(User, SDI, s.getId())) {
+			s.desynchronize();
+			this.sdis().splice(indexValue, 1);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Add a new Role to the User and associate it in the database.
+	 * A Role can only be added once.
+	 *
+	 * @param {Role} r The Role to link with the User. It cannot be a null value.
+	 * @returns {boolean} Returns true if the association is realized in database.
+	 */
+	addRole(r : Role) : boolean {
+		if (this.roles().indexOf(r) !== -1) {
+			throw new Error("You cannot add twice a Role for a User.");
+		}
+		if (r === null || r.getId() === undefined || r.getId() === null) {
+			throw new Error("The Role must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(User, Role, r.getId())) {
+			r.desynchronize();
+			this.roles().push(r);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Remove a Role from the User: the association is removed both in the object and in database.
+	 * The Role can only be removed if it exists first in the list of associated Roles, else an exception is thrown.
+	 *
+	 * @param {Role} r The Role to remove from that User
+	 * @returns {boolean} Returns true if the association is deleted in database.
+	 */
+	removeRole(r : Role) : boolean {
+		var indexValue = this.roles().indexOf(r);
+		if (indexValue === -1) {
+			throw new Error("The Role you try to remove has not been added to the current User");
+		}
+
+		if (this.deleteObjectAssociation(User, Role, r.getId())) {
+			r.desynchronize();
+			this.roles().splice(indexValue, 1);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+        return this.createObject(User, this.toJSONObject());
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {User} The model instance.
      */
     static read(id : number) : User {
-        // TODO
-        return null;
+        return this.readObject(User, id);
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+       return this.updateObject(User, this.toJSONObject());
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        return this.deleteObject(User);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<User>} The model instances.
      */
     static all() : Array<User> {
-        // TODO
-        return null;
+        return this.allObjects(User);
+    }
+
+	/**
+	 * Return a User instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {SDI} The model instance.
+	 */
+	static parseJSON(jsonString : string) : User {
+		return User.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a User instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {SDI} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : User {
+		if(typeof(jsonObject.username) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new User(jsonObject.username, jsonObject.id);
+		}
+	}
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "Users";
     }
 }
