@@ -1,5 +1,6 @@
 /**
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@the6thscreen.fr>
  */
 
 /// <reference path="./ModelItf.ts" />
@@ -150,29 +151,164 @@ class Call extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
 	loadAssociations() : void {
 		this.paramValues();
 		this.profil();
 		this.callType();
 	}
 
-	toJSONObject() : Object {
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string}}
+	 */
+	private toJSONObject() : Object {
 		var data = { "name": this.name() };
 		return data;
 	}
 
-	// TODO : Can we associate an object twice?
+	/**
+	 * Add a new ParamValue to the Call and associate it in the database.
+	 * A ParamValue can only be added once.
+	 *
+	 * @param {ParamValue} p The ParamValue to add inside the call. It cannot be a null value.
+	 * @returns {boolean} Returns true if the association is realized in database.
+	 */
 	addParamValue(p : ParamValue) : boolean {
-		return this.associateObject(Call, ParamValue, p.getId());
+		if (this.paramValues().indexOf(p) !== -1) {
+			throw new Error("You cannot add twice a parameter in a call.");  // TODO: cannot it be useful sometimes?
+		}
+		if (p === null || p.getId() === undefined) {
+			throw new Error("You cannot add a null or undefined parameter in a call.")
+		}
+
+		if (this.associateObject(Call, ParamValue, p.getId())) {
+			this.paramValues().push(p);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * Remove a ParamValue from the Call: the association is removed both in the object and in database.
+	 * The ParamValue can only be removed if it exists first in the list of associated ParamValue, else an exception is thrown.
+	 *
+	 * @param {ParamValue} p The ParamValue to remove from that Call
+	 * @returns {boolean} Returns true if the association is deleted in database.
+	 */
+	removeParamValue(p : ParamValue) : boolean {
+		var indexValue = this.paramValues().indexOf(p);
+		if (indexValue === -1) {
+			throw new Error("The ParamValue you try to remove has not been added to the current Call");
+		}
+
+		if (this.deleteObjectAssociation(Call, ParamValue, p.getId())) {
+			this.paramValues().splice(indexValue, 1);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the Profil of the Call.
+	 * As a Call can only have one Profil, if the value is already set, this method throws an exception: you need first to unset the profil.
+	 * Moreover the given Profil must be created in database.
+	 *
+	 * @param {Profil} p The Profil to associate with the Call.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
 	setProfil(p : Profil) : boolean {
-		return this.associateObject(Call, Profil, p.getId());
+		if (this.profil() !== null) {
+			throw new Error("The profil is already set for the call : "+this+".");
+		}
+		if (p === null || p.getId() === undefined) {
+			throw new Error("You cannot set a profil which is null or undefined for a call.");
+		}
+
+		if (this.associateObject(Call, Profil, p.getId())) {
+			this._profil = p;
+			this._profil_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	setCallType(ct : CallType) : boolean {
-		return this.associateObject(Call, CallType, ct.getId());
+	/**
+	 * Unset the current Profil from the Call.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Profil must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the profil is well unset and the association removed in database.
+	 */
+	unsetProfil() : boolean {
+		if (this.profil() === null) {
+			throw new Error("No profil has been set for this call.");
+		}
+
+		if (this.deleteObjectAssociation(Call, Profil, this.profil().getId())) {
+			this._profil = null;
+			this._profil_loaded = false; // TODO: do we still consider the profil is loaded or not?
+			return true;
+		} else {
+			return false;
+		}
 	}
+
+	/**
+	 * Set the CallType of the Call.
+	 * As a Call can only have one CallType, if the value is already set, this method throws an exception: you need first to unset the CallType.
+	 * Moreover the given CallType must be created in database.
+	 *
+	 * @param {CallType} ct The CallType to associate with the Call.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setCallType(ct : CallType) : boolean {
+		if (this.callType() !== null) {
+			throw new Error("The CallType is already set for the call : "+this+".");
+		}
+		if (ct === undefined || ct === null) {
+			throw new Error("You cannot set a CallType which is null or undefined for a call.");
+		}
+
+		if (this.associateObject(Call, CallType, ct.getId())) {
+			this._call_type = ct;
+			this._call_type_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current CallType from the Call.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A CallType must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the CallType is well unset and the association removed in database.
+	 */
+	unsetCallType() : boolean {
+		if (this.callType() === null) {
+			throw new Error("No CallType has been set for this call.");
+		}
+
+		if (this.deleteObjectAssociation(Call, CallType, this.callType().getId())) {
+			this._call_type = null;
+			this._call_type_loaded = false;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
 
     /**
      * Create model in database.

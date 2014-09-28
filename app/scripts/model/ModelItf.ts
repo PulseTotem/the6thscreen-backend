@@ -167,7 +167,6 @@ class ModelItf {
 	 *
 	 * @method associateObject
 	 * @param {ModelItf Class} modelClass1 - the first model class
-	 * @param {number} id1 - the ID of the first object
 	 * @param {ModelItf Class} modelClass2 - the second model class
 	 * @param {number} id2 - the ID of the second object
 	 * @return {boolean} Association status
@@ -179,6 +178,34 @@ class ModelItf {
 		var associationURL = DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + this.getId().toString() + "/" + modelClass2.getTableName() + "/" + id2.toString();
 		Logger.debug("ModelItf Associate Object with the following URL: "+associationURL);
 		var result = RestClient.putSync(associationURL, {});
+
+		if(result.success) {
+			var response = result.data;
+			if(response.status == "success") {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Remove an association between two objects in database.
+	 *
+	 * @param {ModelItf Class} modelClass1 the model class of the first object
+	 * @param {ModelItf Class} modelClass2 the model class of the second object
+	 * @param {number} id2 the ID of the second object
+	 * @returns {boolean} returns true if the deletion works well.
+	 */
+	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number) : boolean {
+		if (this.getId() == undefined || id2 == undefined) {
+			return false;
+		}
+		var deleteAssoURL = DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + this.getId().toString() + "/" + modelClass2.getTableName() + "/" + id2.toString();
+		Logger.debug("ModelItf Delete Association between Objects with the following URL: "+deleteAssoURL);
+		var result = RestClient.deleteSync(deleteAssoURL);
 
 		if(result.success) {
 			var response = result.data;
