@@ -58,23 +58,40 @@ class Renderer extends ModelItf {
     constructor(name : string, description : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A Renderer needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
-
-        if(this._description == null || this._description == "") {
-            Logger.error("A Renderer needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._description = description;
+        this.setName(name);
+	    this.setDescription(description);
 
         this._info_type = null;
         this._info_type_loaded = false;
     }
+
+	/**
+	 * Set the Renderer's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("A Renderer needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
+
+	/**
+	 * Set the Renderer's description.
+	 *
+	 * @method setDescription
+	 */
+	setDescription(description : string) {
+		if(description == null || description == "") {
+			Logger.error("A Renderer needs to have a description.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._description = description;
+	}
 
     /**
      * Return the Renderer's name.
@@ -102,10 +119,20 @@ class Renderer extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
 	loadAssociations() : void {
 		this.infoType();
 	}
 
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, description: string}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"name" : this.name(),
@@ -115,8 +142,50 @@ class Renderer extends ModelItf {
 		return data;
 	}
 
-	setInfoType(i : InfoType) : boolean {
-		return this.associateObject(Renderer, InfoType, i.getId());
+	/**
+	 * Set the InfoType of the Renderer.
+	 * As a Renderer can only have one InfoType, if the value is already set, this method throws an exception: you need first to unset the InfoType.
+	 * Moreover the given type must be created in database.
+	 *
+	 * @param {InfoType} it The InfoType to associate with the Renderer.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setInfoType(it : InfoType) : boolean {
+		if (this.infoType() !== null) {
+			throw new Error("The InfoType is already set for this Renderer.");
+		}
+
+		if (it === null || it.getId() === undefined || it.getId() === null) {
+			throw new Error("The InfoType must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(Renderer, InfoType, it.getId())) {
+			this._info_type = it;
+			this._info_type_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current InfoType from the Renderer.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * An InfoType must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the InfoType is well unset and the association removed in database.
+	 */
+	unsetInfoType() : boolean {
+		if (this.infoType() === null) {
+			throw new Error("No InfoType has been set for this Renderer.");
+		}
+
+		if (this.deleteObjectAssociation(Renderer, InfoType, this.infoType().getId())) {
+			this._info_type = null;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
     /**
