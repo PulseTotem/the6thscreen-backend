@@ -184,7 +184,7 @@ class Call extends ModelItf {
 			throw new Error("You cannot add twice a parameter in a call.");  // TODO: cannot it be useful sometimes?
 		}
 		if (p === null || p.getId() === undefined) {
-			throw new Error("You cannot add a null or undefined parameter in a call.")
+			throw new Error("The ParamValue must be an existing object to be associated.");
 		}
 
 		if (this.associateObject(Call, ParamValue, p.getId())) {
@@ -229,7 +229,7 @@ class Call extends ModelItf {
 			throw new Error("The profil is already set for the call : "+this+".");
 		}
 		if (p === null || p.getId() === undefined) {
-			throw new Error("You cannot set a profil which is null or undefined for a call.");
+			throw new Error("The Profil must be an existing object to be associated.");
 		}
 
 		if (this.associateObject(Call, Profil, p.getId())) {
@@ -275,7 +275,7 @@ class Call extends ModelItf {
 			throw new Error("The CallType is already set for the call : "+this+".");
 		}
 		if (ct === undefined || ct === null) {
-			throw new Error("You cannot set a CallType which is null or undefined for a call.");
+			throw new Error("The CallType must be an existing object to be associated.");
 		}
 
 		if (this.associateObject(Call, CallType, ct.getId())) {

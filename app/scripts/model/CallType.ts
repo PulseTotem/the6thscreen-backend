@@ -126,19 +126,8 @@ class CallType extends ModelItf {
     constructor(name : string, description : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A CallType needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
-
-        if(this._description == null || this._description == "") {
-            Logger.error("A CallType needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._description = description;
+		this.setName(name);
+		this.setDescription(description);
 
         this._source = null;
         this._source_loaded = false;
@@ -155,6 +144,34 @@ class CallType extends ModelItf {
         this._calls = new Array<Call>();
         this._calls_loaded = false;
     }
+
+	/**
+	 * Set the CallType's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("A Call needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
+
+	/**
+	 * Set the CallType's description.
+	 *
+	 * @method setDescription
+	 */
+	setDescription(description : string) {
+		if(description == null || description == "") {
+			Logger.error("A Call needs to have a description.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._description = description;
+	}
 
     /**
      * Return the CallType's name.
@@ -222,6 +239,10 @@ class CallType extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
 	loadAssociations() : void {
 		this.source();
 		this.renderer();
@@ -230,6 +251,12 @@ class CallType extends ModelItf {
 		this.calls();
 	}
 
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, description: string}}
+	 */
 	toJSONObject() : Object  {
 		var data = {
 			"name" : this.name(),
@@ -239,8 +266,23 @@ class CallType extends ModelItf {
 		return data;
 	}
 
-	// TODO : consider associated elements as loaded ?
+	/**
+	 * Set the Source of the CallType.
+	 * As a CallType can only have one Source, if the value is already set, this method throws an exception: you need first to unset the Source.
+	 * Moreover the given Source must be created in database.
+	 *
+	 * @param {Source} s The Source to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
 	setSource(s : Source) : boolean {
+		if (this.source() !== null) {
+			throw new Error("The source is already set for this CallType.");
+		}
+
+		if (s === null || s.getId() === undefined) {
+			throw new Error("The source must be an existing object to be associated.");
+		}
+
 		if (this.associateObject(CallType, Source, s.getId())) {
 			this._source = s;
 			this._source_loaded = true;
@@ -250,20 +292,183 @@ class CallType extends ModelItf {
 		}
 	}
 
+	/**
+	 * Unset the current Source from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Source must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the source is well unset and the association removed in database.
+	 */
+	unsetSource() : boolean {
+		if (this.source() === null) {
+			throw new Error("No source has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, Source, this.source().getId())) {
+			this._source = null;
+			this._source_loaded = false; // TODO: do we still consider the source is loaded or not?
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the Renderer of the CallType.
+	 * As a CallType can only have one Renderer, if the value is already set, this method throws an exception: you need first to unset the Renderer.
+	 * Moreover the given Renderer must be created in database.
+	 *
+	 * @param {Renderer} r The Renderer to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
 	setRenderer(r : Renderer) : boolean {
-		return this.associateObject(CallType, Renderer, r.getId());
+		if (this.renderer() !== null) {
+			throw new Error("The renderer is already set for this CallType.");
+		}
+
+		if (r === null || r.getId() === undefined) {
+			throw new Error("The renderer must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, Renderer, r.getId())) {
+			this._renderer = r;
+			this._renderer_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * Unset the current Renderer from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Renderer must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the renderer is well unset and the association removed in database.
+	 */
+	unsetRenderer() : boolean {
+		if (this.renderer() === null) {
+			throw new Error("No renderer has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, Renderer, this.renderer().getId())) {
+			this._renderer = null;
+			this._renderer_loaded = false; // TODO: do we still consider the renderer is loaded or not?
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the ReceivePolicy of the CallType.
+	 * As a CallType can only have one ReceivePolicy, if the value is already set, this method throws an exception: you need first to unset the ReceivePolicy.
+	 * Moreover the given ReceivePolicy must be created in database.
+	 *
+	 * @param {ReceivePolicy} rp The ReceivePolicy to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
 	setReceivePolicy(rp : ReceivePolicy) : boolean {
-		return this.associateObject(CallType, ReceivePolicy, rp.getId());
+		if (this.receivePolicy() !== null) {
+			throw new Error("The receivePolicy is already set for this CallType.");
+		}
+
+		if (rp === null || rp.getId() === undefined) {
+			throw new Error("The receivePolicy must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, ReceivePolicy, rp.getId())) {
+			this._receive_policy = rp;
+			this._receive_policy_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * Unset the current ReceivePolicy from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A ReceivePolicy must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the ReceivePolicy is well unset and the association removed in database.
+	 */
+	unsetReceivePolicy() : boolean {
+		if (this.receivePolicy() === null) {
+			throw new Error("No receivePolicy has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, ReceivePolicy, this.receivePolicy().getId())) {
+			this._receive_policy = null;
+			this._receive_policy_loaded = false; // TODO: do we still consider the receivePolicy is loaded or not?
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the RenderPolicy of the CallType.
+	 * As a CallType can only have one RenderPolicy, if the value is already set, this method throws an exception: you need first to unset the RenderPolicy.
+	 * Moreover the given RenderPolicy must be created in database.
+	 *
+	 * @param {RenderPolicy} rp The RenderPolicy to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
 	setRenderPolicy(rp : RenderPolicy) : boolean {
-		return this.associateObject(CallType, RenderPolicy, rp.getId());
+		if (this.renderPolicy() !== null) {
+			throw new Error("The renderPolicy is already set for this CallType.");
+		}
+
+		if (rp === null || rp.getId() === undefined) {
+			throw new Error("The renderPolicy must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, RenderPolicy, rp.getId())) {
+			this._render_policy = rp;
+			this._render_policy_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * Unset the current RenderPolicy from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A RenderPolicy must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the RenderPolicy is well unset and the association removed in database.
+	 */
+	unsetRenderPolicy() : boolean {
+		if (this.renderPolicy() === null) {
+			throw new Error("No RenderPolicy has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId())) {
+			this._render_policy = null;
+			this._render_policy_loaded = false; // TODO: do we still consider the RenderPolicy is loaded or not?
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// TODO : Do we need this method?
 	addCall(c : Call) : boolean {
-		return this.associateObject(CallType, Call, c.getId());
+		if (this.calls().indexOf(c) !== -1) {
+			throw new Error("You cannot add twice a call in a call.");  // TODO: cannot it be useful sometimes?
+		}
+		if (c === null || c.getId() === undefined) {
+			throw new Error("The call must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, Call, c.getId())) {
+			this.calls().push(c);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
     /**
