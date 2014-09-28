@@ -24,40 +24,6 @@ class InfoType extends ModelItf {
      */
     private _name : string;
 
-
-	// TODO: Do we really need those attributes?
-    /**
-     * Sources property.
-     *
-     * @property _sources
-     * @type Array<Source>
-     */
-    private _sources : Array<Source>;
-
-    /**
-     * Lazy loading for Sources property.
-     *
-     * @property _sources_loaded
-     * @type boolean
-     */
-    private _sources_loaded : boolean;
-
-    /**
-     * Renderers property.
-     *
-     * @property _renderers
-     * @type Array<Renderer>
-     */
-    private _renderers : Array<Renderer>;
-
-    /**
-     * Lazy loading for Renderers property.
-     *
-     * @property _renderers_loaded
-     * @type boolean
-     */
-    private _renderers_loaded : boolean;
-
     /**
      * Constructor.
      *
@@ -69,12 +35,6 @@ class InfoType extends ModelItf {
         super(id);
 
         this.setName(name);
-
-        this._sources = new Array<Source>();
-        this._sources_loaded = false;
-
-        this._renderers = new Array<Renderer>();
-        this._renderers_loaded = false;
     }
 
 	/**
@@ -98,47 +58,20 @@ class InfoType extends ModelItf {
         return this._name;
     }
 
-    /**
-     * Return the InfoType's sources.
-     */
-    sources() {
-        if(! this._sources_loaded) {
-            this._sources_loaded = this.getAssociatedObjects(InfoType, Source, this._sources);
-        }
-        return this._sources;
-    }
-
-    /**
-     * Return the InfoType's renderers.
-     */
-    renderers() {
-        if(! this._renderers_loaded) {
-            this._renderers_loaded = this.getAssociatedObjects(InfoType, Renderer, this._renderers);
-        }
-        return this._renderers;
-    }
-
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	loadAssociations() : void {
-		this.renderers();
-		this.sources();
-	}
-
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"name": this.name()
 		};
 
 		return data;
-	}
-
-	addSource(s : Source) : boolean {
-		return this.associateObject(InfoType, Source, s.getId());
-	}
-
-	addRenderer(r : Renderer) : boolean {
-		return this.associateObject(InfoType, Renderer, r.getId());
 	}
 
     /**
