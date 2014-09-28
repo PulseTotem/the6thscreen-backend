@@ -129,6 +129,14 @@ class User extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._roles_loaded = false;
+		this._sdis_loaded = false;
+	}
+
+	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
@@ -155,6 +163,7 @@ class User extends ModelItf {
 		}
 
 		if (this.associateObject(User, SDI, s.getId())) {
+			s.desynchronize();
 			this.sdis().push(s);
 			return true;
 		} else {
@@ -176,6 +185,7 @@ class User extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(User, SDI, s.getId())) {
+			s.desynchronize();
 			this.sdis().splice(indexValue, 1);
 			return true;
 		} else {
@@ -199,6 +209,7 @@ class User extends ModelItf {
 		}
 
 		if (this.associateObject(User, Role, r.getId())) {
+			r.desynchronize();
 			this.roles().push(r);
 			return true;
 		} else {
@@ -220,6 +231,7 @@ class User extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(User, Role, r.getId())) {
+			r.desynchronize();
 			this.roles().splice(indexValue, 1);
 			return true;
 		} else {

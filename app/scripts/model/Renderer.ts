@@ -128,6 +128,13 @@ class Renderer extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._info_type_loaded = false;
+	}
+
+	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
@@ -160,6 +167,7 @@ class Renderer extends ModelItf {
 		}
 
 		if (this.associateObject(Renderer, InfoType, it.getId())) {
+			it.desynchronize();
 			this._info_type = it;
 			this._info_type_loaded = true;
 			return true;
@@ -181,6 +189,7 @@ class Renderer extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Renderer, InfoType, this.infoType().getId())) {
+			this.infoType().desynchronize();
 			this._info_type = null;
 			return true;
 		} else {

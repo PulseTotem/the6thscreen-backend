@@ -283,6 +283,15 @@ class Source extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._info_type_loaded = false;
+		this._param_types_loaded = false;
+		this._param_values_loaded = false;
+	}
+
+	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
@@ -318,6 +327,7 @@ class Source extends ModelItf {
 		}
 
 		if (this.associateObject(Source, InfoType, it.getId())) {
+			it.desynchronize();
 			this._info_type = it;
 			this._info_type_loaded = true;
 			return true;
@@ -339,6 +349,7 @@ class Source extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Source, InfoType, this.infoType().getId())) {
+			this.infoType().desynchronize();
 			this._info_type = null;
 			return true;
 		} else {
@@ -362,6 +373,7 @@ class Source extends ModelItf {
 		}
 
 		if (this.associateObject(Source, ParamType, pt.getId())) {
+			pt.desynchronize();
 			this.paramTypes().push(pt);
 			return true;
 		} else {
@@ -383,6 +395,7 @@ class Source extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Source, ParamType, pt.getId())) {
+			pt.desynchronize();
 			this.paramTypes().splice(indexValue, 1);
 			return true;
 		} else {
@@ -406,6 +419,7 @@ class Source extends ModelItf {
 		}
 
 		if (this.associateObject(Source, ParamValue, pv.getId())) {
+			pv.desynchronize();
 			this.paramValues().push(pv);
 			return true;
 		} else {
@@ -427,6 +441,7 @@ class Source extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Source, ParamValue, pv.getId())) {
+			pv.desynchronize();
 			this.paramValues().splice(indexValue, 1);
 			return true;
 		} else {

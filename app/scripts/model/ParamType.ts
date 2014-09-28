@@ -193,6 +193,15 @@ class ParamType extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._type_loaded = false;
+		this._constraint_loaded = false;
+		this._default_value_loaded = false;
+	}
+
+	/**
 	 * /**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
@@ -226,6 +235,7 @@ class ParamType extends ModelItf {
 		}
 
 		if (this.associateObject(ParamType, TypeParamType, t.getId())) {
+			t.desynchronize();
 			this._type = t;
 			this._type_loaded = true;
 			return true;
@@ -247,6 +257,7 @@ class ParamType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(ParamType, TypeParamType, this.type().getId())) {
+			this.type().desynchronize();
 			this._type = null;
 			return true;
 		} else {
@@ -272,6 +283,7 @@ class ParamType extends ModelItf {
 		}
 
 		if (this.associateObject(ParamType, ConstraintParamType, c.getId())) {
+			c.desynchronize();
 			this._constraint = c;
 			this._constraint_loaded = true;
 			return true;
@@ -293,6 +305,7 @@ class ParamType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(ParamType, ConstraintParamType, this.constraint().getId())) {
+			this.constraint().desynchronize();
 			this._constraint = null;
 			return true;
 		} else {
@@ -318,6 +331,7 @@ class ParamType extends ModelItf {
 		}
 
 		if (this.associateObject(ParamType, ParamValue, d.getId())) {
+			d.desynchronize();
 			this._default_value = d;
 			this._default_value_loaded = true;
 			return true;
@@ -339,6 +353,7 @@ class ParamType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(ParamType, ParamValue, this.defaultValue().getId())) {
+			this.defaultValue().desynchronize();
 			this._default_value = null;
 			return true;
 		} else {

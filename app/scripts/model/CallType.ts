@@ -252,6 +252,17 @@ class CallType extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._source_loaded = false;
+		this._receive_policy_loaded = false;
+		this._render_policy_loaded = false;
+		this._renderer_loaded = false;
+		this._zone_loaded = false;
+	}
+
+	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
@@ -284,6 +295,7 @@ class CallType extends ModelItf {
 		}
 
 		if (this.associateObject(CallType, Source, s.getId())) {
+			s.desynchronize();
 			this._source = s;
 			this._source_loaded = true;
 			return true;
@@ -305,6 +317,7 @@ class CallType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(CallType, Source, this.source().getId())) {
+			this.source().desynchronize();
 			this._source = null;
 			return true;
 		} else {
@@ -330,6 +343,7 @@ class CallType extends ModelItf {
 		}
 
 		if (this.associateObject(CallType, Renderer, r.getId())) {
+			r.desynchronize();
 			this._renderer = r;
 			this._renderer_loaded = true;
 			return true;
@@ -351,6 +365,7 @@ class CallType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(CallType, Renderer, this.renderer().getId())) {
+			this.renderer().desynchronize();
 			this._renderer = null;
 			return true;
 		} else {
@@ -376,6 +391,7 @@ class CallType extends ModelItf {
 		}
 
 		if (this.associateObject(CallType, ReceivePolicy, rp.getId())) {
+			rp.desynchronize();
 			this._receive_policy = rp;
 			this._receive_policy_loaded = true;
 			return true;
@@ -397,6 +413,7 @@ class CallType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(CallType, ReceivePolicy, this.receivePolicy().getId())) {
+			this.receivePolicy().desynchronize();
 			this._receive_policy = null;
 			return true;
 		} else {
@@ -422,6 +439,7 @@ class CallType extends ModelItf {
 		}
 
 		if (this.associateObject(CallType, RenderPolicy, rp.getId())) {
+			rp.desynchronize();
 			this._render_policy = rp;
 			this._render_policy_loaded = true;
 			return true;
@@ -443,6 +461,7 @@ class CallType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId())) {
+			this.renderPolicy().desynchronize();
 			this._render_policy = null;
 			return true;
 		} else {
@@ -468,6 +487,7 @@ class CallType extends ModelItf {
 		}
 
 		if (this.associateObject(CallType, Zone, z.getId())) {
+			z.desynchronize();
 			this._zone = z;
 			this._zone_loaded = true;
 			return true;
@@ -489,6 +509,7 @@ class CallType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(CallType, Zone, this.zone().getId())) {
+			this.zone().desynchronize();
 			this._zone = null;
 			return true;
 		} else {

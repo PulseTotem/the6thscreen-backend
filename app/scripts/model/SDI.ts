@@ -252,6 +252,16 @@ class SDI extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._profils_loaded = false;
+		this._timelines_loaded = false;
+		this._users_loaded = false;
+		this._zones_loaded = false;
+	}
+
+	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
@@ -283,6 +293,7 @@ class SDI extends ModelItf {
 		}
 
 		if (this.associateObject(SDI, User, u.getId())) {
+			u.desynchronize();
 			this.users().push(u);
 			return true;
 		} else {
@@ -304,6 +315,7 @@ class SDI extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(SDI, User, u.getId())) {
+			u.desynchronize();
 			this.users().splice(indexValue, 1);
 			return true;
 		} else {
@@ -327,6 +339,7 @@ class SDI extends ModelItf {
 		}
 
 		if (this.associateObject(SDI, Zone, z.getId())) {
+			z.desynchronize();
 			this.zones().push(z);
 			return true;
 		} else {
@@ -348,6 +361,7 @@ class SDI extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(SDI, Zone, z.getId())) {
+			z.desynchronize();
 			this.zones().splice(indexValue, 1);
 			return true;
 		} else {
@@ -371,6 +385,7 @@ class SDI extends ModelItf {
 		}
 
 		if (this.associateObject(SDI, Profil, p.getId())) {
+			p.desynchronize();
 			this.profils().push(p);
 			return true;
 		} else {
@@ -392,6 +407,7 @@ class SDI extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(SDI, Profil, p.getId())) {
+			p.desynchronize();
 			this.profils().splice(indexValue, 1);
 			return true;
 		} else {
@@ -415,6 +431,7 @@ class SDI extends ModelItf {
 		}
 
 		if (this.associateObject(SDI, Timeline, t.getId())) {
+			t.desynchronize();
 			this.timelines().push(t);
 			return true;
 		} else {
@@ -436,6 +453,7 @@ class SDI extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(SDI, Timeline, t.getId())) {
+			t.desynchronize();
 			this.timelines().splice(indexValue, 1);
 			return true;
 		} else {

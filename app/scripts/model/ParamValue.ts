@@ -97,6 +97,13 @@ class ParamValue extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._paramType_loaded = false;
+	}
+
+	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
@@ -128,6 +135,7 @@ class ParamValue extends ModelItf {
 		}
 
 		if (this.associateObject(ParamValue, ParamType, p.getId())) {
+			p.desynchronize();
 			this._paramType = p;
 			this._paramType_loaded = true;
 			return true;
@@ -149,6 +157,7 @@ class ParamValue extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(ParamValue, ParamType, this.paramType().getId())) {
+			this.paramType().desynchronize();
 			this._paramType = null;
 			return true;
 		} else {

@@ -127,6 +127,13 @@ class ConstraintParamType extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._type_loading = false;
+	}
+
+	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
@@ -159,6 +166,7 @@ class ConstraintParamType extends ModelItf {
 		}
 
 		if (this.associateObject(ConstraintParamType, TypeParamType, t.getId())) {
+			t.desynchronize();
 			this._type = t;
 			this._type_loading = true;
 			return true;
@@ -180,6 +188,7 @@ class ConstraintParamType extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(ConstraintParamType, TypeParamType, this.type().getId())) {
+			this.type().desynchronize();
 			this._type = null;
 			return true;
 		} else {

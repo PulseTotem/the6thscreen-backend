@@ -173,6 +173,14 @@ class Profil extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._calls_loaded = false;
+		this._timelines_loaded = false;
+	}
+
+	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
@@ -202,6 +210,7 @@ class Profil extends ModelItf {
 		}
 
 		if (this.associateObject(Profil, Call, c.getId())) {
+			c.desynchronize();
 			this.calls().push(c);
 			return true;
 		} else {
@@ -223,6 +232,7 @@ class Profil extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Profil, Call, c.getId())) {
+			c.desynchronize();
 			this.calls().splice(indexValue, 1);
 			return true;
 		} else {
@@ -246,6 +256,7 @@ class Profil extends ModelItf {
 		}
 
 		if (this.associateObject(Profil, Timeline, t.getId())) {
+			t.desynchronize();
 			this.timelines().push(t);
 			return true;
 		} else {
@@ -267,6 +278,7 @@ class Profil extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Profil, Timeline, t.getId())) {
+			t.desynchronize();
 			this.timelines().splice(indexValue, 1);
 			return true;
 		} else {
