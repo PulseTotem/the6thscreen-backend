@@ -143,7 +143,7 @@ class CleanAndInitDatabase {
         rss_feed_reader.addParamType(limit_rss_feed_reader);
         rss_feed_reader.setInfoType(feed_content);
 
-	    var s : SDI = new SDI("SDItruc", "*");
+	    var s : SDI = new SDI("SDItruc", "Un super SDI de test ! ", "*");
 	    s.create();
 
 	    var u : User = new User("toto");
