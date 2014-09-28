@@ -53,9 +53,10 @@ class ModelItf {
         if(this.getId() != undefined) {
             return this.update();
         }
+	    var urlCreateObject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName();
 
-        var result = RestClient.postSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName(), data);
-
+        var result = RestClient.postSync(urlCreateObject, data);
+	    Logger.debug("Create a new object : "+urlCreateObject+" with data : "+JSON.stringify(data));
         if(result.success) {
             var response = result.data;
             if(response.status == "success") {

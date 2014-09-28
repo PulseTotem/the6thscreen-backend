@@ -190,6 +190,6 @@ class RenderPolicy extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "RenderPolicys";
+        return "RenderPolicies";
     }
 }

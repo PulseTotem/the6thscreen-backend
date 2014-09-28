@@ -157,6 +157,6 @@ class ReceivePolicy extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "ReceivePolicys";
+        return "ReceivePolicies";
     }
 }
