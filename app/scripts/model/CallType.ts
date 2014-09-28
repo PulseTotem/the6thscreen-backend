@@ -175,6 +175,8 @@ class CallType extends ModelItf {
 
     /**
      * Return the CallType's name.
+     *
+     * @method name
      */
     name() {
         return this._name;

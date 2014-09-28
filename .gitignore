@@ -6,3 +6,4 @@ src/**~
 *~
 .idea
 app/scripts/core/connection_infos.json
+doc/

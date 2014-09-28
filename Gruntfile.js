@@ -8,6 +8,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-typescript');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-mocha-test');
+    grunt.loadNpmTasks('grunt-contrib-yuidoc');
 
     // tasks
     grunt.initConfig({
@@ -107,6 +108,24 @@ module.exports = function (grunt) {
 // ---------------------------------------------
 
 // ---------------------------------------------
+//                                 doc tasks
+// ---------------------------------------------
+        yuidoc: {
+            compile: {
+                name: 'The 6th Screen - Backend',
+                description: 'Backend for The 6th Screen products.',
+                version: '0.0.1',
+                url: 'http://www.the6thscreen.fr',
+                options: {
+                    extension: '.ts, .js',
+                    paths: ['app/scripts/'],
+                    outdir: 'doc/'
+                }
+            }
+        },
+// ---------------------------------------------
+
+// ---------------------------------------------
 //                                 test tasks
 // ---------------------------------------------
         mochaTest: {
@@ -126,6 +145,7 @@ module.exports = function (grunt) {
         clean: {
             build: ['build/'],
             dist: ['dist/'],
+            doc: ['doc'],
             test: ['tests/Test.js']
         }
 // ---------------------------------------------
@@ -153,6 +173,8 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('develop', ['build', 'express:build', 'watch']);
+
+    grunt.registerTask('doc', ['clean:doc', 'yuidoc']);
 
     grunt.registerTask('test', function() {
         grunt.task.run(['clean:test']);
