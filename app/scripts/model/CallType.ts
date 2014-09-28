@@ -99,6 +99,22 @@ class CallType extends ModelItf {
      */
     private _render_policy_loaded : boolean;
 
+	/**
+	 * Zone property
+	 *
+	 * @property _zone
+	 * @type Zone
+	 */
+	private _zone : Zone;
+
+	/**
+	 * Lazy loading for Zone property
+	 *
+	 * @property _zone_loaded
+	 * @type boolean
+	 */
+	private _zone_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -124,6 +140,9 @@ class CallType extends ModelItf {
 
         this._render_policy = null;
         this._render_policy_loaded = false;
+
+	    this._zone = null;
+	    this._zone_loaded = false;
     }
 
 	/**
@@ -208,6 +227,16 @@ class CallType extends ModelItf {
         return this._render_policy;
     }
 
+	/**
+	 * Return the CallType's zone.
+	 */
+	zone() {
+		if(! this._zone) {
+			this._zone_loaded = this.getUniquelyAssociatedObject(CallType, Zone, this._zone);
+		}
+		return this._zone;
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
@@ -219,6 +248,7 @@ class CallType extends ModelItf {
 		this.renderer();
 		this.receivePolicy();
 		this.renderPolicy();
+		this.zone();
 	}
 
 	/**
@@ -414,6 +444,52 @@ class CallType extends ModelItf {
 
 		if (this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId())) {
 			this._render_policy = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the Zone of the CallType.
+	 * As a CallType can only have one Zone, if the value is already set, this method throws an exception: you need first to unset the Zone.
+	 * Moreover the given Zone must be created in database.
+	 *
+	 * @param {Zone} z The Zone to associate with the CallType.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setZone(z : Zone) : boolean {
+		if (this.zone() !== null) {
+			throw new Error("The zone is already set for this CallType.");
+		}
+
+		if (z === null || z.getId() === undefined || z.getId() === null) {
+			throw new Error("The zone must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(CallType, Zone, z.getId())) {
+			this._zone = z;
+			this._zone_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current Zone from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Zone must have been set before using it, else an exception is thrown.
+	 *
+	 * @returns {boolean} Returns true if the Zone is well unset and the association removed in database.
+	 */
+	unsetZone() : boolean {
+		if (this.zone() === null) {
+			throw new Error("No RenderPolicy has been set for this callType.");
+		}
+
+		if (this.deleteObjectAssociation(CallType, Zone, this.zone().getId())) {
+			this._zone = null;
 			return true;
 		} else {
 			return false;

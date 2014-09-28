@@ -164,7 +164,7 @@ class CleanAndInitDatabase {
 
         var ct : CallType = new CallType("RSSMainZone","Display RSS feeds in the main zone with a specific renderer");
         ct.create();
-	    ct.setZone();
+	    ct.setZone(z);
         ct.setSource(rss_feed_reader);
 
         var renderer : Renderer = new Renderer("FeedContentRendererGeneric", "Renderer générique pour les infos de type FeedContent.");
