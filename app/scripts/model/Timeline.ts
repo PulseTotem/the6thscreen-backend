@@ -58,23 +58,40 @@ class Timeline extends ModelItf {
     constructor(name : string, description : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A Timeline needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
-
-        if(this._description == null || this._description == "") {
-            Logger.error("A Timeline needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._description = description;
+        this.setName(name);
+	    this.setDescription(description);
 
         this._profils = new Array<Profil>();
         this._profils_loaded = false;
     }
+
+	/**
+	 * Set the Timeline's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("A Timeline needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
+
+	/**
+	 * Set the Timeline's description.
+	 *
+	 * @method setDescription
+	 */
+	setDescription(description : string) {
+		if(description == null || description == "") {
+			Logger.error("A Timeline needs to have a description.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._description = description;
+	}
 
     /**
      * Return the Timeline's name.
@@ -101,11 +118,20 @@ class Timeline extends ModelItf {
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
-
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
 	loadAssociations() : void {
 		this.profils();
 	}
 
+	/**
+	 * Private method to transform the object in JSON.
+	 * It is used to create or update the object in database.
+	 *
+	 * @returns {{name: string, description: string}}
+	 */
 	toJSONObject() : Object {
 		var data = {
 			"name": this.name(),
@@ -114,11 +140,51 @@ class Timeline extends ModelItf {
 		return data;
 	}
 
+	/**
+	 * Add a new Profil to the Timeline and associate it in the database.
+	 * A Profil can only be added once.
+	 *
+	 * @param {Profil} p The Profil to add inside the Timeline. It cannot be a null value.
+	 * @returns {boolean} Returns true if the association is realized in database.
+	 */
 	addProfil(p : Profil) : boolean {
-		return this.associateObject(Timeline, Profil, p.getId());
+		if (this.profils().indexOf(p) !== -1) {
+			throw new Error("You cannot add twice a Profil for a Timeline.");
+		}
+		if (p === null || p.getId() === undefined || p.getId() === null) {
+			throw new Error("The Profil must be an existing object to be associated.");
+		}
+
+		if (this.associateObject(Timeline, Profil, p.getId())) {
+			this.profils().push(p);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-    /**
+	/**
+	 * Remove a Profil from the Timeline: the association is removed both in the object and in database.
+	 * The Profil can only be removed if it exists first in the list of associated Profils, else an exception is thrown.
+	 *
+	 * @param {Profil} p The Profil to remove from that Timeline
+	 * @returns {boolean} Returns true if the association is deleted in database.
+	 */
+	removeProfil(p : Profil) : boolean {
+		var indexValue = this.profils().indexOf(p);
+		if (indexValue === -1) {
+			throw new Error("The Profil you try to remove has not been added to the current Timeline");
+		}
+
+		if (this.deleteObjectAssociation(Timeline, Profil, p.getId())) {
+			this.profils().splice(indexValue, 1);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
      * Create model in database.
      *
      * @method create
