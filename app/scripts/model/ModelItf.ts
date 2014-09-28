@@ -318,9 +318,16 @@ class ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	loadAssociations() : void {
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 */
+	loadAssociations() : void;
 
-	}
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void;
 
     /**
      * Create model in database.

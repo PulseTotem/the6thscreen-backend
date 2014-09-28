@@ -162,6 +162,15 @@ class Call extends ModelItf {
 	}
 
 	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 */
+	desynchronize() : void {
+		this._call_type_loaded = false;
+		this._param_values_loaded = false;
+		this._profil_loaded = false;
+	}
+
+	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
@@ -188,6 +197,7 @@ class Call extends ModelItf {
 		}
 
 		if (this.associateObject(Call, ParamValue, p.getId())) {
+			p.desynchronize();
 			this.paramValues().push(p);
 			return true;
 		} else {
@@ -209,6 +219,7 @@ class Call extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Call, ParamValue, p.getId())) {
+			p.desynchronize();
 			this.paramValues().splice(indexValue, 1);
 			return true;
 		} else {
@@ -233,6 +244,7 @@ class Call extends ModelItf {
 		}
 
 		if (this.associateObject(Call, Profil, p.getId())) {
+			p.desynchronize();
 			this._profil = p;
 			this._profil_loaded = true;
 			return true;
@@ -254,6 +266,7 @@ class Call extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Call, Profil, this.profil().getId())) {
+			this.profil().desynchronize();
 			this._profil = null;
 			return true;
 		} else {
@@ -278,6 +291,7 @@ class Call extends ModelItf {
 		}
 
 		if (this.associateObject(Call, CallType, ct.getId())) {
+			ct.desynchronize();
 			this._call_type = ct;
 			this._call_type_loaded = true;
 			return true;
@@ -299,14 +313,13 @@ class Call extends ModelItf {
 		}
 
 		if (this.deleteObjectAssociation(Call, CallType, this.callType().getId())) {
+			this.callType().desynchronize();
 			this._call_type = null;
 			return true;
 		} else {
 			return false;
 		}
 	}
-
-
 
     /**
      * Create model in database.
