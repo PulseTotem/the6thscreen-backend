@@ -204,8 +204,7 @@ class Source extends ModelItf {
      */
     infoType() {
         if(! this._info_type_loaded) {
-            // TODO : Retrieve from database.
-            this._info_type_loaded = true;
+            this._info_type_loaded = this.getUniquelyAssociatedObject(Source, InfoType, this._info_type);
         }
         return this._info_type;
     }
@@ -215,8 +214,7 @@ class Source extends ModelItf {
      */
     paramTypes() {
         if(! this._param_types_loaded) {
-            // TODO : Retrieve from database.
-            this._param_types_loaded = true;
+            this._param_types_loaded = this.getAssociatedObjects(Source, ParamType, this._param_types);
         }
         return this._param_types;
     }
@@ -226,52 +224,135 @@ class Source extends ModelItf {
      */
     paramValues() {
         if(! this._param_values_loaded) {
-            // TODO : Retrieve from database.
-            this._param_values_loaded = true;
+            this._param_values_loaded = this.getAssociatedObjects(Source, ParamValue, this._param_values);
         }
         return this._param_values;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	loadAssociations() : void {
+		this.paramTypes();
+		this.paramValues();
+		this.infoType();
+	}
+
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name(),
+			"service": this.service(),
+			"description": this.description(),
+			"host": this.host(),
+			"port": this.port()
+		};
+
+		return data;
+	}
+
+	setInfoType(i : InfoType) : boolean {
+		return this.associateObject(Source, InfoType, i.getId());
+	}
+
+	addParamType(p : ParamType) : boolean {
+		return this.associateObject(Source, ParamType, p.getId());
+	}
+
+	addParamValue(p : ParamValue) : boolean {
+		return this.associateObject(Source, ParamValue, p.getId());
+	}
+
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+        return this.createObject(Source, this.toJSONObject());
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {Source} The model instance.
      */
     static read(id : number) : Source {
-        // TODO
-        return null;
+        return this.readObject(Source, id);
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+        return this.updateObject(Source, this.toJSONObject());
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        return this.deleteObject(Source);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<Source>} The model instances.
      */
     static all() : Array<Source> {
-        // TODO
-        return null;
+        return this.allObjects(Source);
+    }
+
+	/**
+	 * Return a Source instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Source} The model instance.
+	 */
+	static parseJSON(jsonString : string) : Source {
+		return Source.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a Source instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Source} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : Source {
+		if(typeof(jsonObject.name) == "undefined" ||
+			typeof(jsonObject.service) == "undefined" ||
+			typeof(jsonObject.description) == "undefined" ||
+			typeof(jsonObject.host) == "undefined" ||
+			typeof(jsonObject.port) == "undefined" ||
+			typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new Source(jsonObject.name, jsonObject.service, jsonObject.description, jsonObject.host, jsonObject.port, jsonObject.id);
+		}
+	}
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "Sources";
     }
 }

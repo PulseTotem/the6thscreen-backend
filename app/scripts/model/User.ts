@@ -91,8 +91,7 @@ class User extends ModelItf {
      */
     roles() {
         if(! this._roles_loaded) {
-            // TODO : Retrieve from database.
-            this._roles_loaded = true;
+            this._roles_loaded = this.getAssociatedObjects(User, Role, this._roles);
         }
         return this._roles;
     }
@@ -102,52 +101,123 @@ class User extends ModelItf {
      */
     sdis() {
         if(! this._sdis_loaded) {
-            // TODO : Retrieve from database.
-            this._sdis_loaded  =true;
+            this._sdis_loaded  = this.getAssociatedObjects(User, SDI, this._sdis);
         }
         return this._sdis;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	loadAssociations() : void {
+		this.roles();
+		this.sdis();
+	}
+
+	toJSONObject() : Object {
+		var data = { "username": this.username() };
+		return data;
+	}
+
+	/**
+	 * Associate a SDI to the user
+	 * @param s
+	 * @returns {boolean}
+	 */
+	addSDI(s : SDI) : boolean {
+		return this.associateObject(User, SDI, s.getId());
+	}
+
+	addRole(r : Role) : boolean {
+		return this.associateObject(User, Role, r.getId());
+	}
+
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+        return this.createObject(User, this.toJSONObject());
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {User} The model instance.
      */
     static read(id : number) : User {
-        // TODO
-        return null;
+        return this.readObject(User, id);
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+       return this.updateObject(User, this.toJSONObject());
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        return this.deleteObject(User);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<User>} The model instances.
      */
     static all() : Array<User> {
-        // TODO
-        return null;
+        return this.allObjects(User);
+    }
+
+	/**
+	 * Return a User instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {SDI} The model instance.
+	 */
+	static parseJSON(jsonString : string) : User {
+		return User.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a User instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {SDI} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : User {
+		if(typeof(jsonObject.username) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new User(jsonObject.username, jsonObject.id);
+		}
+	}
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "Users";
     }
 }

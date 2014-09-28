@@ -151,34 +151,31 @@ class SDI extends ModelItf {
     }
 
     /**
-     * Return the User's roles.
+     * Return the Users
      */
     users() {
         if(! this._users_loaded) {
-            // TODO : Retrieve from database.
-            this._users_loaded = true;
+	        this._users_loaded = this.getAssociatedObjects(SDI, User, this._users);
         }
         return this._users;
     }
 
     /**
-     * Return the User's roles.
+     * Return the zones
      */
     zones() {
         if(! this._zones_loaded) {
-            // TODO : Retrieve from database.
-            this._zones_loaded = true;
+            this._zones_loaded = this.getAssociatedObjects(SDI, Zone, this._zones);
         }
         return this._zones;
     }
 
     /**
-     * Return the SDI's profils.
+     * Return the SDI's profiles.
      */
     profils() {
         if(! this._profils_loaded) {
-            // TODO : Retrieve from database.
-            this._profils_loaded = true;
+            this._profils_loaded = this.getAssociatedObjects(SDI, Profil, this._profils);
         }
         return this._profils;
     }
@@ -188,52 +185,134 @@ class SDI extends ModelItf {
      */
     timelines() {
         if(! this._timelines_loaded) {
-            // TODO : Retrieve from database.
-            this._timelines_loaded = true;
+            this._timelines_loaded = this.getAssociatedObjects(SDI, Timeline, this._timelines);
         }
         return this._timelines;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-    /**
+	loadAssociations() {
+		this.users();
+		this.profils();
+		this.zones();
+		this.timelines();
+	}
+
+	toJSONObject() : Object {
+		var data = {
+			"description": this.description(),
+			"allowedHost": this.allowedHost()
+		};
+
+		return data;
+	}
+
+	addUser(u : User) : boolean {
+		return this.associateObject(SDI, User, u.getId());
+	}
+
+	addZone(z : Zone) : boolean {
+		return this.associateObject(SDI, Zone, z.getId());
+	}
+
+	addProfil(p : Profil) : boolean {
+		return this.associateObject(SDI, Profil, p.getId());
+	}
+
+	addTimeline(t : Timeline) : boolean {
+		return this.associateObject(SDI, Timeline, t.getId());
+	}
+
+	/**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+        return this.createObject(SDI, this.toJSONObject());
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {SDI} The model instance.
      */
     static read(id : number) : SDI {
-        // TODO
-        return null;
+        return this.readObject(SDI, id);
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+	    return this.updateObject(SDI, this.toJSONObject());
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        return this.deleteObject(SDI);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<SDI>} The model instances.
      */
     static all() : Array<SDI> {
-        // TODO
-        return null;
+        return this.allObjects(SDI);
     }
+
+	/**
+	 * Return a SDI instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {SDI} The model instance.
+	 */
+	static parseJSON(jsonString : string) : SDI {
+		return SDI.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a SDI instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {SDI} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : SDI {
+		if(typeof(jsonObject.description) == "undefined" || typeof(jsonObject.allowedHost) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new SDI(jsonObject.description, jsonObject.allowedHost, jsonObject.id);
+		}
+	}
+
+	/**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "SDIs";
+    }
+
+
 }

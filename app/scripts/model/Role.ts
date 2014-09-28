@@ -49,44 +49,100 @@ class Role extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name()
+		};
+		return data;
+	}
+
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+        return this.createObject(Role, this.toJSONObject());
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {Role} The model instance.
      */
     static read(id : number) : Role {
-        // TODO
-        return null;
+        return this.readObject(Role, id);
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+        return this.updateObject(Role, this.toJSONObject());
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        return this.deleteObject(Role);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<Role>} The model instances.
      */
     static all() : Array<Role> {
-        // TODO
-        return null;
+        return this.allObjects(Role);
+    }
+
+	/**
+	 * Return a Role instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Role} The model instance.
+	 */
+	static parseJSON(jsonString : string) : Role {
+		return Role.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return a Role instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Role} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : Role {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new Role(jsonObject.name, jsonObject.id);
+		}
+	}
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "Roles";
     }
 }

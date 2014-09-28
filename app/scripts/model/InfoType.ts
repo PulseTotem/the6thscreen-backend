@@ -24,6 +24,8 @@ class InfoType extends ModelItf {
      */
     private _name : string;
 
+
+	// TODO: Do we really need those attributes?
     /**
      * Sources property.
      *
@@ -66,12 +68,7 @@ class InfoType extends ModelItf {
     constructor(name : string, id : number = null) {
         super(id);
 
-        if(this._name == null || this._name == "") {
-            Logger.error("A InfoType needs to have a name.");
-            // TODO : Throw an Exception ?
-        }
-
-        this._name = name;
+        this.setName(name);
 
         this._sources = new Array<Source>();
         this._sources_loaded = false;
@@ -79,6 +76,20 @@ class InfoType extends ModelItf {
         this._renderers = new Array<Renderer>();
         this._renderers_loaded = false;
     }
+
+	/**
+	 * Set the InfoType's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		if(name == null || name == "") {
+			Logger.error("An InfoType needs to have a name.");
+			// TODO : Throw an Exception ?
+		}
+
+		this._name = name;
+	}
 
     /**
      * Return the InfoType's name.
@@ -92,8 +103,7 @@ class InfoType extends ModelItf {
      */
     sources() {
         if(! this._sources_loaded) {
-            // TODO : Retrieve from database.
-            this._sources_loaded = true;
+            this._sources_loaded = this.getAssociatedObjects(InfoType, Source, this._sources);
         }
         return this._sources;
     }
@@ -103,52 +113,121 @@ class InfoType extends ModelItf {
      */
     renderers() {
         if(! this._renderers_loaded) {
-            // TODO : Retrieve from database.
-            this._renderers_loaded = true;
+            this._renderers_loaded = this.getAssociatedObjects(InfoType, Renderer, this._renderers);
         }
         return this._renderers;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
+	loadAssociations() : void {
+		this.renderers();
+		this.sources();
+	}
+
+	toJSONObject() : Object {
+		var data = {
+			"name": this.name()
+		};
+
+		return data;
+	}
+
+	addSource(s : Source) : boolean {
+		return this.associateObject(InfoType, Source, s.getId());
+	}
+
+	addRenderer(r : Renderer) : boolean {
+		return this.associateObject(InfoType, Renderer, r.getId());
+	}
+
     /**
      * Create model in database.
+     *
+     * @method create
+     * @return {boolean} Create status
      */
-    create() {
-        // TODO
+    create() : boolean {
+        return this.createObject(InfoType, this.toJSONObject())
     }
 
     /**
      * Retrieve model description from database and create model instance.
      *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
      * @return {InfoType} The model instance.
      */
     static read(id : number) : InfoType {
-        // TODO
-        return null;
+        return this.readObject(InfoType, id);
     }
 
     /**
      * Update in database the model with current id.
+     *
+     * @method update
+     * @return {boolean} Update status
      */
-    update() {
-        // TODO
+    update() : boolean {
+        return this.updateObject(InfoType, this.toJSONObject())
     }
 
     /**
      * Delete in database the model with current id.
+     *
+     * @method delete
+     * @return {boolean} Delete status
      */
-    delete() {
-        // TODO
+    delete() : boolean {
+        return this.deleteObject(InfoType);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
+     * @method all
      * @return {Array<InfoType>} The model instances.
      */
     static all() : Array<InfoType> {
-        // TODO
-        return null;
+       return this.allObjects(InfoType);
+    }
+
+	/**
+	 * Return an InfoType instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Call} The model instance.
+	 */
+	static parseJSON(jsonString : string) : InfoType {
+		return InfoType.fromJSONObject(JSON.parse(jsonString));
+	}
+
+	/**
+	 * Return an InfoType instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Call} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : InfoType {
+		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
+			return null;
+		} else {
+			return new InfoType(jsonObject.name, jsonObject.id);
+		}
+	}
+
+    /**
+     * Retrieve DataBase Table Name.
+     *
+     * @method getTableName
+     * @return {string} The DataBase Table Name corresponding to Model.
+     */
+    static getTableName() : string {
+        return "InfoTypes";
     }
 }
