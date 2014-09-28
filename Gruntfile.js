@@ -7,6 +7,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-typescript');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-mocha-test');
 
     // tasks
     grunt.initConfig({
@@ -55,6 +56,12 @@ module.exports = function (grunt) {
                     module: 'commonjs',
                     basePath: 'app/scripts'
                 }
+            },
+            test: {
+                src: [
+                    'tests/**/*.ts'
+                ],
+                dest: 'tests/Test.js'
             }
         },
 
@@ -100,11 +107,26 @@ module.exports = function (grunt) {
 // ---------------------------------------------
 
 // ---------------------------------------------
+//                                 test tasks
+// ---------------------------------------------
+        mochaTest: {
+            test: {
+                options: {
+                    reporter: 'spec',
+                    'colors': true
+                },
+                src: ['tests/Test.js']
+            }
+        },
+// ---------------------------------------------
+
+// ---------------------------------------------
 //                                    clean task
 // ---------------------------------------------
         clean: {
             build: ['build/'],
-            dist: ['dist/']
+            dist: ['dist/'],
+            test: ['tests/Test.js']
         }
 // ---------------------------------------------
     });
@@ -131,5 +153,11 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('develop', ['build', 'express:build', 'watch']);
+
+    grunt.registerTask('test', function() {
+        grunt.task.run(['clean:test']);
+
+        grunt.task.run(['typescript:test', 'mochaTest:test']);
+    });
 
 }

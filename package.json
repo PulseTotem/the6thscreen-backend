@@ -13,6 +13,8 @@
     "grunt-express-server": "~0.4.17",
     "colors": "~0.6.2",
     "node-rest-client": "~1.0.0",
-    "deasync": "0.0.7"
+    "deasync": "0.0.7",
+    "mocha": "~1.21.4",
+    "grunt-mocha-test": "~0.12.0"
   }
 }
