@@ -75,6 +75,8 @@ class RenderPolicy extends ModelItf {
 
     /**
      * Return the RenderPolicy's name.
+     *
+     * @method name
      */
     name() {
         return this._name;
@@ -82,6 +84,8 @@ class RenderPolicy extends ModelItf {
 
     /**
      * Return the RenderPolicy's description.
+     *
+     * @method description
      */
     description() {
         return this._description;
@@ -93,6 +97,7 @@ class RenderPolicy extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string, description: string}}
 	 */
 	toJSONObject() : Object {

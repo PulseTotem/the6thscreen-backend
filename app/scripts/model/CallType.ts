@@ -7,7 +7,7 @@
 /// <reference path="./Renderer.ts" />
 /// <reference path="./ReceivePolicy.ts" />
 /// <reference path="./RenderPolicy.ts" />
-/// <reference path="./Call.ts" />
+/// <reference path="./Zone.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -184,6 +184,8 @@ class CallType extends ModelItf {
 
     /**
      * Return the CallType's description.
+     *
+     * @method description
      */
     description() {
         return this._description;
@@ -191,6 +193,8 @@ class CallType extends ModelItf {
 
     /**
      * Return the CallType's source.
+     *
+     * @method source
      */
     source() {
         if(! this._source_loaded) {
@@ -201,6 +205,8 @@ class CallType extends ModelItf {
 
     /**
      * Return the CallType's renderer.
+     *
+     * @method renderer
      */
     renderer() {
         if(! this._renderer_loaded) {
@@ -211,6 +217,8 @@ class CallType extends ModelItf {
 
     /**
      * Return the CallType's receivePolicy.
+     *
+     * @method receivePolicy
      */
     receivePolicy() {
         if(! this._receive_policy_loaded) {
@@ -221,6 +229,8 @@ class CallType extends ModelItf {
 
     /**
      * Return the CallType's renderPolicy.
+     *
+     * @method renderPolicy
      */
     renderPolicy() {
         if(! this._render_policy_loaded) {
@@ -231,6 +241,8 @@ class CallType extends ModelItf {
 
 	/**
 	 * Return the CallType's zone.
+     *
+     * @method zone
 	 */
 	zone() {
 		if(! this._zone) {
@@ -244,6 +256,8 @@ class CallType extends ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {
 		this.source();
@@ -255,6 +269,8 @@ class CallType extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._source_loaded = false;
@@ -268,6 +284,7 @@ class CallType extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string, description: string}}
 	 */
 	toJSONObject() : Object  {
@@ -284,6 +301,7 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one Source, if the value is already set, this method throws an exception: you need first to unset the Source.
 	 * Moreover the given Source must be created in database.
 	 *
+     * @method setSource
 	 * @param {Source} s The Source to associate with the CallType.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -311,6 +329,7 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Source must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetSource
 	 * @returns {boolean} Returns true if the source is well unset and the association removed in database.
 	 */
 	unsetSource() : boolean {
@@ -332,6 +351,7 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one Renderer, if the value is already set, this method throws an exception: you need first to unset the Renderer.
 	 * Moreover the given Renderer must be created in database.
 	 *
+     * @method setRenderer
 	 * @param {Renderer} r The Renderer to associate with the CallType.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -359,6 +379,7 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Renderer must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetRenderer
 	 * @returns {boolean} Returns true if the renderer is well unset and the association removed in database.
 	 */
 	unsetRenderer() : boolean {
@@ -380,6 +401,7 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one ReceivePolicy, if the value is already set, this method throws an exception: you need first to unset the ReceivePolicy.
 	 * Moreover the given ReceivePolicy must be created in database.
 	 *
+     * @method setReceivePolicy
 	 * @param {ReceivePolicy} rp The ReceivePolicy to associate with the CallType.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -407,6 +429,7 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A ReceivePolicy must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetReceivePolicy
 	 * @returns {boolean} Returns true if the ReceivePolicy is well unset and the association removed in database.
 	 */
 	unsetReceivePolicy() : boolean {
@@ -428,6 +451,7 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one RenderPolicy, if the value is already set, this method throws an exception: you need first to unset the RenderPolicy.
 	 * Moreover the given RenderPolicy must be created in database.
 	 *
+     * @method setRenderPolicy
 	 * @param {RenderPolicy} rp The RenderPolicy to associate with the CallType.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -455,6 +479,7 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A RenderPolicy must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetRenderPolicy
 	 * @returns {boolean} Returns true if the RenderPolicy is well unset and the association removed in database.
 	 */
 	unsetRenderPolicy() : boolean {
@@ -476,6 +501,7 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one Zone, if the value is already set, this method throws an exception: you need first to unset the Zone.
 	 * Moreover the given Zone must be created in database.
 	 *
+     * @method setZone
 	 * @param {Zone} z The Zone to associate with the CallType.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -503,6 +529,7 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Zone must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetZone
 	 * @returns {boolean} Returns true if the Zone is well unset and the association removed in database.
 	 */
 	unsetZone() : boolean {
@@ -577,7 +604,7 @@ class CallType extends ModelItf {
 	 * @method parseJSON
 	 * @static
 	 * @param {string} json - The JSON string
-	 * @return {Call} The model instance.
+	 * @return {CallType} The model instance.
 	 */
 	static parseJSON(jsonString : string) : CallType {
 		return CallType.fromJSONObject(JSON.parse(jsonString));
@@ -589,7 +616,7 @@ class CallType extends ModelItf {
 	 * @method fromJSONObject
 	 * @static
 	 * @param {JSONObject} json - The JSON Object
-	 * @return {Call} The model instance.
+	 * @return {CallType} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : CallType {
 		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {

@@ -3,8 +3,6 @@
  */
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./Source.ts" />
-/// <reference path="./Renderer.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -53,6 +51,8 @@ class TypeParamType extends ModelItf {
 
 	/**
 	 * Return the TypeParamType's name.
+     *
+     * @method name
 	 */
 	name() {
 		return this._name;
@@ -64,6 +64,7 @@ class TypeParamType extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string}}
 	 */
 	toJSONObject() : Object {

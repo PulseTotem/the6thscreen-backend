@@ -7,8 +7,6 @@
 /// <reference path="./Timeline.ts" />
 
 /// <reference path="../core/Logger.ts" />
-/// <reference path="../core/RestClient.ts" />
-/// <reference path="../core/DatabaseConnection.ts" />
 
 /**
  * Model : Profil
@@ -166,6 +164,8 @@ class Profil extends ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {
 		this.calls();
@@ -174,6 +174,8 @@ class Profil extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._calls_loaded = false;
@@ -184,6 +186,7 @@ class Profil extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string, description: string}}
 	 */
 	toJSONObject() : Object {
@@ -198,6 +201,7 @@ class Profil extends ModelItf {
 	 * Add a new Call to the Profil and associate it in the database.
 	 * A Call can only be added once.
 	 *
+     * @method addCall
 	 * @param {Call} c The Call to add inside the Profil. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -222,7 +226,8 @@ class Profil extends ModelItf {
 	 * Remove a Call from the Profil: the association is removed both in the object and in database.
 	 * The Call can only be removed if it exists first in the list of associated Calls, else an exception is thrown.
 	 *
-	 * @param {Call} c The Call to remove from that Profil
+     * @method removeCall
+     * @param {Call} c The Call to remove from that Profil
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeCall(c : Call) : boolean {
@@ -244,6 +249,7 @@ class Profil extends ModelItf {
 	 * Add a new Timeline to the Profil and associate it in the database.
 	 * A Timeline can only be added once.
 	 *
+     * @method addTimeline
 	 * @param {Timeline} t The Timeline to add inside the Profil. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -268,6 +274,7 @@ class Profil extends ModelItf {
 	 * Remove a Timeline from the Profil: the association is removed both in the object and in database.
 	 * The Timeline can only be removed if it exists first in the list of associated Timelines, else an exception is thrown.
 	 *
+     * @method removeTimeline
 	 * @param {Timeline} t The Timeline to remove from that Profil
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */

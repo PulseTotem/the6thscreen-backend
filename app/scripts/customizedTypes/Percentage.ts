@@ -1,6 +1,7 @@
 /**
  @author Simon Urli <simon@the6thscreen.fr>
  */
+
 /// <reference path="../core/Logger.ts" />
 
 
@@ -11,8 +12,20 @@
  */
 class Percentage {
 
+    /**
+     * Percentage value.
+     *
+     * @property _value
+     * @type nulber
+     */
 	private _value : number;
 
+    /**
+     * Constructor.
+     *
+     * @constructor
+     * @param {number} value - The percentage value.
+     */
 	constructor(value : number) {
 		if (value == null || value > 100 || value < 0) {
 			Logger.error("The given value must be strictly in the range [0, 100].");
@@ -23,6 +36,11 @@ class Percentage {
 		this._value = value;
 	}
 
+    /**
+     * Set the percentage value.
+     *
+     * @method value
+     */
 	value() : number {
 		return this._value;
 	}

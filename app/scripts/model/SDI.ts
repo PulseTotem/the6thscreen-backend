@@ -179,6 +179,8 @@ class SDI extends ModelItf {
 
 	/**
 	 * Return the SDI's name.
+     *
+     * @method name
 	 */
 	name() {
 		return this._name;
@@ -186,6 +188,8 @@ class SDI extends ModelItf {
 
     /**
      * Return the SDI's description.
+     *
+     * @method description
      */
     description() {
         return this._description;
@@ -193,6 +197,8 @@ class SDI extends ModelItf {
 
     /**
      * Return the SDI's allowedHost.
+     *
+     * @method allowedHost
      */
     allowedHost() {
         return this._allowedHost;
@@ -200,6 +206,8 @@ class SDI extends ModelItf {
 
     /**
      * Return the Users
+     *
+     * @method users
      */
     users() {
         if(! this._users_loaded) {
@@ -210,6 +218,8 @@ class SDI extends ModelItf {
 
     /**
      * Return the zones
+     *
+     * @method zones
      */
     zones() {
         if(! this._zones_loaded) {
@@ -220,6 +230,8 @@ class SDI extends ModelItf {
 
     /**
      * Return the SDI's profiles.
+     *
+     * @method profils
      */
     profils() {
         if(! this._profils_loaded) {
@@ -230,6 +242,8 @@ class SDI extends ModelItf {
 
     /**
      * Return the SDI's timelines.
+     *
+     * @method timelines
      */
     timelines() {
         if(! this._timelines_loaded) {
@@ -243,6 +257,8 @@ class SDI extends ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() {
 		this.users();
@@ -253,6 +269,8 @@ class SDI extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._profils_loaded = false;
@@ -265,6 +283,7 @@ class SDI extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string, description: string, allowedHost: string}}
 	 */
 	toJSONObject() : Object {
@@ -281,6 +300,7 @@ class SDI extends ModelItf {
 	 * Add a new User to the SDI and associate it in the database.
 	 * A User can only be added once.
 	 *
+     * @method addUser
 	 * @param {User} u The User to add inside the SDI. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -305,6 +325,7 @@ class SDI extends ModelItf {
 	 * Remove a User from the SDI: the association is removed both in the object and in database.
 	 * The User can only be removed if it exists first in the list of associated Users, else an exception is thrown.
 	 *
+     * @method removeUser
 	 * @param {User} u The User to remove from that SDI
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
@@ -327,6 +348,7 @@ class SDI extends ModelItf {
 	 * Add a new Zone to the SDI and associate it in the database.
 	 * A Zone can only be added once.
 	 *
+     * @method addZone
 	 * @param {Zone} z The Zone to add inside the SDI. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -351,6 +373,7 @@ class SDI extends ModelItf {
 	 * Remove a Zone from the SDI: the association is removed both in the object and in database.
 	 * The Zone can only be removed if it exists first in the list of associated Zones, else an exception is thrown.
 	 *
+     * @method removeZone
 	 * @param {Zone} z The Zone to remove from that SDI
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
@@ -373,6 +396,7 @@ class SDI extends ModelItf {
 	 * Add a new Profil to the SDI and associate it in the database.
 	 * A Profil can only be added once.
 	 *
+     * @method addProfil
 	 * @param {Profil} p The Profil to add inside the SDI. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -397,6 +421,7 @@ class SDI extends ModelItf {
 	 * Remove a Profil from the SDI: the association is removed both in the object and in database.
 	 * The Profil can only be removed if it exists first in the list of associated Profils, else an exception is thrown.
 	 *
+     * @method removeProfil
 	 * @param {Profil} p The Profil to remove from that SDI
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
@@ -419,6 +444,7 @@ class SDI extends ModelItf {
 	 * Add a new Timeline to the SDI and associate it in the database.
 	 * A Timeline can only be added once.
 	 *
+     * @method addTimeline
 	 * @param {Timeline} t The Timeline to add inside the SDI. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -443,6 +469,7 @@ class SDI extends ModelItf {
 	 * Remove a Timeline from the SDI: the association is removed both in the object and in database.
 	 * The Timeline can only be removed if it exists first in the list of associated Timelines, else an exception is thrown.
 	 *
+     * @method removeTimeline
 	 * @param {Timeline} t The Timeline to remove from that SDI
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */

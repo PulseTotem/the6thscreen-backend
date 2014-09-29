@@ -95,6 +95,8 @@ class Renderer extends ModelItf {
 
     /**
      * Return the Renderer's name.
+     *
+     * @method name
      */
     name() {
         return this._name;
@@ -102,6 +104,8 @@ class Renderer extends ModelItf {
 
     /**
      * Return the Renderer's description.
+     *
+     * @method description
      */
     description() {
         return this._description;
@@ -109,6 +113,8 @@ class Renderer extends ModelItf {
 
     /**
      * Return the Renderer's infoType.
+     *
+     * @method infoType
      */
     infoType() {
         if(! this._info_type_loaded) {
@@ -122,6 +128,8 @@ class Renderer extends ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {
 		this.infoType();
@@ -129,6 +137,8 @@ class Renderer extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._info_type_loaded = false;
@@ -138,6 +148,7 @@ class Renderer extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string, description: string}}
 	 */
 	toJSONObject() : Object {
@@ -154,6 +165,7 @@ class Renderer extends ModelItf {
 	 * As a Renderer can only have one InfoType, if the value is already set, this method throws an exception: you need first to unset the InfoType.
 	 * Moreover the given type must be created in database.
 	 *
+     * @method setInfoType
 	 * @param {InfoType} it The InfoType to associate with the Renderer.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -181,6 +193,7 @@ class Renderer extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * An InfoType must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetInfoType
 	 * @returns {boolean} Returns true if the InfoType is well unset and the association removed in database.
 	 */
 	unsetInfoType() : boolean {

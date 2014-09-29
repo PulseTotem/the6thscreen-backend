@@ -92,6 +92,8 @@ class User extends ModelItf {
 
     /**
      * Return the User's username.
+     *
+     * @method username
      */
     username() {
         return this._username;
@@ -99,6 +101,8 @@ class User extends ModelItf {
 
     /**
      * Return the User's roles.
+     *
+     * @method roles
      */
     roles() {
         if(! this._roles_loaded) {
@@ -109,6 +113,8 @@ class User extends ModelItf {
 
     /**
      * Return the SDIs owned by the User.
+     *
+     * @method sdis
      */
     sdis() {
         if(! this._sdis_loaded) {
@@ -122,6 +128,8 @@ class User extends ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {
 		this.roles();
@@ -130,6 +138,8 @@ class User extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._roles_loaded = false;
@@ -140,6 +150,7 @@ class User extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{username: string}}
 	 */
 	toJSONObject() : Object {
@@ -151,6 +162,7 @@ class User extends ModelItf {
 	 * Add a new SDI to the User and associate it in the database.
 	 * A SDI can only be added once.
 	 *
+     * @method addSDI
 	 * @param {SDI} s The SDI to link with the User. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -175,6 +187,7 @@ class User extends ModelItf {
 	 * Remove a SDI from the User: the association is removed both in the object and in database.
 	 * The SDI can only be removed if it exists first in the list of associated SDIs, else an exception is thrown.
 	 *
+     * @method removeSDI
 	 * @param {SDI} s The SDI to remove from that User
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
@@ -197,6 +210,7 @@ class User extends ModelItf {
 	 * Add a new Role to the User and associate it in the database.
 	 * A Role can only be added once.
 	 *
+     * @method addRole
 	 * @param {Role} r The Role to link with the User. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -221,6 +235,7 @@ class User extends ModelItf {
 	 * Remove a Role from the User: the association is removed both in the object and in database.
 	 * The Role can only be removed if it exists first in the list of associated Roles, else an exception is thrown.
 	 *
+     * @method removeRole
 	 * @param {Role} r The Role to remove from that User
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */

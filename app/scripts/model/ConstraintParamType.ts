@@ -94,6 +94,8 @@ class ConstraintParamType extends ModelItf {
 
 	/**
 	 * Return the ConstraintParamType's name.
+     *
+     * @method name
 	 */
 	name() {
 		return this._name;
@@ -101,6 +103,8 @@ class ConstraintParamType extends ModelItf {
 
 	/**
 	 * Return the ConstraintParamType's description.
+     *
+     * @method description
 	 */
 	description() {
 		return this._description;
@@ -108,6 +112,8 @@ class ConstraintParamType extends ModelItf {
 
 	/**
 	 * Return the ConstraintParamType's type
+     *
+     * @method type
 	 */
 	type() {
 		if (!this._type_loading) {
@@ -121,6 +127,8 @@ class ConstraintParamType extends ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {
 		this.type();
@@ -128,6 +136,8 @@ class ConstraintParamType extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._type_loading = false;
@@ -137,6 +147,7 @@ class ConstraintParamType extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string, description: string}}
 	 */
 	toJSONObject() : Object {
@@ -153,6 +164,7 @@ class ConstraintParamType extends ModelItf {
 	 * As a ConstraintParamType can only have one type, if the value is already set, this method throws an exception: you need first to unset the type.
 	 * Moreover the given type must be created in database.
 	 *
+     * @method setType
 	 * @param {TypeParamType} t The type to associate with the ConstraintParamType.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -180,6 +192,7 @@ class ConstraintParamType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A type must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetType
 	 * @returns {boolean} Returns true if the type is well unset and the association removed in database.
 	 */
 	unsetType() : boolean {

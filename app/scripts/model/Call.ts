@@ -9,8 +9,6 @@
 /// <reference path="./Profil.ts" />
 
 /// <reference path="../core/Logger.ts" />
-/// <reference path="../core/RestClient.ts" />
-/// <reference path="../core/DatabaseConnection.ts" />
 
 /**
  * Model : Call
@@ -100,6 +98,8 @@ class Call extends ModelItf {
 
     /**
      * Return the Call's name.
+     *
+     * @method name
      */
     name() {
         return this._name;
@@ -121,6 +121,8 @@ class Call extends ModelItf {
 
     /**
      * Return the Call's paramValues.
+     *
+     * @method paramValues
      */
     paramValues() {
         if(! this._param_values_loaded) {
@@ -131,6 +133,8 @@ class Call extends ModelItf {
 
 	/**
 	 * Return the Call's profil.
+     *
+     * @method profil
 	 */
 	profil() {
 		if(! this._profil_loaded) {
@@ -141,6 +145,8 @@ class Call extends ModelItf {
 
 	/**
 	 * Return the Call's type.
+     *
+     * @method callType
 	 */
 	callType() {
 		if(! this._call_type_loaded) {
@@ -154,6 +160,8 @@ class Call extends ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {
 		this.paramValues();
@@ -163,6 +171,8 @@ class Call extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._call_type_loaded = false;
@@ -174,6 +184,7 @@ class Call extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string}}
 	 */
 	private toJSONObject() : Object {
@@ -185,6 +196,7 @@ class Call extends ModelItf {
 	 * Add a new ParamValue to the Call and associate it in the database.
 	 * A ParamValue can only be added once.
 	 *
+     * @method addParamValue
 	 * @param {ParamValue} p The ParamValue to add inside the call. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -209,6 +221,7 @@ class Call extends ModelItf {
 	 * Remove a ParamValue from the Call: the association is removed both in the object and in database.
 	 * The ParamValue can only be removed if it exists first in the list of associated ParamValue, else an exception is thrown.
 	 *
+     * @method removeParamValue
 	 * @param {ParamValue} p The ParamValue to remove from that Call
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
@@ -232,6 +245,7 @@ class Call extends ModelItf {
 	 * As a Call can only have one Profil, if the value is already set, this method throws an exception: you need first to unset the profil.
 	 * Moreover the given Profil must be created in database.
 	 *
+     * @method setProfil
 	 * @param {Profil} p The Profil to associate with the Call.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -258,6 +272,7 @@ class Call extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Profil must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetProfil
 	 * @returns {boolean} Returns true if the profil is well unset and the association removed in database.
 	 */
 	unsetProfil() : boolean {
@@ -279,6 +294,7 @@ class Call extends ModelItf {
 	 * As a Call can only have one CallType, if the value is already set, this method throws an exception: you need first to unset the CallType.
 	 * Moreover the given CallType must be created in database.
 	 *
+     * @method setCallType
 	 * @param {CallType} ct The CallType to associate with the Call.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -305,6 +321,7 @@ class Call extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A CallType must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetCallType
 	 * @returns {boolean} Returns true if the CallType is well unset and the association removed in database.
 	 */
 	unsetCallType() : boolean {

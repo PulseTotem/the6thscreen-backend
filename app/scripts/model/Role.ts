@@ -51,6 +51,8 @@ class Role extends ModelItf {
 
     /**
      * Return the Role's name.
+     *
+     * @method name
      */
     name() {
         return this._name;
@@ -62,6 +64,7 @@ class Role extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string}}
 	 */
 	toJSONObject() : Object {

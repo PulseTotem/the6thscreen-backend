@@ -207,6 +207,8 @@ class Source extends ModelItf {
 
 	/**
      * Return the Source's name.
+     *
+     * @method name
      */
     name() {
         return this._name;
@@ -214,6 +216,8 @@ class Source extends ModelItf {
 
     /**
      * Return the Source's service.
+     *
+     * @method service
      */
     service() {
         return this._service;
@@ -221,6 +225,8 @@ class Source extends ModelItf {
 
     /**
      * Return the Source's description.
+     *
+     * @method description
      */
     description() {
         return this._description;
@@ -228,6 +234,8 @@ class Source extends ModelItf {
 
     /**
      * Return the Source's host.
+     *
+     * @method host
      */
     host() {
         return this._host;
@@ -235,6 +243,8 @@ class Source extends ModelItf {
 
     /**
      * Return the Source's port.
+     *
+     * @method port
      */
     port() {
         return this._port;
@@ -242,6 +252,8 @@ class Source extends ModelItf {
 
     /**
      * Return the Source's infoType.
+     *
+     * @method infoType
      */
     infoType() {
         if(! this._info_type_loaded) {
@@ -252,6 +264,8 @@ class Source extends ModelItf {
 
     /**
      * Return the Source's paramTypes.
+     *
+     * @method paramTypes
      */
     paramTypes() {
         if(! this._param_types_loaded) {
@@ -262,6 +276,8 @@ class Source extends ModelItf {
 
     /**
      * Return the Source's paramValues.
+     *
+     * @method paramValues
      */
     paramValues() {
         if(! this._param_values_loaded) {
@@ -275,6 +291,8 @@ class Source extends ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {
 		this.paramTypes();
@@ -284,6 +302,8 @@ class Source extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._info_type_loaded = false;
@@ -295,6 +315,7 @@ class Source extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string, service: string, description: string, host: string, port: number}}
 	 */
 	toJSONObject() : Object {
@@ -314,6 +335,7 @@ class Source extends ModelItf {
 	 * As a Source can only have one InfoType, if the value is already set, this method throws an exception: you need first to unset the InfoType.
 	 * Moreover the given type must be created in database.
 	 *
+     * @method setInfoType
 	 * @param {InfoType} it The InfoType to associate with the Source.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -341,6 +363,7 @@ class Source extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * An InfoType must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetInfoType
 	 * @returns {boolean} Returns true if the InfoType is well unset and the association removed in database.
 	 */
 	unsetInfoType() : boolean {
@@ -361,6 +384,7 @@ class Source extends ModelItf {
 	 * Add a new ParamType to the Source and associate it in the database.
 	 * A ParamType can only be added once.
 	 *
+     * @method addParamType
 	 * @param {ParamType} pt The ParamType to add inside the Source. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -385,6 +409,7 @@ class Source extends ModelItf {
 	 * Remove a ParamType from the Source: the association is removed both in the object and in database.
 	 * The ParamType can only be removed if it exists first in the list of associated ParamTypes, else an exception is thrown.
 	 *
+     * @method removeParamType
 	 * @param {ParamType} pt The ParamType to remove from that Source
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
@@ -407,6 +432,7 @@ class Source extends ModelItf {
 	 * Add a new ParamValue to the Source and associate it in the database.
 	 * A ParamValue can only be added once.
 	 *
+     * @method addParamValue
 	 * @param {ParamValue} pv The ParamValue to add inside the Source. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -431,6 +457,7 @@ class Source extends ModelItf {
 	 * Remove a ParamValue from the Source: the association is removed both in the object and in database.
 	 * The ParamValue can only be removed if it exists first in the list of associated ParamValues, else an exception is thrown.
 	 *
+     * @method removeParamValue
 	 * @param {ParamValue} pv The ParamValue to remove from that Source
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */

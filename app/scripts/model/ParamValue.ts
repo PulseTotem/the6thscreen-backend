@@ -3,6 +3,7 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./ParamType.ts" />
 
 /// <reference path="../core/Logger.ts" />
 
@@ -71,6 +72,8 @@ class ParamValue extends ModelItf {
 
     /**
      * Return the ParamValue's value.
+     *
+     * @method value
      */
     value() {
         return this._value;
@@ -78,6 +81,8 @@ class ParamValue extends ModelItf {
 
 	/**
 	 * Return the ParamValue's ParamType.
+     *
+     * @method paramType
 	 */
 	paramType() {
 		if(! this._paramType_loaded) {
@@ -91,6 +96,8 @@ class ParamValue extends ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {
 		this.paramType();
@@ -98,6 +105,8 @@ class ParamValue extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._paramType_loaded = false;
@@ -107,6 +116,7 @@ class ParamValue extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{value: string}}
 	 */
 	toJSONObject() : Object {
@@ -122,6 +132,7 @@ class ParamValue extends ModelItf {
 	 * As a ParamValue can only have one type, if the value is already set, this method throws an exception: you need first to unset the ParamType.
 	 * Moreover the given ParamType must be created in database.
 	 *
+     * @method setParamType
 	 * @param {ParamType} t The ParamType to associate with the ParamValue.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -149,6 +160,7 @@ class ParamValue extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A ParamType must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetParamType
 	 * @returns {boolean} Returns true if the ParamType is well unset and the association removed in database.
 	 */
 	unsetParamType() : boolean {

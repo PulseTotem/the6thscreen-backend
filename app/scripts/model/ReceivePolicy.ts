@@ -50,16 +50,20 @@ class ReceivePolicy extends ModelItf {
 
     /**
      * Return the ReceivePolicy's name.
+     *
+     * @method name
      */
     name() {
         return this._name;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
 	/**
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string}}
 	 */
 	toJSONObject() : Object {

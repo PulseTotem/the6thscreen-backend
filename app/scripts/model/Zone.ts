@@ -3,9 +3,6 @@
  */
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./CallType.ts" />
-/// <reference path="./Call.ts" />
-
 
 /// <reference path="../customizedTypes/Percentage.ts" />
 /// <reference path="../core/Logger.ts" />
@@ -88,6 +85,8 @@ class Zone extends ModelItf {
 
 	/**
 	 * Set the Zone's name
+     *
+     * @method setName
 	 * @param name A new name
 	 */
 	setName(name : string) : void {
@@ -101,6 +100,8 @@ class Zone extends ModelItf {
 
 	/**
 	 * Set the Zone's description
+     *
+     * @method setDescription
 	 * @param description a new description
 	 */
 	setDescription(description : string) : void {
@@ -114,6 +115,8 @@ class Zone extends ModelItf {
 
 	/**
 	 * Set the Zone's width
+     *
+     * @method setWidth
 	 * @param width a new width
 	 */
 	setWidth(width : number) : void {
@@ -127,6 +130,8 @@ class Zone extends ModelItf {
 
 	/**
 	 * Set the Zone's height
+     *
+     * @method setHeight
 	 * @param height a new height
 	 */
 	setHeight(height : number) : void {
@@ -140,6 +145,8 @@ class Zone extends ModelItf {
 
 	/**
 	 * Set the Zone's positionFromTop
+     *
+     * @method setPositionFromTop
 	 * @param positionFromTop a new positionFromTop
 	 */
 	setPositionFromTop(positionFromTop : number) : void {
@@ -153,6 +160,8 @@ class Zone extends ModelItf {
 
 	/**
 	 * Set the Zone's positionFromLeft
+     *
+     * @method setPositionFromLeft
 	 * @param positionFromTop a new positionFromTop
 	 */
 	setPositionFromLeft(positionFromLeft : number) : void {
@@ -166,6 +175,8 @@ class Zone extends ModelItf {
 
     /**
      * Return the Zone's name.
+     *
+     * @method name
      */
     name() {
         return this._name;
@@ -173,6 +184,8 @@ class Zone extends ModelItf {
 
     /**
      * Return the Zone's description.
+     *
+     * @method description
      */
     description() {
         return this._description;
@@ -180,6 +193,8 @@ class Zone extends ModelItf {
 
 	/**
 	 * Return the Zone's width
+     *
+     * @method width
 	 */
     width() {
 		return this._width.value();
@@ -187,6 +202,8 @@ class Zone extends ModelItf {
 
 	/**
 	 * Return the Zone's height
+     *
+     * @method height
 	 */
 	height() {
 		return this._height.value();
@@ -194,6 +211,8 @@ class Zone extends ModelItf {
 
 	/**
 	 * Return the Zone's positionFromTop
+     *
+     * @method positionFromTop
 	 */
 	positionFromTop() {
 		return this._position_from_top.value();
@@ -201,6 +220,8 @@ class Zone extends ModelItf {
 
 	/**
 	 * Return the Zone's positionFromLeft
+     *
+     * @method positionFromLeft
 	 */
 	positionFromLeft() {
 		return this._position_from_left.value();
@@ -212,6 +233,7 @@ class Zone extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string, description: string, width: number, height: number, positionFromTop: number, positionFromLeft: number}}
 	 */
 	toJSONObject() : Object {

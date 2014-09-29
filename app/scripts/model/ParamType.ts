@@ -138,6 +138,8 @@ class ParamType extends ModelItf {
 
     /**
      * Return the ParamType's name.
+     *
+     * @method name
      */
     name() {
         return this._name;
@@ -145,6 +147,8 @@ class ParamType extends ModelItf {
 
     /**
      * Return the ParamType's description.
+     *
+     * @method description
      */
     description() {
         return this._description;
@@ -152,6 +156,8 @@ class ParamType extends ModelItf {
 
     /**
      * Return the ParamType's type.
+     *
+     * @method type
      */
 	type() {
 	    if(! this._type_loaded) {
@@ -162,6 +168,8 @@ class ParamType extends ModelItf {
 
     /**
      * Return the ParamType's constraint.
+     *
+     * @method constraint
      */
     constraint() {
 	    if(! this._constraint_loaded) {
@@ -172,6 +180,8 @@ class ParamType extends ModelItf {
 
 	/**
 	 * Return the ParamType's default value.
+     *
+     * @method defaultValue
 	 */
 	defaultValue() {
 		if(! this._default_value_loaded) {
@@ -185,6 +195,8 @@ class ParamType extends ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {
 		this.type();
@@ -194,6 +206,8 @@ class ParamType extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._type_loaded = false;
@@ -206,6 +220,7 @@ class ParamType extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string, description: string}}
 	 */
 	toJSONObject() : Object {
@@ -222,6 +237,7 @@ class ParamType extends ModelItf {
 	 * As a ParamType can only have one Type, if the value is already set, this method throws an exception: you need first to unset the Type.
 	 * Moreover the given Type must be created in database.
 	 *
+     * @method setType
 	 * @param {TypeParamType} t The Type to associate with the ParamType.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -249,6 +265,7 @@ class ParamType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Type must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetType
 	 * @returns {boolean} Returns true if the Type is well unset and the association removed in database.
 	 */
 	unsetType() : boolean {
@@ -270,6 +287,7 @@ class ParamType extends ModelItf {
 	 * As a ParamType can only have one Constraint, if the value is already set, this method throws an exception: you need first to unset the Constraint.
 	 * Moreover the given Constraint must be created in database.
 	 *
+     * @method setConstraint
 	 * @param {ConstraintParamType} t The Constraint to associate with the ParamType.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -297,6 +315,7 @@ class ParamType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Constraint must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetConstraint
 	 * @returns {boolean} Returns true if the Constraint is well unset and the association removed in database.
 	 */
 	unsetConstraint() : boolean {
@@ -318,6 +337,7 @@ class ParamType extends ModelItf {
 	 * As a ParamType can only have one DefaultValue, if the value is already set, this method throws an exception: you need first to unset the DefaultValue.
 	 * Moreover the given DefaultValue must be created in database.
 	 *
+     * @method setDefaultValue
 	 * @param {ParamValue} t The DefaultValue to associate with the ParamType.
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
@@ -345,6 +365,7 @@ class ParamType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A DefaultValue must have been set before using it, else an exception is thrown.
 	 *
+     * @method unsetDefaultValue
 	 * @returns {boolean} Returns true if the DefaultValue is well unset and the association removed in database.
 	 */
 	unsetDefaultValue() : boolean {

@@ -195,6 +195,7 @@ class ModelItf {
 	/**
 	 * Remove an association between two objects in database.
 	 *
+     * @method deleteObjectAssociation
 	 * @param {ModelItf Class} modelClass1 the model class of the first object
 	 * @param {ModelItf Class} modelClass2 the model class of the second object
 	 * @param {number} id2 the ID of the second object
@@ -223,6 +224,7 @@ class ModelItf {
 	/**
 	 * Retrieve all associated objects
 	 *
+     * @method getAssociatedObjects
 	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
 	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
 	 * @param assoName - the array in which the objects have to be pushed
@@ -256,6 +258,7 @@ class ModelItf {
 	/**
 	 * Retrieve all associated objects
 	 *
+     * @method getUniquelyAssociatedObject
 	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
 	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
 	 * @param assoName - where the object have to be saved
@@ -322,11 +325,15 @@ class ModelItf {
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {}
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {}
 

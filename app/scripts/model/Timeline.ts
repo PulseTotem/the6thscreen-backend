@@ -95,6 +95,8 @@ class Timeline extends ModelItf {
 
     /**
      * Return the Timeline's name.
+     *
+     * @method name
      */
     name() {
         return this._name;
@@ -102,6 +104,8 @@ class Timeline extends ModelItf {
 
     /**
      * Return the Timeline's description.
+     *
+     * @method description
      */
     description() {
         return this._description;
@@ -109,6 +113,8 @@ class Timeline extends ModelItf {
 
     /**
      * Return the Timeline's profils.
+     *
+     * @method profils
      */
     profils() {
         if(! this._profils_loaded) {
@@ -118,9 +124,12 @@ class Timeline extends ModelItf {
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
 	/**
 	 * Load all the lazy loading properties of the object.
 	 * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
 	 */
 	loadAssociations() : void {
 		this.profils();
@@ -128,6 +137,8 @@ class Timeline extends ModelItf {
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
 	 */
 	desynchronize() : void {
 		this._profils_loaded = false;
@@ -137,6 +148,7 @@ class Timeline extends ModelItf {
 	 * Private method to transform the object in JSON.
 	 * It is used to create or update the object in database.
 	 *
+     * @method toJSONObject
 	 * @returns {{name: string, description: string}}
 	 */
 	toJSONObject() : Object {
@@ -151,6 +163,7 @@ class Timeline extends ModelItf {
 	 * Add a new Profil to the Timeline and associate it in the database.
 	 * A Profil can only be added once.
 	 *
+     * @method addProfil
 	 * @param {Profil} p The Profil to add inside the Timeline. It cannot be a null value.
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
@@ -175,6 +188,7 @@ class Timeline extends ModelItf {
 	 * Remove a Profil from the Timeline: the association is removed both in the object and in database.
 	 * The Profil can only be removed if it exists first in the list of associated Profils, else an exception is thrown.
 	 *
+     * @method removeProfil
 	 * @param {Profil} p The Profil to remove from that Timeline
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
