@@ -232,6 +232,26 @@ class ParamType extends ModelItf {
 		return data;
 	}
 
+    /**
+     * To transform ParamType to JSON object containing
+     * description of associations.
+     *
+     * @method toJSONObjectWithAssociations
+     */
+    toJSONObjectWithAssociations() : Object {
+        this.loadAssociations();
+
+        var data = {
+            "name" : this.name(),
+            "description": this.description()
+        };
+
+        data["type"] = this.type().toJSONObjectWithAssociations();
+        data["defaultValue"] = this.defaultValue().toJSONObjectWithAssociations();
+
+        return data;
+    }
+
 	/**
 	 * Set the Type of the ParamType.
 	 * As a ParamType can only have one Type, if the value is already set, this method throws an exception: you need first to unset the Type.

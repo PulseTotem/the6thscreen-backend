@@ -330,6 +330,40 @@ class Source extends ModelItf {
 		return data;
 	}
 
+    /**
+     * To transform Source to JSON object containing
+     * description of associations.
+     *
+     * @method toJSONObjectWithAssociations
+     */
+    toJSONObjectWithAssociations() : Object {
+        this.loadAssociations();
+
+        var data = {
+            "name": this.name(),
+            "service": this.service(),
+            "description": this.description(),
+            "host": this.host(),
+            "port": this.port()
+        };
+
+        data["paramTypes"] = new Array();
+        for(var iPT in this._param_types) {
+            var pt : ParamType = this._param_types[iPT];
+            data["paramTypes"].push(pt.toJSONObjectWithAssociations())
+        }
+
+        data["paramValues"] = new Array();
+        for(var iPV in this._param_values) {
+            var pv : ParamValue = this._param_values[iPV];
+            data["paramValues"].push(pv.toJSONObjectWithAssociations())
+        }
+
+        data["infoType"] = this.infoType().toJSONObjectWithAssociations();
+
+        return data;
+    }
+
 	/**
 	 * Set the InfoType of the Source.
 	 * As a Source can only have one InfoType, if the value is already set, this method throws an exception: you need first to unset the InfoType.

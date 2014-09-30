@@ -160,6 +160,25 @@ class Renderer extends ModelItf {
 		return data;
 	}
 
+    /**
+     * To transform Renderer to JSON object containing
+     * description of associations.
+     *
+     * @method toJSONObjectWithAssociations
+     */
+    toJSONObjectWithAssociations() : Object {
+        this.loadAssociations();
+
+        var data = {
+            "name" : this.name(),
+            "description": this.description()
+        };
+
+        data["infoType"] = this.infoType().toJSONObjectWithAssociations();
+
+        return data;
+    }
+
 	/**
 	 * Set the InfoType of the Renderer.
 	 * As a Renderer can only have one InfoType, if the value is already set, this method throws an exception: you need first to unset the InfoType.

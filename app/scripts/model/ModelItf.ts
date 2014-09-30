@@ -274,10 +274,17 @@ class ModelItf {
 		if(result.success) {
 			var response = result.data;
 			if(response.status == "success") {
+                Logger.debug("OK!!!!");
+                Logger.debug(modelClass.getTableName() + " / " + this.getId().toString() + " / " + modelClassAssociated.getTableName());
 				if(Object.keys(response.data).length === 1) {
+                    Logger.debug("OK 1!!!");
 					for(var i = 0; i < response.data.length; i++) {
 						var object = response.data[i];
+                        Logger.debug(object);
+
 						assoName = modelClassAssociated.fromJSONObject(object);
+
+                        Logger.debug(assoName);
 					}
 					return true;
 				}

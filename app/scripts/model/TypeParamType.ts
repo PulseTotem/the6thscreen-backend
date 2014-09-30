@@ -75,6 +75,20 @@ class TypeParamType extends ModelItf {
 		return data;
 	}
 
+    /**
+     * To transform ParamType to JSON object containing
+     * description of associations.
+     *
+     * @method toJSONObjectWithAssociations
+     */
+    toJSONObjectWithAssociations() : Object {
+        var data = {
+            "name" : this.name()
+        };
+
+        return data;
+    }
+
 	/**
 	 * Create model in database.
 	 *

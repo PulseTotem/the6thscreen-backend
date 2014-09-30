@@ -296,6 +296,29 @@ class CallType extends ModelItf {
 		return data;
 	}
 
+    /**
+     * To transform CallType to JSON object containing
+     * description of associations.
+     *
+     * @method toJSONObjectWithAssociations
+     */
+    toJSONObjectWithAssociations() : Object {
+        this.loadAssociations();
+
+        var data = {
+            "name" : this.name(),
+            "description" : this.description()
+        };
+
+        data["source"] = this.source().toJSONObjectWithAssociations();
+        data["renderer"] = this.renderer().toJSONObjectWithAssociations();
+        data["receivePolicy"] = this.receivePolicy().toJSONObjectWithAssociations();
+        data["renderPolicy"] = this.renderPolicy().toJSONObjectWithAssociations();
+        data["zone"] = this.zone().toJSONObjectWithAssociations();
+
+        return data;
+    }
+
 	/**
 	 * Set the Source of the CallType.
 	 * As a CallType can only have one Source, if the value is already set, this method throws an exception: you need first to unset the Source.

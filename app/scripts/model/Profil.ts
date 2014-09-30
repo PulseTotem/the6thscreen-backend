@@ -197,6 +197,28 @@ class Profil extends ModelItf {
 		return data;
 	}
 
+    /**
+     * To transform profil to JSON object containing
+     * description of associations.
+     *
+     * @method toJSONObjectWithAssociations
+     */
+    toJSONObjectWithAssociations() : Object {
+        this.loadAssociations();
+
+        var data = {
+            "name": this.name(),
+            "description": this.description()
+        };
+
+        data["calls"] = new Array();
+        for(var iCall in this._calls) {
+            var c : Call = this._calls[iCall];
+            data["calls"].push(c.toJSONObjectWithAssociations())
+        }
+        return data;
+    }
+
 	/**
 	 * Add a new Call to the Profil and associate it in the database.
 	 * A Call can only be added once.

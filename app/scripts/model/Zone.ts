@@ -249,6 +249,25 @@ class Zone extends ModelItf {
 	}
 
     /**
+     * To transform Zone to JSON object containing
+     * description of associations.
+     *
+     * @method toJSONObjectWithAssociations
+     */
+    toJSONObjectWithAssociations() : Object {
+        var data = {
+            "name": this.name(),
+            "description": this.description(),
+            "width": this.width(),
+            "height": this.height(),
+            "positionFromTop": this.positionFromTop(),
+            "positionFromLeft": this.positionFromLeft()
+        };
+
+        return data;
+    }
+
+    /**
      * Create model in database.
      *
      * @method create

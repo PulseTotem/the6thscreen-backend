@@ -75,6 +75,21 @@ class ReceivePolicy extends ModelItf {
 	}
 
     /**
+     * To transform ReceivePolicy to JSON object containing
+     * description of associations.
+     *
+     * @method toJSONObjectWithAssociations
+     */
+    toJSONObjectWithAssociations() : Object {
+
+        var data = {
+            "name" : this.name()
+        };
+
+        return data;
+    }
+
+    /**
      * Create model in database.
      *
      * @method create
