@@ -49,22 +49,6 @@ class Profil extends ModelItf {
     private _calls_loaded : boolean;
 
     /**
-     * Timelines property.
-     *
-     * @property _timelines
-     * @type Array<Timeline>
-     */
-    private _timelines : Array<Timeline>;
-
-    /**
-     * Lazy loading for Timelines property.
-     *
-     * @property _timelines_loaded
-     * @type boolean
-     */
-    private _timelines_loaded : boolean;
-
-    /**
      * Constructor.
      *
      * @constructor
@@ -80,9 +64,6 @@ class Profil extends ModelItf {
 
         this._calls = new Array<Call>();
         this._calls_loaded = false;
-
-        this._timelines = new Array<Timeline>();
-        this._timelines_loaded = false;
     }
 
     /**
@@ -146,19 +127,6 @@ class Profil extends ModelItf {
         return this._calls;
     }
 
-    /**
-     * Return the Profil's timelines.
-     *
-     * @method timelines
-     * @return {Array<Timeline>} The Profil's timelines.
-     */
-    timelines() : Array<Timeline> {
-        if(! this._timelines_loaded) {
-            this._timelines_loaded = this.getAssociatedObjects(Profil, Timeline, this._timelines);
-        }
-        return this._timelines;
-    }
-
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
@@ -169,7 +137,6 @@ class Profil extends ModelItf {
 	 */
 	loadAssociations() : void {
 		this.calls();
-		this.timelines();
 	}
 
 	/**
@@ -179,45 +146,35 @@ class Profil extends ModelItf {
 	 */
 	desynchronize() : void {
 		this._calls_loaded = false;
-		this._timelines_loaded = false;
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a Profil instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description()
 		};
 		return data;
 	}
 
-    /**
-     * To transform profil to JSON object containing
-     * description of associations.
-     *
-     * @method toJSONObjectWithAssociations
-     */
-    toJSONObjectWithAssociations() : Object {
-        this.loadAssociations();
-
-        var data = {
-            "name": this.name(),
-            "description": this.description()
-        };
-
-        data["calls"] = new Array();
-        for(var iCall in this._calls) {
-            var c : Call = this._calls[iCall];
-            data["calls"].push(c.toJSONObjectWithAssociations())
-        }
-        return data;
-    }
+	/**
+	 * Return a ModelItf instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		var data = this.toJSONObject();
+		data["calls"] = this.serializeArray(this.calls());
+		return data;
+	}
 
 	/**
 	 * Add a new Call to the Profil and associate it in the database.
@@ -261,54 +218,6 @@ class Profil extends ModelItf {
 		if (this.deleteObjectAssociation(Profil, Call, c.getId())) {
 			c.desynchronize();
 			this.calls().splice(indexValue, 1);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Add a new Timeline to the Profil and associate it in the database.
-	 * A Timeline can only be added once.
-	 *
-     * @method addTimeline
-	 * @param {Timeline} t The Timeline to add inside the Profil. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
-	 */
-	addTimeline(t : Timeline) : boolean {
-		if (this.timelines().indexOf(t) !== -1) {
-			throw new Error("You cannot add twice a Timeline in a Profil.");  // TODO: cannot it be useful sometimes?
-		}
-		if (t === null || t.getId() === undefined || t.getId() === null) {
-			throw new Error("The Timeline must be an existing object to be associated.");
-		}
-
-		if (this.associateObject(Profil, Timeline, t.getId())) {
-			t.desynchronize();
-			this.timelines().push(t);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Remove a Timeline from the Profil: the association is removed both in the object and in database.
-	 * The Timeline can only be removed if it exists first in the list of associated Timelines, else an exception is thrown.
-	 *
-     * @method removeTimeline
-	 * @param {Timeline} t The Timeline to remove from that Profil
-	 * @returns {boolean} Returns true if the association is deleted in database.
-	 */
-	removeTimeline(t : Timeline) : boolean {
-		var indexValue = this.timelines().indexOf(t);
-		if (indexValue === -1) {
-			throw new Error("The Timeline you try to remove has not been added to the current Profil");
-		}
-
-		if (this.deleteObjectAssociation(Profil, Timeline, t.getId())) {
-			t.desynchronize();
-			this.timelines().splice(indexValue, 1);
 			return true;
 		} else {
 			return false;

@@ -218,25 +218,6 @@ class Call extends ModelItf {
 		return data;
 	}
 
-    /**
-     * To transform call to JSON object containing
-     * description of associations.
-     *
-     * @method toJSONObjectWithAssociations
-     */
-    toJSONObjectWithAssociations() : Object {
-        this.loadAssociations();
-	    Logger.debug("call toJSON");
-        Logger.debug(this.callType());
-	    Logger.debug(this.paramValues());
-
-        var data = {
-            "name": this.name(),
-            "callType": this.callType().toJSONObjectWithAssociations()
-        };
-        return data;
-    }
-
 	/**
 	 * Add a new ParamValue to the Call and associate it in the database.
 	 * A ParamValue can only be added once.
