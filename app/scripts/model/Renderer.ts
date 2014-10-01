@@ -118,7 +118,11 @@ class Renderer extends ModelItf {
      */
     infoType() {
         if(! this._info_type_loaded) {
-            this._info_type_loaded = this.getUniquelyAssociatedObject(Renderer, InfoType, this._info_type);
+	        var value = [];
+            this._info_type_loaded = this.getUniquelyAssociatedObject(Renderer, InfoType, value);
+	        if (this._info_type_loaded) {
+		        this._info_type = value[0];
+	        }
         }
         return this._info_type;
     }

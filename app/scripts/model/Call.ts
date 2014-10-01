@@ -138,7 +138,11 @@ class Call extends ModelItf {
 	 */
 	profil() {
 		if(! this._profil_loaded) {
-			this._profil_loaded = this.getUniquelyAssociatedObject(Call, Profil, this._profil);
+			var value = [];
+			this._profil_loaded = this.getUniquelyAssociatedObject(Call, Profil, value);
+			if (this._profil_loaded) {
+				this._profil = value[0];
+			}
 		}
 		return this._profil;
 	}
@@ -151,8 +155,10 @@ class Call extends ModelItf {
 	callType() {
 		if(! this._call_type_loaded) {
 			var value = [];
-			this._call_type_loaded = this.getUniquelyAssociatedObject2(Call, CallType, value);
-			this._call_type = value[0];
+			this._call_type_loaded = this.getUniquelyAssociatedObject(Call, CallType, value);
+			if (this._call_type_loaded) {
+				this._call_type = value[0];
+			}
 		}
 		return this._call_type;
 	}

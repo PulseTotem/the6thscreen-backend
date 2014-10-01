@@ -258,54 +258,13 @@ class ModelItf {
 	/**
 	 * Retrieve all associated objects
 	 *
-     * @method getUniquelyAssociatedObject
-	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
-	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
-	 * @param assoName - where the object have to be saved
-	 * @returns {boolean}
-	 */
-	getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, assoName : ModelItf) : boolean {
-		if (this.getId() == undefined) {
-			return false;
-		}
-
-		var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString() + "/" + modelClassAssociated.getTableName());
-
-		if(result.success) {
-			var response = result.data;
-			if(response.status == "success") {
-                Logger.debug("OK!!!!");
-				Logger.debug(response.data);
-                Logger.debug(modelClass.getTableName() + " / " + this.getId().toString() + " / " + modelClassAssociated.getTableName());
-				 Logger.debug("OK 1!!!");
-					var object = response.data;
-                    Logger.debug(object);
-
-					assoName = modelClassAssociated.fromJSONObject(object);
-
-					Logger.debug("serialization");
-					Logger.debug(modelClassAssociated.fromJSONObject(object));
-					Logger.debug("instanciation");
-                    Logger.debug(assoName);
-					return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Retrieve all associated objects
-	 *
 	 * @method getUniquelyAssociatedObject
 	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
 	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
 	 * @param assoName - where the object have to be saved
 	 * @returns {boolean}
 	 */
-	getUniquelyAssociatedObject2(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) : boolean {
+	getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) : boolean {
 		if (this.getId() == undefined) {
 			return false;
 		}
@@ -315,19 +274,8 @@ class ModelItf {
 		if(result.success) {
 			var response = result.data;
 			if(response.status == "success") {
-				Logger.debug("OK!!!!");
-				Logger.debug(response.data);
-				Logger.debug(modelClass.getTableName() + " / " + this.getId().toString() + " / " + modelClassAssociated.getTableName());
-				Logger.debug("OK 1!!!");
 				var object = response.data;
-				Logger.debug(object);
-
 				assoName.push(modelClassAssociated.fromJSONObject(object));
-
-				Logger.debug("serialization");
-				Logger.debug(modelClassAssociated.fromJSONObject(object));
-				Logger.debug("instanciation");
-				Logger.debug(assoName);
 				return true;
 			} else {
 				return false;
