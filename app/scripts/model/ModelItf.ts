@@ -275,19 +275,60 @@ class ModelItf {
 			var response = result.data;
 			if(response.status == "success") {
                 Logger.debug("OK!!!!");
+				Logger.debug(response.data);
                 Logger.debug(modelClass.getTableName() + " / " + this.getId().toString() + " / " + modelClassAssociated.getTableName());
-				if(Object.keys(response.data).length === 1) {
-                    Logger.debug("OK 1!!!");
-					for(var i = 0; i < response.data.length; i++) {
-						var object = response.data[i];
-                        Logger.debug(object);
+				 Logger.debug("OK 1!!!");
+					var object = response.data;
+                    Logger.debug(object);
 
-						assoName = modelClassAssociated.fromJSONObject(object);
+					assoName = modelClassAssociated.fromJSONObject(object);
 
-                        Logger.debug(assoName);
-					}
+					Logger.debug("serialization");
+					Logger.debug(modelClassAssociated.fromJSONObject(object));
+					Logger.debug("instanciation");
+                    Logger.debug(assoName);
 					return true;
-				}
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Retrieve all associated objects
+	 *
+	 * @method getUniquelyAssociatedObject
+	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
+	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
+	 * @param assoName - where the object have to be saved
+	 * @returns {boolean}
+	 */
+	getUniquelyAssociatedObject2(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) : boolean {
+		if (this.getId() == undefined) {
+			return false;
+		}
+
+		var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString() + "/" + modelClassAssociated.getTableName());
+
+		if(result.success) {
+			var response = result.data;
+			if(response.status == "success") {
+				Logger.debug("OK!!!!");
+				Logger.debug(response.data);
+				Logger.debug(modelClass.getTableName() + " / " + this.getId().toString() + " / " + modelClassAssociated.getTableName());
+				Logger.debug("OK 1!!!");
+				var object = response.data;
+				Logger.debug(object);
+
+				assoName.push(modelClassAssociated.fromJSONObject(object));
+
+				Logger.debug("serialization");
+				Logger.debug(modelClassAssociated.fromJSONObject(object));
+				Logger.debug("instanciation");
+				Logger.debug(assoName);
+				return true;
 			} else {
 				return false;
 			}
@@ -400,6 +441,43 @@ class ModelItf {
         Logger.error("ModelItf - all : Method need to be implemented.");
         return null;
     }
+
+	/**
+	 * Serialize an array of ModelItf instances to a JSON Object.
+	 * It is used in some implementation of "toCompleteJSONObject"
+	 *
+	 * @param {Array<ModelItf>} tableau an array of ModelItf instances
+	 * @returns {Array} an array of JSON Objects
+	 */
+	serializeArray(tableau : Array<ModelItf>) : Object {
+		var data = [];
+		for (var i = 0; i < tableau.length; i++) {
+			data.push(tableau[i].toJSONObject());
+		}
+		return data;
+	}
+
+	/**
+	 * Return a ModelItf instance as a JSON Object
+	 *
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toJSONObject() : Object {
+		var data = { "id": this.getId() };
+		return data;
+	}
+
+	/**
+	 * Return a ModelItf instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		return this.toJSONObject();
+	}
 
     /**
      * Return a ModelItf instance from a JSON string.

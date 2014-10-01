@@ -150,7 +150,9 @@ class Call extends ModelItf {
 	 */
 	callType() {
 		if(! this._call_type_loaded) {
-			this._call_type_loaded = this.getUniquelyAssociatedObject(Call, CallType, this._call_type);
+			var value = [];
+			this._call_type_loaded = this.getUniquelyAssociatedObject2(Call, CallType, value);
+			this._call_type = value[0];
 		}
 		return this._call_type;
 	}
@@ -181,14 +183,32 @@ class Call extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a ModelItf instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
-	private toJSONObject() : Object {
-		var data = { "name": this.name() };
+	toJSONObject() : Object {
+		var data = {
+			"id": this.getId(),
+			"name": this.name()
+		};
+		return data;
+	}
+
+	/**
+	 * Return a ModelItf instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["callType"] = (this.callType() !== null) ? this.callType().toJSONObject() : null;
+		data["profil"] = (this.profil() !== null) ? this.callType().toJSONObject() : null;
+		data["paramValues"] = this.serializeArray(this.paramValues());
 		return data;
 	}
 
@@ -200,8 +220,9 @@ class Call extends ModelItf {
      */
     toJSONObjectWithAssociations() : Object {
         this.loadAssociations();
-
+	    Logger.debug("call toJSON");
         Logger.debug(this.callType());
+	    Logger.debug(this.paramValues());
 
         var data = {
             "name": this.name(),
