@@ -316,57 +316,38 @@ class Source extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a Source instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, service: string, description: string, host: string, port: number}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"name": this.name(),
 			"service": this.service(),
 			"description": this.description(),
 			"host": this.host(),
 			"port": this.port()
 		};
-
 		return data;
 	}
 
-    /**
-     * To transform Source to JSON object containing
-     * description of associations.
-     *
-     * @method toJSONObjectWithAssociations
-     */
-    toJSONObjectWithAssociations() : Object {
-        this.loadAssociations();
-
-        var data = {
-            "name": this.name(),
-            "service": this.service(),
-            "description": this.description(),
-            "host": this.host(),
-            "port": this.port()
-        };
-
-        data["paramTypes"] = new Array();
-        for(var iPT in this._param_types) {
-            var pt : ParamType = this._param_types[iPT];
-            data["paramTypes"].push(pt.toJSONObjectWithAssociations())
-        }
-
-        data["paramValues"] = new Array();
-        for(var iPV in this._param_values) {
-            var pv : ParamValue = this._param_values[iPV];
-            data["paramValues"].push(pv.toJSONObjectWithAssociations())
-        }
-
-        data["infoType"] = this.infoType().toJSONObjectWithAssociations();
-
-        return data;
-    }
+	/**
+	 * Return a Source instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["infoType"] = (this.infoType() !== null) ? this.infoType().toJSONObject() : null;
+		data["paramTypes"] = this.serializeArray(this.paramTypes());
+		data["paramValues"] = this.serializeArray(this.paramValues());
+		return data;
+	}
 
 	/**
 	 * Set the InfoType of the Source.

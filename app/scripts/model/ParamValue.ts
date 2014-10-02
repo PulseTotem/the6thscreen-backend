@@ -117,37 +117,32 @@ class ParamValue extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a ParamValue instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{value: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"value": this.value()
 		};
-
 		return data;
 	}
 
-    /**
-     * To transform ParamValue to JSON object containing
-     * description of associations.
-     *
-     * @method toJSONObjectWithAssociations
-     */
-    toJSONObjectWithAssociations() : Object {
-        this.loadAssociations();
-
-        var data = {
-            "value": this.value()
-        };
-
-        data["paramType"] = this.paramType().toJSONObjectWithAssociations();
-
-        return data;
-    }
+	/**
+	 * Return a ParamValue instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["paramType"] = (this.paramType() !== null) ? this.paramType().toJSONObject() : null;
+		return data;
+	}
 
 	/**
 	 * Set the ParamType of the ParamValue.

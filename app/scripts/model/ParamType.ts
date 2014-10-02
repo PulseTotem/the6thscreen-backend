@@ -228,41 +228,35 @@ class ParamType extends ModelItf {
 	}
 
 	/**
-	 * /**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a ParamType instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
-			"name" : this.name(),
+			"id": this.getId(),
+			"name": this.name(),
 			"description": this.description()
 		};
-
 		return data;
 	}
 
-    /**
-     * To transform ParamType to JSON object containing
-     * description of associations.
-     *
-     * @method toJSONObjectWithAssociations
-     */
-    toJSONObjectWithAssociations() : Object {
-        this.loadAssociations();
-
-        var data = {
-            "name" : this.name(),
-            "description": this.description()
-        };
-
-        data["type"] = this.type().toJSONObjectWithAssociations();
-        data["defaultValue"] = this.defaultValue().toJSONObjectWithAssociations();
-
-        return data;
-    }
+	/**
+	 * Return a ParamType instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["type"] = (this.type() !== null) ? this.type().toJSONObject() : null;
+		data["constraint"] = (this.constraint() !== null) ? this.constraint().toJSONObject() : null;
+		data["defaultValue"] = (this.defaultValue() !== null) ? this.defaultValue().toJSONObject() : null;
+		return data;
+	}
 
 	/**
 	 * Set the Type of the ParamType.

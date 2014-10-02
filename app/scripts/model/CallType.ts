@@ -301,43 +301,37 @@ class CallType extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a CallType instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
-	toJSONObject() : Object  {
+	toJSONObject() : Object {
 		var data = {
-			"name" : this.name(),
-			"description" : this.description()
+			"id": this.getId(),
+			"name": this.name(),
+			"description": this.description()
 		};
-
 		return data;
 	}
 
-    /**
-     * To transform CallType to JSON object containing
-     * description of associations.
-     *
-     * @method toJSONObjectWithAssociations
-     */
-    toJSONObjectWithAssociations() : Object {
-        this.loadAssociations();
-
-        var data = {
-            "name" : this.name(),
-            "description" : this.description()
-        };
-
-        data["source"] = this.source().toJSONObjectWithAssociations();
-        data["renderer"] = this.renderer().toJSONObjectWithAssociations();
-        data["receivePolicy"] = this.receivePolicy().toJSONObjectWithAssociations();
-        data["renderPolicy"] = this.renderPolicy().toJSONObjectWithAssociations();
-        data["zone"] = this.zone().toJSONObjectWithAssociations();
-
-        return data;
-    }
+	/**
+	 * Return a CallType instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["source"] = (this.source() !== null) ? this.source().toJSONObject() : null;
+		data["renderer"] = (this.renderer() !== null) ? this.renderer().toJSONObject() : null;
+		data["zone"] = (this.zone() !== null) ? this.zone().toJSONObject() : null;
+		data["receivePolicy"] = (this.receivePolicy() !== null) ? this.receivePolicy().toJSONObject() : null;
+		data["renderPolicy"] = (this.renderPolicy() !== null) ? this.renderPolicy().toJSONObject() : null;
+		return data;
+	}
 
 	/**
 	 * Set the Source of the CallType.

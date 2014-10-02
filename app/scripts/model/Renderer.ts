@@ -149,39 +149,33 @@ class Renderer extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a Renderer instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
-			"name" : this.name(),
+			"id": this.getId(),
+			"name": this.name(),
 			"description": this.description()
 		};
-
 		return data;
 	}
 
-    /**
-     * To transform Renderer to JSON object containing
-     * description of associations.
-     *
-     * @method toJSONObjectWithAssociations
-     */
-    toJSONObjectWithAssociations() : Object {
-        this.loadAssociations();
-
-        var data = {
-            "name" : this.name(),
-            "description": this.description()
-        };
-
-        data["infoType"] = this.infoType().toJSONObjectWithAssociations();
-
-        return data;
-    }
+	/**
+	 * Return a Renderer instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["infoType"] = (this.infoType() !== null) ? this.infoType().toJSONObject() : null;
+		return data;
+	}
 
 	/**
 	 * Set the InfoType of the Renderer.

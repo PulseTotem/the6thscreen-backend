@@ -147,14 +147,31 @@ class User extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a User instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{username: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
-		var data = { "username": this.username() };
+		var data = {
+			"id": this.getId(),
+			"username": this.username()
+		};
+		return data;
+	}
+
+	/**
+	 * Return a User instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["roles"] = this.serializeArray(this.roles());
+		data["sdis"] = this.serializeArray(this.sdis());
 		return data;
 	}
 

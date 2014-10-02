@@ -280,19 +280,34 @@ class SDI extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a SDI instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string, allowedHost: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description(),
-			"allowedHost": this.allowedHost()
+			"description": this.description()
 		};
+		return data;
+	}
 
+	/**
+	 * Return a SDI instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["profils"] = this.serializeArray(this.profils());
+		data["timelines"] = this.serializeArray(this.timelines());
+		data["users"] = this.serializeArray(this.users());
+		data["zones"] = this.serializeArray(this.zones());
 		return data;
 	}
 

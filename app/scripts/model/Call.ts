@@ -189,7 +189,7 @@ class Call extends ModelItf {
 	}
 
 	/**
-	 * Return a ModelItf instance as a JSON Object
+	 * Return a Call instance as a JSON Object
 	 *
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
@@ -203,7 +203,7 @@ class Call extends ModelItf {
 	}
 
 	/**
-	 * Return a ModelItf instance as a JSON Object including associated object.
+	 * Return a Call instance as a JSON Object including associated object.
 	 * However the method should not be recursive due to cycle in the model.
 	 *
 	 * @method toCompleteJSONObject

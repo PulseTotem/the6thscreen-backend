@@ -61,34 +61,18 @@ class InfoType extends ModelItf {
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a InfoType instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"name": this.name()
 		};
-
 		return data;
 	}
-
-    /**
-     * To transform Source to JSON object containing
-     * description of associations.
-     *
-     * @method toJSONObjectWithAssociations
-     */
-    toJSONObjectWithAssociations() : Object {
-
-        var data = {
-            "name": this.name()
-        };
-
-        return data;
-    }
 
     /**
      * Create model in database.

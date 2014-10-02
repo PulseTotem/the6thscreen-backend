@@ -164,7 +164,7 @@ class Profil extends ModelItf {
 	}
 
 	/**
-	 * Return a ModelItf instance as a JSON Object including associated object.
+	 * Return a Profil instance as a JSON Object including associated object.
 	 * However the method should not be recursive due to cycle in the model.
 	 *
 	 * @method toCompleteJSONObject

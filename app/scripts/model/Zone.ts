@@ -230,14 +230,14 @@ class Zone extends ModelItf {
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a Renderer instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string, width: number, height: number, positionFromTop: number, positionFromLeft: number}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
 			"width": this.width(),
