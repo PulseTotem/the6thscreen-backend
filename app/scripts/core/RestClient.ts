@@ -1,10 +1,13 @@
 /**
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@the6thscreen.fr>
  */
 
 /// <reference path="../../../libsdef/node-rest-client.d.ts" />
 
 /// <reference path="./Logger.ts" />
+/// <reference path="./RestClientResponse.ts" />
+/// <reference path="./RestClientSync.ts" />
 
 var Client = require('node-rest-client').Client;
 
@@ -39,36 +42,67 @@ class RestClient {
         return RestClient.client;
     }
 
+	private static manageLogging(strType : String, url : String, successCallback : Function = null, failCallback : Function = null) : Array<Function> {
+		var success : Function = null;
+		var fail : Function = null;
+
+		if (successCallback != null) {
+			success = successCallback;
+		} else {
+			success = function() {
+				Logger.info("RestClient : Success to send "+strType+" message to URL '" + url + "'.");
+			};
+		}
+
+		if (failCallback != null) {
+			fail = failCallback;
+		} else {
+			fail = function() {
+				Logger.warn("RestClient : Fail to send "+strType+" message to URL '" + url + "'.");
+			};
+		}
+
+		return [success, fail];
+	}
+
+	private static syncCallbacks(sync : RestClientSync) : Array<Function> {
+		var success : Function = function(data, response) {
+			var result : RestClientResponse = new RestClientResponse(true, response, JSON.parse(data));
+			sync.finishRequest(result);
+		};
+
+		var fail : Function = function(error) {
+			var result : RestClientResponse = new RestClientResponse(false, error);
+			sync.finishRequest(result);
+		};
+
+		return [success, fail];
+	}
+
+	private static createArgs(data : any) : Object {
+		var result = {
+			"data": data,
+			"headers": {
+				"Content-Type": "application/json"
+			}
+		};
+
+		return result;
+	}
+
     /**
      * Send a GET message to URL in parameter, in an asynchronous way.
      *
      * @method get
      * @static
      * @param {string} url - The url to get.
-     * @param {any} successCallback - The callback function when success.
-     * @param {any} failCallback - The callback function when fail.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
      */
-    static get(url : string, successCallback : any = null, failCallback : any = null) {
-        var success = null;
-        var fail = null;
+    static get(url : string, successCallback : Function = null, failCallback : Function = null) {
+		var callbacks : Array<Function> = RestClient.manageLogging("GET", url, successCallback, failCallback);
 
-        if(successCallback != null) {
-            success = successCallback;
-        } else {
-            success = function() {
-                Logger.info("RestClient : Success to send GET message to URL '" + url + "'.");
-            };
-        }
-
-        if(failCallback != null) {
-            fail = failCallback;
-        } else {
-            fail = function() {
-                Logger.warn("RestClient : Fail to send GET message to URL '" + url + "'.");
-            };
-        }
-
-        RestClient.getClient().get(url, success).on('error',fail);
+        RestClient.getClient().get(url, callbacks[0]).on('error',callbacks[1]);
     }
 
     /**
@@ -78,35 +112,18 @@ class RestClient {
      * @static
      * @param {string} url - The url to get.
      */
-    static getSync(url : string) {
+    static getSync(url : string) : RestClientResponse {
 
-            var done = false;
-            var result = null;
+            var sync : RestClientSync = new RestClientSync();
+	        var callbacks : Array<Function> = RestClient.syncCallbacks(sync);
 
-            var success = function(data, response) {
-                result = new Object();
-                result["success"] = true;
-                result["data"] = JSON.parse(data);
-                result["response"] = response;
+            RestClient.getClient().get(url, callbacks[0]).on('error',callbacks[1]);
 
-                done = true;
-            };
-
-            var fail = function(error) {
-                result = new Object();
-                result["success"] = false;
-                result["error"] = error;
-
-                done = true;
-            };
-
-            RestClient.getClient().get(url, success).on('error',fail);
-
-            while(!done) {
+            while(!sync.done()) {
                 deasync.sleep(5);
             }
 
-            return result;
+            return sync.result();
     }
 
     /**
@@ -120,30 +137,13 @@ class RestClient {
      *      data: { test: "hello" },
      *      headers:{"Content-Type": "application/json"}
      *  };
-     * @param {any} successCallback - The callback function when success.
-     * @param {any} failCallback - The callback function when fail.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
      */
-    static post(url : string, args : any, successCallback : any = null, failCallback : any = null) {
-        var success = null;
-        var fail = null;
+    static post(url : string, args : any, successCallback : Function = null, failCallback : Function = null) {
+	    var callbacks : Array<Function> = RestClient.manageLogging("POST", url, successCallback, failCallback);
 
-        if(successCallback != null) {
-            success = successCallback;
-        } else {
-            success = function() {
-                Logger.info("RestClient : Success to send POST message to URL '" + url + "'.");
-            };
-        }
-
-        if(failCallback != null) {
-            fail = failCallback;
-        } else {
-            fail = function() {
-                Logger.warn("RestClient : Fail to send POST message to URL '" + url + "'.");
-            };
-        }
-
-        RestClient.getClient().post(url, args, success).on('error',fail);
+	    RestClient.getClient().post(url, args, callbacks[0]).on('error',callbacks[1]);
     }
 
     /**
@@ -152,42 +152,22 @@ class RestClient {
      * @method postSync
      * @static
      * @param {string} url - The url to post.
-     * @param {JSONObject} data - The data for POST message.
+     * @param {any} data - The data for POST message.
      */
-    static postSync(url : string, data : any) {
+    static postSync(url : string, data : any) : RestClientResponse {
 
-        var done = false;
-        var result = null;
+	    var sync : RestClientSync = new RestClientSync();
+	    var callbacks : Array<Function> = RestClient.syncCallbacks(sync);
 
-        var args = new Object();
-        args["data"] = data;
-        args["headers"] = new Object();
-        args["headers"]["Content-Type"] = "application/json";
+        var args = RestClient.createArgs(data);
 
-        var success = function(data, response) {
-            result = new Object();
-            result["success"] = true;
-            result["data"] = JSON.parse(data);
-            result["response"] = response;
+        RestClient.getClient().post(url, args, callbacks[0]).on('error',callbacks[1]);
 
-            done = true;
-        };
-
-        var fail = function(error) {
-            result = new Object();
-            result["success"] = false;
-            result["error"] = error;
-
-            done = true;
-        };
-
-        RestClient.getClient().post(url, args, success).on('error',fail);
-
-        while(!done) {
+        while(!sync.done()) {
             deasync.sleep(5);
         }
 
-        return result;
+        return sync.result();
     }
 
     /**
@@ -196,35 +176,18 @@ class RestClient {
      * @method put
      * @static
      * @param {string} url - The url to post.
-     * @param {JSONObject} args - The arguments for PUT message. Schema for this JSON Object is :
+     * @param {any} args - The arguments for PUT message. Schema for this JSON Object is :
      *  {
      *      data: { test: "hello" },
      *      headers:{"Content-Type": "application/json"}
      *  };
-     * @param {any} successCallback - The callback function when success.
-     * @param {any} failCallback - The callback function when fail.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
      */
-    static put(url : string, args : any, successCallback : any = null, failCallback : any = null) {
-        var success = null;
-        var fail = null;
+    static put(url : string, args : any, successCallback : Function = null, failCallback : Function = null) {
+	    var callbacks : Array<Function> = RestClient.manageLogging("PUT", url, successCallback, failCallback);
 
-        if(successCallback != null) {
-            success = successCallback;
-        } else {
-            success = function() {
-                Logger.info("RestClient : Success to send PUT message to URL '" + url + "'.");
-            };
-        }
-
-        if(failCallback != null) {
-            fail = failCallback;
-        } else {
-            fail = function() {
-                Logger.warn("RestClient : Fail to send PUT message to URL '" + url + "'.");
-            };
-        }
-
-        RestClient.getClient().put(url, args, success).on('error',fail);
+	    RestClient.getClient().put(url, args, callbacks[0]).on('error',callbacks[1]);
     }
 
     /**
@@ -233,42 +196,22 @@ class RestClient {
      * @method putSync
      * @static
      * @param {string} url - The url to put.
-     * @param {JSONObject} data - The data for PUT message.
+     * @param {any} data - The data for PUT message.
      */
-    static putSync(url : string, data : any) {
+    static putSync(url : string, data : any) : RestClientResponse {
 
-        var done = false;
-        var result = null;
+	    var sync : RestClientSync = new RestClientSync();
+	    var callbacks : Array<Function> = RestClient.syncCallbacks(sync);
 
-        var args = new Object();
-        args["data"] = data;
-        args["headers"] = new Object();
-        args["headers"]["Content-Type"] = "application/json";
+	    var args = RestClient.createArgs(data);
 
-        var success = function(data, response) {
-            result = new Object();
-            result["success"] = true;
-            result["data"] = JSON.parse(data);
-            result["response"] = response;
+        RestClient.getClient().put(url, args, callbacks[0]).on('error',callbacks[1]);
 
-            done = true;
-        };
-
-        var fail = function(error) {
-            result = new Object();
-            result["success"] = false;
-            result["error"] = error;
-
-            done = true;
-        };
-
-        RestClient.getClient().put(url, args, success).on('error',fail);
-
-        while(!done) {
+        while(!sync.done()) {
             deasync.sleep(5);
         }
 
-        return result;
+        return sync.result();
     }
 
     /**
@@ -282,30 +225,13 @@ class RestClient {
      *      data: { test: "hello" },
      *      headers:{"Content-Type": "application/json"}
      *  };
-     * @param {any} successCallback - The callback function when success.
-     * @param {any} failCallback - The callback function when fail.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
      */
-    static patch(url : string, args : any, successCallback : any = null, failCallback : any = null) {
-        var success = null;
-        var fail = null;
+    static patch(url : string, args : any, successCallback : Function = null, failCallback : Function = null) {
+	    var callbacks : Array<Function> = RestClient.manageLogging("PATCH", url, successCallback, failCallback);
 
-        if(successCallback != null) {
-            success = successCallback;
-        } else {
-            success = function() {
-                Logger.info("RestClient : Success to send PATCH message to URL '" + url + "'.");
-            };
-        }
-
-        if(failCallback != null) {
-            fail = failCallback;
-        } else {
-            fail = function() {
-                Logger.warn("RestClient : Fail to send PATCH message to URL '" + url + "'.");
-            };
-        }
-
-        RestClient.getClient().patch(url, args, success).on('error',fail);
+	    RestClient.getClient().patch(url, args, callbacks[0]).on('error',callbacks[1]);
     }
 
     /**
@@ -314,42 +240,22 @@ class RestClient {
      * @method patchSync
      * @static
      * @param {string} url - The url to patch.
-     * @param {JSONObject} data - The data for PATCH message.
+     * @param {any} data - The data for PATCH message.
      */
-    static patchSync(url : string, data : any) {
+    static patchSync(url : string, data : any) : RestClientResponse {
 
-        var done = false;
-        var result = null;
+	    var sync : RestClientSync = new RestClientSync();
+	    var callbacks : Array<Function> = RestClient.syncCallbacks(sync);
 
-        var args = new Object();
-        args["data"] = data;
-        args["headers"] = new Object();
-        args["headers"]["Content-Type"] = "application/json";
+	    var args = RestClient.createArgs(data);
 
-        var success = function(data, response) {
-            result = new Object();
-            result["success"] = true;
-            result["data"] = JSON.parse(data);
-            result["response"] = response;
+        RestClient.getClient().patch(url, args, callbacks[0]).on('error', callbacks[1]);
 
-            done = true;
-        };
-
-        var fail = function(error) {
-            result = new Object();
-            result["success"] = false;
-            result["error"] = error;
-
-            done = true;
-        };
-
-        RestClient.getClient().patch(url, args, success).on('error',fail);
-
-        while(!done) {
+        while(!sync.done()) {
             deasync.sleep(5);
         }
 
-        return result;
+        return sync.result();
     }
 
     /**
@@ -358,30 +264,13 @@ class RestClient {
      * @method delete
      * @static
      * @param {string} url - The url to post.
-     * @param {any} successCallback - The callback function when success.
-     * @param {any} failCallback - The callback function when fail.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
      */
-    static delete(url : string, successCallback : any = null, failCallback : any = null) {
-        var success = null;
-        var fail = null;
+    static delete(url : string, successCallback : Function = null, failCallback : Function = null) {
+	    var callbacks : Array<Function> = RestClient.manageLogging("DELETE", url, successCallback, failCallback);
 
-        if(successCallback != null) {
-            success = successCallback;
-        } else {
-            success = function() {
-                Logger.info("RestClient : Success to send PATCH message to URL '" + url + "'.");
-            };
-        }
-
-        if(failCallback != null) {
-            fail = failCallback;
-        } else {
-            fail = function() {
-                Logger.warn("RestClient : Fail to send PATCH message to URL '" + url + "'.");
-            };
-        }
-
-        RestClient.getClient().delete(url, success).on('error',fail);
+	    RestClient.getClient().delete(url, callbacks[0]).on('error',callbacks[1]);
     }
 
     /**
@@ -391,35 +280,18 @@ class RestClient {
      * @static
      * @param {string} url - The url to patch.
      */
-    static deleteSync(url : string) {
+    static deleteSync(url : string) : RestClientResponse {
 
-        var done = false;
-        var result = null;
+	    var sync : RestClientSync = new RestClientSync();
+	    var callbacks : Array<Function> = RestClient.syncCallbacks(sync);
 
-        var success = function(data, response) {
-            result = new Object();
-            result["success"] = true;
-            result["data"] = JSON.parse(data);
-            result["response"] = response;
+        RestClient.getClient().delete(url, callbacks[0]).on('error', callbacks[1]);
 
-            done = true;
-        };
-
-        var fail = function(error) {
-            result = new Object();
-            result["success"] = false;
-            result["error"] = error;
-
-            done = true;
-        };
-
-        RestClient.getClient().delete(url, success).on('error',fail);
-
-        while(!done) {
+        while(!sync.done()) {
             deasync.sleep(5);
         }
 
-        return result;
+        return sync.result();
     }
 
 }

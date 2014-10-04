@@ -4,6 +4,7 @@
 
 /// <reference path="../core/Logger.ts" />
 /// <reference path="../core/RestClient.ts" />
+/// <reference path="../core/RestClientResponse.ts" />
 /// <reference path="../core/DatabaseConnection.ts" />
 
 /**
@@ -50,15 +51,19 @@ class ModelItf {
      * @return {boolean} Create status
      */
     createObject(modelClass : any, data : any) : boolean {
-        if(this.getId() != undefined) {
+
+	    // if the object already exists we need to call an update, not to create an object !
+        if (this.getId() != undefined) {
             return this.update();
         }
-	    var urlCreateObject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName();
 
-        var result = RestClient.postSync(urlCreateObject, data);
-	    Logger.debug("Create a new object : "+urlCreateObject+" with data : "+JSON.stringify(data));
-        if(result.success) {
-            var response = result.data;
+	    var urlCreateObject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName();
+	    Logger.debug("[ModelItf] Create a new object : "+urlCreateObject+" with data : "+JSON.stringify(data));
+
+        var result : RestClientResponse = RestClient.postSync(urlCreateObject, data);
+
+        if(result.success()) {
+            var response = result.data();
             if(response.status == "success") {
                 if(Object.keys(response.data).length == 0) {
                     return false;
@@ -83,10 +88,14 @@ class ModelItf {
      * @param {number} id - The model instance's id.
      */
     static readObject(modelClass : any, id : number) {
-        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + id.toString());
 
-        if(result.success) {
-            var response = result.data;
+	    var urlReadObject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + id.toString();
+	    Logger.debug("[ModelItf] Read an object : "+urlReadObject);
+
+        var result : RestClientResponse = RestClient.getSync(urlReadObject);
+
+        if(result.success()) {
+            var response = result.data();
             if(response.status == "success") {
                 if(Object.keys(response.data).length == 0) {
                     return null;
@@ -110,14 +119,19 @@ class ModelItf {
      * @return {boolean} Update status
      */
      updateObject(modelClass : any, data : any) : boolean {
+
+	    // if the object does not exist yet, we need to create it instead updating!
         if(this.getId() == undefined) {
             return this.create();
         }
 
-        var result = RestClient.putSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString(), data);
+	    var urlUpdate = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString();
+	    Logger.debug("[ModelItf] Update an object with the URL : "+urlUpdate+" and data : "+JSON.stringify(data));
 
-        if(result.success) {
-            var response = result.data;
+        var result : RestClientResponse = RestClient.putSync(urlUpdate, data);
+
+        if(result.success()) {
+            var response = result.data();
             if(response.status == "success") {
                 if(Object.keys(response.data).length == 0) {
                     return false;
@@ -144,10 +158,13 @@ class ModelItf {
             return false;
         }
 
-        var result = RestClient.deleteSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString());
+	    var urlDelete = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString();
+	    Logger.debug("[ModelItf] Delete an object with the URL : "+urlDelete);
 
-        if(result.success) {
-            var response = result.data;
+        var result : RestClientResponse = RestClient.deleteSync(urlDelete);
+
+        if(result.success()) {
+            var response = result.data();
             if(response.status == "success") {
                 if(Object.keys(response.data).length == 0) {
                     this._id = undefined;
@@ -177,11 +194,12 @@ class ModelItf {
 			return false;
 		}
 		var associationURL = DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + this.getId().toString() + "/" + modelClass2.getTableName() + "/" + id2.toString();
-		Logger.debug("ModelItf Associate Object with the following URL: "+associationURL);
-		var result = RestClient.putSync(associationURL, {});
+		Logger.debug("[ModelItf] Associate an object with the following URL: "+associationURL);
 
-		if(result.success) {
-			var response = result.data;
+		var result : RestClientResponse = RestClient.putSync(associationURL, {});
+
+		if(result.success()) {
+			var response = result.data();
 			if(response.status == "success") {
 				return true;
 			} else {
@@ -205,12 +223,14 @@ class ModelItf {
 		if (this.getId() == undefined || id2 == undefined) {
 			return false;
 		}
-		var deleteAssoURL = DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + this.getId().toString() + "/" + modelClass2.getTableName() + "/" + id2.toString();
-		Logger.debug("ModelItf Delete Association between Objects with the following URL: "+deleteAssoURL);
-		var result = RestClient.deleteSync(deleteAssoURL);
 
-		if(result.success) {
-			var response = result.data;
+		var deleteAssoURL = DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + this.getId().toString() + "/" + modelClass2.getTableName() + "/" + id2.toString();
+		Logger.debug("[ModelItf] Delete Association between Objects with the following URL: "+deleteAssoURL);
+
+		var result : RestClientResponse = RestClient.deleteSync(deleteAssoURL);
+
+		if(result.success()) {
+			var response = result.data();
 			if(response.status == "success") {
 				return true;
 			} else {
@@ -235,10 +255,13 @@ class ModelItf {
 			return false;
 		}
 
-		var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString() + "/" + modelClassAssociated.getTableName());
+		var urlAssociatedObjects = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString() + "/" + modelClassAssociated.getTableName();
+		Logger.debug("[ModelItf] Get associated objects with the URL: "+urlAssociatedObjects);
 
-		if(result.success) {
-			var response = result.data;
+		var result : RestClientResponse = RestClient.getSync(urlAssociatedObjects);
+
+		if(result.success()) {
+			var response = result.data();
 			if(response.status == "success") {
 				if(Object.keys(response.data).length > 0) {
 					for(var i = 0; i < response.data.length; i++) {
@@ -269,10 +292,13 @@ class ModelItf {
 			return false;
 		}
 
-		var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString() + "/" + modelClassAssociated.getTableName());
+		var urlUniqueAssociatedOject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString() + "/" + modelClassAssociated.getTableName();
+		Logger.debug("[ModelItf] Get a uniquely associated object with the URL: "+urlUniqueAssociatedOject);
 
-		if(result.success) {
-			var response = result.data;
+		var result : RestClientResponse = RestClient.getSync(urlUniqueAssociatedOject);
+
+		if(result.success()) {
+			var response = result.data();
 			if(response.status == "success") {
 				var object = response.data;
 				assoName.push(modelClassAssociated.fromJSONObject(object));
@@ -296,10 +322,13 @@ class ModelItf {
     static allObjects(modelClass : any) {
         var allModelItfs : any = new Array();
 
-        var result = RestClient.getSync(DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName());
+	    var urlAll = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName();
+	    Logger.debug("[ModelItf] Read all objects with the URL: "+urlAll);
 
-        if(result.success) {
-            var response = result.data;
+        var result : RestClientResponse = RestClient.getSync(urlAll);
+
+        if(result.success()) {
+            var response = result.data();
             if(response.status == "success") {
                 if(Object.keys(response.data).length > 0) {
                     for(var i = 0; i < response.data.length; i++) {
