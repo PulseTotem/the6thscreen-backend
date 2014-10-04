@@ -61,8 +61,6 @@ class ModelItf {
 	    Logger.debug("[ModelItf] Create a new object : "+urlCreateObject+" with data : "+JSON.stringify(data));
 
         var result : RestClientResponse = RestClient.postSync(urlCreateObject, data);
-	    Logger.debug("Obtained result for create");
-	    Logger.debug(result);
         if(result.success()) {
             var response = result.data();
             if(response.status == "success") {

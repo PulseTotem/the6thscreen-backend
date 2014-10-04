@@ -19,9 +19,9 @@ describe('InfoType', function(){
 			new InfoType("");
 		},
 		Error);
-	})
+	}),
 
-	/*it('should get an id when built', function() {
+	it('should get an id when built', function() {
 		var info = new InfoType("toto");
 		var mockID = 42;
 
@@ -34,9 +34,9 @@ describe('InfoType', function(){
 
 		var restClientMock = nock("http://"+DatabaseConnection.getHost()+":"+DatabaseConnection.getPort())
 							 .post("/api/" + InfoType.getTableName(), info.toJSONObject())
-							 .reply(200, reponse);
+							 .reply(200, JSON.stringify(reponse));
 		info.create();
-		//assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		assert.equal(info.getId(), mockID, "The ID is not recorded in the object.");
-	});*/
+	});
 });
