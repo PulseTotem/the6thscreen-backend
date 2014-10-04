@@ -24,7 +24,10 @@ module.exports = function (grunt) {
             },
             distConnectionInfosFile: {
                 files: 	[{'dist/js/connection_infos.json': 'app/scripts/core/connection_infos.json'}]
-            }
+            },
+	        testConnectionInfosFile: {
+		        files: 	[{'build/tests/connection_infos.json': 'app/scripts/core/connection_infos-sample.json'}]
+	        }
         },
 
         typescript: {
@@ -62,7 +65,7 @@ module.exports = function (grunt) {
                 src: [
                     'tests/**/*.ts'
                 ],
-                dest: 'tests/Test.js'
+                dest: 'build/tests/Test.js'
             }
         },
 
@@ -134,7 +137,7 @@ module.exports = function (grunt) {
                     reporter: 'spec',
                     'colors': true
                 },
-                src: ['tests/Test.js']
+                src: ['build/tests/Test.js']
             }
         },
 // ---------------------------------------------
@@ -146,7 +149,7 @@ module.exports = function (grunt) {
             build: ['build/'],
             dist: ['dist/'],
             doc: ['doc'],
-            test: ['tests/Test.js']
+            test: ['build/tests/Test.js']
         }
 // ---------------------------------------------
     });
@@ -179,7 +182,7 @@ module.exports = function (grunt) {
     grunt.registerTask('test', function() {
         grunt.task.run(['clean:test']);
 
-        grunt.task.run(['typescript:test', 'mochaTest:test']);
+        grunt.task.run(['copy:testConnectionInfosFile', 'typescript:test', 'mochaTest:test']);
     });
 
 }
