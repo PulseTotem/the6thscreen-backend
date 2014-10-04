@@ -52,9 +52,9 @@ class ModelItf {
      */
     createObject(modelClass : any, data : any) : boolean {
 
-	    // if the object already exists we need to call an update, not to create an object !
+	    // if the object already exists we throw an error
         if (this.getId() != undefined) {
-            return this.update();
+            throw new Error("This object already exists! Use update() instead.");
         }
 
 	    var urlCreateObject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName();
@@ -132,16 +132,16 @@ class ModelItf {
         if(result.success()) {
             var response = result.data();
             if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return false;
+                if(response.data === undefined) {
+                    throw new Error("Undefined data coming from PUT request to "+urlUpdate);
                 } else {
                     return true;
                 }
             } else {
-                return false;
+	            throw new Error("Response status from PUT request to "+urlUpdate+" : "+response.status);
             }
         } else {
-            return false;
+	        throw new Error("Result failure from PUT request to "+urlUpdate+" : "+result.response());
         }
     }
 
