@@ -2,6 +2,7 @@
  * @author Simon Urli <simon@the6thscreen.fr>
  */
 
+/// <reference path="../../../libsdef/sequelize-restful.d.ts" />
 
 /**
  * Represent a response of a request made using RestClient class.
@@ -35,7 +36,7 @@ class RestClientResponse {
 	 * @property _data
 	 * @type {any}
 	 */
-	private _data : any;
+	private _data : SequelizeRestfulResponse;
 
 	constructor(success : boolean, response : any, data : any = null) {
 		this._success = success;
