@@ -28,7 +28,6 @@ class RestClientResponse {
 	 */
 	private _response : any;
 
-	// TODO : We need to have a specific type for the data.
 	/**
 	 * Contains the data of the request.
 	 * It remains null in case of error.
