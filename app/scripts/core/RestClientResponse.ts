@@ -37,10 +37,22 @@ class RestClientResponse {
 	 */
 	private _data : SequelizeRestfulResponse;
 
+	/**
+	 * Get the statusCode from the request
+	 *
+	 * @property _statusCode
+	 * @type {number}
+	 */
+	private _statusCode : number = 0;
+
 	constructor(success : boolean, response : any, data : any = null) {
 		this._success = success;
 		this._response = response;
 		this._data = data;
+
+		if (this._response.statusCode !== undefined) {
+			this._statusCode = this._response.statusCode;
+		}
 	}
 
 	/**
@@ -71,5 +83,15 @@ class RestClientResponse {
 	 */
 	data() {
 		return this._data;
+	}
+
+	/**
+	 * Return the statusCode of the request.
+	 *
+	 * @method statusCode
+	 * @returns {number}
+	 */
+	statusCode() {
+		return this._statusCode;
 	}
 }

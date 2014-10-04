@@ -6,6 +6,10 @@
 /// <reference path="../core/RestClient.ts" />
 /// <reference path="../core/RestClientResponse.ts" />
 /// <reference path="../core/DatabaseConnection.ts" />
+/// <reference path="../exceptions/DataException.ts" />
+/// <reference path="../exceptions/RequestException.ts" />
+/// <reference path="../exceptions/ResponseException.ts" />
+/// <reference path="../exceptions/ModelException.ts" />
 
 /**
  * Model Interface
@@ -54,27 +58,28 @@ class ModelItf {
 
 	    // if the object already exists we throw an error
         if (this.getId() != undefined) {
-            throw new Error("This object already exists! Use update() instead.");
+            throw new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data));
         }
 
 	    var urlCreateObject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName();
 	    Logger.debug("[ModelItf] Create a new object : "+urlCreateObject+" with data : "+JSON.stringify(data));
 
         var result : RestClientResponse = RestClient.postSync(urlCreateObject, data);
-        if(result.success()) {
+
+        if(result.success() && result.statusCode() == 200) {
             var response = result.data();
             if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return false;
+                if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
+	                throw new DataException("The response is a success but the data appears to be empty or does not have the right signature when creating an object with URL: "+urlCreateObject+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data));
                 } else {
                     this._id = response.data.id;
                     return true;
                 }
             } else {
-                return false;
+	            throw new ResponseException("The request failed on the server when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nMessage : "+JSON.stringify(response));
             }
         } else {
-            return false;
+	        throw new RequestException("The request failed when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
         }
     }
 

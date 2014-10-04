@@ -58,7 +58,7 @@ describe('InfoType', function(){
 
 			assert.throws(function() {
 				info.create();
-			}, Error);
+			}, ModelException);
 		})
 	}),
 

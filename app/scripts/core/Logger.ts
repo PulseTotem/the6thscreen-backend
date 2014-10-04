@@ -13,6 +13,7 @@ var colors = require('colors');
  */
 class Logger {
 
+	// TODO : create different levels for the logger
     /**
      * Status of color mode.
      *
@@ -88,9 +89,9 @@ class Logger {
      */
     static error(msg) {
         if(Logger.color && msg != null && msg != undefined && typeof(msg.toString()) !== "string") {
-            console.log(msg.red);
+            console.error(msg.red);
         } else {
-            console.log(msg);
+            console.error(msg);
         }
     }
 
