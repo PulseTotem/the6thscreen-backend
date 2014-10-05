@@ -169,8 +169,12 @@ class ModelItf {
      * @return {boolean} Delete status
      */
     deleteObject(modelClass : any) : boolean {
-        if(this.getId() == undefined) {
-            return false;
+	    if (!modelClass) {
+		    throw new ModelException("To delete an object, the modelClass must be given.");
+	    }
+
+        if (!this.getId()) {
+	        throw new ModelException("The object does not exist yet. It can't be delete in database.");
         }
 
 	    var urlDelete = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
@@ -181,17 +185,13 @@ class ModelItf {
         if(result.success()) {
             var response = result.data();
             if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    this._id = undefined;
-                    return true;
-                } else {
-                    return false;
-                }
+                this._id = null;
+                return true;
             } else {
-                return false;
+	            throw new ResponseException("The request failed on the server when trying to update an object with URL:"+urlDelete+".\nMessage : "+JSON.stringify(response));
             }
         } else {
-            return false;
+	        throw new RequestException("The request failed when trying to update an object with URL:"+urlDelete+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
         }
     }
 

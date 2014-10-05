@@ -496,5 +496,104 @@ describe('ModelItf', function() {
 			}, DataException, "The DataException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		})
+	});
+
+	describe('#deleteObject()', function() {
+		it('should throw an error if the object has an id null', function() {
+			var model = new ModelItf(null);
+
+			assert.throws(function() {
+					model.deleteObject(ModelItf);
+				},
+				ModelException);
+		});
+
+		it('should throw an error if the object has an id undefined', function() {
+			var model = new ModelItf(undefined);
+
+			assert.throws(function() {
+					model.deleteObject(ModelItf);
+				},
+				ModelException);
+		});
+
+		it('should built a proper request to delete the object and set ID to null', function() {
+			var id = 42;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+
+			var reponse : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.delete(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+				.reply(200, JSON.stringify(reponse));
+
+			var retour = model.deleteObject(modelName);
+			assert.ok(retour, "The delete did not return true");
+			assert.equal(model.getId(), null, "The object ID is not null.");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if no modelclass is given', function() {
+			var model = new ModelItf(42);
+			var toto;
+
+			assert.throws(function() {
+				model.deleteObject(toto);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if the connection failed', function() {
+			var model = new ModelItf(42);
+
+			var modelName = ModelItf;
+
+			nock.disableNetConnect();
+
+			assert.throws(function() {
+				model.deleteObject(modelName);
+			}, RequestException, "The RequestException has not been thrown");
+		});
+
+		it('should throw an error if the request failed', function() {
+			var id = 42;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.delete(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+				.reply(500, JSON.stringify('Server error'));
+
+			assert.throws(function() {
+				model.deleteObject(modelName);
+			}, RequestException, "The RequestException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the request failed on the server', function() {
+			var id = 42;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+
+			var response : SequelizeRestfulResponse = {
+				"status": "error",
+				"data": {}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.delete(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				model.deleteObject(modelName);
+			}, ResponseException, "The ResponseException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
 	})
 });
