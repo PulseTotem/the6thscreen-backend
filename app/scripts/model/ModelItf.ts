@@ -316,8 +316,14 @@ class ModelItf {
 	 * @returns {boolean}
 	 */
 	getAssociatedObjects(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) : boolean {
-		if (this.getId() == undefined) {
-			return false;
+		if (!this.getId()) {
+			throw new ModelException("You cannot retrieve associated objects if the object does not exist.");
+		}
+		if (!modelClass || !modelClassAssociated || !assoName) {
+			throw new ModelException("The two modelClasses and the assoName argument must be given to retrieve objects.");
+		}
+		if (!(assoName instanceof Array)) {
+			throw new ModelException("The argument assoName must be an existing array.");
 		}
 
 		var urlAssociatedObjects = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
@@ -328,18 +334,24 @@ class ModelItf {
 		if(result.success()) {
 			var response = result.data();
 			if(response.status == "success") {
-				if(Object.keys(response.data).length > 0) {
+				if(response.data === undefined || !(response.data instanceof Array)) {
+					throw new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAssociatedObjects+"\nResponse data: "+JSON.stringify(response.data));
+				} else {
 					for(var i = 0; i < response.data.length; i++) {
 						var object = response.data[i];
-						assoName.push(modelClassAssociated.fromJSONObject(object));
+						if (object.id === undefined) {
+							throw new DataException("One data does not have any ID when retrieving all objects with URL: "+urlAssociatedObjects+"\nResponse data: "+JSON.stringify(response.data));
+						} else {
+							assoName.push(modelClassAssociated.fromJSONObject(object));
+						}
 					}
 					return true;
 				}
-			} else {
-				return false;
+			}else {
+				throw new ResponseException("The request failed on the server when trying to retrieve all objects with URL:"+urlAssociatedObjects+".\nMessage : "+JSON.stringify(response));
 			}
 		} else {
-			return false;
+			throw new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
 		}
 	}
 

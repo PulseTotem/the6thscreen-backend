@@ -968,10 +968,71 @@ describe('ModelItf', function() {
 	});
 
 	describe('#getAssociatedObjects()', function() {
-		/*it('should built a proper request to read all objects and return the proper array of objects', function() {
+		it('should throw an error if the object has an id null', function() {
+			var model = new ModelItf(null);
+			var result = [];
+
+			assert.throws(function() {
+					model.getAssociatedObjects(ModelItf, ModelItf, result);
+				},
+				ModelException);
+		});
+
+		it('should throw an error if the object has an id undefined', function() {
+			var model = new ModelItf(undefined);
+			var result = [];
+
+			assert.throws(function() {
+					model.getAssociatedObjects(ModelItf, ModelItf, result);
+				},
+				ModelException);
+		});
+
+		it('should throw an error if the modelclass1 is not given', function() {
+			var model = new ModelItf(42);
+			var result = [];
+			var toto;
+
+			assert.throws(function() {
+				model.getAssociatedObjects(toto, ModelItf, result);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if the modelclass2 is not given', function() {
+			var model = new ModelItf(42);
+			var result = [];
+			var toto;
+
+			assert.throws(function() {
+				model.getAssociatedObjects(ModelItf, toto, result);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if the result parameter is not given', function() {
+			var model = new ModelItf(42);
+			var toto;
+
+			assert.throws(function() {
+				model.getAssociatedObjects(ModelItf, ModelItf, toto);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if the result parameter is not an array', function() {
+			var model = new ModelItf(42);
+			var result = null;
+
+			assert.throws(function() {
+				model.getAssociatedObjects(ModelItf, ModelItf, result);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should built a proper request to read all associated objects and return the proper array of objects', function() {
+			var originID = 1;
 			var ids = [42, 12, 8, 63];
 			var models = [];
 			var data = [];
+
+			var model = new ModelItf(originID);
 
 			for (var id in ids) {
 				models.push(new ModelItf(id));
@@ -986,76 +1047,82 @@ describe('ModelItf', function() {
 			};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(reponse));
 
-			var allmodels = ModelItf.allObjects(modelName);
+			var allmodels = [];
+			var result = model.getAssociatedObjects(ModelItf, ModelItf, allmodels);
+			assert.ok(result, "The retrieve of associated objects did not return true.");
 			assert.deepEqual(allmodels, models, "The array of models is not the same.");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
 
-		it('should throw an error if the modelClass is not given', function() {
-			var modelClass;
-
-			assert.throws(function() {
-					ModelItf.allObjects(modelClass);
-				},
-				ModelException, "The ModelException has not been thrown.");
-		});
 
 		it('should throw an error if the connection failed', function() {
+			var model = new ModelItf(12);
 
 			nock.disableNetConnect();
 
 			assert.throws(function() {
-				ModelItf.allObjects(ModelItf);
+				model.getAssociatedObjects(ModelItf, ModelItf, []);
 			}, RequestException, "The RequestException has not been thrown");
 		});
 
 		it('should throw an error if the request failed', function() {
+			var originID = 12;
+			var model = new ModelItf(originID);
+
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(500, JSON.stringify('Server error'));
 
 			assert.throws(function() {
-				ModelItf.allObjects(ModelItf);
+				model.getAssociatedObjects(ModelItf, ModelItf, []);
 			}, RequestException, "The RequestException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
 
 		it('should throw an error if the request failed on the server', function() {
+			var originID = 12;
+			var model = new ModelItf(originID);
+
 			var response : SequelizeRestfulResponse = {
 				"status": "error",
 				"data": {}
 			};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			assert.throws(function() {
-				ModelItf.allObjects(ModelItf);
+				model.getAssociatedObjects(ModelItf, ModelItf, []);
 			}, ResponseException, "The ResponseException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
 
 		it('should throw an error if the request succeed but the data field is missing on the response', function() {
+			var originID = 12;
+			var model = new ModelItf(originID);
+
 			var response = {
 				"status": "success"
 			};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			assert.throws(function() {
-				ModelItf.allObjects(ModelItf);
+				model.getAssociatedObjects(ModelItf, ModelItf, []);
 			}, DataException, "The DataException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
 
 		it('should throw an error if the request succeed but the data field is not an array', function() {
-			var id = 42;
+			var originID = 12;
+			var model = new ModelItf(originID);
+
 			var response = {
 				"status": "success",
 				"data": {
@@ -1064,16 +1131,19 @@ describe('ModelItf', function() {
 			};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			assert.throws(function() {
-				ModelItf.allObjects(ModelItf);
+				model.getAssociatedObjects(ModelItf, ModelItf, []);
 			}, DataException, "The DataException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
 
 		it('should throw an error if the request succeed but one data response does not contain an id', function() {
+			var originID = 12;
+			var model = new ModelItf(originID);
+
 			var response = {
 				"status": "success",
 				"data": [
@@ -1088,13 +1158,13 @@ describe('ModelItf', function() {
 			};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			assert.throws(function() {
-				ModelItf.allObjects(ModelItf);
+				model.getAssociatedObjects(ModelItf, ModelItf, []);
 			}, DataException, "The DataException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-		})*/
+		})
 	});
 });
