@@ -728,4 +728,123 @@ describe('ModelItf', function() {
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		})
 	});
+
+	describe('#associateObject()', function() {
+		it('should throw an error if the object has an id null', function() {
+			var model = new ModelItf(null);
+
+			assert.throws(function() {
+					model.associateObject(ModelItf, ModelItf, 42);
+				},
+				ModelException);
+		});
+
+		it('should throw an error if the object has an id undefined', function() {
+			var model = new ModelItf(undefined);
+
+			assert.throws(function() {
+					model.associateObject(ModelItf, ModelItf, 42);
+				},
+				ModelException);
+		});
+
+		it('should throw an error if the modelclass1 is not given', function() {
+			var model = new ModelItf(42);
+			var toto;
+
+			assert.throws(function() {
+				model.associateObject(toto, ModelItf, 42);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if the modelclass2 is not given', function() {
+			var model = new ModelItf(42);
+			var toto;
+
+			assert.throws(function() {
+				model.associateObject(ModelItf, toto, 42);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if the second ID is not given', function() {
+			var model = new ModelItf(42);
+			var toto;
+
+			assert.throws(function() {
+				model.associateObject(ModelItf, ModelItf, toto);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should built a proper request to associate the objects and return true', function() {
+			var id = 42;
+			var id2 = 24;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+
+			var reponse : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+				.reply(200, JSON.stringify(reponse));
+
+			var retour = model.associateObject(ModelItf, ModelItf, id2);
+			assert.ok(retour, "The association did not return true");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the connection failed', function() {
+			var model = new ModelItf(42);
+
+			var modelName = ModelItf;
+
+			nock.disableNetConnect();
+
+			assert.throws(function() {
+				model.associateObject(ModelItf, ModelItf, 23);
+			}, RequestException, "The RequestException has not been thrown");
+		});
+
+		it('should throw an error if the request failed', function() {
+			var id = 42;
+			var id2 = 24;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+				.reply(500, JSON.stringify('Server error'));
+
+			assert.throws(function() {
+				model.associateObject(ModelItf, ModelItf, id2);
+			}, RequestException, "The RequestException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the request failed on the server', function() {
+			var id = 42;
+			var id2 = 24;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+
+			var response : SequelizeRestfulResponse = {
+				"status": "error",
+				"data": {}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				model.associateObject(ModelItf, ModelItf, id2);
+			}, ResponseException, "The ResponseException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+	});
 });
