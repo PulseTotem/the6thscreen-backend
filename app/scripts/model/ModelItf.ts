@@ -196,6 +196,40 @@ class ModelItf {
     }
 
 	/**
+	 * Retrieve all model objects in database.
+	 *
+	 * @method allObjects
+	 * @static
+	 * @param {ModelItf Class} modelClass - The model to retrieve all instances.
+	 * @return {Array<ModelItf>} The model instances.
+	 */
+	static allObjects(modelClass : any) {
+		var allModelItfs : any = new Array();
+
+		var urlAll = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
+		Logger.debug("[ModelItf] Read all objects with the URL: "+urlAll);
+
+		var result : RestClientResponse = RestClient.getSync(urlAll);
+
+		if(result.success()) {
+			var response = result.data();
+			if(response.status == "success") {
+				if(Object.keys(response.data).length > 0) {
+					for(var i = 0; i < response.data.length; i++) {
+						var obj = response.data[i];
+						allModelItfs.push(modelClass.fromJSONObject(obj));
+					}
+				}
+				return allModelItfs;
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
+	/**
 	 * Associate two objects in database.
 	 *
 	 * @method associateObject
@@ -324,39 +358,7 @@ class ModelItf {
 		}
 	}
 
-    /**
-     * Retrieve all model objects in database.
-     *
-     * @method allObjects
-     * @static
-     * @param {ModelItf Class} modelClass - The model to retrieve all instances.
-     * @return {Array<ModelItf>} The model instances.
-     */
-    static allObjects(modelClass : any) {
-        var allModelItfs : any = new Array();
 
-	    var urlAll = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
-	    Logger.debug("[ModelItf] Read all objects with the URL: "+urlAll);
-
-        var result : RestClientResponse = RestClient.getSync(urlAll);
-
-        if(result.success()) {
-            var response = result.data();
-            if(response.status == "success") {
-                if(Object.keys(response.data).length > 0) {
-                    for(var i = 0; i < response.data.length; i++) {
-                        var obj = response.data[i];
-                        allModelItfs.push(modelClass.fromJSONObject(obj));
-                    }
-                }
-                return allModelItfs;
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -492,7 +494,7 @@ class ModelItf {
      */
     static fromJSONObject(jsonObject : any) : ModelItf {
         Logger.error("ModelItf - fromJSONObject : Method need to be implemented.");
-        return null;
+        return new ModelItf(jsonObject.id); // for passing the tests with modelItf
     }
 
     /**
