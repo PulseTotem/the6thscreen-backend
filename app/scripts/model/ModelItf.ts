@@ -383,8 +383,8 @@ class ModelItf {
 		if(result.success()) {
 			var response = result.data();
 			if(response.status == "success") {
-				if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
-					throw new DataException("The response is a success but the data appears to be empty or does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response.data));
+				if(response.data === undefined || ((response.data instanceof Array) && (response.data.length > 0)) || (!(response.data instanceof Array)  && response.data.id === undefined)) {
+					throw new DataException("The response is a success but the data does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response.data));
 				} else {
 					assoName.push(modelClassAssociated.fromJSONObject(response.data));
 					return true;
