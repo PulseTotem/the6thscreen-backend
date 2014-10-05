@@ -519,7 +519,7 @@ class ModelItf {
      * @return {ModelItf} The model instance.
      */
     static parseJSON(jsonString : string) : ModelItf {
-        Logger.error("ModelItf - parseJSON : Method need to be implemented. It will look like : 'return \"ModelItf\".fromJSONObject(JSON.parse(jsonString));'");
+        Logger.warn("ModelItf - parseJSON : Method need to be implemented. It will look like : 'return \"ModelItf\".fromJSONObject(JSON.parse(jsonString));'");
         return null;
     }
 
@@ -532,7 +532,7 @@ class ModelItf {
      * @return {ModelItf} The model instance.
      */
     static fromJSONObject(jsonObject : any) : ModelItf {
-        Logger.error("ModelItf - fromJSONObject : Method need to be implemented.");
+        Logger.warn("ModelItf - fromJSONObject : Method need to be implemented.");
         return new ModelItf(jsonObject.id); // for passing the tests with modelItf
     }
 
@@ -543,7 +543,7 @@ class ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        Logger.error("ModelItf - getTableName : Method need to be implemented.");
+        Logger.warn("ModelItf - getTableName : Method need to be implemented.");
         return "";
     }
 }

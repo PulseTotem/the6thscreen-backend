@@ -3,6 +3,7 @@
  */
 
 /// <reference path="../../../libsdef/colors.d.ts" />
+/// <reference path="./LoggerLevel.ts" />
 
 var colors = require('colors');
 
@@ -12,8 +13,6 @@ var colors = require('colors');
  * @class Logger
  */
 class Logger {
-
-	// TODO : create different levels for the logger
     /**
      * Status of color mode.
      *
@@ -23,6 +22,16 @@ class Logger {
      * @default true
      */
     static color : boolean = true;
+
+	/**
+	 * Level status of the logger.
+	 *
+	 * @property level
+	 * @type LoggerLevel
+	 * @static
+	 * @default Error
+	 */
+	static level : LoggerLevel = LoggerLevel.Error;
 
     /**
      * Change the color status.
@@ -35,6 +44,17 @@ class Logger {
         Logger.color = status;
     }
 
+	/**
+	 * Change the level of the logger.
+	 *
+	 * @method setLevel
+	 * @static
+	 * @param level
+	 */
+	static setLevel(level : LoggerLevel) {
+		Logger.level = level;
+	}
+
     /**
      * Log message as Debug Level.
      *
@@ -43,11 +63,13 @@ class Logger {
      * @param {string} msg - The message to log.
      */
     static debug(msg) {
-        if(Logger.color && msg != null && msg != undefined && typeof(msg.toString()) !== "string") {
-                console.log(msg.green);
-        } else {
-            console.log(msg);
-        }
+	    if (Logger.level === LoggerLevel.Debug) {
+		    if (Logger.color && msg != null && msg != undefined && typeof(msg.toString()) !== "string") {
+			    console.log(msg.green);
+		    } else {
+			    console.log(msg);
+		    }
+	    }
     }
 
     /**
@@ -58,11 +80,13 @@ class Logger {
      * @param {string} msg - The message to log.
      */
     static info(msg) {
-        if(Logger.color && msg != null && msg != undefined && typeof(msg.toString()) !== "string") {
-            console.log(msg.blue);
-        } else {
-            console.log(msg);
-        }
+	    if (Logger.level === LoggerLevel.Debug || Logger.level === LoggerLevel.Info) {
+		    if (Logger.color && msg != null && msg != undefined && typeof(msg.toString()) !== "string") {
+			    console.log(msg.blue);
+		    } else {
+			    console.log(msg);
+		    }
+	    }
     }
 
     /**
@@ -73,11 +97,13 @@ class Logger {
      * @param {string} msg - The message to log.
      */
     static warn(msg) {
-        if(Logger.color && msg != null && msg != undefined && typeof(msg.toString()) !== "string") {
-            console.log(msg.orange);
-        } else {
-            console.log(msg);
-        }
+	    if (Logger.level === LoggerLevel.Debug || Logger.level === LoggerLevel.Info || Logger.level === LoggerLevel.Warning) {
+		    if (Logger.color && msg != null && msg != undefined && typeof(msg.toString()) !== "string") {
+			    console.log(msg.orange);
+		    } else {
+			    console.log(msg);
+		    }
+	    }
     }
 
     /**
