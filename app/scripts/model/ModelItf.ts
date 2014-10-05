@@ -365,9 +365,16 @@ class ModelItf {
 	 * @returns {boolean}
 	 */
 	getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) : boolean {
-		if (this.getId() == undefined) {
-			return false;
+		if (!this.getId()) {
+			throw new ModelException("You cannot retrieve uniquely associated object if the object does not exist.");
 		}
+		if (!modelClass || !modelClassAssociated || !assoName) {
+			throw new ModelException("The two modelClasses and the assoName argument must be given to retrieve a uniquely associated object.");
+		}
+		if (!(assoName instanceof Array)) {
+			throw new ModelException("The argument assoName must be an existing array.");
+		}
+
 		var urlUniqueAssociatedOject = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
 		Logger.debug("[ModelItf] Get a uniquely associated object with the URL: "+urlUniqueAssociatedOject);
 
@@ -376,14 +383,17 @@ class ModelItf {
 		if(result.success()) {
 			var response = result.data();
 			if(response.status == "success") {
-				var object = response.data;
-				assoName.push(modelClassAssociated.fromJSONObject(object));
-				return true;
+				if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
+					throw new DataException("The response is a success but the data appears to be empty or does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response.data));
+				} else {
+					assoName.push(modelClassAssociated.fromJSONObject(response.data));
+					return true;
+				}
 			} else {
-				return false;
+				throw new ResponseException("The request failed on the server when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nMessage : "+JSON.stringify(response));
 			}
 		} else {
-			return false;
+			throw new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
 		}
 	}
 

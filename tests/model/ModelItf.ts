@@ -1167,4 +1167,196 @@ describe('ModelItf', function() {
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		})
 	});
+
+	describe('#getUniquelyAssociatedObject()', function() {
+		it('should throw an error if the object has an id null', function() {
+			var model = new ModelItf(null);
+			var result = [];
+
+			assert.throws(function() {
+					model.getUniquelyAssociatedObject(ModelItf, ModelItf, result);
+				},
+				ModelException);
+		});
+
+		it('should throw an error if the object has an id undefined', function() {
+			var model = new ModelItf(undefined);
+			var result = [];
+
+			assert.throws(function() {
+					model.getUniquelyAssociatedObject(ModelItf, ModelItf, result);
+				},
+				ModelException);
+		});
+
+		it('should throw an error if the modelclass1 is not given', function() {
+			var model = new ModelItf(42);
+			var result = [];
+			var toto;
+
+			assert.throws(function() {
+				model.getUniquelyAssociatedObject(toto, ModelItf, result);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if the modelclass2 is not given', function() {
+			var model = new ModelItf(42);
+			var result = [];
+			var toto;
+
+			assert.throws(function() {
+				model.getUniquelyAssociatedObject(ModelItf, toto, result);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if the result parameter is not given', function() {
+			var model = new ModelItf(42);
+			var toto;
+
+			assert.throws(function() {
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf, toto);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if the result parameter is not an array', function() {
+			var model = new ModelItf(42);
+			var result = null;
+
+			assert.throws(function() {
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf, result);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should built a proper request to read a uniquely associated objects and return the proper array containing a unique object', function() {
+			var originID = 1;
+			var targetID = 42;
+
+			var model = new ModelItf(originID);
+
+			var finalResult = [new ModelItf(targetID)];
+
+			var modelName = ModelItf;
+
+			var reponse : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id": targetID
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+				.reply(200, JSON.stringify(reponse));
+
+			var allmodels = [];
+			var result = model.getUniquelyAssociatedObject(ModelItf, ModelItf, allmodels);
+			assert.ok(result, "The retrieve of associated objects did not return true.");
+			assert.deepEqual(allmodels, finalResult, "The array of models is not the same.");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+
+		it('should throw an error if the connection failed', function() {
+			var model = new ModelItf(12);
+
+			nock.disableNetConnect();
+
+			assert.throws(function() {
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+			}, RequestException, "The RequestException has not been thrown");
+		});
+
+		it('should throw an error if the request failed', function() {
+			var originID = 12;
+			var model = new ModelItf(originID);
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+				.reply(500, JSON.stringify('Server error'));
+
+			assert.throws(function() {
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+			}, RequestException, "The RequestException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the request failed on the server', function() {
+			var originID = 12;
+			var model = new ModelItf(originID);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "error",
+				"data": {}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+			}, ResponseException, "The ResponseException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the request succeed but the data field is missing on the response', function() {
+			var originID = 12;
+			var model = new ModelItf(originID);
+
+			var response = {
+				"status": "success"
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+			}, DataException, "The DataException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the request succeed but the data remains empty', function() {
+			var originID = 12;
+			var model = new ModelItf(originID);
+
+			var response = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+			}, DataException, "The DataException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the request succeed but the data does not contain an id', function() {
+			var originID = 12;
+			var model = new ModelItf(originID);
+
+			var response = {
+				"status": "success",
+				"data": {
+					"toto": "bidule"
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+			}, DataException, "The DataException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+
+	});
 });
