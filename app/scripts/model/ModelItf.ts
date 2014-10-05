@@ -108,8 +108,8 @@ class ModelItf {
         if(result.success()) {
             var response = result.data();
             if(response.status == "success") {
-                if(Object.keys(response.data).length == 0) {
-                    return null;
+                if(response.data === undefined || Object.keys(response.data).length == 0 ||response.data.id === undefined) {
+	                throw new DataException("The response is a success but the data appears to be empty or does not have the right signature when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response.data));
                 } else {
                     return modelClass.fromJSONObject(response.data);
                 }
