@@ -599,7 +599,7 @@ describe('ModelItf', function() {
 	});
 
 	describe('#allObjects()', function() {
-		it('should built a proper request to read all objects', function() {
+		it('should built a proper request to read all objects and return the proper array of objects', function() {
 			var ids = [42, 12, 8, 63];
 			var models = [];
 			var data = [];
@@ -670,57 +670,62 @@ describe('ModelItf', function() {
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
 
-		/*it('should throw an error if the request succeed but the data field is missing on the response', function() {
-			var id = 42;
+		it('should throw an error if the request succeed but the data field is missing on the response', function() {
 			var response = {
 				"status": "success"
 			};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			assert.throws(function() {
-				ModelItf.readObject(ModelItf, id);
+				ModelItf.allObjects(ModelItf);
 			}, DataException, "The DataException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
 
-		it('should throw an error if the request succeed but the data field is empty', function() {
-			var id = 42;
-			var response = {
-				"status": "success",
-				"data": {}
-			};
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
-				.reply(200, JSON.stringify(response));
-
-			assert.throws(function() {
-				ModelItf.readObject(ModelItf, id);
-			}, DataException, "The DataException has not been thrown");
-			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-		});
-
-		it('should throw an error if the request succeed but the data response does not contain an id', function() {
+		it('should throw an error if the request succeed but the data field is not an array', function() {
 			var id = 42;
 			var response = {
 				"status": "success",
 				"data": {
-					"truc": "machin",
-					"bidule": "toto"
+					"toto": "bidule"
 				}
 			};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			assert.throws(function() {
-				ModelItf.readObject(ModelItf, id);
+				ModelItf.allObjects(ModelItf);
 			}, DataException, "The DataException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-		})*/
+		});
+
+		it('should throw an error if the request succeed but one data response does not contain an id', function() {
+			var response = {
+				"status": "success",
+				"data": [
+					{
+						"bidule": "truc",
+						"id": 12
+					},
+					{
+						"toto": "titi"
+					}
+				]
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				ModelItf.allObjects(ModelItf);
+			}, DataException, "The DataException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		})
 	});
 });

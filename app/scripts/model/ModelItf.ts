@@ -188,10 +188,10 @@ class ModelItf {
                 this._id = null;
                 return true;
             } else {
-	            throw new ResponseException("The request failed on the server when trying to update an object with URL:"+urlDelete+".\nMessage : "+JSON.stringify(response));
+	            throw new ResponseException("The request failed on the server when trying to delete an object with URL:"+urlDelete+".\nMessage : "+JSON.stringify(response));
             }
         } else {
-	        throw new RequestException("The request failed when trying to update an object with URL:"+urlDelete+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
+	        throw new RequestException("The request failed when trying to delete an object with URL:"+urlDelete+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
         }
     }
 
@@ -204,6 +204,10 @@ class ModelItf {
 	 * @return {Array<ModelItf>} The model instances.
 	 */
 	static allObjects(modelClass : any) {
+		if (!modelClass) {
+			throw new ModelException("To retrieve all objects, the modelClass must be given.");
+		}
+
 		var allModelItfs : any = new Array();
 
 		var urlAll = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
@@ -214,18 +218,24 @@ class ModelItf {
 		if(result.success()) {
 			var response = result.data();
 			if(response.status == "success") {
-				if(Object.keys(response.data).length > 0) {
+				if(response.data === undefined || !(response.data instanceof Array)) {
+					throw new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAll+"\nResponse data: "+JSON.stringify(response.data));
+				} else {
 					for(var i = 0; i < response.data.length; i++) {
 						var obj = response.data[i];
-						allModelItfs.push(modelClass.fromJSONObject(obj));
+						if (obj.id === undefined) {
+							throw new DataException("One data does not have any ID when retrieving all objects with URL: "+urlAll+"\nResponse data: "+JSON.stringify(response.data));
+						} else {
+							allModelItfs.push(modelClass.fromJSONObject(obj));
+						}
 					}
 				}
 				return allModelItfs;
 			} else {
-				return null;
+				throw new ResponseException("The request failed on the server when trying to retrieve all objects with URL:"+urlAll+".\nMessage : "+JSON.stringify(response));
 			}
 		} else {
-			return null;
+			throw new RequestException("The request failed when trying to retrieve all objects with URL:"+urlAll+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
 		}
 	}
 
