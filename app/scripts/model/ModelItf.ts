@@ -56,6 +56,10 @@ class ModelItf {
      */
     createObject(modelClass : any, data : any) : boolean {
 
+	    if (modelClass === undefined || data === undefined) {
+		    throw new ModelException("To create an object the modelClass and the data of the object must be given.");
+	    }
+
 	    // if the object already exists we throw an error
         if (this.getId() != undefined) {
             throw new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data));
@@ -92,6 +96,9 @@ class ModelItf {
      * @param {number} id - The model instance's id.
      */
     static readObject(modelClass : any, id : number) {
+	    if (modelClass == undefined || id == undefined) {
+		    throw new ModelException("To read an object the modelClass and the id must be given.");
+	    }
 
 	    var urlReadObject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + id.toString();
 	    Logger.debug("[ModelItf] Read an object : "+urlReadObject);
