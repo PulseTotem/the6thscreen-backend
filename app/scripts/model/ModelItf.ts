@@ -65,12 +65,12 @@ class ModelItf {
             throw new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data));
         }
 
-	    var urlCreateObject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName();
+	    var urlCreateObject = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
 	    Logger.debug("[ModelItf] Create a new object : "+urlCreateObject+" with data : "+JSON.stringify(data));
 
         var result : RestClientResponse = RestClient.postSync(urlCreateObject, data);
 
-        if(result.success() && result.statusCode() == 200) {
+        if(result.success()) {
             var response = result.data();
             if(response.status == "success") {
                 if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
@@ -100,7 +100,7 @@ class ModelItf {
 		    throw new ModelException("To read an object the modelClass and the id must be given.");
 	    }
 
-	    var urlReadObject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + id.toString();
+	    var urlReadObject = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), id.toString());
 	    Logger.debug("[ModelItf] Read an object : "+urlReadObject);
 
         var result : RestClientResponse = RestClient.getSync(urlReadObject);
@@ -114,10 +114,10 @@ class ModelItf {
                     return modelClass.fromJSONObject(response.data);
                 }
             } else {
-                return null;
+	            throw new ResponseException("The request failed on the server when trying to read an object with URL:"+urlReadObject+".\nMessage : "+JSON.stringify(response));
             }
         } else {
-            return null;
+	        throw new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
         }
     }
 
@@ -136,7 +136,7 @@ class ModelItf {
             return this.create();
         }
 
-	    var urlUpdate = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString();
+	    var urlUpdate = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
 	    Logger.debug("[ModelItf] Update an object with the URL : "+urlUpdate+" and data : "+JSON.stringify(data));
 
         var result : RestClientResponse = RestClient.putSync(urlUpdate, data);
@@ -169,7 +169,7 @@ class ModelItf {
             return false;
         }
 
-	    var urlDelete = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString();
+	    var urlDelete = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
 	    Logger.debug("[ModelItf] Delete an object with the URL : "+urlDelete);
 
         var result : RestClientResponse = RestClient.deleteSync(urlDelete);
@@ -204,7 +204,7 @@ class ModelItf {
 		if (this.getId() == undefined || id2 == undefined) {
 			return false;
 		}
-		var associationURL = DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + this.getId().toString() + "/" + modelClass2.getTableName() + "/" + id2.toString();
+		var associationURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
 		Logger.debug("[ModelItf] Associate an object with the following URL: "+associationURL);
 
 		var result : RestClientResponse = RestClient.putSync(associationURL, {});
@@ -234,8 +234,7 @@ class ModelItf {
 		if (this.getId() == undefined || id2 == undefined) {
 			return false;
 		}
-
-		var deleteAssoURL = DatabaseConnection.getBaseURL() + "/" + modelClass1.getTableName() + "/" + this.getId().toString() + "/" + modelClass2.getTableName() + "/" + id2.toString();
+		var deleteAssoURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
 		Logger.debug("[ModelItf] Delete Association between Objects with the following URL: "+deleteAssoURL);
 
 		var result : RestClientResponse = RestClient.deleteSync(deleteAssoURL);
@@ -266,7 +265,7 @@ class ModelItf {
 			return false;
 		}
 
-		var urlAssociatedObjects = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString() + "/" + modelClassAssociated.getTableName();
+		var urlAssociatedObjects = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
 		Logger.debug("[ModelItf] Get associated objects with the URL: "+urlAssociatedObjects);
 
 		var result : RestClientResponse = RestClient.getSync(urlAssociatedObjects);
@@ -302,8 +301,7 @@ class ModelItf {
 		if (this.getId() == undefined) {
 			return false;
 		}
-
-		var urlUniqueAssociatedOject = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName() + "/" + this.getId().toString() + "/" + modelClassAssociated.getTableName();
+		var urlUniqueAssociatedOject = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
 		Logger.debug("[ModelItf] Get a uniquely associated object with the URL: "+urlUniqueAssociatedOject);
 
 		var result : RestClientResponse = RestClient.getSync(urlUniqueAssociatedOject);
@@ -333,7 +331,7 @@ class ModelItf {
     static allObjects(modelClass : any) {
         var allModelItfs : any = new Array();
 
-	    var urlAll = DatabaseConnection.getBaseURL() + "/" + modelClass.getTableName();
+	    var urlAll = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
 	    Logger.debug("[ModelItf] Read all objects with the URL: "+urlAll);
 
         var result : RestClientResponse = RestClient.getSync(urlAll);

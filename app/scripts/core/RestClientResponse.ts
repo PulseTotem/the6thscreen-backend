@@ -46,13 +46,15 @@ class RestClientResponse {
 	private _statusCode : number = 0;
 
 	constructor(success : boolean, response : any, data : any = null) {
-		this._success = success;
+		if (response.statusCode !== undefined) {
+			this._statusCode = response.statusCode;
+		} else {
+			this._statusCode = -1;
+		}
+
+		this._success = success && (this._statusCode == 200);
 		this._response = response;
 		this._data = data;
-
-		if (this._response.statusCode !== undefined) {
-			this._statusCode = this._response.statusCode;
-		}
 	}
 
 	/**

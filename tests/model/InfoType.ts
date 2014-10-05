@@ -42,8 +42,8 @@ describe('InfoType', function(){
 
 			reponse.data["id"] = mockID;
 
-			var restClientMock = nock("http://"+DatabaseConnection.getHost()+":"+DatabaseConnection.getPort())
-				.post("/api/" + InfoType.getTableName(), info.toJSONObject())
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.post(DatabaseConnection.modelEndpoint(InfoType.getTableName()), info.toJSONObject())
 				.reply(200, JSON.stringify(reponse));
 
 			var retour = info.create();
@@ -72,8 +72,8 @@ describe('InfoType', function(){
 				"data": info.toJSONObject()
 			};
 
-			var restClientMock = nock("http://"+DatabaseConnection.getHost()+":"+DatabaseConnection.getPort())
-				.put("/api/" + InfoType.getTableName()+"/"+id, info.toJSONObject())
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(InfoType.getTableName(), id.toString()), info.toJSONObject())
 				.reply(200, JSON.stringify(reponse));
 
 			var retour = info.update();
