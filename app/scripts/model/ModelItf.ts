@@ -266,10 +266,10 @@ class ModelItf {
 			if(response.status == "success") {
 				return true;
 			} else {
-				throw new ResponseException("The request failed on the server when trying to delete an object with URL:"+associationURL+".\nMessage : "+JSON.stringify(response));
+				throw new ResponseException("The request failed on the server when trying to associate objects with URL:"+associationURL+".\nMessage : "+JSON.stringify(response));
 			}
 		} else {
-			throw new RequestException("The request failed when trying to delete an object with URL:"+associationURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
+			throw new RequestException("The request failed when trying to associate objects with URL:"+associationURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
 		}
 	}
 
@@ -283,8 +283,11 @@ class ModelItf {
 	 * @returns {boolean} returns true if the deletion works well.
 	 */
 	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number) : boolean {
-		if (this.getId() == undefined || id2 == undefined) {
-			return false;
+		if (!this.getId()) {
+			throw new ModelException("An association can't be deleted if the object does not exist.");
+		}
+		if (!modelClass1 || !modelClass2 || !id2) {
+			throw new ModelException("The two modelClasses and the ID of the second objects must be given to delete the association.");
 		}
 		var deleteAssoURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
 		Logger.debug("[ModelItf] Delete Association between Objects with the following URL: "+deleteAssoURL);
@@ -296,10 +299,10 @@ class ModelItf {
 			if(response.status == "success") {
 				return true;
 			} else {
-				return false;
+				throw new ResponseException("The request failed on the server when trying to delete an association between objects with URL:"+deleteAssoURL+".\nMessage : "+JSON.stringify(response));
 			}
 		} else {
-			return false;
+			throw new RequestException("The request failed when trying to delete an association between objects with URL:"+deleteAssoURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
 		}
 	}
 
