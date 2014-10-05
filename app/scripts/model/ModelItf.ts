@@ -56,12 +56,12 @@ class ModelItf {
      */
     createObject(modelClass : any, data : any) : boolean {
 
-	    if (modelClass === undefined || data === undefined) {
+	    if (!modelClass || !data) {
 		    throw new ModelException("To create an object the modelClass and the data of the object must be given.");
 	    }
 
 	    // if the object already exists we throw an error
-        if (this.getId() != undefined) {
+        if (!!this.getId()) {
             throw new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data));
         }
 
@@ -96,7 +96,7 @@ class ModelItf {
      * @param {number} id - The model instance's id.
      */
     static readObject(modelClass : any, id : number) {
-	    if (modelClass == undefined || id == undefined) {
+	    if (!modelClass || !id) {
 		    throw new ModelException("To read an object the modelClass and the id must be given.");
 	    }
 
@@ -131,9 +131,13 @@ class ModelItf {
      */
      updateObject(modelClass : any, data : any) : boolean {
 
+	    if (!modelClass || !data) {
+		    throw new ModelException("To update an object, the modelClass and the datas must be given.");
+	    }
+
 	    // if the object does not exist yet, we need to create it instead updating!
-        if(this.getId() == undefined) {
-            return this.create();
+        if(!this.getId()) {
+            throw new ModelException("The object does not exist yet. It can't be update. Datas: "+JSON.stringify(data));
         }
 
 	    var urlUpdate = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
@@ -143,17 +147,17 @@ class ModelItf {
 
         if(result.success()) {
             var response = result.data();
-            if(response.status == "success") {
-                if(response.data === undefined) {
-                    throw new Error("Undefined data coming from PUT request to "+urlUpdate);
-                } else {
-                    return true;
-                }
-            } else {
-	            throw new Error("Response status from PUT request to "+urlUpdate+" : "+response.status);
-            }
+	        if(response.status == "success") {
+		        if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
+			        throw new DataException("The response is a success but the data appears to be empty or does not have the right signature when updating an object with URL: "+urlUpdate+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data));
+		        } else {
+			        return true;
+		        }
+	        } else {
+		        throw new ResponseException("The request failed on the server when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nMessage : "+JSON.stringify(response));
+	        }
         } else {
-	        throw new Error("Result failure from PUT request to "+urlUpdate+" : "+result.response());
+	        throw new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
         }
     }
 

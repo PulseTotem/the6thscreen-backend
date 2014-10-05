@@ -26,9 +26,9 @@ describe('ModelItf', function() {
 			var model = new ModelItf(42);
 
 			assert.throws(function() {
-				model.createObject("ModelItf", model.toJSONObject());
+				model.createObject(ModelItf, model.toJSONObject());
 			},
-			Error);
+			ModelException);
 		});
 
 		it('should built a proper request to create the object and store the id', function() {
@@ -315,6 +315,184 @@ describe('ModelItf', function() {
 
 			assert.throws(function() {
 				ModelItf.readObject(ModelItf, id);
+			}, DataException, "The DataException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		})
+	});
+
+	describe('#updateObject()', function() {
+		it('should throw an error if the object has an id null', function() {
+			var model = new ModelItf(null);
+
+			assert.throws(function() {
+					model.updateObject(ModelItf, model.toJSONObject());
+				},
+				ModelException);
+		});
+
+		it('should throw an error if the object has an id undefined', function() {
+			var model = new ModelItf(undefined);
+
+			assert.throws(function() {
+					model.updateObject(ModelItf, model.toJSONObject());
+				},
+				ModelException);
+		});
+
+		it('should built a proper request to update the object', function() {
+			var id = 42;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+			var jsonParam = model.toJSONObject();
+
+			var reponse : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": model.toJSONObject()
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
+				.reply(200, JSON.stringify(reponse));
+
+			var retour = model.updateObject(modelName, jsonParam);
+			assert.ok(retour, "The update did not return true");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if no modelclass is given', function() {
+			var model = new ModelItf(42);
+			var toto;
+
+			assert.throws(function() {
+				model.updateObject(toto, model.toJSONObject());
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if no data is given', function() {
+			var model = new ModelItf(42);
+			var toto;
+
+			assert.throws(function() {
+				model.updateObject(ModelItf, toto);
+			}, ModelException, "The ModelException has not been thrown");
+		});
+
+		it('should throw an error if the connection failed', function() {
+			var model = new ModelItf(42);
+
+			var modelName = ModelItf;
+			var jsonParam = model.toJSONObject();
+
+			nock.disableNetConnect();
+
+			assert.throws(function() {
+				model.updateObject(modelName, jsonParam);
+			}, RequestException, "The RequestException has not been thrown");
+		});
+
+		it('should throw an error if the request failed', function() {
+			var id = 42;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+			var jsonParam = model.toJSONObject();
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
+				.reply(500, JSON.stringify('Server error'));
+
+			assert.throws(function() {
+				model.updateObject(modelName, jsonParam);
+			}, RequestException, "The RequestException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the request failed on the server', function() {
+			var id = 42;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+			var jsonParam = model.toJSONObject();
+
+			var response : SequelizeRestfulResponse = {
+				"status": "error",
+				"data": {}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				model.updateObject(modelName, jsonParam);
+			}, ResponseException, "The ResponseException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the request succeed but the data field is missing on the response', function() {
+			var id = 42;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+			var jsonParam = model.toJSONObject();
+
+			var response = {
+				"status": "success"
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				model.updateObject(modelName, jsonParam);
+			}, DataException, "The DataException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the request succeed but the data field is empty', function() {
+			var id = 42;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+			var jsonParam = model.toJSONObject();
+
+			var response = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				model.updateObject(modelName, jsonParam);
+			}, DataException, "The DataException has not been thrown");
+			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+		});
+
+		it('should throw an error if the request succeed but the data response does not contain an id', function() {
+			var id = 42;
+			var model = new ModelItf(id);
+
+			var modelName = ModelItf;
+			var jsonParam = model.toJSONObject();
+
+			var response = {
+				"status": "success",
+				"data": {
+					"toto": "titi"
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
+				.reply(200, JSON.stringify(response));
+
+			assert.throws(function() {
+				model.updateObject(modelName, jsonParam);
 			}, DataException, "The DataException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		})
