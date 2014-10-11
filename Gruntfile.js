@@ -10,7 +10,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
 
-    // tasks
+
+	// tasks
     grunt.initConfig({
 
 
@@ -138,7 +139,14 @@ module.exports = function (grunt) {
                     'colors': true
                 },
                 src: ['build/tests/Test.js']
-            }
+            },
+	        fixtures: {
+		        options: {
+			        reporter: 'spec',
+			        'colors': true
+		        },
+		        src: ['build/tests/Test.js']
+	        }
         },
 // ---------------------------------------------
 

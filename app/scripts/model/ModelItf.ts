@@ -18,6 +18,8 @@
  */
 class ModelItf {
 
+	static NULLID = null;
+
     /**
      * ID property.
      *
@@ -32,6 +34,9 @@ class ModelItf {
      * @param {number} id - The model ID.
      */
     constructor(id : number) {
+	    if (!id && id !== ModelItf.NULLID) {
+		    throw new ModelException("The ID cannot be undefined");
+	    }
         this._id = id;
     }
 
@@ -45,7 +50,6 @@ class ModelItf {
         return this._id;
     }
 
-	// TODO : In all following methods, we need to log errors!
     /**
      * Create model object in database.
      *
@@ -383,7 +387,11 @@ class ModelItf {
 		if(result.success()) {
 			var response = result.data();
 			if(response.status == "success") {
-				if(response.data === undefined || ((response.data instanceof Array) && (response.data.length > 0)) || (!(response.data instanceof Array)  && response.data.id === undefined)) {
+				// in that case tere is no data to retrieve
+				if ((response.data instanceof Array) && (response.data.length == 0)) {
+					return true;
+				}
+				if(response.data === undefined || response.data.id === undefined) {
 					throw new DataException("The response is a success but the data does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response.data));
 				} else {
 					assoName.push(modelClassAssociated.fromJSONObject(response.data));
@@ -546,4 +554,13 @@ class ModelItf {
         Logger.warn("ModelItf - getTableName : Method need to be implemented.");
         return "";
     }
+
+	static isObjectInsideArray(tableau : Array<ModelItf>, object : ModelItf) : boolean {
+		for (var i = 0; i < tableau.length; i++) {
+			if (tableau[i].getId() === object.getId()) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

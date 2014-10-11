@@ -81,7 +81,7 @@ class Call extends ModelItf {
      * @param {string} name - The Call's name.
      * @param {number} id - The Call's ID.
      */
-    constructor(name : string, id : number = null) {
+    constructor(name : string, id : number = ModelItf.NULLID) {
         super(id);
 
         this.setName(name);
@@ -227,11 +227,12 @@ class Call extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addParamValue(p : ParamValue) : boolean {
-		if (this.paramValues().indexOf(p) !== -1) {
-			throw new Error("You cannot add twice a parameter in a call.");  // TODO: cannot it be useful sometimes?
+		if (!p || !p.getId()) {
+			throw new ModelException("The ParamValue must be an existing object to be associated.");
 		}
-		if (p === null || p.getId() === undefined || p.getId() === null) {
-			throw new Error("The ParamValue must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.paramValues(), p)) {
+			throw new ModelException("You cannot add twice a parameter in a call.");  // TODO: cannot it be useful sometimes?
 		}
 
 		if (this.associateObject(Call, ParamValue, p.getId())) {
@@ -352,7 +353,7 @@ class Call extends ModelItf {
 	 */
 	unsetCallType() : boolean {
 		if (this.callType() === null) {
-			throw new Error("No CallType has been set for this call.");
+			throw new ModelException("No CallType has been set for this call.");
 		}
 
 		if (this.deleteObjectAssociation(Call, CallType, this.callType().getId())) {
@@ -437,11 +438,13 @@ class Call extends ModelItf {
      * @return {Call} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Call {
-        if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
-            return null;
-        } else {
-            return new Call(jsonObject.name, jsonObject.id);
+	    if (!jsonObject.id) {
+		    throw new ModelException("A Call object should have an ID.");
+	    }
+        if(!jsonObject.name) {
+	        throw new ModelException("A Call object should have a name.");
         }
+	    return new Call(jsonObject.name, jsonObject.id);
     }
 
     /**

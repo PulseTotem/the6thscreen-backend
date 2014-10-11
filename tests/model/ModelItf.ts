@@ -18,7 +18,15 @@ describe('ModelItf', function() {
 			var model = new ModelItf(id);
 
 			assert.equal(model.getId(), id, "The id is correctly stored.");
-		})
+		});
+
+
+		it('should not authorize to create an object with an undefined ID', function() {
+			assert.throws(function() {
+					new ModelItf(undefined);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
 	});
 
 	describe('#createObject()', function() {
@@ -322,17 +330,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#updateObject()', function() {
-		it('should throw an error if the object has an id null', function() {
-			var model = new ModelItf(null);
-
-			assert.throws(function() {
-					model.updateObject(ModelItf, model.toJSONObject());
-				},
-				ModelException);
-		});
-
-		it('should throw an error if the object has an id undefined', function() {
-			var model = new ModelItf(undefined);
+		it('should throw an error if the object has an id '+ModelItf.NULLID, function() {
+			var model = new ModelItf(ModelItf.NULLID);
 
 			assert.throws(function() {
 					model.updateObject(ModelItf, model.toJSONObject());
@@ -500,17 +499,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#deleteObject()', function() {
-		it('should throw an error if the object has an id null', function() {
-			var model = new ModelItf(null);
-
-			assert.throws(function() {
-					model.deleteObject(ModelItf);
-				},
-				ModelException);
-		});
-
-		it('should throw an error if the object has an id undefined', function() {
-			var model = new ModelItf(undefined);
+		it('should throw an error if the object has an id '+ModelItf.NULLID, function() {
+			var model = new ModelItf(ModelItf.NULLID);
 
 			assert.throws(function() {
 					model.deleteObject(ModelItf);
@@ -730,17 +720,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#associateObject()', function() {
-		it('should throw an error if the object has an id null', function() {
-			var model = new ModelItf(null);
-
-			assert.throws(function() {
-					model.associateObject(ModelItf, ModelItf, 42);
-				},
-				ModelException);
-		});
-
-		it('should throw an error if the object has an id undefined', function() {
-			var model = new ModelItf(undefined);
+		it('should throw an error if the object has an id '+ModelItf.NULLID, function() {
+			var model = new ModelItf(ModelItf.NULLID);
 
 			assert.throws(function() {
 					model.associateObject(ModelItf, ModelItf, 42);
@@ -849,17 +830,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#deleteObjectAssociation()', function() {
-		it('should throw an error if the object has an id null', function() {
-			var model = new ModelItf(null);
-
-			assert.throws(function() {
-					model.deleteObjectAssociation(ModelItf, ModelItf, 42);
-				},
-				ModelException);
-		});
-
-		it('should throw an error if the object has an id undefined', function() {
-			var model = new ModelItf(undefined);
+		it('should throw an error if the object has an id '+ModelItf.NULLID, function() {
+			var model = new ModelItf(ModelItf.NULLID);
 
 			assert.throws(function() {
 					model.deleteObjectAssociation(ModelItf, ModelItf, 42);
@@ -968,18 +940,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#getAssociatedObjects()', function() {
-		it('should throw an error if the object has an id null', function() {
-			var model = new ModelItf(null);
-			var result = [];
-
-			assert.throws(function() {
-					model.getAssociatedObjects(ModelItf, ModelItf, result);
-				},
-				ModelException);
-		});
-
-		it('should throw an error if the object has an id undefined', function() {
-			var model = new ModelItf(undefined);
+		it('should throw an error if the object has an id '+ModelItf.NULLID, function() {
+			var model = new ModelItf(ModelItf.NULLID);
 			var result = [];
 
 			assert.throws(function() {
@@ -1169,18 +1131,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#getUniquelyAssociatedObject()', function() {
-		it('should throw an error if the object has an id null', function() {
-			var model = new ModelItf(null);
-			var result = [];
-
-			assert.throws(function() {
-					model.getUniquelyAssociatedObject(ModelItf, ModelItf, result);
-				},
-				ModelException);
-		});
-
-		it('should throw an error if the object has an id undefined', function() {
-			var model = new ModelItf(undefined);
+		it('should throw an error if the object has an id '+ModelItf.NULLID, function() {
+			var model = new ModelItf(ModelItf.NULLID);
 			var result = [];
 
 			assert.throws(function() {
@@ -1361,4 +1313,28 @@ describe('ModelItf', function() {
 
 
 	});
+
+	describe('#isObjectInsideArray', function() {
+		it('should return true if the item is in the array', function() {
+			var model = new ModelItf(2);
+			var array = [
+				new ModelItf(1),
+				model,
+				new ModelItf(3)
+			];
+
+			assert.ok(ModelItf.isObjectInsideArray(array, model), "The item is not found in the array");
+		});
+
+		it('should get the index if an identical item is in the array', function() {
+			var model = new ModelItf(2);
+			var array = [
+				new ModelItf(1),
+				new ModelItf(2),
+				new ModelItf(3)
+			];
+
+			assert.ok(ModelItf.isObjectInsideArray(array, model), "The item is not found in the array");
+		})
+	})
 });
