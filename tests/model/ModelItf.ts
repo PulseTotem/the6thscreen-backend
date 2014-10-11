@@ -1336,5 +1336,77 @@ describe('ModelItf', function() {
 
 			assert.ok(ModelItf.isObjectInsideArray(array, model), "The item is not found in the array");
 		})
+	});
+
+	describe('#removeObjectFromArray', function() {
+		it('should return true and remove the item', function() {
+			var model1 = new ModelItf(1);
+			var model2 = new ModelItf(2);
+			var model3 = new ModelItf(3);
+
+			var array = [
+				model1,
+				model2,
+				model3
+			];
+
+			var expected = [
+				model1,
+				model3
+			];
+
+			var retour = ModelItf.removeObjectFromArray(array, model2);
+
+			assert.ok(retour, "The item has not been found in the array");
+			assert.deepEqual(array, expected, "The array has not been modified correcty: "+JSON.stringify(array));
+
+		});
+
+		it('should return true and remove an identical item', function() {
+			var model1 = new ModelItf(1);
+			var model2 = new ModelItf(2);
+			var model3 = new ModelItf(3);
+
+			var array = [
+				model1,
+				model2,
+				model3
+			];
+
+			var expected = [
+				model1,
+				model3
+			];
+
+			var retour = ModelItf.removeObjectFromArray(array, new ModelItf(2));
+
+			assert.ok(retour, "The item has not been found in the array");
+			assert.deepEqual(array, expected, "The array has not been modified correcty: "+JSON.stringify(array));
+
+		});
+
+		it('should return false and keep the array as it is if the item is not found', function() {
+			var model1 = new ModelItf(1);
+			var model2 = new ModelItf(2);
+			var model3 = new ModelItf(3);
+
+			var array = [
+				model1,
+				model2,
+				model3
+			];
+
+			var expected = [
+				model1,
+				model2,
+				model3
+			];
+
+			var retour = ModelItf.removeObjectFromArray(array, new ModelItf(4));
+
+			assert.ok(!retour, "The item has been found in the array");
+			assert.deepEqual(array, expected, "The array has not been modified correcty: "+JSON.stringify(array));
+
+		});
 	})
 });

@@ -563,4 +563,14 @@ class ModelItf {
 		}
 		return false;
 	}
+
+	static removeObjectFromArray(tableau : Array<ModelItf>, object : ModelItf) : boolean {
+		for (var i = 0; i < tableau.length; i++) {
+			if (tableau[i].getId() === object.getId()) {
+				tableau.splice(i, 1);
+				return true;
+			}
+		}
+		return false;
+	}
 }

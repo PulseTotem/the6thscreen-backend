@@ -5,11 +5,13 @@
 
 /// <reference path="../../libsdef/mocha.d.ts" />
 /// <reference path="../../libsdef/nock.d.ts" />
+/// <reference path="../../libsdef/sinon.d.ts" />
 
 /// <reference path="../../app/scripts/model/Call.ts" />
 
 var assert = require("assert");
 var nock = require("nock");
+var sinon : SinonStatic = require("sinon");
 
 describe('Call', function(){
 	describe('#constructor', function() {
@@ -98,6 +100,7 @@ describe('Call', function(){
 		it('should put the new ParamValue inside the array', function() {
 			var c = new Call("toto", 52);
 			var pv = new ParamValue("mavaleur",12);
+			var spy = sinon.spy(pv, "desynchronize");
 
 			var reponse1 : SequelizeRestfulResponse = {
 				"status": "success",
@@ -129,6 +132,7 @@ describe('Call', function(){
 			 paramValues = c.paramValues();
 			 var expected = [pv];
 			 assert.deepEqual(paramValues, expected, "The paramValues is not an array containing only the added paramValue: "+JSON.stringify(paramValues));
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
 		});
 
 		it('should not allow to add a null object', function() {

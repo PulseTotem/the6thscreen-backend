@@ -136,14 +136,19 @@ module.exports = function (grunt) {
             test: {
                 options: {
                     reporter: 'spec',
-                    'colors': true
+                    colors: true,
+	                require: 'coverage/blanket'
                 },
                 src: ['build/tests/Test.js']
             },
-	        fixtures: {
+	        coverage: {
 		        options: {
-			        reporter: 'spec',
-			        'colors': true
+			        reporter: 'html-cov',
+			        // use the quiet flag to suppress the mocha console output
+			        quiet: true,
+			        // specify a destination file to capture the mocha
+			        // output (the quiet option does not suppress this)
+			        captureFile: 'coverage.html'
 		        },
 		        src: ['build/tests/Test.js']
 	        }
@@ -191,6 +196,9 @@ module.exports = function (grunt) {
         grunt.task.run(['clean:test']);
 
         grunt.task.run(['copy:testConnectionInfosFile', 'typescript:test', 'mochaTest:test']);
+	    //grunt.task.run(['mochaTest:test']);
     });
+
+	grunt.registerTask('coverage', ['test', 'mochaTest:coverage']);
 
 }
