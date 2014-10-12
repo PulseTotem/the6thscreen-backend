@@ -1,4 +1,5 @@
 /**
+ * @author Christian Brel <brel@i3s.unice.fr, ch.brel@gmail.com>
  * @author Simon Urli <simon@the6thscreen.fr>
  */
 
@@ -7,6 +8,7 @@
 /// <reference path="../../libsdef/sinon.d.ts" />
 
 /// <reference path="../../app/scripts/model/ConstraintParamType.ts" />
+/// <reference path="../../app/scripts/model/TypeParamType.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");
@@ -32,6 +34,26 @@ describe('ConstraintParamType', function() {
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
+
+    describe("#type", function() {
+        it('should be null at initialization', function() {
+            var cpt = new ConstraintParamType("bidule", "Description de bidule", 52);
+
+            var reponse : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": []
+            };
+
+            var restClientMock = nock(DatabaseConnection.getBaseURL())
+                .get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
+                .reply(200, JSON.stringify(reponse));
+
+            var type = cpt.type();
+
+            assert.deepEqual(type, null, "The type is not null: "+JSON.stringify(type));
+            assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+        });
+    });
 
 	describe('#fromJSONobject', function() {
 		it('should create the right object', function() {
