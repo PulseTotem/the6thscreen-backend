@@ -147,11 +147,13 @@ class TypeParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : TypeParamType {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new TypeParamType(jsonObject.name, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A TypeParamType object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A TypeParamType object should have a name.");
+		}
+		return new TypeParamType(jsonObject.name, jsonObject.id);
 	}
 
 	/**

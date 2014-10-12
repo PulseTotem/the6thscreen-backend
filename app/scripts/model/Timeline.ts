@@ -297,13 +297,13 @@ class Timeline extends ModelItf {
 	 */
 	static fromJSONObject(jsonObject : any) : Timeline {
 		if(!jsonObject.id) {
-			throw new ModelException("A Profil object should have an ID.");
+			throw new ModelException("A Timeline object should have an ID.");
 		}
 		if(!jsonObject.name) {
-			throw new ModelException("A Profil object should have a name.");
+			throw new ModelException("A Timeline object should have a name.");
 		}
 		if(!jsonObject.description) {
-			throw new ModelException("A Profil object should have a description.");
+			throw new ModelException("A Timeline object should have a description.");
 		}
 		return new Timeline(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
