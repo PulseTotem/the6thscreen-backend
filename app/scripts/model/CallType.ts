@@ -248,8 +248,8 @@ class CallType extends ModelItf {
         if(! this._render_policy_loaded) {
 	        var value = [];
             this._render_policy_loaded = this.getUniquelyAssociatedObject(CallType, RenderPolicy, value);
-	        if (this._receive_policy_loaded) {
-		        this._receive_policy = value[0];
+	        if (this._render_policy_loaded) {
+		        this._render_policy = value[0];
 	        }
         }
         return this._render_policy;
@@ -497,12 +497,12 @@ class CallType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setRenderPolicy(rp : RenderPolicy) : boolean {
-		if (this.renderPolicy() !== null) {
-			throw new Error("The renderPolicy is already set for this CallType.");
+		if (!rp || !rp.getId()) {
+			throw new ModelException("The renderPolicy must be an existing object to be associated.");
 		}
 
-		if (rp === null || rp.getId() === undefined || rp.getId() === null) {
-			throw new Error("The renderPolicy must be an existing object to be associated.");
+		if (this.renderPolicy() !== null) {
+			throw new ModelException("The renderPolicy is already set for this CallType.");
 		}
 
 		if (this.associateObject(CallType, RenderPolicy, rp.getId())) {
@@ -525,7 +525,7 @@ class CallType extends ModelItf {
 	 */
 	unsetRenderPolicy() : boolean {
 		if (this.renderPolicy() === null) {
-			throw new Error("No RenderPolicy has been set for this callType.");
+			throw new ModelException("No RenderPolicy has been set for this callType.");
 		}
 
 		if (this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId())) {
