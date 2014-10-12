@@ -202,5 +202,108 @@ describe('Call', function(){
 			"The exception has not been thrown.");
 		});
 
+	});
+
+	describe('#removeParamValue', function() {
+		it('should remove the ParamValue from the array', function() {
+			var c = new Call("toto", 52);
+			var pv = new ParamValue("mavaleur",12);
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": [
+					{
+						"value": "mavaleur",
+						"id": 12
+					}
+				]
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var paramValues = c.paramValues();
+
+			assert.deepEqual(paramValues, [pv], "The paramValue array is not an array fill only with PV: "+JSON.stringify(paramValues));
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+
+			var spy = sinon.spy(pv, "desynchronize");
+			var reponse2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.delete(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
+				.reply(200, JSON.stringify(reponse2));
+
+			var retour = c.removeParamValue(pv);
+			assert.ok(retour, "The return of the removeParamValue is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+
+			paramValues = c.paramValues();
+			assert.deepEqual(paramValues, [], "The paramValues is not an empty array: "+JSON.stringify(paramValues));
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+		});
+
+		it('should not allow to remove a null object', function() {
+			nock.disableNetConnect();
+			var c = new Call("toto", 52);
+
+			assert.throws(function() {
+					c.removeParamValue(null);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to add an undefined object', function() {
+			nock.disableNetConnect();
+			var c = new Call("toto", 52);
+
+			assert.throws(function() {
+					c.removeParamValue(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to add a object which is not yet created', function() {
+			nock.disableNetConnect();
+			var c = new Call("toto", 52);
+			var p = new ParamValue("bidule");
+
+			assert.throws(function() {
+					c.removeParamValue(p);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to remove an object which is not linked', function() {
+			var c = new Call("toto", 52);
+			var pv = new ParamValue("toto",12);
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var paramValues = c.paramValues();
+
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+
+			assert.throws(function() {
+					c.removeParamValue(pv);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
 	})
 });
