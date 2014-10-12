@@ -318,12 +318,12 @@ class ParamType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setConstraint(c : ConstraintParamType) : boolean {
-		if (this.constraint() !== null) {
-			throw new Error("The constraint is already set for this CallType.");
+		if (!c || !c.getId()) {
+			throw new ModelException("The constraint must be an existing object to be associated.");
 		}
 
-		if (c === null || c.getId() === undefined || c.getId() === null) {
-			throw new Error("The constraint must be an existing object to be associated.");
+		if (this.constraint() !== null) {
+			throw new ModelException("The constraint is already set for this CallType.");
 		}
 
 		if (this.associateObject(ParamType, ConstraintParamType, c.getId())) {
@@ -346,7 +346,7 @@ class ParamType extends ModelItf {
 	 */
 	unsetConstraint() : boolean {
 		if (this.constraint() === null) {
-			throw new Error("No constraint has been set for this ParamType.");
+			throw new ModelException("No constraint has been set for this ParamType.");
 		}
 
 		if (this.deleteObjectAssociation(ParamType, ConstraintParamType, this.constraint().getId())) {
@@ -368,12 +368,12 @@ class ParamType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setDefaultValue(d : ParamValue) : boolean {
-		if (this.defaultValue() !== null) {
-			throw new Error("The defaultValue is already set for this CallType.");
+		if (!d || !d.getId()) {
+			throw new ModelException("The defaultValue must be an existing object to be associated.");
 		}
 
-		if (d === null || d.getId() === undefined || d.getId() === null) {
-			throw new Error("The defaultValue must be an existing object to be associated.");
+		if (this.defaultValue() !== null) {
+			throw new ModelException("The defaultValue is already set for this CallType.");
 		}
 
 		if (this.associateObject(ParamType, ParamValue, d.getId())) {
@@ -396,7 +396,7 @@ class ParamType extends ModelItf {
 	 */
 	unsetDefaultValue() : boolean {
 		if (this.defaultValue() === null) {
-			throw new Error("No defaultValue has been set for this ParamType.");
+			throw new ModelException("No defaultValue has been set for this ParamType.");
 		}
 
 		if (this.deleteObjectAssociation(ParamType, ParamValue, this.defaultValue().getId())) {
