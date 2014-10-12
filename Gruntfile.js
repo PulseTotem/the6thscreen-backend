@@ -76,12 +76,14 @@ module.exports = function (grunt) {
             },
             build: {
                 options: {
-                    script: 'build/js/The6thScreenBackend.js'
+                    script: 'build/js/The6thScreenBackend.js',
+                    args: ["loglevel=debug"]
                 }
             },
             dist: {
                 options: {
                     script: 'dist/js/The6thScreenBackend.js',
+                    args: ["loglevel=error"],
                     node_env: 'production'
                 }
             }
