@@ -344,11 +344,13 @@ class User extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : User {
-		if(typeof(jsonObject.username) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new User(jsonObject.username, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A User object should have an ID.");
 		}
+		if(!jsonObject.username) {
+			throw new ModelException("A User object should have a name.");
+		}
+		return new User(jsonObject.username, jsonObject.id);
 	}
 
     /**

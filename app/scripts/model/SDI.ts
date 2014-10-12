@@ -289,7 +289,8 @@ class SDI extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"allowedHost": this.allowedHost()
 		};
 		return data;
 	}
@@ -320,11 +321,12 @@ class SDI extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addUser(u : User) : boolean {
-		if (this.users().indexOf(u) !== -1) {
-			throw new Error("You cannot add twice a User for a SDI.");
+		if (!u || !u.getId()) {
+			throw new ModelException("The User must be an existing object to be associated.");
 		}
-		if (u === null || u.getId() === undefined || u.getId() === null) {
-			throw new Error("The User must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.users(), u)) {
+			throw new ModelException("You cannot add twice a User for a SDI.");
 		}
 
 		if (this.associateObject(SDI, User, u.getId())) {
@@ -345,15 +347,17 @@ class SDI extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeUser(u : User) : boolean {
-		var indexValue = this.users().indexOf(u);
-		if (indexValue === -1) {
-			throw new Error("The User you try to remove has not been added to the current SDI");
+		if (!u || !u.getId()) {
+			throw new ModelException("The User must be an existing object to be associated.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.users(), u)) {
+			throw new ModelException("The User you try to remove has not been added to the current SDI");
 		}
 
 		if (this.deleteObjectAssociation(SDI, User, u.getId())) {
 			u.desynchronize();
-			this.users().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.users(), u);
 		} else {
 			return false;
 		}
@@ -368,11 +372,12 @@ class SDI extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addZone(z : Zone) : boolean {
-		if (this.zones().indexOf(z) !== -1) {
-			throw new Error("You cannot add twice a Zone for a SDI.");
+		if (!z || !z.getId()) {
+			throw new ModelException("The Zone must be an existing object to be associated.");
 		}
-		if (z === null || z.getId() === undefined || z.getId() === null) {
-			throw new Error("The Zone must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.zones(), z)) {
+			throw new ModelException("You cannot add twice a Zone for a SDI.");
 		}
 
 		if (this.associateObject(SDI, Zone, z.getId())) {
@@ -393,15 +398,17 @@ class SDI extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeZone(z : Zone) : boolean {
-		var indexValue = this.zones().indexOf(z);
-		if (indexValue === -1) {
-			throw new Error("The Zone you try to remove has not been added to the current SDI");
+		if (!z || !z.getId()) {
+			throw new ModelException("The Zone must be an existing object to be associated.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.zones(), z)) {
+			throw new ModelException("The Zone you try to remove has not been added to the current SDI");
 		}
 
 		if (this.deleteObjectAssociation(SDI, Zone, z.getId())) {
 			z.desynchronize();
-			this.zones().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.zones(), z);
 		} else {
 			return false;
 		}
@@ -416,11 +423,12 @@ class SDI extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addProfil(p : Profil) : boolean {
-		if (this.profils().indexOf(p) !== -1) {
-			throw new Error("You cannot add twice a Profil for a SDI.");
+		if (!p || !p.getId()) {
+			throw new ModelException("The Profil must be an existing object to be associated.");
 		}
-		if (p === null || p.getId() === undefined || p.getId() === null) {
-			throw new Error("The Profil must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.profils(), p)) {
+			throw new ModelException("You cannot add twice a Profil for a SDI.");
 		}
 
 		if (this.associateObject(SDI, Profil, p.getId())) {
@@ -441,15 +449,17 @@ class SDI extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeProfil(p : Profil) : boolean {
-		var indexValue = this.profils().indexOf(p);
-		if (indexValue === -1) {
-			throw new Error("The Profil you try to remove has not been added to the current SDI");
+		if (!p || !p.getId()) {
+			throw new ModelException("The Profil must be an existing object to be associated.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.profils(), p)) {
+			throw new ModelException("The profil you try to remove is not linked with the SDI.");
 		}
 
 		if (this.deleteObjectAssociation(SDI, Profil, p.getId())) {
 			p.desynchronize();
-			this.profils().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.profils(), p);
 		} else {
 			return false;
 		}
@@ -464,11 +474,12 @@ class SDI extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addTimeline(t : Timeline) : boolean {
-		if (this.timelines().indexOf(t) !== -1) {
-			throw new Error("You cannot add twice a Timeline for a SDI.");
+		if (!t || !t.getId()) {
+			throw new ModelException("The Timeline must be an existing object to be associated.");
 		}
-		if (t === null || t.getId() === undefined || t.getId() === null) {
-			throw new Error("The Timeline must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.timelines(), t)) {
+			throw new ModelException("You cannot add twice a Timeline for a SDI.");
 		}
 
 		if (this.associateObject(SDI, Timeline, t.getId())) {
@@ -489,15 +500,17 @@ class SDI extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeTimeline(t : Timeline) : boolean {
-		var indexValue = this.timelines().indexOf(t);
-		if (indexValue === -1) {
-			throw new Error("The Timeline you try to remove has not been added to the current SDI");
+		if (!t || !t.getId()) {
+			throw new ModelException("The Timeline must be an existing object to be associated.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.timelines(), t)) {
+			throw new ModelException("The Timeline you try to remove is not linked with the SDI.");
 		}
 
 		if (this.deleteObjectAssociation(SDI, Timeline, t.getId())) {
 			t.desynchronize();
-			this.timelines().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.timelines(), t);
 		} else {
 			return false;
 		}
@@ -576,11 +589,19 @@ class SDI extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : SDI {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.allowedHost) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A SDI object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A SDI object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A SDI object should have a description.");
+		}
+		if(!jsonObject.allowedHost) {
+			throw new ModelException("A SDI object should have an allowedHost.");
+		}
+		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id);
 	}
 
 	/**
