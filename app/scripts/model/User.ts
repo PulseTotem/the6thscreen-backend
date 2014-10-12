@@ -82,9 +82,8 @@ class User extends ModelItf {
 	 * @method setUsername
 	 */
 	setUsername(username : string) {
-		if(username == null || username == "") {
-			Logger.error("A User needs to have a username.");
-			// TODO : Throw an Exception ?
+		if(!username) {
+			throw new ModelException("The username is mandatory for a User.");
 		}
 
 		this._username = username;
@@ -106,7 +105,9 @@ class User extends ModelItf {
      */
     roles() {
         if(! this._roles_loaded) {
-            this._roles_loaded = this.getAssociatedObjects(User, Role, this._roles);
+            this.getAssociatedObjects(User, Role, this._roles);
+
+	        this._roles_loaded = true;
         }
         return this._roles;
     }
@@ -118,7 +119,9 @@ class User extends ModelItf {
      */
     sdis() {
         if(! this._sdis_loaded) {
-            this._sdis_loaded  = this.getAssociatedObjects(User, SDI, this._sdis);
+            this.getAssociatedObjects(User, SDI, this._sdis);
+
+	        this._sdis_loaded = true;
         }
         return this._sdis;
     }
@@ -147,14 +150,31 @@ class User extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a User instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{username: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
-		var data = { "username": this.username() };
+		var data = {
+			"id": this.getId(),
+			"username": this.username()
+		};
+		return data;
+	}
+
+	/**
+	 * Return a User instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["roles"] = this.serializeArray(this.roles());
+		data["sdis"] = this.serializeArray(this.sdis());
 		return data;
 	}
 
@@ -167,11 +187,12 @@ class User extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addSDI(s : SDI) : boolean {
-		if (this.sdis().indexOf(s) !== -1) {
-			throw new Error("You cannot add twice a SDI for a User.");
+		if (!s || !s.getId()) {
+			throw new ModelException("The SDI must be an existing object to be associated.");
 		}
-		if (s === null || s.getId() === undefined || s.getId() === null) {
-			throw new Error("The SDI must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.sdis(),s)) {
+			throw new ModelException("You cannot add twice a SDI for a User.");
 		}
 
 		if (this.associateObject(User, SDI, s.getId())) {
@@ -192,15 +213,17 @@ class User extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeSDI(s : SDI) : boolean {
-		var indexValue = this.sdis().indexOf(s);
-		if (indexValue === -1) {
-			throw new Error("The SDI you try to remove has not been added to the current User");
+		if (!s || !s.getId()) {
+			throw new ModelException("The SDI must be an existing object to be removed.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.sdis(),s)) {
+			throw new ModelException("The SDI you try to remove is not yet associated.");
 		}
 
 		if (this.deleteObjectAssociation(User, SDI, s.getId())) {
 			s.desynchronize();
-			this.sdis().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.sdis(), s);
 		} else {
 			return false;
 		}
@@ -215,11 +238,12 @@ class User extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addRole(r : Role) : boolean {
-		if (this.roles().indexOf(r) !== -1) {
-			throw new Error("You cannot add twice a Role for a User.");
+		if (!r || !r.getId()) {
+			throw new ModelException("The Role must be an existing object to be associated.");
 		}
-		if (r === null || r.getId() === undefined || r.getId() === null) {
-			throw new Error("The Role must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.roles(),r)) {
+			throw new ModelException("You cannot add twice a Role for a User.");
 		}
 
 		if (this.associateObject(User, Role, r.getId())) {
@@ -240,15 +264,17 @@ class User extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeRole(r : Role) : boolean {
-		var indexValue = this.roles().indexOf(r);
-		if (indexValue === -1) {
-			throw new Error("The Role you try to remove has not been added to the current User");
+		if (!r || !r.getId()) {
+			throw new ModelException("The Role must be an existing object to be removed.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.roles(),r)) {
+			throw new ModelException("The Role you try to remove is not yet associated.");
 		}
 
 		if (this.deleteObjectAssociation(User, Role, r.getId())) {
 			r.desynchronize();
-			this.roles().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.roles(),r);
 		} else {
 			return false;
 		}
@@ -327,11 +353,13 @@ class User extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : User {
-		if(typeof(jsonObject.username) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new User(jsonObject.username, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A User object should have an ID.");
 		}
+		if(!jsonObject.username) {
+			throw new ModelException("A User object should have a name.");
+		}
+		return new User(jsonObject.username, jsonObject.id);
 	}
 
     /**

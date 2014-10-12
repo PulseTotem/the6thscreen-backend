@@ -54,7 +54,7 @@ class ConstraintParamType extends ModelItf {
 	 * @param {string} name - The ConstraintParamType's name.
 	 * @param {number} id - The ConstraintParamType's ID.
 	 */
-	constructor(name : string, description : string, id : number = null) {
+	constructor(name : string, description : string = "", id : number = null) {
 		super(id);
 
 		this.setName(name);
@@ -70,9 +70,8 @@ class ConstraintParamType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A ConstraintParamType needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A ConstraintParamType needs to have a name.");
 		}
 
 		this._name = name;
@@ -84,11 +83,6 @@ class ConstraintParamType extends ModelItf {
 	 * @method setDescription
 	 */
 	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A ConstraintParamType needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 
@@ -117,7 +111,11 @@ class ConstraintParamType extends ModelItf {
 	 */
 	type() {
 		if (!this._type_loading) {
-			this._type_loading = this.getUniquelyAssociatedObject(ConstraintParamType, TypeParamType, this._type);
+			var value = this.getUniquelyAssociatedObject(ConstraintParamType, TypeParamType);
+			if (!!value) {
+				this._type = value;
+			}
+			this._type_loading = true;
 		}
 		return this._type;
 	}
@@ -144,18 +142,31 @@ class ConstraintParamType extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a ConstraintParamType instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description()
 		};
+		return data;
+	}
 
+	/**
+	 * Return a ConstraintParamType instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["type"] = (this.type() !== null) ? this.type().toJSONObject() : null;
 		return data;
 	}
 
@@ -169,12 +180,12 @@ class ConstraintParamType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setType(t : TypeParamType) : boolean {
-		if (this.type() !== null) {
-			throw new Error("The type is already set for this ConstraintParamType.");
+		if (!t || !t.getId()) {
+			throw new ModelException("The type must be an existing object to be associated.");
 		}
 
-		if (t === null || t.getId() === undefined || t.getId() === null) {
-			throw new Error("The type must be an existing object to be associated.");
+		if (this.type() !== null) {
+			throw new ModelException("The type is already set for this ConstraintParamType.");
 		}
 
 		if (this.associateObject(ConstraintParamType, TypeParamType, t.getId())) {
@@ -197,7 +208,7 @@ class ConstraintParamType extends ModelItf {
 	 */
 	unsetType() : boolean {
 		if (this.type() === null) {
-			throw new Error("No type has been set for this constraintParamType.");
+			throw new ModelException("No type has been set for this constraintParamType.");
 		}
 
 		if (this.deleteObjectAssociation(ConstraintParamType, TypeParamType, this.type().getId())) {
@@ -282,11 +293,16 @@ class ConstraintParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ConstraintParamType {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new ConstraintParamType(jsonObject.name, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A CallType object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A CallType object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A CallType object should have a description.");
+		}
+		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
 	/**

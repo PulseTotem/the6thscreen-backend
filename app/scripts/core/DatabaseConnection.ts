@@ -1,5 +1,6 @@
 /**
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@the6thscreen.fr>
  */
 
 /// <reference path="../../../libsdef/node.d.ts" />
@@ -33,6 +34,14 @@ class DatabaseConnection {
      */
     static port : number = -1;
 
+	/**
+	 * API Endpoint
+	 *
+	 * @property endpoint
+	 * @type {string}
+	 */
+	static endpoint : string = "";
+
     /**
      * Retrieve connection information from file description.
      *
@@ -47,6 +56,7 @@ class DatabaseConnection {
                 var connectionInfos = JSON.parse(fs.readFileSync(file, 'utf8'));
                 DatabaseConnection.host = connectionInfos.host;
                 DatabaseConnection.port = parseInt(connectionInfos.port);
+	            DatabaseConnection.endpoint = connectionInfos.endpoint;
             } catch (e) {
                 Logger.error("Connection configuration file can't be read.");
                 //TODO ? Throw Exception ?
@@ -78,6 +88,18 @@ class DatabaseConnection {
         return DatabaseConnection.port;
     }
 
+	/**
+	 * Return Database endpoint
+	 *
+	 * @method getEndpoint
+	 * @static
+	 * @returns {string} - Database endpoint
+	 */
+	static getEndpoint() : string {
+		DatabaseConnection.retrieveConnectionInformation();
+		return DatabaseConnection.endpoint;
+	}
+
     /**
      * Return DataBase's BaseURL.
      *
@@ -86,7 +108,60 @@ class DatabaseConnection {
      * @return {string} - DataBase's BaseURL.
      */
     static getBaseURL() : string {
-        return "http://" + DatabaseConnection.getHost() + ":" + DatabaseConnection.getPort().toString() + "/api";
+        return "http://" + DatabaseConnection.getHost() + ":" + DatabaseConnection.getPort().toString();
     }
 
+	/**
+	 * Return Database endpoint to work on a specific model.
+	 *
+	 * @method modelEndpoint
+	 * @static
+	 * @param model
+	 * @returns {string}
+	 */
+	static modelEndpoint(model : string) {
+		return "/"+DatabaseConnection.getEndpoint()+"/"+model;
+	}
+
+	/**
+	 * Return database endpoint to work on a specific object
+	 *
+	 * @method objectEndpoint
+	 * @static
+	 * @param objectType
+	 * @param objectID
+	 * @returns {string}
+	 */
+	static objectEndpoint(objectType : string, objectID : string) {
+		return "/"+DatabaseConnection.getEndpoint()+"/"+objectType+"/"+objectID;
+	}
+
+	/**
+	 * Return database endpoint to work on a specific association
+	 *
+	 * @method associationEndpoint
+	 * @static
+	 * @param objectType
+	 * @param objectID
+	 * @param associatedType
+	 * @returns {string}
+	 */
+	static associationEndpoint(objectType : string, objectID : string, associatedType : string) {
+		return "/"+DatabaseConnection.getEndpoint()+"/"+objectType+"/"+objectID+"/"+associatedType;
+	}
+
+	/**
+	 * Return database endpoint to work on associated objects
+	 *
+	 * @method associatedObjectEndpoint
+	 * @static
+	 * @param objectType
+	 * @param objectID
+	 * @param associatedType
+	 * @param associatedID
+	 * @returns {string}
+	 */
+	static associatedObjectEndpoint(objectType : string, objectID : string, associatedType : string, associatedID : string) {
+		return "/"+DatabaseConnection.getEndpoint()+"/"+objectType+"/"+objectID+"/"+associatedType+"/"+associatedID;
+	}
 }

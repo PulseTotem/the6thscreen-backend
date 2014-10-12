@@ -38,7 +38,7 @@ class RenderPolicy extends ModelItf {
      * @param {string} description - The RenderPolicy's description.
      * @param {number} id - The RenderPolicy's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -51,9 +51,8 @@ class RenderPolicy extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A RenderPolicy needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("The name attribute is mandatory for RenderPolicy.")
 		}
 
 		this._name = name;
@@ -65,11 +64,6 @@ class RenderPolicy extends ModelItf {
 	 * @method setDescription
 	 */
 	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A RenderPolicy needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 
@@ -94,14 +88,14 @@ class RenderPolicy extends ModelItf {
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a RenderPolicy instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description()
 		};
@@ -181,11 +175,16 @@ class RenderPolicy extends ModelItf {
 	 * @return {RenderPolicy} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : RenderPolicy {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new RenderPolicy(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A RenderPolicy object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A RenderPolicy object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A RenderPolicy object should have a description.");
+		}
+		return new RenderPolicy(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
     /**

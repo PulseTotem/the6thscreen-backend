@@ -81,7 +81,7 @@ class Call extends ModelItf {
      * @param {string} name - The Call's name.
      * @param {number} id - The Call's ID.
      */
-    constructor(name : string, id : number = null) {
+    constructor(name : string, id : number = ModelItf.NULLID) {
         super(id);
 
         this.setName(name);
@@ -111,9 +111,8 @@ class Call extends ModelItf {
      * @method setName
      */
     setName(name : string) {
-        if(name == null || name == "") {
-            Logger.error("A Call needs to have a name.");
-            // TODO : Throw an Exception ?
+        if(!name) {
+            throw new ModelException("A name must be given for Call.");
         }
 
         this._name = name;
@@ -126,7 +125,8 @@ class Call extends ModelItf {
      */
     paramValues() {
         if(! this._param_values_loaded) {
-            this._param_values_loaded = this.getAssociatedObjects(Call, ParamValue, this._param_values);
+            this.getAssociatedObjects(Call, ParamValue, this._param_values);
+	        this._param_values_loaded = true;
         }
         return this._param_values;
     }
@@ -138,7 +138,11 @@ class Call extends ModelItf {
 	 */
 	profil() {
 		if(! this._profil_loaded) {
-			this._profil_loaded = this.getUniquelyAssociatedObject(Call, Profil, this._profil);
+			var value = this.getUniquelyAssociatedObject(Call, Profil);
+			if (!!value) {
+				this._profil = value;
+			}
+			this._profil_loaded = true;
 		}
 		return this._profil;
 	}
@@ -150,7 +154,11 @@ class Call extends ModelItf {
 	 */
 	callType() {
 		if(! this._call_type_loaded) {
-			this._call_type_loaded = this.getUniquelyAssociatedObject(Call, CallType, this._call_type);
+			var value = this.getUniquelyAssociatedObject(Call, CallType);
+			if (!!value) {
+				this._call_type = value;
+			}
+			this._call_type_loaded = true;
 		}
 		return this._call_type;
 	}
@@ -181,14 +189,32 @@ class Call extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a Call instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
-	private toJSONObject() : Object {
-		var data = { "name": this.name() };
+	toJSONObject() : Object {
+		var data = {
+			"id": this.getId(),
+			"name": this.name()
+		};
+		return data;
+	}
+
+	/**
+	 * Return a Call instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["callType"] = (this.callType() !== null) ? this.callType().toJSONObject() : null;
+		data["profil"] = (this.profil() !== null) ? this.callType().toJSONObject() : null;
+		data["paramValues"] = this.serializeArray(this.paramValues());
 		return data;
 	}
 
@@ -201,11 +227,12 @@ class Call extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addParamValue(p : ParamValue) : boolean {
-		if (this.paramValues().indexOf(p) !== -1) {
-			throw new Error("You cannot add twice a parameter in a call.");  // TODO: cannot it be useful sometimes?
+		if (!p || !p.getId()) {
+			throw new ModelException("The ParamValue must be an existing object to be associated.");
 		}
-		if (p === null || p.getId() === undefined || p.getId() === null) {
-			throw new Error("The ParamValue must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.paramValues(), p)) {
+			throw new ModelException("You cannot add twice a parameter in a call.");  // TODO: cannot it be useful sometimes?
 		}
 
 		if (this.associateObject(Call, ParamValue, p.getId())) {
@@ -226,15 +253,16 @@ class Call extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeParamValue(p : ParamValue) : boolean {
-		var indexValue = this.paramValues().indexOf(p);
-		if (indexValue === -1) {
-			throw new Error("The ParamValue you try to remove has not been added to the current Call");
+		if (!p || !p.getId()) {
+			throw new ModelException("The ParamValue must be an existing object to be removed.");
+		}
+		if (!ModelItf.isObjectInsideArray(this.paramValues(), p)) {
+			throw new ModelException("The ParamValue you try to remove has not been added to the current Call");
 		}
 
 		if (this.deleteObjectAssociation(Call, ParamValue, p.getId())) {
 			p.desynchronize();
-			this.paramValues().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.paramValues(), p);
 		} else {
 			return false;
 		}
@@ -250,11 +278,12 @@ class Call extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setProfil(p : Profil) : boolean {
-		if (this.profil() !== null) {
-			throw new Error("The profil is already set for the call : "+this+".");
+		if (!p || !p.getId()) {
+			throw new ModelException("The Profil must be an existing object to be associated.");
 		}
-		if (p === null || p.getId() === undefined || p.getId() === null) {
-			throw new Error("The Profil must be an existing object to be associated.");
+
+		if (this.profil() !== null) {
+			throw new ModelException("The profil is already set for the call: "+JSON.stringify(this.profil())+".");
 		}
 
 		if (this.associateObject(Call, Profil, p.getId())) {
@@ -277,7 +306,7 @@ class Call extends ModelItf {
 	 */
 	unsetProfil() : boolean {
 		if (this.profil() === null) {
-			throw new Error("No profil has been set for this call.");
+			throw new ModelException("No profil has been set for this call.");
 		}
 
 		if (this.deleteObjectAssociation(Call, Profil, this.profil().getId())) {
@@ -299,12 +328,13 @@ class Call extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setCallType(ct : CallType) : boolean {
+		if (!ct || !ct.getId()) {
+			throw new ModelException("The CallType must be an existing object to be associated.");
+		}
 		if (this.callType() !== null) {
-			throw new Error("The CallType is already set for the call : "+this+".");
+			throw new ModelException("The CallType is already set for the call : "+JSON.stringify(this.callType())+".");
 		}
-		if (ct === null || ct.getId() === undefined || ct.getId() === null) {
-			throw new Error("The CallType must be an existing object to be associated.");
-		}
+
 
 		if (this.associateObject(Call, CallType, ct.getId())) {
 			ct.desynchronize();
@@ -326,7 +356,7 @@ class Call extends ModelItf {
 	 */
 	unsetCallType() : boolean {
 		if (this.callType() === null) {
-			throw new Error("No CallType has been set for this call.");
+			throw new ModelException("No CallType has been set for this call.");
 		}
 
 		if (this.deleteObjectAssociation(Call, CallType, this.callType().getId())) {
@@ -411,11 +441,13 @@ class Call extends ModelItf {
      * @return {Call} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Call {
-        if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
-            return null;
-        } else {
-            return new Call(jsonObject.name, jsonObject.id);
+	    if (!jsonObject.id) {
+		    throw new ModelException("A Call object should have an ID.");
+	    }
+        if(!jsonObject.name) {
+	        throw new ModelException("A Call object should have a name.");
         }
+	    return new Call(jsonObject.name, jsonObject.id);
     }
 
     /**

@@ -141,9 +141,8 @@ class Source extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A Source needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("The name is mandatory for a Source");
 		}
 
 		this._name = name;
@@ -155,9 +154,8 @@ class Source extends ModelItf {
 	 * @method setService
 	 */
 	setService(service : string) {
-		if(service == null || service == "") {
-			Logger.error("A Source needs to have a service.");
-			// TODO : Throw an Exception ?
+		if(!service) {
+			throw new ModelException("The service is mandatory for a Source");
 		}
 
 		this._service = service;
@@ -168,12 +166,7 @@ class Source extends ModelItf {
 	 *
 	 * @method setDescription
 	 */
-	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A Source needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
+	setDescription(description : string = "") {
 		this._description = description;
 	}
 
@@ -183,9 +176,8 @@ class Source extends ModelItf {
 	 * @method setHost
 	 */
 	setHost(host : string) {
-		if(host == null || host == "") {
-			Logger.error("A Source needs to have a host.");
-			// TODO : Throw an Exception ?
+		if(!host) {
+			throw new ModelException("The host is mandatory for a Source");
 		}
 
 		this._host = host;
@@ -197,9 +189,8 @@ class Source extends ModelItf {
 	 * @method setPort
 	 */
 	setPort(port : number) {
-		if(port == null) {
-			Logger.error("A Source needs to have a port.");
-			// TODO : Throw an Exception ?
+		if(!port) {
+			throw new ModelException("The port is mandatory for a Source");
 		}
 
 		this._port = port;
@@ -257,7 +248,11 @@ class Source extends ModelItf {
      */
     infoType() {
         if(! this._info_type_loaded) {
-            this._info_type_loaded = this.getUniquelyAssociatedObject(Source, InfoType, this._info_type);
+	        var value = this.getUniquelyAssociatedObject(Source, InfoType);
+	        if (!!value) {
+		        this._info_type = value;
+	        }
+	        this._info_type_loaded = true;
         }
         return this._info_type;
     }
@@ -269,7 +264,9 @@ class Source extends ModelItf {
      */
     paramTypes() {
         if(! this._param_types_loaded) {
-            this._param_types_loaded = this.getAssociatedObjects(Source, ParamType, this._param_types);
+            this.getAssociatedObjects(Source, ParamType, this._param_types);
+
+	        this._param_types_loaded = true;
         }
         return this._param_types;
     }
@@ -281,7 +278,9 @@ class Source extends ModelItf {
      */
     paramValues() {
         if(! this._param_values_loaded) {
-            this._param_values_loaded = this.getAssociatedObjects(Source, ParamValue, this._param_values);
+            this.getAssociatedObjects(Source, ParamValue, this._param_values);
+
+	        this._param_values_loaded = true;
         }
         return this._param_values;
     }
@@ -312,21 +311,36 @@ class Source extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a Source instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, service: string, description: string, host: string, port: number}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"name": this.name(),
 			"service": this.service(),
 			"description": this.description(),
 			"host": this.host(),
 			"port": this.port()
 		};
+		return data;
+	}
 
+	/**
+	 * Return a Source instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["infoType"] = (this.infoType() !== null) ? this.infoType().toJSONObject() : null;
+		data["paramTypes"] = this.serializeArray(this.paramTypes());
+		data["paramValues"] = this.serializeArray(this.paramValues());
 		return data;
 	}
 
@@ -340,12 +354,12 @@ class Source extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setInfoType(it : InfoType) : boolean {
-		if (this.infoType() !== null) {
-			throw new Error("The InfoType is already set for this Source.");
+		if (!it || !it.getId()) {
+			throw new ModelException("The InfoType must be an existing object to be associated.");
 		}
 
-		if (it === null || it.getId() === undefined || it.getId() === null) {
-			throw new Error("The InfoType must be an existing object to be associated.");
+		if (this.infoType() !== null) {
+			throw new ModelException("The InfoType is already set for this Source.");
 		}
 
 		if (this.associateObject(Source, InfoType, it.getId())) {
@@ -368,7 +382,7 @@ class Source extends ModelItf {
 	 */
 	unsetInfoType() : boolean {
 		if (this.infoType() === null) {
-			throw new Error("No InfoType has been set for this Source.");
+			throw new ModelException("No InfoType has been set for this Source.");
 		}
 
 		if (this.deleteObjectAssociation(Source, InfoType, this.infoType().getId())) {
@@ -389,11 +403,12 @@ class Source extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addParamType(pt : ParamType) : boolean {
-		if (this.paramTypes().indexOf(pt) !== -1) {
-			throw new Error("You cannot add twice a ParamType for a SDI.");
+		if (!pt  || !pt.getId()) {
+			throw new ModelException("The ParamType must be an existing object to be associated.");
 		}
-		if (pt === null || pt.getId() === undefined || pt.getId() === null) {
-			throw new Error("The ParamType must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.paramTypes(), pt)) {
+			throw new ModelException("You cannot add twice a ParamType for a SDI.");
 		}
 
 		if (this.associateObject(Source, ParamType, pt.getId())) {
@@ -414,15 +429,17 @@ class Source extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeParamType(pt : ParamType) : boolean {
-		var indexValue = this.paramTypes().indexOf(pt);
-		if (indexValue === -1) {
-			throw new Error("The ParamType you try to remove has not been added to the current Source");
+		if (!pt  || !pt.getId()) {
+			throw new ModelException("The ParamType must be an existing object to be removed.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.paramTypes(), pt)) {
+			throw new ModelException("The ParamType you try to remove is not yet associated.");
 		}
 
 		if (this.deleteObjectAssociation(Source, ParamType, pt.getId())) {
 			pt.desynchronize();
-			this.paramTypes().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.paramTypes(), pt);
 		} else {
 			return false;
 		}
@@ -437,11 +454,12 @@ class Source extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addParamValue(pv : ParamValue) : boolean {
-		if (this.paramValues().indexOf(pv) !== -1) {
-			throw new Error("You cannot add twice a ParamValue for a SDI.");
+		if (!pv  || !pv.getId()) {
+			throw new ModelException("The ParamValue must be an existing object to be associated.");
 		}
-		if (pv === null || pv.getId() === undefined || pv.getId() === null) {
-			throw new Error("The ParamValue must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.paramValues(), pv)) {
+			throw new ModelException("You cannot add twice a ParamValue for a SDI.");
 		}
 
 		if (this.associateObject(Source, ParamValue, pv.getId())) {
@@ -462,15 +480,17 @@ class Source extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeParamValue(pv : ParamValue) : boolean {
-		var indexValue = this.paramValues().indexOf(pv);
-		if (indexValue === -1) {
-			throw new Error("The ParamValue you try to remove has not been added to the current Source");
+		if (!pv  || !pv.getId()) {
+			throw new ModelException("The ParamValue must be an existing object to be removed.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.paramValues(), pv)) {
+			throw new ModelException("The ParamValue you try to remove is not yet associated.");
 		}
 
 		if (this.deleteObjectAssociation(Source, ParamValue, pv.getId())) {
 			pv.desynchronize();
-			this.paramValues().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.paramValues(), pv);
 		} else {
 			return false;
 		}
@@ -549,16 +569,25 @@ class Source extends ModelItf {
 	 * @return {Source} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Source {
-		if(typeof(jsonObject.name) == "undefined" ||
-			typeof(jsonObject.service) == "undefined" ||
-			typeof(jsonObject.description) == "undefined" ||
-			typeof(jsonObject.host) == "undefined" ||
-			typeof(jsonObject.port) == "undefined" ||
-			typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new Source(jsonObject.name, jsonObject.service, jsonObject.description, jsonObject.host, jsonObject.port, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A Source object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A Source object should have a name.");
+		}
+		if(!jsonObject.service) {
+			throw new ModelException("A Source object should have a service.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A Source object should have a description.");
+		}
+		if(!jsonObject.host) {
+			throw new ModelException("A Source object should have a host.");
+		}
+		if(!jsonObject.port) {
+			throw new ModelException("A Source object should have a port.");
+		}
+		return new Source(jsonObject.name, jsonObject.service, jsonObject.description, jsonObject.host, jsonObject.port, jsonObject.id);
 	}
 
     /**

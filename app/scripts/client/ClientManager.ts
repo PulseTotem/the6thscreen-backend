@@ -56,7 +56,7 @@ class ClientManager {
     sendProfilDescription(userID : string, sdiID : string, profilID : string) {
         //TODO Retrieve information from model
         var profil = Profil.read(parseInt(profilID));
-        Logger.debug(profil);
+        Logger.debug(profil.toCompleteJSONObject());
         this._clientSocket.emit("ProfilDescription", {"test" : "super!"});
     }
 }

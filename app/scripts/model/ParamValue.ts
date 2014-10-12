@@ -62,9 +62,8 @@ class ParamValue extends ModelItf {
 	 * @method setValue
 	 */
 	setValue(value : string) {
-		if(value == null || value == "") {
-			Logger.error("A ParamValue needs a proper value.");
-			// TODO : Throw an Exception ?
+		if(!value) {
+			throw new ModelException("A ParamValue needs a proper value.")
 		}
 
 		this._value = value;
@@ -86,7 +85,11 @@ class ParamValue extends ModelItf {
 	 */
 	paramType() {
 		if(! this._paramType_loaded) {
-			this._paramType_loaded = this.getUniquelyAssociatedObject(ParamValue, ParamType, this._paramType);
+			var value = this.getUniquelyAssociatedObject(ParamValue, ParamType);
+			if (!!value) {
+				this._paramType = value;
+			}
+			this._paramType_loaded = true;
 		}
 		return this._paramType;
 	}
@@ -113,17 +116,30 @@ class ParamValue extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a ParamValue instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{value: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"value": this.value()
 		};
+		return data;
+	}
 
+	/**
+	 * Return a ParamValue instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["paramType"] = (this.paramType() !== null) ? this.paramType().toJSONObject() : null;
 		return data;
 	}
 
@@ -137,12 +153,12 @@ class ParamValue extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setParamType(p : ParamType) : boolean {
-		if (this.paramType() !== null) {
-			throw new Error("The paramType is already set for this ParamValue.");
+		if (!p || !p.getId()) {
+			throw new ModelException("The ParamType must be an existing object to be associated.");
 		}
 
-		if (p === null || p.getId() === undefined || p.getId() === null) {
-			throw new Error("The ParamType must be an existing object to be associated.");
+		if (this.paramType() !== null) {
+			throw new ModelException("The paramType is already set for this ParamValue.");
 		}
 
 		if (this.associateObject(ParamValue, ParamType, p.getId())) {
@@ -165,7 +181,7 @@ class ParamValue extends ModelItf {
 	 */
 	unsetParamType() : boolean {
 		if (this.paramType() === null) {
-			throw new Error("No ParamType has been set for this ParamValue.");
+			throw new ModelException("No ParamType has been set for this ParamValue.");
 		}
 
 		if (this.deleteObjectAssociation(ParamValue, ParamType, this.paramType().getId())) {
@@ -250,11 +266,13 @@ class ParamValue extends ModelItf {
 	 * @return {ParamValue} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ParamValue {
-		if(typeof(jsonObject.value) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new ParamValue(jsonObject.value, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A ParamValue object should have an ID.");
 		}
+		if(!jsonObject.value) {
+			throw new ModelException("A ParamValue object should have a value.");
+		}
+		return new ParamValue(jsonObject.value, jsonObject.id);
 	}
 
     /**

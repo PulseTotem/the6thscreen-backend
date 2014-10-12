@@ -55,7 +55,7 @@ class Renderer extends ModelItf {
      * @param {string} description - The Renderer's description.
      * @param {number} id - The Renderer's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -71,9 +71,8 @@ class Renderer extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A Renderer needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A name is mandatory for Renderer.");
 		}
 
 		this._name = name;
@@ -85,11 +84,6 @@ class Renderer extends ModelItf {
 	 * @method setDescription
 	 */
 	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A Renderer needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 
@@ -118,7 +112,11 @@ class Renderer extends ModelItf {
      */
     infoType() {
         if(! this._info_type_loaded) {
-            this._info_type_loaded = this.getUniquelyAssociatedObject(Renderer, InfoType, this._info_type);
+	        var value = this.getUniquelyAssociatedObject(Renderer, InfoType);
+	        if (!!value) {
+		        this._info_type = value;
+	        }
+	        this._info_type_loaded = true;
         }
         return this._info_type;
     }
@@ -145,18 +143,31 @@ class Renderer extends ModelItf {
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a Renderer instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
-			"name" : this.name(),
+			"id": this.getId(),
+			"name": this.name(),
 			"description": this.description()
 		};
+		return data;
+	}
 
+	/**
+	 * Return a Renderer instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["infoType"] = (this.infoType() !== null) ? this.infoType().toJSONObject() : null;
 		return data;
 	}
 
@@ -170,12 +181,12 @@ class Renderer extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setInfoType(it : InfoType) : boolean {
-		if (this.infoType() !== null) {
-			throw new Error("The InfoType is already set for this Renderer.");
+		if (!it || !it.getId()) {
+			throw new ModelException("The InfoType must be an existing object to be associated.");
 		}
 
-		if (it === null || it.getId() === undefined || it.getId() === null) {
-			throw new Error("The InfoType must be an existing object to be associated.");
+		if (this.infoType() !== null) {
+			throw new ModelException("The InfoType is already set for this Renderer.");
 		}
 
 		if (this.associateObject(Renderer, InfoType, it.getId())) {
@@ -198,7 +209,7 @@ class Renderer extends ModelItf {
 	 */
 	unsetInfoType() : boolean {
 		if (this.infoType() === null) {
-			throw new Error("No InfoType has been set for this Renderer.");
+			throw new ModelException("No InfoType has been set for this Renderer.");
 		}
 
 		if (this.deleteObjectAssociation(Renderer, InfoType, this.infoType().getId())) {
@@ -283,11 +294,16 @@ class Renderer extends ModelItf {
 	 * @return {Renderer} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Renderer {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A Renderer object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A Renderer object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A Renderer object should have a description.");
+		}
+		return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
     /**

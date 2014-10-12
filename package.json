@@ -16,6 +16,9 @@
     "deasync": "0.0.7",
     "mocha": "~1.21.4",
     "grunt-mocha-test": "~0.12.0",
-    "grunt-contrib-yuidoc": "~0.5.2"
+    "grunt-contrib-yuidoc": "~0.5.2",
+	"nock": "0.48.0",
+	"blanket": "1.1.6",
+	"sinon": "1.10.3"
   }
 }

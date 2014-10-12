@@ -92,7 +92,7 @@ class ParamType extends ModelItf {
      * @param {string} description - The ParamType's description.
      * @param {number} id - The ParamType's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -114,9 +114,8 @@ class ParamType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A ParamType needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A ParamType needs to have a name.");
 		}
 
 		this._name = name;
@@ -128,11 +127,6 @@ class ParamType extends ModelItf {
 	 * @method setDescription
 	 */
 	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A ParamType needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 
@@ -161,7 +155,11 @@ class ParamType extends ModelItf {
      */
 	type() {
 	    if(! this._type_loaded) {
-		    this._type_loaded = this.getUniquelyAssociatedObject(ParamType, TypeParamType, this._type);
+		    var value = this.getUniquelyAssociatedObject(ParamType, TypeParamType);
+		    if (!!value) {
+			    this._type = value;
+		    }
+		    this._type_loaded = true;
 	    }
 	    return this._type;
     }
@@ -173,7 +171,11 @@ class ParamType extends ModelItf {
      */
     constraint() {
 	    if(! this._constraint_loaded) {
-		    this._constraint_loaded = this.getUniquelyAssociatedObject(ParamType, ConstraintParamType, this._constraint);
+		    var value = this.getUniquelyAssociatedObject(ParamType, ConstraintParamType);
+		    if (!!value) {
+			    this._constraint = value;
+		    }
+		    this._constraint_loaded = true;
 	    }
 	    return this._constraint;
     }
@@ -185,7 +187,11 @@ class ParamType extends ModelItf {
 	 */
 	defaultValue() {
 		if(! this._default_value_loaded) {
-			this._default_value_loaded = this.getUniquelyAssociatedObject(ParamType, ParamValue, this._default_value);
+			var value = this.getUniquelyAssociatedObject(ParamType, ParamValue);
+			if (!!value) {
+				this._default_value = value;
+			}
+			this._default_value_loaded = true;
 		}
 		return this._default_value;
 	}
@@ -216,19 +222,33 @@ class ParamType extends ModelItf {
 	}
 
 	/**
-	 * /**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a ParamType instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
-			"name" : this.name(),
+			"id": this.getId(),
+			"name": this.name(),
 			"description": this.description()
 		};
+		return data;
+	}
 
+	/**
+	 * Return a ParamType instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		this.loadAssociations();
+		var data = this.toJSONObject();
+		data["type"] = (this.type() !== null) ? this.type().toJSONObject() : null;
+		data["constraint"] = (this.constraint() !== null) ? this.constraint().toJSONObject() : null;
+		data["defaultValue"] = (this.defaultValue() !== null) ? this.defaultValue().toJSONObject() : null;
 		return data;
 	}
 
@@ -242,12 +262,12 @@ class ParamType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setType(t : TypeParamType) : boolean {
-		if (this.type() !== null) {
-			throw new Error("The type is already set for this CallType.");
+		if (!t  || !t.getId()) {
+			throw new ModelException("The type must be an existing object to be associated.");
 		}
 
-		if (t === null || t.getId() === undefined || t.getId() === null) {
-			throw new Error("The source must be an existing object to be associated.");
+		if (this.type() !== null) {
+			throw new ModelException("The type is already set for this CallType.");
 		}
 
 		if (this.associateObject(ParamType, TypeParamType, t.getId())) {
@@ -270,7 +290,7 @@ class ParamType extends ModelItf {
 	 */
 	unsetType() : boolean {
 		if (this.type() === null) {
-			throw new Error("No Type has been set for this ParamType.");
+			throw new ModelException("No Type has been set for this ParamType.");
 		}
 
 		if (this.deleteObjectAssociation(ParamType, TypeParamType, this.type().getId())) {
@@ -292,12 +312,12 @@ class ParamType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setConstraint(c : ConstraintParamType) : boolean {
-		if (this.constraint() !== null) {
-			throw new Error("The constraint is already set for this CallType.");
+		if (!c || !c.getId()) {
+			throw new ModelException("The constraint must be an existing object to be associated.");
 		}
 
-		if (c === null || c.getId() === undefined || c.getId() === null) {
-			throw new Error("The constraint must be an existing object to be associated.");
+		if (this.constraint() !== null) {
+			throw new ModelException("The constraint is already set for this CallType.");
 		}
 
 		if (this.associateObject(ParamType, ConstraintParamType, c.getId())) {
@@ -320,7 +340,7 @@ class ParamType extends ModelItf {
 	 */
 	unsetConstraint() : boolean {
 		if (this.constraint() === null) {
-			throw new Error("No constraint has been set for this ParamType.");
+			throw new ModelException("No constraint has been set for this ParamType.");
 		}
 
 		if (this.deleteObjectAssociation(ParamType, ConstraintParamType, this.constraint().getId())) {
@@ -342,12 +362,12 @@ class ParamType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setDefaultValue(d : ParamValue) : boolean {
-		if (this.defaultValue() !== null) {
-			throw new Error("The defaultValue is already set for this CallType.");
+		if (!d || !d.getId()) {
+			throw new ModelException("The defaultValue must be an existing object to be associated.");
 		}
 
-		if (d === null || d.getId() === undefined || d.getId() === null) {
-			throw new Error("The defaultValue must be an existing object to be associated.");
+		if (this.defaultValue() !== null) {
+			throw new ModelException("The defaultValue is already set for this CallType.");
 		}
 
 		if (this.associateObject(ParamType, ParamValue, d.getId())) {
@@ -370,7 +390,7 @@ class ParamType extends ModelItf {
 	 */
 	unsetDefaultValue() : boolean {
 		if (this.defaultValue() === null) {
-			throw new Error("No defaultValue has been set for this ParamType.");
+			throw new ModelException("No defaultValue has been set for this ParamType.");
 		}
 
 		if (this.deleteObjectAssociation(ParamType, ParamValue, this.defaultValue().getId())) {
@@ -455,11 +475,16 @@ class ParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ParamType {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A ParamType object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A ParamType object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A ParamType object should have a description.");
+		}
+		return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
     /**

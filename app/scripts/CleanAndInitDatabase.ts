@@ -230,5 +230,10 @@ class CleanAndInitDatabase {
     }
 }
 
-var caid = new CleanAndInitDatabase();
-caid.run();
+try {
+	var caid = new CleanAndInitDatabase();
+	caid.run();
+} catch (e) {
+	console.log(e);
+	throw e;
+}

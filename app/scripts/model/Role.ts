@@ -41,9 +41,8 @@ class Role extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A Role needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A name is mandatory for Role.");
 		}
 
 		this._name = name;
@@ -61,14 +60,14 @@ class Role extends ModelItf {
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a Role instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"name": this.name()
 		};
 		return data;
@@ -147,11 +146,13 @@ class Role extends ModelItf {
 	 * @return {Role} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Role {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new Role(jsonObject.name, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A Role object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A Role object should have a name.");
+		}
+		return new Role(jsonObject.name, jsonObject.id);
 	}
 
     /**

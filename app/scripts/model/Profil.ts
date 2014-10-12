@@ -49,22 +49,6 @@ class Profil extends ModelItf {
     private _calls_loaded : boolean;
 
     /**
-     * Timelines property.
-     *
-     * @property _timelines
-     * @type Array<Timeline>
-     */
-    private _timelines : Array<Timeline>;
-
-    /**
-     * Lazy loading for Timelines property.
-     *
-     * @property _timelines_loaded
-     * @type boolean
-     */
-    private _timelines_loaded : boolean;
-
-    /**
      * Constructor.
      *
      * @constructor
@@ -72,7 +56,7 @@ class Profil extends ModelItf {
      * @param {string} description - The Profil's description.
      * @param {number} id - The Profil's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -80,9 +64,6 @@ class Profil extends ModelItf {
 
         this._calls = new Array<Call>();
         this._calls_loaded = false;
-
-        this._timelines = new Array<Timeline>();
-        this._timelines_loaded = false;
     }
 
     /**
@@ -101,9 +82,8 @@ class Profil extends ModelItf {
      * @method setName
      */
     setName(name : string) {
-        if(name == null || name == "") {
-            Logger.error("A Profil needs to have a name.");
-            // TODO : Throw an Exception ?
+        if(!name) {
+            throw new ModelException("A profil needs a name.")
         }
 
         this._name = name;
@@ -125,11 +105,6 @@ class Profil extends ModelItf {
      * @method setDescription
      */
     setDescription(description : string) {
-        if(description == null || description == "") {
-            Logger.error("A Profil needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
         this._description = description;
     }
 
@@ -141,22 +116,10 @@ class Profil extends ModelItf {
      */
     calls() : Array<Call> {
         if(! this._calls_loaded) {
-            this._calls_loaded = this.getAssociatedObjects(Profil, Call, this._calls);
+            this.getAssociatedObjects(Profil, Call, this._calls);
+	        this._calls_loaded = true;
         }
         return this._calls;
-    }
-
-    /**
-     * Return the Profil's timelines.
-     *
-     * @method timelines
-     * @return {Array<Timeline>} The Profil's timelines.
-     */
-    timelines() : Array<Timeline> {
-        if(! this._timelines_loaded) {
-            this._timelines_loaded = this.getAssociatedObjects(Profil, Timeline, this._timelines);
-        }
-        return this._timelines;
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
@@ -169,7 +132,6 @@ class Profil extends ModelItf {
 	 */
 	loadAssociations() : void {
 		this.calls();
-		this.timelines();
 	}
 
 	/**
@@ -179,21 +141,33 @@ class Profil extends ModelItf {
 	 */
 	desynchronize() : void {
 		this._calls_loaded = false;
-		this._timelines_loaded = false;
 	}
 
 	/**
-	 * Private method to transform the object in JSON.
-	 * It is used to create or update the object in database.
+	 * Return a Profil instance as a JSON Object
 	 *
-     * @method toJSONObject
-	 * @returns {{name: string, description: string}}
+	 * @method toJSONObject
+	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
 		var data = {
+			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description()
 		};
+		return data;
+	}
+
+	/**
+	 * Return a Profil instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @returns {Object} a JSON Object representing the instance
+	 */
+	toCompleteJSONObject() : Object {
+		var data = this.toJSONObject();
+		data["calls"] = this.serializeArray(this.calls());
 		return data;
 	}
 
@@ -206,11 +180,12 @@ class Profil extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addCall(c : Call) : boolean {
-		if (this.calls().indexOf(c) !== -1) {
-			throw new Error("You cannot add twice a Call in a Profil.");  // TODO: cannot it be useful sometimes?
+		if (!c || !c.getId()) {
+			throw new ModelException("The Call must be an existing object to be associated.");
 		}
-		if (c === null || c.getId() === undefined || c.getId() === null) {
-			throw new Error("The Call must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.calls(), c)) {
+			throw new ModelException("You cannot add twice a Call in a Profil.");
 		}
 
 		if (this.associateObject(Profil, Call, c.getId())) {
@@ -231,63 +206,17 @@ class Profil extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeCall(c : Call) : boolean {
-		var indexValue = this.calls().indexOf(c);
-		if (indexValue === -1) {
-			throw new Error("The Call you try to remove has not been added to the current Profil");
+		if (!c || !c.getId()) {
+			throw new ModelException("The Call must be an existing object to be removed.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.calls(), c)) {
+			throw new ModelException("The Call you try to remove has not been added to the current Profil");
 		}
 
 		if (this.deleteObjectAssociation(Profil, Call, c.getId())) {
 			c.desynchronize();
-			this.calls().splice(indexValue, 1);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Add a new Timeline to the Profil and associate it in the database.
-	 * A Timeline can only be added once.
-	 *
-     * @method addTimeline
-	 * @param {Timeline} t The Timeline to add inside the Profil. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
-	 */
-	addTimeline(t : Timeline) : boolean {
-		if (this.timelines().indexOf(t) !== -1) {
-			throw new Error("You cannot add twice a Timeline in a Profil.");  // TODO: cannot it be useful sometimes?
-		}
-		if (t === null || t.getId() === undefined || t.getId() === null) {
-			throw new Error("The Timeline must be an existing object to be associated.");
-		}
-
-		if (this.associateObject(Profil, Timeline, t.getId())) {
-			t.desynchronize();
-			this.timelines().push(t);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Remove a Timeline from the Profil: the association is removed both in the object and in database.
-	 * The Timeline can only be removed if it exists first in the list of associated Timelines, else an exception is thrown.
-	 *
-     * @method removeTimeline
-	 * @param {Timeline} t The Timeline to remove from that Profil
-	 * @returns {boolean} Returns true if the association is deleted in database.
-	 */
-	removeTimeline(t : Timeline) : boolean {
-		var indexValue = this.timelines().indexOf(t);
-		if (indexValue === -1) {
-			throw new Error("The Timeline you try to remove has not been added to the current Profil");
-		}
-
-		if (this.deleteObjectAssociation(Profil, Timeline, t.getId())) {
-			t.desynchronize();
-			this.timelines().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.calls(), c);
 		} else {
 			return false;
 		}
@@ -367,11 +296,16 @@ class Profil extends ModelItf {
      * @return {Profil} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Profil {
-        if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
-            return null;
-        } else {
-            return new Profil(jsonObject.name, jsonObject.description, jsonObject.id);
-        }
+	    if(!jsonObject.id) {
+		    throw new ModelException("A Profil object should have an ID.");
+	    }
+	    if(!jsonObject.name) {
+		    throw new ModelException("A Profil object should have a name.");
+	    }
+	    if(!jsonObject.description) {
+		    throw new ModelException("A Profil object should have a description.");
+	    }
+	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id);
     }
 
     /**
