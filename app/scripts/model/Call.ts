@@ -213,7 +213,7 @@ class Call extends ModelItf {
 		this.loadAssociations();
 		var data = this.toJSONObject();
 		data["callType"] = (this.callType() !== null) ? this.callType().toJSONObject() : null;
-		data["profil"] = (this.profil() !== null) ? this.callType().toJSONObject() : null;
+		data["profil"] = (this.profil() !== null) ? this.profil().toJSONObject() : null;
 		data["paramValues"] = this.serializeArray(this.paramValues());
 		return data;
 	}

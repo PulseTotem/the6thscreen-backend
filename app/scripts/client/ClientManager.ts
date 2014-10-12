@@ -43,6 +43,13 @@ class ClientManager {
             // profilDescription : {"userID" : string, "sdiID" : string, "profilID" : string}
             self.sendProfilDescription(profilDescription.userID, profilDescription.sdiID, profilDescription.profilID);
         });
+
+        this._clientSocket.on("RetrieveCallDescription", function(callDescription) {
+            // callDescription : {"callID" : string}
+            self.sendCallDescription(callDescription.callID);
+        });
+
+
     }
 
     /**
@@ -54,9 +61,20 @@ class ClientManager {
      * @param {string} profilID - The Profil ID.
      */
     sendProfilDescription(userID : string, sdiID : string, profilID : string) {
-        //TODO Retrieve information from model
         var profil = Profil.read(parseInt(profilID));
         Logger.debug(profil.toCompleteJSONObject());
-        this._clientSocket.emit("ProfilDescription", {"test" : "super!"});
+        this._clientSocket.emit("ProfilDescription", profil.toCompleteJSONObject());
+    }
+
+    /**
+     * Retrieve Call instance description and send it to client.
+     *
+     * @method sendCallDescription
+     * @param {string} callID - The Call ID.
+     */
+    sendCallDescription(callID : string) {
+        var call = Call.read(parseInt(callID));
+        Logger.debug(call.toCompleteJSONObject());
+        this._clientSocket.emit("CallDescription", call.toCompleteJSONObject());
     }
 }
