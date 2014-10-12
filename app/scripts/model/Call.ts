@@ -111,9 +111,8 @@ class Call extends ModelItf {
      * @method setName
      */
     setName(name : string) {
-        if(name == null || name == "") {
-            Logger.error("A Call needs to have a name.");
-            // TODO : Throw an Exception ?
+        if(!name) {
+            throw new ModelException("A name must be given for Call.");
         }
 
         this._name = name;
