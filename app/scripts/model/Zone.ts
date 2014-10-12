@@ -340,17 +340,28 @@ class Zone extends ModelItf {
 	 * @return {Zone} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Zone {
-		if(typeof(jsonObject.name) == "undefined" ||
-			typeof(jsonObject.description) == "undefined" ||
-			typeof(jsonObject.width) == "undefined" ||
-			typeof(jsonObject.height) == "undefined" ||
-			typeof(jsonObject.positionFromTop) == "undefined" ||
-			typeof(jsonObject.positionFromLeft) == "undefined" ||
-			typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A Zone object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A Zone object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A Zone object should have a description.");
+		}
+		if(!jsonObject.width) {
+			throw new ModelException("A Zone object should have a width.");
+		}
+		if(!jsonObject.height) {
+			throw new ModelException("A Zone object should have a height.");
+		}
+		if(!jsonObject.positionFromTop) {
+			throw new ModelException("A Zone object should have a positionFromTop.");
+		}
+		if(!jsonObject.positionFromLeft) {
+			throw new ModelException("A Zone object should have a positionFromLeft.");
+		}
+		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id);
 	}
 
     /**
