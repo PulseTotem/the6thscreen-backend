@@ -261,7 +261,7 @@ class CallType extends ModelItf {
      * @method zone
 	 */
 	zone() {
-		if(! this._zone) {
+		if(! this._zone_loaded) {
 			var value = [];
 			this._zone_loaded = this.getUniquelyAssociatedObject(CallType, Zone, value);
 			if (this._zone_loaded) {
@@ -547,12 +547,12 @@ class CallType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setZone(z : Zone) : boolean {
-		if (this.zone() !== null) {
-			throw new Error("The zone is already set for this CallType.");
+		if (!z || !z.getId()) {
+			throw new ModelException("The zone must be an existing object to be associated.");
 		}
 
-		if (z === null || z.getId() === undefined || z.getId() === null) {
-			throw new Error("The zone must be an existing object to be associated.");
+		if (this.zone() !== null) {
+			throw new ModelException("The zone is already set for this CallType.");
 		}
 
 		if (this.associateObject(CallType, Zone, z.getId())) {
@@ -575,7 +575,7 @@ class CallType extends ModelItf {
 	 */
 	unsetZone() : boolean {
 		if (this.zone() === null) {
-			throw new Error("No RenderPolicy has been set for this callType.");
+			throw new ModelException("No Zone has been set for this callType.");
 		}
 
 		if (this.deleteObjectAssociation(CallType, Zone, this.zone().getId())) {

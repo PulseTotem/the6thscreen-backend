@@ -791,4 +791,167 @@ describe('Call', function(){
 			assert.ok(restClientMock1.isDone(), "The mock request has not been done");
 		});
 	});
+
+	describe('#setZone', function() {
+		it('should set the given zone', function() {
+			var c = new CallType("toto","machin", 52);
+			var r = new Zone("zone","toto",2, 3, 4, 5, 12);
+			var spy = sinon.spy(r, "desynchronize");
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
+				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
+				.reply(200, JSON.stringify(reponse1));
+
+			var zone = c.zone();
+			assert.equal(zone, null, "The zone is not a null value: "+JSON.stringify(zone));
+
+			var reponse2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName(), r.getId().toString()))
+				.reply(200, JSON.stringify(reponse2));
+
+			var retour = c.setZone(r);
+			assert.ok(retour, "The return of the setZone is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the zone in database.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zone");
+
+			// normalement le lazy_loading est true : plus besoin de mock pour la requête
+			zone = c.zone();
+			assert.deepEqual(zone, r, "The zone() does not return the exact zone we give: "+JSON.stringify(zone));
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+		});
+
+		it('should not allow to add a null object', function() {
+			nock.disableNetConnect();
+			var c = new CallType("toto","machin", 52);
+
+			assert.throws(function() {
+					c.setZone(null);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to add an undefined object', function() {
+			nock.disableNetConnect();
+			var c = new CallType("toto","machin", 52);
+
+			assert.throws(function() {
+					c.setZone(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to add a object which is not yet created', function() {
+			nock.disableNetConnect();
+			var c = new CallType("toto","machin", 52);
+			var s = new Zone("toto","t",2,3,4,5);
+
+			assert.throws(function() {
+					c.setZone(s);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to set a zone if there is already one', function() {
+			var c = new CallType("toto","machin", 52);
+			var s = new Zone("toto","tata",2,3,4,5, 42);
+			var s2 = new Zone("tutu","tata",2,3,4,5, 89);
+
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s2.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var zone = c.zone();
+
+			assert.ok(!!zone, "The zone has false value: "+JSON.stringify(zone)+" .");
+			assert.throws(function() {
+					c.setZone(s);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zone");
+		});
+
+	});
+
+	describe('#unsetZone', function() {
+		it('should unset the Zone', function () {
+			var c = new CallType("toto", "machin", 52);
+			var s = new Zone("toto","tata",2,3,4,5, 42);
+
+			var reponse1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var zone = c.zone();
+			assert.deepEqual(zone, s, "The zone is not the expected value");
+			var spy = sinon.spy(zone, "desynchronize");
+
+			var reponse2:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName(), s.getId().toString()))
+				.reply(200, JSON.stringify(reponse2));
+
+			var retour = c.unsetZone();
+			assert.ok(retour, "The return of the unsetZone is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+
+			zone = c.zone();
+			assert.deepEqual(zone, null, "The zone() does not return a null value after unsetting");
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+		});
+
+		it('should not allow to unset a profil if there is none', function () {
+			var c = new CallType("toto", "machin", 52);
+			var s = new Zone("toto", "tata",2,3,4,5, 42);
+
+			var reponse1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
+				.times(2)
+				.reply(200, JSON.stringify(reponse1));
+
+			var zone = c.zone();
+
+			assert.equal(zone, null, "The zone has a value not null: " + JSON.stringify(zone));
+			assert.throws(function () {
+					c.unsetZone();
+				},
+				ModelException,
+				"The exception has not been thrown.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done");
+		});
+	});
 });
