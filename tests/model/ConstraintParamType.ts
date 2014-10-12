@@ -136,4 +136,168 @@ describe('ConstraintParamType', function() {
 			assert.deepEqual(json, expected, "The JSON object ("+JSON.stringify(json)+") and the expected JSON ("+JSON.stringify(expected)+") do not match.");
 		})
 	});
+
+	describe('#setTypeParamType', function() {
+		it('should set the given type', function() {
+			var c = new ConstraintParamType("toto","machin", 52);
+			var s = new TypeParamType("toto", 42);
+			var spy = sinon.spy(s, "desynchronize");
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
+				.reply(200, JSON.stringify(reponse1));
+
+			var type = c.type();
+			assert.equal(type, null, "The type is not a null value: "+JSON.stringify(type));
+
+			var reponse2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.associatedObjectEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
+				.reply(200, JSON.stringify(reponse2));
+
+			var retour = c.setType(s);
+			assert.ok(retour, "The return of the setTypeParamType is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the type in database.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the type");
+
+			// normalement le lazy_loading est true : plus besoin de mock pour la requête
+			type = c.type();
+			assert.deepEqual(type, s, "The type() does not return the exact type we give: "+JSON.stringify(type));
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+		});
+
+		it('should not allow to add a null object', function() {
+			nock.disableNetConnect();
+			var c = new ConstraintParamType("toto","machin", 52);
+
+			assert.throws(function() {
+					c.setType(null);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to add an undefined object', function() {
+			nock.disableNetConnect();
+			var c = new ConstraintParamType("toto","machin", 52);
+
+			assert.throws(function() {
+					c.setType(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to add a object which is not yet created', function() {
+			nock.disableNetConnect();
+			var c = new ConstraintParamType("toto","machin", 52);
+			var s = new TypeParamType("toto");
+
+			assert.throws(function() {
+					c.setType(s);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to set a type if there is already one', function() {
+			var c = new ConstraintParamType("toto","machin", 52);
+			var s = new TypeParamType("toto", 42);
+			var s2 = new TypeParamType("tutu", 89);
+
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s2.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var type = c.type();
+
+			assert.ok(!!type, "The type has false value.");
+			assert.throws(function() {
+					c.setType(s);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the type");
+		});
+
+	});
+
+	describe('#unsetTypeParamType', function() {
+		it('should unset the TypeParamType', function() {
+			var c = new ConstraintParamType("toto","machin", 52);
+			var s = new TypeParamType("toto", 42);
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var type = c.type();
+			assert.deepEqual(type, s, "The type is not the expected value");
+			var spy = sinon.spy(type, "desynchronize");
+
+			var reponse2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.delete(DatabaseConnection.associatedObjectEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
+				.reply(200, JSON.stringify(reponse2));
+
+			var retour = c.unsetType();
+			assert.ok(retour, "The return of the unsetTypeParamType is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+
+			type = c.type();
+			assert.deepEqual(type, null, "The type() does not return a null value after unsetting");
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+		});
+
+		it('should not allow to unset a profil if there is none', function() {
+			var c = new ConstraintParamType("toto","machin", 52);
+			var s = new TypeParamType("toto", 42);
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+				.times(2)
+				.reply(200, JSON.stringify(reponse1));
+
+			var type = c.type();
+
+			assert.equal(type, null, "The type has a value not null: "+JSON.stringify(type));
+			assert.throws(function() {
+					c.unsetType();
+				},
+				ModelException,
+				"The exception has not been thrown.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done");
+		});
+
+	});
 });

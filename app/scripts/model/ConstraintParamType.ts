@@ -186,12 +186,12 @@ class ConstraintParamType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setType(t : TypeParamType) : boolean {
-		if (this.type() !== null) {
-			throw new Error("The type is already set for this ConstraintParamType.");
+		if (!t || !t.getId()) {
+			throw new ModelException("The type must be an existing object to be associated.");
 		}
 
-		if (t === null || t.getId() === undefined || t.getId() === null) {
-			throw new Error("The type must be an existing object to be associated.");
+		if (this.type() !== null) {
+			throw new ModelException("The type is already set for this ConstraintParamType.");
 		}
 
 		if (this.associateObject(ConstraintParamType, TypeParamType, t.getId())) {
@@ -214,7 +214,7 @@ class ConstraintParamType extends ModelItf {
 	 */
 	unsetType() : boolean {
 		if (this.type() === null) {
-			throw new Error("No type has been set for this constraintParamType.");
+			throw new ModelException("No type has been set for this constraintParamType.");
 		}
 
 		if (this.deleteObjectAssociation(ConstraintParamType, TypeParamType, this.type().getId())) {
