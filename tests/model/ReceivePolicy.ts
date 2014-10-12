@@ -13,6 +13,36 @@ var nock : any = require("nock");
 
 describe('ReceivePolicy', function() {
 	describe('#constructor', function () {
+		it('should throw an error if the name is undefined', function(){
+			assert.throws(
+				function() {
+					new ReceivePolicy(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is null', function(){
+			assert.throws(
+				function() {
+					new ReceivePolicy(null);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is empty', function(){
+			assert.throws(
+				function() {
+					new ReceivePolicy("");
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new ReceivePolicy(name);

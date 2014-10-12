@@ -56,7 +56,7 @@ class Profil extends ModelItf {
      * @param {string} description - The Profil's description.
      * @param {number} id - The Profil's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -82,9 +82,8 @@ class Profil extends ModelItf {
      * @method setName
      */
     setName(name : string) {
-        if(name == null || name == "") {
-            Logger.error("A Profil needs to have a name.");
-            // TODO : Throw an Exception ?
+        if(!name) {
+            throw new ModelException("A profil needs a name.")
         }
 
         this._name = name;

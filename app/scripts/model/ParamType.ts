@@ -92,7 +92,7 @@ class ParamType extends ModelItf {
      * @param {string} description - The ParamType's description.
      * @param {number} id - The ParamType's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -114,9 +114,8 @@ class ParamType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A ParamType needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A ParamType needs to have a name.");
 		}
 
 		this._name = name;
@@ -128,11 +127,6 @@ class ParamType extends ModelItf {
 	 * @method setDescription
 	 */
 	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A ParamType needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 

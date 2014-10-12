@@ -41,8 +41,8 @@ class InfoType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			throw new Error("An instance of InfoType needs to have a name!")
+		if(!name) {
+			throw new ModelException("An instance of InfoType needs to have a name")
 		}
 
 		this._name = name;

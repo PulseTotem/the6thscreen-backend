@@ -62,9 +62,8 @@ class ParamValue extends ModelItf {
 	 * @method setValue
 	 */
 	setValue(value : string) {
-		if(value == null || value == "") {
-			Logger.error("A ParamValue needs a proper value.");
-			// TODO : Throw an Exception ?
+		if(!value) {
+			throw new ModelException("A ParamValue needs a proper value.")
 		}
 
 		this._value = value;

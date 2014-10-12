@@ -14,8 +14,38 @@ var sinon : SinonStatic = require("sinon");
 
 describe('ParamValue', function() {
 	describe('#constructor', function () {
+		it('should throw an error if the name is undefined', function(){
+			assert.throws(
+				function() {
+					new ParamValue(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is null', function(){
+			assert.throws(
+				function() {
+					new ParamValue(null);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is empty', function(){
+			assert.throws(
+				function() {
+					new ParamValue("");
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
 		it('should store the value', function () {
-			var value = "machin";
+			var value = "false";
 			var c = new ParamValue(value);
 			assert.equal(c.value(), value, "The value is not stored correctly.");
 		});
