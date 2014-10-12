@@ -343,13 +343,15 @@ class CallType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setSource(s : Source) : boolean {
-		if (this.source() !== null) {
-			throw new Error("The source is already set for this CallType.");
+		if (!s || !s.getId()) {
+			throw new ModelException("The source must be an existing object to be associated.");
 		}
 
-		if (s === null || s.getId() === undefined || s.getId() === null) {
-			throw new Error("The source must be an existing object to be associated.");
+		if (this.source() !== null) {
+			throw new ModelException("The source is already set for this CallType.");
 		}
+
+
 
 		if (this.associateObject(CallType, Source, s.getId())) {
 			s.desynchronize();
