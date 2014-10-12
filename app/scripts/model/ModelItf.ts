@@ -317,9 +317,8 @@ class ModelItf {
 	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
 	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
 	 * @param assoName - the array in which the objects have to be pushed
-	 * @returns {boolean}
 	 */
-	getAssociatedObjects(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) : boolean {
+	getAssociatedObjects(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) {
 		if (!this.getId()) {
 			throw new ModelException("You cannot retrieve associated objects if the object does not exist.");
 		}
@@ -349,7 +348,6 @@ class ModelItf {
 							assoName.push(modelClassAssociated.fromJSONObject(object));
 						}
 					}
-					return true;
 				}
 			}else {
 				throw new ResponseException("The request failed on the server when trying to retrieve all objects with URL:"+urlAssociatedObjects+".\nMessage : "+JSON.stringify(response));
@@ -368,15 +366,12 @@ class ModelItf {
 	 * @param assoName - where the object have to be saved
 	 * @returns {boolean}
 	 */
-	getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) : boolean {
+	getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any) : any {
 		if (!this.getId()) {
 			throw new ModelException("You cannot retrieve uniquely associated object if the object does not exist.");
 		}
-		if (!modelClass || !modelClassAssociated || !assoName) {
-			throw new ModelException("The two modelClasses and the assoName argument must be given to retrieve a uniquely associated object.");
-		}
-		if (!(assoName instanceof Array)) {
-			throw new ModelException("The argument assoName must be an existing array.");
+		if (!modelClass || !modelClassAssociated) {
+			throw new ModelException("The two modelClasses arguments must be given to retrieve a uniquely associated object.");
 		}
 
 		var urlUniqueAssociatedOject = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
@@ -389,13 +384,12 @@ class ModelItf {
 			if(response.status == "success") {
 				// in that case tere is no data to retrieve
 				if ((response.data instanceof Array) && (response.data.length == 0)) {
-					return false;
+					return null;
 				}
 				if(response.data === undefined || response.data.id === undefined) {
 					throw new DataException("The response is a success but the data does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response.data));
 				} else {
-					assoName.push(modelClassAssociated.fromJSONObject(response.data));
-					return true;
+					return modelClassAssociated.fromJSONObject(response.data);
 				}
 			} else {
 				throw new ResponseException("The request failed on the server when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nMessage : "+JSON.stringify(response));

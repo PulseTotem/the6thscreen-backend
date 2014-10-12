@@ -155,11 +155,11 @@ class ParamType extends ModelItf {
      */
 	type() {
 	    if(! this._type_loaded) {
-		    var value = [];
-		    this._type_loaded = this.getUniquelyAssociatedObject(ParamType, TypeParamType, value);
-		    if (this._type_loaded) {
-			    this._type = value[0];
+		    var value = this.getUniquelyAssociatedObject(ParamType, TypeParamType);
+		    if (!!value) {
+			    this._type = value;
 		    }
+		    this._type_loaded = true;
 	    }
 	    return this._type;
     }
@@ -171,11 +171,11 @@ class ParamType extends ModelItf {
      */
     constraint() {
 	    if(! this._constraint_loaded) {
-		    var value = [];
-		    this._constraint_loaded = this.getUniquelyAssociatedObject(ParamType, ConstraintParamType, value);
-		    if (this._constraint_loaded) {
-			    this._constraint = value[0];
+		    var value = this.getUniquelyAssociatedObject(ParamType, ConstraintParamType);
+		    if (!!value) {
+			    this._constraint = value;
 		    }
+		    this._constraint_loaded = true;
 	    }
 	    return this._constraint;
     }
@@ -187,11 +187,11 @@ class ParamType extends ModelItf {
 	 */
 	defaultValue() {
 		if(! this._default_value_loaded) {
-			var value = [];
-			this._default_value_loaded = this.getUniquelyAssociatedObject(ParamType, ParamValue, value);
-			if (this._default_value_loaded) {
-				this._default_value = value[0];
+			var value = this.getUniquelyAssociatedObject(ParamType, ParamValue);
+			if (!!value) {
+				this._default_value = value;
 			}
+			this._default_value_loaded = true;
 		}
 		return this._default_value;
 	}

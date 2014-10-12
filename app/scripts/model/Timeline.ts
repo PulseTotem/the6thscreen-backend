@@ -112,7 +112,9 @@ class Timeline extends ModelItf {
      */
     profils() {
         if(! this._profils_loaded) {
-            this._profils_loaded = this.getAssociatedObjects(Timeline, Profil, this._profils);
+            this.getAssociatedObjects(Timeline, Profil, this._profils);
+
+	        this._profils_loaded = true;
         }
         return this._profils;
     }

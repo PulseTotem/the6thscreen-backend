@@ -64,11 +64,6 @@ class RenderPolicy extends ModelItf {
 	 * @method setDescription
 	 */
 	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A RenderPolicy needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 

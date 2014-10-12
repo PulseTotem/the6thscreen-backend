@@ -180,7 +180,6 @@ describe('Renderer', function() {
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Renderer.getTableName(), c.getId().toString(), InfoType.getTableName()))
-				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
 				.reply(200, JSON.stringify(reponse1));
 
 			var infoType = c.infoType();
@@ -315,7 +314,6 @@ describe('Renderer', function() {
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Renderer.getTableName(), c.getId().toString(), InfoType.getTableName()))
-				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 
 			var infoType = c.infoType();

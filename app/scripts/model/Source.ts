@@ -248,11 +248,11 @@ class Source extends ModelItf {
      */
     infoType() {
         if(! this._info_type_loaded) {
-	        var value = [];
-            this._info_type_loaded = this.getUniquelyAssociatedObject(Source, InfoType, value);
-	        if (this._info_type_loaded) {
-		        this._info_type = value[0];
+	        var value = this.getUniquelyAssociatedObject(Source, InfoType);
+	        if (!!value) {
+		        this._info_type = value;
 	        }
+	        this._info_type_loaded = true;
         }
         return this._info_type;
     }
@@ -264,7 +264,9 @@ class Source extends ModelItf {
      */
     paramTypes() {
         if(! this._param_types_loaded) {
-            this._param_types_loaded = this.getAssociatedObjects(Source, ParamType, this._param_types);
+            this.getAssociatedObjects(Source, ParamType, this._param_types);
+
+	        this._param_types_loaded = true;
         }
         return this._param_types;
     }
@@ -276,7 +278,9 @@ class Source extends ModelItf {
      */
     paramValues() {
         if(! this._param_values_loaded) {
-            this._param_values_loaded = this.getAssociatedObjects(Source, ParamValue, this._param_values);
+            this.getAssociatedObjects(Source, ParamValue, this._param_values);
+
+	        this._param_values_loaded = true;
         }
         return this._param_values;
     }

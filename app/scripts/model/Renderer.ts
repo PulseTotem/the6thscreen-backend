@@ -84,11 +84,6 @@ class Renderer extends ModelItf {
 	 * @method setDescription
 	 */
 	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A Renderer needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 
@@ -117,11 +112,11 @@ class Renderer extends ModelItf {
      */
     infoType() {
         if(! this._info_type_loaded) {
-	        var value = [];
-            this._info_type_loaded = this.getUniquelyAssociatedObject(Renderer, InfoType, value);
-	        if (this._info_type_loaded) {
-		        this._info_type = value[0];
+	        var value = this.getUniquelyAssociatedObject(Renderer, InfoType);
+	        if (!!value) {
+		        this._info_type = value;
 	        }
+	        this._info_type_loaded = true;
         }
         return this._info_type;
     }

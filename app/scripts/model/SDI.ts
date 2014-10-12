@@ -200,7 +200,9 @@ class SDI extends ModelItf {
      */
     users() {
         if(! this._users_loaded) {
-	        this._users_loaded = this.getAssociatedObjects(SDI, User, this._users);
+	        this.getAssociatedObjects(SDI, User, this._users);
+
+	        this._users_loaded = true;
         }
         return this._users;
     }
@@ -212,7 +214,9 @@ class SDI extends ModelItf {
      */
     zones() {
         if(! this._zones_loaded) {
-            this._zones_loaded = this.getAssociatedObjects(SDI, Zone, this._zones);
+            this.getAssociatedObjects(SDI, Zone, this._zones);
+
+	        this._zones_loaded = true;
         }
         return this._zones;
     }
@@ -224,7 +228,9 @@ class SDI extends ModelItf {
      */
     profils() {
         if(! this._profils_loaded) {
-            this._profils_loaded = this.getAssociatedObjects(SDI, Profil, this._profils);
+            this.getAssociatedObjects(SDI, Profil, this._profils);
+
+	        this._profils_loaded = true;
         }
         return this._profils;
     }
@@ -236,7 +242,9 @@ class SDI extends ModelItf {
      */
     timelines() {
         if(! this._timelines_loaded) {
-            this._timelines_loaded = this.getAssociatedObjects(SDI, Timeline, this._timelines);
+            this.getAssociatedObjects(SDI, Timeline, this._timelines);
+
+	        this._timelines_loaded = true;
         }
         return this._timelines;
     }

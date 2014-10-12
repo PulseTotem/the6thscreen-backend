@@ -85,11 +85,11 @@ class ParamValue extends ModelItf {
 	 */
 	paramType() {
 		if(! this._paramType_loaded) {
-			var value = [];
-			this._paramType_loaded = this.getUniquelyAssociatedObject(ParamValue, ParamType, value);
-			if (this._paramType_loaded) {
-				this._paramType = value[0];
+			var value = this.getUniquelyAssociatedObject(ParamValue, ParamType);
+			if (!!value) {
+				this._paramType = value;
 			}
+			this._paramType_loaded = true;
 		}
 		return this._paramType;
 	}

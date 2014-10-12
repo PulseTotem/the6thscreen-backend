@@ -105,7 +105,9 @@ class User extends ModelItf {
      */
     roles() {
         if(! this._roles_loaded) {
-            this._roles_loaded = this.getAssociatedObjects(User, Role, this._roles);
+            this.getAssociatedObjects(User, Role, this._roles);
+
+	        this._roles_loaded = true;
         }
         return this._roles;
     }
@@ -117,7 +119,9 @@ class User extends ModelItf {
      */
     sdis() {
         if(! this._sdis_loaded) {
-            this._sdis_loaded  = this.getAssociatedObjects(User, SDI, this._sdis);
+            this.getAssociatedObjects(User, SDI, this._sdis);
+
+	        this._sdis_loaded = true;
         }
         return this._sdis;
     }

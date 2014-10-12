@@ -111,11 +111,11 @@ class ConstraintParamType extends ModelItf {
 	 */
 	type() {
 		if (!this._type_loading) {
-			var value = [];
-			this._type_loading = this.getUniquelyAssociatedObject(ConstraintParamType, TypeParamType, value);
-			if (this._type_loading) {
-				this._type = value[0];
+			var value = this.getUniquelyAssociatedObject(ConstraintParamType, TypeParamType);
+			if (!!value) {
+				this._type = value;
 			}
+			this._type_loading = true;
 		}
 		return this._type;
 	}

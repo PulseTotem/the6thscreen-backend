@@ -105,11 +105,6 @@ class Profil extends ModelItf {
      * @method setDescription
      */
     setDescription(description : string) {
-        if(description == null || description == "") {
-            Logger.error("A Profil needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
         this._description = description;
     }
 
@@ -121,7 +116,8 @@ class Profil extends ModelItf {
      */
     calls() : Array<Call> {
         if(! this._calls_loaded) {
-            this._calls_loaded = this.getAssociatedObjects(Profil, Call, this._calls);
+            this.getAssociatedObjects(Profil, Call, this._calls);
+	        this._calls_loaded = true;
         }
         return this._calls;
     }

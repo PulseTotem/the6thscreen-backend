@@ -140,7 +140,6 @@ describe('ParamValue', function() {
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName()))
-				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setParamType vu que le lazy loading reste false
 				.reply(200, JSON.stringify(reponse1));
 
 			var paramType = c.paramType();
@@ -277,7 +276,6 @@ describe('ParamValue', function() {
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName()))
-				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 
 			var paramType = c.paramType();

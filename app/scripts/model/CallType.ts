@@ -192,11 +192,11 @@ class CallType extends ModelItf {
      */
     source() {
         if(! this._source_loaded) {
-	        var value = [];
-            this._source_loaded = this.getUniquelyAssociatedObject(CallType, Source, value);
-			if (this._source_loaded) {
-				this._source = value[0];
+	        var value = this.getUniquelyAssociatedObject(CallType, Source);
+			if (!!value) {
+				this._source = value;
 			}
+	        this._source_loaded = true;
         }
         return this._source;
     }
@@ -208,11 +208,11 @@ class CallType extends ModelItf {
      */
     renderer() {
         if(! this._renderer_loaded) {
-	        var value = [];
-            this._renderer_loaded = this.getUniquelyAssociatedObject(CallType, Renderer, value);
-	        if (this._renderer_loaded) {
-		        this._renderer = value[0];
+	        var value = this.getUniquelyAssociatedObject(CallType, Renderer);
+	        if (!!value) {
+		        this._renderer = value;
 	        }
+	        this._renderer_loaded = true;
         }
         return this._renderer;
     }
@@ -224,11 +224,11 @@ class CallType extends ModelItf {
      */
     receivePolicy() {
         if(! this._receive_policy_loaded) {
-	        var value = [];
-            this._receive_policy_loaded = this.getUniquelyAssociatedObject(CallType, ReceivePolicy, value);
-	        if (this._receive_policy_loaded) {
-		        this._receive_policy = value[0];
+	        var value = this.getUniquelyAssociatedObject(CallType, ReceivePolicy);
+	        if (!!value) {
+		        this._receive_policy = value;
 	        }
+	        this._receive_policy_loaded = true;
         }
         return this._receive_policy;
     }
@@ -240,11 +240,11 @@ class CallType extends ModelItf {
      */
     renderPolicy() {
         if(! this._render_policy_loaded) {
-	        var value = [];
-            this._render_policy_loaded = this.getUniquelyAssociatedObject(CallType, RenderPolicy, value);
-	        if (this._render_policy_loaded) {
-		        this._render_policy = value[0];
+	        var value = this.getUniquelyAssociatedObject(CallType, RenderPolicy);
+	        if (!!value) {
+		        this._render_policy = value;
 	        }
+	        this._render_policy_loaded = true;
         }
         return this._render_policy;
     }
@@ -256,11 +256,11 @@ class CallType extends ModelItf {
 	 */
 	zone() {
 		if(! this._zone_loaded) {
-			var value = [];
-			this._zone_loaded = this.getUniquelyAssociatedObject(CallType, Zone, value);
-			if (this._zone_loaded) {
-				this._zone = value[0];
+			var value = this.getUniquelyAssociatedObject(CallType, Zone);
+			if (!!value) {
+				this._zone = value;
 			}
+			this._zone_loaded = true;
 		}
 		return this._zone;
 	}
