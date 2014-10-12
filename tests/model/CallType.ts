@@ -238,23 +238,23 @@ describe('Call', function(){
 
 	});
 
-	/*describe('#unsetSource', function() {
-		it('should unset the Profil', function() {
-			var c = new Call("toto", 52);
-			var p = new Profil("toto", "machin", 42);
+	describe('#unsetSource', function() {
+		it('should unset the Source', function() {
+			var c = new CallType("toto","machin", 52);
+			var s = new Source("toto", "machin","titi","tata", 12, 42);
 
 			var reponse1 : SequelizeRestfulResponse = {
 				"status": "success",
-				"data": p.toJSONObject()
+				"data": s.toJSONObject()
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName()))
 				.reply(200, JSON.stringify(reponse1));
 
-			var profil = c.profil();
-			assert.deepEqual(profil, p, "The profil is not the expected value");
-			var spy = sinon.spy(profil, "desynchronize");
+			var source = c.source();
+			assert.deepEqual(source, s, "The source is not the expected value");
+			var spy = sinon.spy(source, "desynchronize");
 
 			var reponse2 : SequelizeRestfulResponse = {
 				"status": "success",
@@ -262,21 +262,21 @@ describe('Call', function(){
 			};
 
 			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName(), p.getId().toString()))
+				.delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName(), s.getId().toString()))
 				.reply(200, JSON.stringify(reponse2));
 
-			var retour = c.unsetProfil();
-			assert.ok(retour, "The return of the unsetProfil is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+			var retour = c.unsetSource();
+			assert.ok(retour, "The return of the unsetSource is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
 
-			profil = c.profil();
-			assert.deepEqual(profil, null, "The profil() does not return a null value after unsetting");
+			source = c.source();
+			assert.deepEqual(source, null, "The source() does not return a null value after unsetting");
 			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
 		});
 
 		it('should not allow to unset a profil if there is none', function() {
-			var c = new Call("toto", 52);
-			var p = new Profil("toto","machin", 13);
+			var c = new CallType("toto","machin", 52);
+			var s = new Source("toto", "machin","titi","tata", 12, 42);
 
 			var reponse1 : SequelizeRestfulResponse = {
 				"status": "success",
@@ -284,20 +284,20 @@ describe('Call', function(){
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName()))
 				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 
-			var profil = c.profil();
+			var source = c.source();
 
-			assert.equal(profil, null, "The profil has a value not null: "+JSON.stringify(profil));
+			assert.equal(source, null, "The source has a value not null: "+JSON.stringify(source));
 			assert.throws(function() {
-					c.unsetProfil();
+					c.unsetSource();
 				},
 				ModelException,
 				"The exception has not been thrown.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done");
 		});
 
-	});*/
+	});
 });

@@ -373,7 +373,7 @@ class CallType extends ModelItf {
 	 */
 	unsetSource() : boolean {
 		if (this.source() === null) {
-			throw new Error("No source has been set for this callType.");
+			throw new ModelException("No source has been set for this callType.");
 		}
 
 		if (this.deleteObjectAssociation(CallType, Source, this.source().getId())) {
