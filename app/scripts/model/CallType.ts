@@ -395,12 +395,12 @@ class CallType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setRenderer(r : Renderer) : boolean {
-		if (this.renderer() !== null) {
-			throw new Error("The renderer is already set for this CallType.");
+		if (!r || !r.getId()) {
+			throw new ModelException("The renderer must be an existing object to be associated.");
 		}
 
-		if (r === null || r.getId() === undefined || r.getId() === null) {
-			throw new Error("The renderer must be an existing object to be associated.");
+		if (this.renderer() !== null) {
+			throw new ModelException("The renderer is already set for this CallType.");
 		}
 
 		if (this.associateObject(CallType, Renderer, r.getId())) {
@@ -423,7 +423,7 @@ class CallType extends ModelItf {
 	 */
 	unsetRenderer() : boolean {
 		if (this.renderer() === null) {
-			throw new Error("No renderer has been set for this callType.");
+			throw new ModelException("No renderer has been set for this callType.");
 		}
 
 		if (this.deleteObjectAssociation(CallType, Renderer, this.renderer().getId())) {

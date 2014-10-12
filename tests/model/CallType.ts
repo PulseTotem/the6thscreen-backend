@@ -300,4 +300,168 @@ describe('Call', function(){
 		});
 
 	});
+
+	describe('#setRenderer', function() {
+		it('should set the given renderer', function() {
+			var c = new CallType("toto","machin", 52);
+			var r = new Renderer("renderer","blop",12);
+			var spy = sinon.spy(r, "desynchronize");
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
+				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
+				.reply(200, JSON.stringify(reponse1));
+
+			var renderer = c.renderer();
+			assert.equal(renderer, null, "The renderer is not a null value: "+JSON.stringify(renderer));
+
+			var reponse2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName(), r.getId().toString()))
+				.reply(200, JSON.stringify(reponse2));
+
+			var retour = c.setRenderer(r);
+			assert.ok(retour, "The return of the setRenderer is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the renderer in database.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the renderer");
+
+			// normalement le lazy_loading est true : plus besoin de mock pour la requête
+			renderer = c.renderer();
+			assert.deepEqual(renderer, r, "The renderer() does not return the exact renderer we give: "+JSON.stringify(renderer));
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+		});
+
+		it('should not allow to add a null object', function() {
+			nock.disableNetConnect();
+			var c = new CallType("toto","machin", 52);
+
+			assert.throws(function() {
+					c.setRenderer(null);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to add an undefined object', function() {
+			nock.disableNetConnect();
+			var c = new CallType("toto","machin", 52);
+
+			assert.throws(function() {
+					c.setRenderer(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to add a object which is not yet created', function() {
+			nock.disableNetConnect();
+			var c = new CallType("toto","machin", 52);
+			var s = new Renderer("toto", "machin");
+
+			assert.throws(function() {
+					c.setRenderer(s);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to set a renderer if there is already one', function() {
+			var c = new CallType("toto","machin", 52);
+			var s = new Renderer("toto", "machin", 42);
+			var s2 = new Renderer("tutu", "blop", 89);
+
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s2.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var renderer = c.renderer();
+
+			assert.ok(!!renderer, "The renderer has false value.");
+			assert.throws(function() {
+					c.setRenderer(s);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the renderer");
+		});
+
+	});
+
+	describe('#unsetRenderer', function() {
+		it('should unset the Renderer', function() {
+			var c = new CallType("toto","machin", 52);
+			var s = new Renderer("toto", "machin", 42);
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var renderer = c.renderer();
+			assert.deepEqual(renderer, s, "The renderer is not the expected value");
+			var spy = sinon.spy(renderer, "desynchronize");
+
+			var reponse2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName(), s.getId().toString()))
+				.reply(200, JSON.stringify(reponse2));
+
+			var retour = c.unsetRenderer();
+			assert.ok(retour, "The return of the unsetRenderer is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+
+			renderer = c.renderer();
+			assert.deepEqual(renderer, null, "The renderer() does not return a null value after unsetting");
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+		});
+
+		it('should not allow to unset a profil if there is none', function() {
+			var c = new CallType("toto","machin", 52);
+			var s = new Renderer("toto", "machin",42);
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
+				.times(2)
+				.reply(200, JSON.stringify(reponse1));
+
+			var renderer = c.renderer();
+
+			assert.equal(renderer, null, "The renderer has a value not null: "+JSON.stringify(renderer));
+			assert.throws(function() {
+					c.unsetRenderer();
+				},
+				ModelException,
+				"The exception has not been thrown.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done");
+		});
+
+	});
 });
