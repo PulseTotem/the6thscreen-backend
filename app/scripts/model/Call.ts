@@ -328,12 +328,13 @@ class Call extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setCallType(ct : CallType) : boolean {
+		if (!ct || !ct.getId()) {
+			throw new ModelException("The CallType must be an existing object to be associated.");
+		}
 		if (this.callType() !== null) {
-			throw new Error("The CallType is already set for the call : "+this+".");
+			throw new ModelException("The CallType is already set for the call : "+JSON.stringify(this.callType())+".");
 		}
-		if (ct === null || ct.getId() === undefined || ct.getId() === null) {
-			throw new Error("The CallType must be an existing object to be associated.");
-		}
+
 
 		if (this.associateObject(Call, CallType, ct.getId())) {
 			ct.desynchronize();
