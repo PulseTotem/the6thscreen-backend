@@ -181,11 +181,12 @@ class Timeline extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addProfil(p : Profil) : boolean {
-		if (this.profils().indexOf(p) !== -1) {
-			throw new Error("You cannot add twice a Profil for a Timeline.");
+		if (!p || !p.getId()) {
+			throw new ModelException("The Profil must be an existing object to be associated.");
 		}
-		if (p === null || p.getId() === undefined || p.getId() === null) {
-			throw new Error("The Profil must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.profils(), p)) {
+			throw new ModelException("You cannot add twice a Profil for a Timeline.");
 		}
 
 		if (this.associateObject(Timeline, Profil, p.getId())) {
@@ -206,15 +207,17 @@ class Timeline extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeProfil(p : Profil) : boolean {
-		var indexValue = this.profils().indexOf(p);
-		if (indexValue === -1) {
-			throw new Error("The Profil you try to remove has not been added to the current Timeline");
+		if (!p || !p.getId()) {
+			throw new ModelException("The Profil must be an existing object to be removed.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.profils(), p)) {
+			throw new ModelException("The Profil you try to remove is not yet associated.");
 		}
 
 		if (this.deleteObjectAssociation(Timeline, Profil, p.getId())) {
 			p.desynchronize();
-			this.profils().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.profils(), p);
 		} else {
 			return false;
 		}
@@ -293,11 +296,16 @@ class Timeline extends ModelItf {
 	 * @return {Timeline} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Timeline {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new Timeline(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A Profil object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A Profil object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A Profil object should have a description.");
+		}
+		return new Timeline(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
     /**
