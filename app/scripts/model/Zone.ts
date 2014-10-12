@@ -90,9 +90,8 @@ class Zone extends ModelItf {
 	 * @param name A new name
 	 */
 	setName(name : string) : void {
-		if(name == null || name == "") {
-			Logger.error("A Zone needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A name is mandatory for a Zone.");
 		}
 
 		this._name = name;
@@ -105,11 +104,6 @@ class Zone extends ModelItf {
 	 * @param description a new description
 	 */
 	setDescription(description : string) : void {
-		if(description == null || description == "") {
-			Logger.error("A Zone needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 
@@ -120,9 +114,8 @@ class Zone extends ModelItf {
 	 * @param width a new width
 	 */
 	setWidth(width : number) : void {
-		if(width == null) {
-			Logger.error("A Zone needs to have a width.");
-			// TODO : Throw an Exception ?
+		if(!width) {
+			throw new ModelException("A width is mandatory for a Zone.");
 		}
 
 		this._width = new Percentage(width);
@@ -135,9 +128,8 @@ class Zone extends ModelItf {
 	 * @param height a new height
 	 */
 	setHeight(height : number) : void {
-		if(height == null) {
-			Logger.error("A Zone needs to have a height.");
-			// TODO : Throw an Exception ?
+		if(!height) {
+			throw new ModelException("A height is mandatory for a Zone.");
 		}
 
 		this._height = new Percentage(height);
@@ -150,9 +142,8 @@ class Zone extends ModelItf {
 	 * @param positionFromTop a new positionFromTop
 	 */
 	setPositionFromTop(positionFromTop : number) : void {
-		if(positionFromTop == null) {
-			Logger.error("A Zone needs to have a positionFromTop.");
-			// TODO : Throw an Exception ?
+		if(!positionFromTop) {
+			throw new ModelException("The positionFromTop attribute is mandatory for a Zone.");
 		}
 
 		this._position_from_top = new Percentage(positionFromTop);
@@ -165,9 +156,8 @@ class Zone extends ModelItf {
 	 * @param positionFromTop a new positionFromTop
 	 */
 	setPositionFromLeft(positionFromLeft : number) : void {
-		if(positionFromLeft == null) {
-			Logger.error("A Zone needs to have a positionFromLeft.");
-			// TODO : Throw an Exception ?
+		if(!positionFromLeft) {
+			throw new ModelException("The positionFromTop attribute is mandatory for a Zone.");
 		}
 
 		this._position_from_left = new Percentage(positionFromLeft);
@@ -340,17 +330,28 @@ class Zone extends ModelItf {
 	 * @return {Zone} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Zone {
-		if(typeof(jsonObject.name) == "undefined" ||
-			typeof(jsonObject.description) == "undefined" ||
-			typeof(jsonObject.width) == "undefined" ||
-			typeof(jsonObject.height) == "undefined" ||
-			typeof(jsonObject.positionFromTop) == "undefined" ||
-			typeof(jsonObject.positionFromLeft) == "undefined" ||
-			typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A Zone object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A Zone object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A Zone object should have a description.");
+		}
+		if(!jsonObject.width) {
+			throw new ModelException("A Zone object should have a width.");
+		}
+		if(!jsonObject.height) {
+			throw new ModelException("A Zone object should have a height.");
+		}
+		if(!jsonObject.positionFromTop) {
+			throw new ModelException("A Zone object should have a positionFromTop.");
+		}
+		if(!jsonObject.positionFromLeft) {
+			throw new ModelException("A Zone object should have a positionFromLeft.");
+		}
+		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id);
 	}
 
     /**

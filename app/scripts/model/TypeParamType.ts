@@ -41,9 +41,8 @@ class TypeParamType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A Call needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("The name is mandatory for a TypeParamType");
 		}
 
 		this._name = name;
@@ -147,11 +146,13 @@ class TypeParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : TypeParamType {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new TypeParamType(jsonObject.name, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A TypeParamType object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A TypeParamType object should have a name.");
+		}
+		return new TypeParamType(jsonObject.name, jsonObject.id);
 	}
 
 	/**

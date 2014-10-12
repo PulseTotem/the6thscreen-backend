@@ -111,9 +111,8 @@ class Call extends ModelItf {
      * @method setName
      */
     setName(name : string) {
-        if(name == null || name == "") {
-            Logger.error("A Call needs to have a name.");
-            // TODO : Throw an Exception ?
+        if(!name) {
+            throw new ModelException("A name must be given for Call.");
         }
 
         this._name = name;
@@ -126,7 +125,8 @@ class Call extends ModelItf {
      */
     paramValues() {
         if(! this._param_values_loaded) {
-            this._param_values_loaded = this.getAssociatedObjects(Call, ParamValue, this._param_values);
+            this.getAssociatedObjects(Call, ParamValue, this._param_values);
+	        this._param_values_loaded = true;
         }
         return this._param_values;
     }
@@ -138,11 +138,11 @@ class Call extends ModelItf {
 	 */
 	profil() {
 		if(! this._profil_loaded) {
-			var value = [];
-			this._profil_loaded = this.getUniquelyAssociatedObject(Call, Profil, value);
-			if (this._profil_loaded) {
-				this._profil = value[0];
+			var value = this.getUniquelyAssociatedObject(Call, Profil);
+			if (!!value) {
+				this._profil = value;
 			}
+			this._profil_loaded = true;
 		}
 		return this._profil;
 	}
@@ -154,11 +154,11 @@ class Call extends ModelItf {
 	 */
 	callType() {
 		if(! this._call_type_loaded) {
-			var value = [];
-			this._call_type_loaded = this.getUniquelyAssociatedObject(Call, CallType, value);
-			if (this._call_type_loaded) {
-				this._call_type = value[0];
+			var value = this.getUniquelyAssociatedObject(Call, CallType);
+			if (!!value) {
+				this._call_type = value;
 			}
+			this._call_type_loaded = true;
 		}
 		return this._call_type;
 	}

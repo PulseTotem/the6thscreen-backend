@@ -15,6 +15,36 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Call', function(){
 	describe('#constructor', function() {
+		it('should throw an error if the name is undefined', function(){
+			assert.throws(
+				function() {
+					new Call(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is null', function(){
+			assert.throws(
+				function() {
+					new Call(null);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is empty', function(){
+			assert.throws(
+				function() {
+					new Call("");
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
 		it('should store the name', function(){
 			var name = "machin";
 			var c = new Call(name);
@@ -322,7 +352,6 @@ describe('Call', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
-				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
 				.reply(200, JSON.stringify(reponse1));
 
 			var profil = c.profil();
@@ -459,7 +488,6 @@ describe('Call', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
-				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 
 			var profil = c.profil();
@@ -488,7 +516,6 @@ describe('Call', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), CallType.getTableName()))
-				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
 				.reply(200, JSON.stringify(reponse1));
 
 			var calltype = c.callType();
@@ -624,7 +651,6 @@ describe('Call', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), CallType.getTableName()))
-				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 
 			var calltype = c.callType();

@@ -54,7 +54,7 @@ class ConstraintParamType extends ModelItf {
 	 * @param {string} name - The ConstraintParamType's name.
 	 * @param {number} id - The ConstraintParamType's ID.
 	 */
-	constructor(name : string, description : string, id : number = null) {
+	constructor(name : string, description : string = "", id : number = null) {
 		super(id);
 
 		this.setName(name);
@@ -70,9 +70,8 @@ class ConstraintParamType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A ConstraintParamType needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A ConstraintParamType needs to have a name.");
 		}
 
 		this._name = name;
@@ -84,11 +83,6 @@ class ConstraintParamType extends ModelItf {
 	 * @method setDescription
 	 */
 	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A ConstraintParamType needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 
@@ -117,11 +111,11 @@ class ConstraintParamType extends ModelItf {
 	 */
 	type() {
 		if (!this._type_loading) {
-			var value = [];
-			this._type_loading = this.getUniquelyAssociatedObject(ConstraintParamType, TypeParamType, value);
-			if (this._type_loading) {
-				this._type = value[0];
+			var value = this.getUniquelyAssociatedObject(ConstraintParamType, TypeParamType);
+			if (!!value) {
+				this._type = value;
 			}
+			this._type_loading = true;
 		}
 		return this._type;
 	}

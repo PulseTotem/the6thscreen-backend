@@ -1013,8 +1013,7 @@ describe('ModelItf', function() {
 				.reply(200, JSON.stringify(reponse));
 
 			var allmodels = [];
-			var result = model.getAssociatedObjects(ModelItf, ModelItf, allmodels);
-			assert.ok(result, "The retrieve of associated objects did not return true.");
+			model.getAssociatedObjects(ModelItf, ModelItf, allmodels);
 			assert.deepEqual(allmodels, models, "The array of models is not the same.");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
@@ -1133,49 +1132,28 @@ describe('ModelItf', function() {
 	describe('#getUniquelyAssociatedObject()', function() {
 		it('should throw an error if the object has an id '+ModelItf.NULLID, function() {
 			var model = new ModelItf(ModelItf.NULLID);
-			var result = [];
 
 			assert.throws(function() {
-					model.getUniquelyAssociatedObject(ModelItf, ModelItf, result);
+					model.getUniquelyAssociatedObject(ModelItf, ModelItf);
 				},
 				ModelException);
 		});
 
 		it('should throw an error if the modelclass1 is not given', function() {
 			var model = new ModelItf(42);
-			var result = [];
 			var toto;
 
 			assert.throws(function() {
-				model.getUniquelyAssociatedObject(toto, ModelItf, result);
+				model.getUniquelyAssociatedObject(toto, ModelItf);
 			}, ModelException, "The ModelException has not been thrown");
 		});
 
 		it('should throw an error if the modelclass2 is not given', function() {
 			var model = new ModelItf(42);
-			var result = [];
 			var toto;
 
 			assert.throws(function() {
-				model.getUniquelyAssociatedObject(ModelItf, toto, result);
-			}, ModelException, "The ModelException has not been thrown");
-		});
-
-		it('should throw an error if the result parameter is not given', function() {
-			var model = new ModelItf(42);
-			var toto;
-
-			assert.throws(function() {
-				model.getUniquelyAssociatedObject(ModelItf, ModelItf, toto);
-			}, ModelException, "The ModelException has not been thrown");
-		});
-
-		it('should throw an error if the result parameter is not an array', function() {
-			var model = new ModelItf(42);
-			var result = null;
-
-			assert.throws(function() {
-				model.getUniquelyAssociatedObject(ModelItf, ModelItf, result);
+				model.getUniquelyAssociatedObject(ModelItf, toto);
 			}, ModelException, "The ModelException has not been thrown");
 		});
 
@@ -1184,8 +1162,6 @@ describe('ModelItf', function() {
 			var targetID = 42;
 
 			var model = new ModelItf(originID);
-
-			var finalResult = [new ModelItf(targetID)];
 
 			var modelName = ModelItf;
 
@@ -1199,11 +1175,10 @@ describe('ModelItf', function() {
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(reponse));
+			var expected = new ModelItf(targetID);
+			var result = model.getUniquelyAssociatedObject(ModelItf, ModelItf);
 
-			var allmodels = [];
-			var result = model.getUniquelyAssociatedObject(ModelItf, ModelItf, allmodels);
-			assert.ok(result, "The retrieve of associated objects did not return true.");
-			assert.deepEqual(allmodels, finalResult, "The array of models is not the same.");
+			assert.deepEqual(result, expected, "The result ("+JSON.stringify(result)+" is not the expected one: "+JSON.stringify(expected));
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
 
@@ -1223,7 +1198,7 @@ describe('ModelItf', function() {
 				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(reponse));
 
-			var result = model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+			var result = model.getUniquelyAssociatedObject(ModelItf, ModelItf);
 			assert.ok(!result, "The retrieve of associated objects returns true.");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
@@ -1235,7 +1210,7 @@ describe('ModelItf', function() {
 			nock.disableNetConnect();
 
 			assert.throws(function() {
-				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf);
 			}, RequestException, "The RequestException has not been thrown");
 		});
 
@@ -1248,7 +1223,7 @@ describe('ModelItf', function() {
 				.reply(500, JSON.stringify('Server error'));
 
 			assert.throws(function() {
-				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf);
 			}, RequestException, "The RequestException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
@@ -1267,7 +1242,7 @@ describe('ModelItf', function() {
 				.reply(200, JSON.stringify(response));
 
 			assert.throws(function() {
-				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf);
 			}, ResponseException, "The ResponseException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
@@ -1285,7 +1260,7 @@ describe('ModelItf', function() {
 				.reply(200, JSON.stringify(response));
 
 			assert.throws(function() {
-				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf);
 			}, DataException, "The DataException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
@@ -1306,7 +1281,7 @@ describe('ModelItf', function() {
 				.reply(200, JSON.stringify(response));
 
 			assert.throws(function() {
-				model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
+				model.getUniquelyAssociatedObject(ModelItf, ModelItf);
 			}, DataException, "The DataException has not been thrown");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});

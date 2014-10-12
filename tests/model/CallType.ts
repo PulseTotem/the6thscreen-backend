@@ -14,6 +14,36 @@ var sinon : SinonStatic = require("sinon");
 
 describe('CallType', function(){
 	describe('#constructor', function() {
+		it('should throw an error if the name is undefined', function(){
+			assert.throws(
+				function() {
+					new CallType(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is null', function(){
+			assert.throws(
+				function() {
+					new CallType(null);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is empty', function(){
+			assert.throws(
+				function() {
+					new CallType("");
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
 		it('should store the name', function(){
 			var name = "machin";
 			var c = new CallType(name,"");
@@ -22,13 +52,13 @@ describe('CallType', function(){
 
 		it('should store the description', function(){
 			var desc = "machin";
-			var c = new CallType("",desc);
+			var c = new CallType("name",desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new CallType("","",id);
+			var c = new CallType("name","",id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
@@ -150,7 +180,6 @@ describe('CallType', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName()))
-				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
 				.reply(200, JSON.stringify(reponse1));
 
 			var source = c.source();
@@ -285,7 +314,6 @@ describe('CallType', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName()))
-				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 
 			var source = c.source();
@@ -314,7 +342,6 @@ describe('CallType', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
-				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
 				.reply(200, JSON.stringify(reponse1));
 
 			var renderer = c.renderer();
@@ -449,7 +476,6 @@ describe('CallType', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
-				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 
 			var renderer = c.renderer();
@@ -478,7 +504,6 @@ describe('CallType', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName()))
-				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
 				.reply(200, JSON.stringify(reponse1));
 
 			var receivePolicy = c.receivePolicy();
@@ -613,7 +638,6 @@ describe('CallType', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName()))
-				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 
 			var receivePolicy = c.receivePolicy();
@@ -642,7 +666,6 @@ describe('CallType', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), RenderPolicy.getTableName()))
-				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
 				.reply(200, JSON.stringify(reponse1));
 
 			var renderPolicy = c.renderPolicy();
@@ -777,7 +800,6 @@ describe('CallType', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), RenderPolicy.getTableName()))
-				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 
 			var renderPolicy = c.renderPolicy();
@@ -805,7 +827,6 @@ describe('CallType', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
-				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
 				.reply(200, JSON.stringify(reponse1));
 
 			var zone = c.zone();
@@ -940,7 +961,6 @@ describe('CallType', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
-				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 
 			var zone = c.zone();

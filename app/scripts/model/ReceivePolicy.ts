@@ -40,9 +40,8 @@ class ReceivePolicy extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A ReceivePolicy needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A ReceivePolicy needs to have a name.");
 		}
 
 		this._name = name;
@@ -146,11 +145,13 @@ class ReceivePolicy extends ModelItf {
 	 * @return {ReceivePolicy} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ReceivePolicy {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new ReceivePolicy(jsonObject.name, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A ReceivePolicy object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A ReceivePolicy object should have a name.");
+		}
+		return new ReceivePolicy(jsonObject.name, jsonObject.id);
 	}
 
     /**

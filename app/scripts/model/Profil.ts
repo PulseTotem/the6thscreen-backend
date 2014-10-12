@@ -56,7 +56,7 @@ class Profil extends ModelItf {
      * @param {string} description - The Profil's description.
      * @param {number} id - The Profil's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -82,9 +82,8 @@ class Profil extends ModelItf {
      * @method setName
      */
     setName(name : string) {
-        if(name == null || name == "") {
-            Logger.error("A Profil needs to have a name.");
-            // TODO : Throw an Exception ?
+        if(!name) {
+            throw new ModelException("A profil needs a name.")
         }
 
         this._name = name;
@@ -106,11 +105,6 @@ class Profil extends ModelItf {
      * @method setDescription
      */
     setDescription(description : string) {
-        if(description == null || description == "") {
-            Logger.error("A Profil needs to have a description.");
-            // TODO : Throw an Exception ?
-        }
-
         this._description = description;
     }
 
@@ -122,7 +116,8 @@ class Profil extends ModelItf {
      */
     calls() : Array<Call> {
         if(! this._calls_loaded) {
-            this._calls_loaded = this.getAssociatedObjects(Profil, Call, this._calls);
+            this.getAssociatedObjects(Profil, Call, this._calls);
+	        this._calls_loaded = true;
         }
         return this._calls;
     }
@@ -185,11 +180,12 @@ class Profil extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addCall(c : Call) : boolean {
-		if (this.calls().indexOf(c) !== -1) {
-			throw new Error("You cannot add twice a Call in a Profil.");  // TODO: cannot it be useful sometimes?
+		if (!c || !c.getId()) {
+			throw new ModelException("The Call must be an existing object to be associated.");
 		}
-		if (c === null || c.getId() === undefined || c.getId() === null) {
-			throw new Error("The Call must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.calls(), c)) {
+			throw new ModelException("You cannot add twice a Call in a Profil.");
 		}
 
 		if (this.associateObject(Profil, Call, c.getId())) {
@@ -210,15 +206,17 @@ class Profil extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeCall(c : Call) : boolean {
-		var indexValue = this.calls().indexOf(c);
-		if (indexValue === -1) {
-			throw new Error("The Call you try to remove has not been added to the current Profil");
+		if (!c || !c.getId()) {
+			throw new ModelException("The Call must be an existing object to be removed.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.calls(), c)) {
+			throw new ModelException("The Call you try to remove has not been added to the current Profil");
 		}
 
 		if (this.deleteObjectAssociation(Profil, Call, c.getId())) {
 			c.desynchronize();
-			this.calls().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.calls(), c);
 		} else {
 			return false;
 		}
@@ -298,11 +296,16 @@ class Profil extends ModelItf {
      * @return {Profil} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Profil {
-        if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
-            return null;
-        } else {
-            return new Profil(jsonObject.name, jsonObject.description, jsonObject.id);
-        }
+	    if(!jsonObject.id) {
+		    throw new ModelException("A Profil object should have an ID.");
+	    }
+	    if(!jsonObject.name) {
+		    throw new ModelException("A Profil object should have a name.");
+	    }
+	    if(!jsonObject.description) {
+		    throw new ModelException("A Profil object should have a description.");
+	    }
+	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id);
     }
 
     /**
