@@ -38,7 +38,7 @@ class RenderPolicy extends ModelItf {
      * @param {string} description - The RenderPolicy's description.
      * @param {number} id - The RenderPolicy's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -51,9 +51,8 @@ class RenderPolicy extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A RenderPolicy needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("The name attribute is mandatory for RenderPolicy.")
 		}
 
 		this._name = name;

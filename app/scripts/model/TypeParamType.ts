@@ -41,9 +41,8 @@ class TypeParamType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A Call needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("The name is mandatory for a TypeParamType");
 		}
 
 		this._name = name;

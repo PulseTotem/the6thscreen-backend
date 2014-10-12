@@ -13,6 +13,36 @@ var nock : any = require("nock");
 
 describe('RenderPolicy', function() {
 	describe('#constructor', function() {
+		it('should throw an error if the name is undefined', function(){
+			assert.throws(
+				function() {
+					new RenderPolicy(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is null', function(){
+			assert.throws(
+				function() {
+					new RenderPolicy(null);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is empty', function(){
+			assert.throws(
+				function() {
+					new RenderPolicy("");
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
 		it('should store the name', function(){
 			var name = "machin";
 			var c = new RenderPolicy(name,"");
@@ -21,13 +51,13 @@ describe('RenderPolicy', function() {
 
 		it('should store the description', function(){
 			var desc = "machin";
-			var c = new RenderPolicy("",desc);
+			var c = new RenderPolicy("toot",desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new RenderPolicy("","",id);
+			var c = new RenderPolicy("titi","",id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});

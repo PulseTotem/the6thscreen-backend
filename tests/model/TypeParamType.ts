@@ -13,6 +13,36 @@ var nock : any = require("nock");
 
 describe('TypeParamType', function() {
 	describe('#constructor', function () {
+		it('should throw an error if the name is undefined', function(){
+			assert.throws(
+				function() {
+					new TypeParamType(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is null', function(){
+			assert.throws(
+				function() {
+					new TypeParamType(null);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is empty', function(){
+			assert.throws(
+				function() {
+					new TypeParamType("");
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new TypeParamType(name);

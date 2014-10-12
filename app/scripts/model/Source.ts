@@ -141,9 +141,8 @@ class Source extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A Source needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("The name is mandatory for a Source");
 		}
 
 		this._name = name;
@@ -155,9 +154,8 @@ class Source extends ModelItf {
 	 * @method setService
 	 */
 	setService(service : string) {
-		if(service == null || service == "") {
-			Logger.error("A Source needs to have a service.");
-			// TODO : Throw an Exception ?
+		if(!service) {
+			throw new ModelException("The service is mandatory for a Source");
 		}
 
 		this._service = service;
@@ -168,12 +166,7 @@ class Source extends ModelItf {
 	 *
 	 * @method setDescription
 	 */
-	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A Source needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
+	setDescription(description : string = "") {
 		this._description = description;
 	}
 
@@ -183,9 +176,8 @@ class Source extends ModelItf {
 	 * @method setHost
 	 */
 	setHost(host : string) {
-		if(host == null || host == "") {
-			Logger.error("A Source needs to have a host.");
-			// TODO : Throw an Exception ?
+		if(!host) {
+			throw new ModelException("The host is mandatory for a Source");
 		}
 
 		this._host = host;
@@ -197,9 +189,8 @@ class Source extends ModelItf {
 	 * @method setPort
 	 */
 	setPort(port : number) {
-		if(port == null) {
-			Logger.error("A Source needs to have a port.");
-			// TODO : Throw an Exception ?
+		if(!port) {
+			throw new ModelException("The port is mandatory for a Source");
 		}
 
 		this._port = port;

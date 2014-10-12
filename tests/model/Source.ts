@@ -14,6 +14,116 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Source', function() {
 	describe('#constructor', function () {
+		it('should throw an error if the name is undefined', function(){
+			assert.throws(
+				function() {
+					new Source(undefined, "toto", "", "localhost", 4242);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is null', function(){
+			assert.throws(
+				function() {
+					new Source(null, "toto", "", "localhost", 4242);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is empty', function(){
+			assert.throws(
+				function() {
+					new Source("", "toto", "", "localhost", 4242);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the service is undefined', function(){
+			assert.throws(
+				function() {
+					new Source("toto", undefined, "", "localhost", 4242);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the service is null', function(){
+			assert.throws(
+				function() {
+					new Source("toto", null, "", "localhost", 4242);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the service is empty', function(){
+			assert.throws(
+				function() {
+					new Source("toto", "", "", "localhost", 4242);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the host is undefined', function(){
+			assert.throws(
+				function() {
+					new Source("toto", "machin", "", undefined, 4242);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the host is null', function(){
+			assert.throws(
+				function() {
+					new Source("toto", "machin", "", null, 4242);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the host is empty', function(){
+			assert.throws(
+				function() {
+					new Source("toto", "machin", "", "", 4242);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the port is undefined', function(){
+			assert.throws(
+				function() {
+					new Source("toto", "machin", "", "localhost", undefined);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the port is null', function(){
+			assert.throws(
+				function() {
+					new Source("toto", "machin", "", "localhost", null);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new Source(name, "ser", "desc", "host", 4242, 12);

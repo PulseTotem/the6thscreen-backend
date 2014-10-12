@@ -14,6 +14,116 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Zone', function() {
 	describe('#constructor', function () {
+		it('should throw an error if the name is undefined', function(){
+			assert.throws(
+				function() {
+					new Zone(undefined, "", 1, 2, 3, 4);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is null', function(){
+			assert.throws(
+				function() {
+					new Zone(null, "", 1, 2, 3, 4);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is empty', function(){
+			assert.throws(
+				function() {
+					new Zone("", "", 1, 2, 3, 4);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the width is undefined', function(){
+			assert.throws(
+				function() {
+					new Zone("toto", "", undefined, 2, 3, 4);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the width is null', function(){
+			assert.throws(
+				function() {
+					new Zone("toto", "", null, 2, 3, 4);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the height is undefined', function(){
+			assert.throws(
+				function() {
+					new Zone("toto", "", 1, undefined, 3, 4);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the height is null', function(){
+			assert.throws(
+				function() {
+					new Zone("toto", "", 1, null, 3, 4);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the positionFromTop is undefined', function(){
+			assert.throws(
+				function() {
+					new Zone("toto", "", 1,2, undefined, 4);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the positionFromTop is null', function(){
+			assert.throws(
+				function() {
+					new Zone("toto", "", 1,2, null, 4);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the positionFromLeft is undefined', function(){
+			assert.throws(
+				function() {
+					new Zone("toto", "", 1,2,3, undefined);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the positionFromLeft is null', function(){
+			assert.throws(
+				function() {
+					new Zone("toto", "", 1,2,3, null);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new Zone(name, "description", 10, 20, 30, 40);

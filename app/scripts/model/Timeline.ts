@@ -55,7 +55,7 @@ class Timeline extends ModelItf {
      * @param {string} description - The Timeline's description.
      * @param {number} id - The Timeline's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -71,9 +71,8 @@ class Timeline extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A Timeline needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("The name is mandatory for a Timeline");
 		}
 
 		this._name = name;
@@ -85,11 +84,6 @@ class Timeline extends ModelItf {
 	 * @method setDescription
 	 */
 	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A Timeline needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 

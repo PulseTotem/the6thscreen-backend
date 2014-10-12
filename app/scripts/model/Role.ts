@@ -41,9 +41,8 @@ class Role extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A Role needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A name is mandatory for Role.");
 		}
 
 		this._name = name;

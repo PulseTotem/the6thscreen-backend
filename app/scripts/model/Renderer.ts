@@ -55,7 +55,7 @@ class Renderer extends ModelItf {
      * @param {string} description - The Renderer's description.
      * @param {number} id - The Renderer's ID.
      */
-    constructor(name : string, description : string, id : number = null) {
+    constructor(name : string, description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -71,9 +71,8 @@ class Renderer extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A Renderer needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A name is mandatory for Renderer.");
 		}
 
 		this._name = name;

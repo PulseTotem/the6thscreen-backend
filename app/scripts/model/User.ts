@@ -82,9 +82,8 @@ class User extends ModelItf {
 	 * @method setUsername
 	 */
 	setUsername(username : string) {
-		if(username == null || username == "") {
-			Logger.error("A User needs to have a username.");
-			// TODO : Throw an Exception ?
+		if(!username) {
+			throw new ModelException("The username is mandatory for a User.");
 		}
 
 		this._username = username;

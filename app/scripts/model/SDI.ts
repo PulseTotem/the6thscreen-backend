@@ -115,7 +115,7 @@ class SDI extends ModelItf {
      * @param {string} allowedHost - The SDI's allowedHost.
      * @param {number} id - The SDI's ID.
      */
-    constructor(name : string, description : string, allowedHost : string, id : number = null) {
+    constructor(name : string, description : string = "", allowedHost : string = "*", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -141,9 +141,8 @@ class SDI extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(name == null || name == "") {
-			Logger.error("A SDI needs to have a name.");
-			// TODO : Throw an Exception ?
+		if(!name) {
+			throw new ModelException("A name is mandatory for a SDI.");
 		}
 
 		this._name = name;
@@ -155,11 +154,6 @@ class SDI extends ModelItf {
 	 * @method setDescription
 	 */
 	setDescription(description : string) {
-		if(description == null || description == "") {
-			Logger.error("A SDI needs to have a description.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._description = description;
 	}
 
@@ -169,11 +163,6 @@ class SDI extends ModelItf {
 	 * @method setAllowedHost
 	 */
 	setAllowedHost(allowedHost : string) {
-		if(allowedHost == null || allowedHost == "") {
-			Logger.error("A SDI needs to have an allowedHost.");
-			// TODO : Throw an Exception ?
-		}
-
 		this._allowedHost = allowedHost;
 	}
 

@@ -12,6 +12,36 @@ var nock : any = require("nock");
 
 describe('User', function() {
 	describe('#constructor', function () {
+		it('should throw an error if the username is undefined', function(){
+			assert.throws(
+				function() {
+					new User(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the username is null', function(){
+			assert.throws(
+				function() {
+					new User(null);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the username is empty', function(){
+			assert.throws(
+				function() {
+					new User("");
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
 		it('should store the username', function () {
 			var username = "machin";
 			var c = new User(username);

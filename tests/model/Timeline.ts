@@ -14,6 +14,36 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Timeline', function() {
 	describe('#constructor', function () {
+		it('should throw an error if the name is undefined', function(){
+			assert.throws(
+				function() {
+					new Timeline(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is null', function(){
+			assert.throws(
+				function() {
+					new Timeline(null);
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
+		it('should throw an error if the name is empty', function(){
+			assert.throws(
+				function() {
+					new Timeline("");
+				},
+				ModelException,
+				"The exception has not been thrown."
+			);
+		});
+
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new Timeline(name, "");
@@ -22,13 +52,13 @@ describe('Timeline', function() {
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Timeline("", desc);
+			var c = new Timeline("toto", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Timeline("", "", id);
+			var c = new Timeline("tata", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
