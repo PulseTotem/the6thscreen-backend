@@ -86,14 +86,16 @@ describe('Call', function(){
 	});
 
 	describe('#toJsonObject', function() {
-		var c = new Call("toto", 52);
-		var expected = {
-			"name": "toto",
-			"id": 52
-		};
-		var json = c.toJSONObject();
+		it('should create the expected JSON Object', function() {
+			var c = new Call("toto", 52);
+			var expected = {
+				"name": "toto",
+				"id": 52
+			};
+			var json = c.toJSONObject();
 
-		assert.deepEqual(json, expected, "The JSON object ("+JSON.stringify(json)+") and the expected JSON ("+JSON.stringify(expected)+") do not match.");
+			assert.deepEqual(json, expected, "The JSON object ("+JSON.stringify(json)+") and the expected JSON ("+JSON.stringify(expected)+") do not match.");
+		})
 	});
 
 	describe('#addParamValue', function() {
