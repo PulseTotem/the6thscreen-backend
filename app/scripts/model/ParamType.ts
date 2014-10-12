@@ -268,12 +268,12 @@ class ParamType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setType(t : TypeParamType) : boolean {
-		if (this.type() !== null) {
-			throw new Error("The type is already set for this CallType.");
+		if (!t  || !t.getId()) {
+			throw new ModelException("The type must be an existing object to be associated.");
 		}
 
-		if (t === null || t.getId() === undefined || t.getId() === null) {
-			throw new Error("The source must be an existing object to be associated.");
+		if (this.type() !== null) {
+			throw new ModelException("The type is already set for this CallType.");
 		}
 
 		if (this.associateObject(ParamType, TypeParamType, t.getId())) {
@@ -296,7 +296,7 @@ class ParamType extends ModelItf {
 	 */
 	unsetType() : boolean {
 		if (this.type() === null) {
-			throw new Error("No Type has been set for this ParamType.");
+			throw new ModelException("No Type has been set for this ParamType.");
 		}
 
 		if (this.deleteObjectAssociation(ParamType, TypeParamType, this.type().getId())) {
@@ -481,11 +481,16 @@ class ParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ParamType {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A ParamType object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A ParamType object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A ParamType object should have a description.");
+		}
+		return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
     /**

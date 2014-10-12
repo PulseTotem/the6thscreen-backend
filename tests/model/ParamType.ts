@@ -6,126 +6,126 @@
 /// <reference path="../../libsdef/nock.d.ts" />
 /// <reference path="../../libsdef/sinon.d.ts" />
 
-/// <reference path="../../app/scripts/model/ConstraintParamType.ts" />
+/// <reference path="../../app/scripts/model/ParamType.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");
 var sinon : SinonStatic = require("sinon");
 
-describe('ConstraintParamType', function() {
+describe('ParamType', function() {
 	describe('#constructor', function () {
-		it('should store the name', function(){
+		it('should store the name', function () {
 			var name = "machin";
-			var c = new ConstraintParamType(name,"");
+			var c = new ParamType(name, "");
 			assert.equal(c.name(), name, "The name is not stored correctly.");
 		});
 
-		it('should store the description', function(){
+		it('should store the description', function () {
 			var desc = "machin";
-			var c = new ConstraintParamType("",desc);
+			var c = new ParamType("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
-		it('should store the ID', function() {
+		it('should store the ID', function () {
 			var id = 52;
-			var c = new ConstraintParamType("","",id);
+			var c = new ParamType("", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
 
-	describe('#fromJSONobject', function() {
-		it('should create the right object', function() {
+	describe('#fromJSONobject', function () {
+		it('should create the right object', function () {
 			var json = {
 				"id": 42,
 				"name": "toto",
 				"description": "blabla"
 			};
 
-			var callRetrieve = ConstraintParamType.fromJSONObject(json);
-			var callExpected = new ConstraintParamType("toto","blabla",42);
+			var callRetrieve = ParamType.fromJSONObject(json);
+			var callExpected = new ParamType("toto", "blabla", 42);
 
-			assert.deepEqual(callRetrieve, callExpected, "The retrieve constraintParamType ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve paramType (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
 
-		it('should throw an exception if the ID is undefined', function() {
+		it('should throw an exception if the ID is undefined', function () {
 			var json = {
 				"name": "toto",
 				"description": "blabla"
 			};
 
-			assert.throws(function() {
-					ConstraintParamType.fromJSONObject(json);
+			assert.throws(function () {
+					ParamType.fromJSONObject(json);
 				},
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the ID is null', function() {
+		it('should throw an exception if the ID is null', function () {
 			var json = {
 				"name": "toto",
 				"description": "blabla",
 				"id": null
 			};
 
-			assert.throws(function() {
-					ConstraintParamType.fromJSONObject(json);
+			assert.throws(function () {
+					ParamType.fromJSONObject(json);
 				},
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function() {
+		it('should throw an exception if the name is undefined', function () {
 			var json = {
 				"id": 52,
 				"description": "blabla"
 			};
 
-			assert.throws(function() {
-					ConstraintParamType.fromJSONObject(json);
+			assert.throws(function () {
+					ParamType.fromJSONObject(json);
 				},
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is null', function() {
+		it('should throw an exception if the name is null', function () {
 			var json = {
 				"name": null,
 				"description": "blabla",
 				"id": 42
 			};
 
-			assert.throws(function() {
-					ConstraintParamType.fromJSONObject(json);
+			assert.throws(function () {
+					ParamType.fromJSONObject(json);
 				},
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the description is undefined', function() {
+		it('should throw an exception if the description is undefined', function () {
 			var json = {
 				"id": 52,
 				"name": "blabla"
 			};
 
-			assert.throws(function() {
-					ConstraintParamType.fromJSONObject(json);
+			assert.throws(function () {
+					ParamType.fromJSONObject(json);
 				},
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the description is null', function() {
+		it('should throw an exception if the description is null', function () {
 			var json = {
 				"description": null,
 				"name": "blabla",
 				"id": 42
 			};
 
-			assert.throws(function() {
-					ConstraintParamType.fromJSONObject(json);
+			assert.throws(function () {
+					ParamType.fromJSONObject(json);
 				},
 				ModelException, "The exception has not been thrown.");
 		});
 	});
 
-	describe('#toJsonObject', function() {
-		it('should create the expected JSON Object', function() {
-			var c = new ConstraintParamType("toto","blabla", 52);
+	describe('#toJsonObject', function () {
+		it('should create the expected JSON Object', function () {
+			var c = new ParamType("toto", "blabla", 52);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
@@ -133,13 +133,13 @@ describe('ConstraintParamType', function() {
 			};
 			var json = c.toJSONObject();
 
-			assert.deepEqual(json, expected, "The JSON object ("+JSON.stringify(json)+") and the expected JSON ("+JSON.stringify(expected)+") do not match.");
+			assert.deepEqual(json, expected, "The JSON object (" + JSON.stringify(json) + ") and the expected JSON (" + JSON.stringify(expected) + ") do not match.");
 		})
 	});
 
 	describe('#setType', function() {
 		it('should set the given type', function() {
-			var c = new ConstraintParamType("toto","machin", 52);
+			var c = new ParamType("toto","machin", 52);
 			var s = new TypeParamType("toto", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
@@ -149,7 +149,7 @@ describe('ConstraintParamType', function() {
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
 				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
 				.reply(200, JSON.stringify(reponse1));
 
@@ -162,7 +162,7 @@ describe('ConstraintParamType', function() {
 			};
 
 			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
+				.put(DatabaseConnection.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
 				.reply(200, JSON.stringify(reponse2));
 
 			var retour = c.setType(s);
@@ -178,7 +178,7 @@ describe('ConstraintParamType', function() {
 
 		it('should not allow to add a null object', function() {
 			nock.disableNetConnect();
-			var c = new ConstraintParamType("toto","machin", 52);
+			var c = new ParamType("toto","machin", 52);
 
 			assert.throws(function() {
 					c.setType(null);
@@ -189,7 +189,7 @@ describe('ConstraintParamType', function() {
 
 		it('should not allow to add an undefined object', function() {
 			nock.disableNetConnect();
-			var c = new ConstraintParamType("toto","machin", 52);
+			var c = new ParamType("toto","machin", 52);
 
 			assert.throws(function() {
 					c.setType(undefined);
@@ -200,7 +200,7 @@ describe('ConstraintParamType', function() {
 
 		it('should not allow to add a object which is not yet created', function() {
 			nock.disableNetConnect();
-			var c = new ConstraintParamType("toto","machin", 52);
+			var c = new ParamType("toto","machin", 52);
 			var s = new TypeParamType("toto");
 
 			assert.throws(function() {
@@ -211,7 +211,7 @@ describe('ConstraintParamType', function() {
 		});
 
 		it('should not allow to set a type if there is already one', function() {
-			var c = new ConstraintParamType("toto","machin", 52);
+			var c = new ParamType("toto","machin", 52);
 			var s = new TypeParamType("toto", 42);
 			var s2 = new TypeParamType("tutu", 89);
 
@@ -222,7 +222,7 @@ describe('ConstraintParamType', function() {
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
 				.reply(200, JSON.stringify(reponse1));
 
 			var type = c.type();
@@ -240,7 +240,7 @@ describe('ConstraintParamType', function() {
 
 	describe('#unsetType', function() {
 		it('should unset the TypeParamType', function() {
-			var c = new ConstraintParamType("toto","machin", 52);
+			var c = new ParamType("toto","machin", 52);
 			var s = new TypeParamType("toto", 42);
 
 			var reponse1 : SequelizeRestfulResponse = {
@@ -249,7 +249,7 @@ describe('ConstraintParamType', function() {
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
 				.reply(200, JSON.stringify(reponse1));
 
 			var type = c.type();
@@ -262,7 +262,7 @@ describe('ConstraintParamType', function() {
 			};
 
 			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
+				.delete(DatabaseConnection.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
 				.reply(200, JSON.stringify(reponse2));
 
 			var retour = c.unsetType();
@@ -275,7 +275,7 @@ describe('ConstraintParamType', function() {
 		});
 
 		it('should not allow to unset a profil if there is none', function() {
-			var c = new ConstraintParamType("toto","machin", 52);
+			var c = new ParamType("toto","machin", 52);
 			var s = new TypeParamType("toto", 42);
 
 			var reponse1 : SequelizeRestfulResponse = {
@@ -284,7 +284,7 @@ describe('ConstraintParamType', function() {
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
 				.times(2)
 				.reply(200, JSON.stringify(reponse1));
 

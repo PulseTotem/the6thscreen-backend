@@ -12,7 +12,7 @@ var assert = require("assert");
 var nock : any = require("nock");
 var sinon : SinonStatic = require("sinon");
 
-describe('Call', function(){
+describe('CallType', function(){
 	describe('#constructor', function() {
 		it('should store the name', function(){
 			var name = "machin";
