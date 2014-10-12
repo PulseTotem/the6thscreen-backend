@@ -154,12 +154,12 @@ class ParamValue extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setParamType(p : ParamType) : boolean {
-		if (this.paramType() !== null) {
-			throw new Error("The paramType is already set for this ParamValue.");
+		if (!p || !p.getId()) {
+			throw new ModelException("The ParamType must be an existing object to be associated.");
 		}
 
-		if (p === null || p.getId() === undefined || p.getId() === null) {
-			throw new Error("The ParamType must be an existing object to be associated.");
+		if (this.paramType() !== null) {
+			throw new ModelException("The paramType is already set for this ParamValue.");
 		}
 
 		if (this.associateObject(ParamValue, ParamType, p.getId())) {
@@ -182,7 +182,7 @@ class ParamValue extends ModelItf {
 	 */
 	unsetParamType() : boolean {
 		if (this.paramType() === null) {
-			throw new Error("No ParamType has been set for this ParamValue.");
+			throw new ModelException("No ParamType has been set for this ParamValue.");
 		}
 
 		if (this.deleteObjectAssociation(ParamValue, ParamType, this.paramType().getId())) {
@@ -267,11 +267,13 @@ class ParamValue extends ModelItf {
 	 * @return {ParamValue} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ParamValue {
-		if(typeof(jsonObject.value) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new ParamValue(jsonObject.value, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A ParamValue object should have an ID.");
 		}
+		if(!jsonObject.value) {
+			throw new ModelException("A ParamValue object should have a value.");
+		}
+		return new ParamValue(jsonObject.value, jsonObject.id);
 	}
 
     /**

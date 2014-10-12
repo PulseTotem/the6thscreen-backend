@@ -13,74 +13,87 @@ var assert = require("assert");
 var nock = require("nock");
 
 describe('InfoType', function(){
-
 	describe('#constructor', function() {
-		it('should have a defined name', function() {
+		it('should store the name', function(){
+			var name = "machin";
+			var c = new InfoType(name);
+			assert.equal(c.name(), name, "The name is not stored correctly.");
+		});
+
+		it('should store the ID', function() {
+			var id = 52;
+			var c = new InfoType("bidule",52);
+			assert.equal(c.getId(), id, "The ID is not stored.");
+		});
+	});
+
+	describe('#fromJSONobject', function() {
+		it('should create the right object', function() {
+			var json = {"id": 42,
+				"name": "toto"
+			};
+
+			var callRetrieve = InfoType.fromJSONObject(json);
+			var callExpected = new InfoType("toto",42);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve call ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
+		});
+
+		it('should throw an exception if the ID is undefined', function() {
+			var json = {"name": "toto"
+			};
+
 			assert.throws(function() {
-					new InfoType("");
+					InfoType.fromJSONObject(json);
 				},
-				Error);
-		}),
+				ModelException, "The exception has not been thrown.");
+		});
 
-		it('should store the name', function() {
-			var name = "toto";
-			var info = new InfoType(name);
-
-			assert.equal(info.name(), name, "The name is stored.");
-		})
-	}),
-
-	describe('#create()', function() {
-		it('should get an id when built', function() {
-			var info = new InfoType("toto");
-			var mockID = 42;
-
-			var reponse : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": info.toJSONObject()
+		it('should throw an exception if the ID is null', function() {
+			var json = {
+				"name": "toto",
+				"id": null
 			};
-
-			reponse.data["id"] = mockID;
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.post(DatabaseConnection.modelEndpoint(InfoType.getTableName()), info.toJSONObject())
-				.reply(200, JSON.stringify(reponse));
-
-			var retour = info.create();
-
-			assert.ok(retour, "The creation worked well");
-			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-			assert.equal(info.getId(), mockID, "The ID is not recorded in the object.");
-		}),
-
-		it('should throw an error when trying to built an existing object', function() {
-			var info = new InfoType("toto", 42);
 
 			assert.throws(function() {
-				info.create();
-			}, ModelException);
-		})
-	}),
+					InfoType.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
 
-	describe('#update()', function() {
-		it('should send the proper request', function() {
-			var id = 42;
-			var info = new InfoType("blabla", id);
-
-			var reponse : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": info.toJSONObject()
+		it('should throw an exception if the name is undefined', function() {
+			var json = {"id": 52
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(InfoType.getTableName(), id.toString()), info.toJSONObject())
-				.reply(200, JSON.stringify(reponse));
+			assert.throws(function() {
+					InfoType.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
 
-			var retour = info.update();
+		it('should throw an exception if the name is null', function() {
+			var json = {
+				"name": null,
+				"id": 42
+			};
 
-			assert.ok(retour, "The update worked well");
-			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+			assert.throws(function() {
+					InfoType.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+	});
+
+	describe('#toJsonObject', function() {
+		it('should create the expected JSON Object', function() {
+			var c = new InfoType("toto", 52);
+			var expected = {
+				"name": "toto",
+				"id": 52
+			};
+			var json = c.toJSONObject();
+
+			assert.deepEqual(json, expected, "The JSON object ("+JSON.stringify(json)+") and the expected JSON ("+JSON.stringify(expected)+") do not match.");
 		})
-	})
-
+	});
 });

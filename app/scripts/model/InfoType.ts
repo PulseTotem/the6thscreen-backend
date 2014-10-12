@@ -146,11 +146,13 @@ class InfoType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : InfoType {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new InfoType(jsonObject.name, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A InfoType object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A InfoType object should have a name.");
+		}
+		return new InfoType(jsonObject.name, jsonObject.id);
 	}
 
     /**

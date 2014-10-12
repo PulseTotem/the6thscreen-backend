@@ -248,8 +248,8 @@ class CallType extends ModelItf {
         if(! this._render_policy_loaded) {
 	        var value = [];
             this._render_policy_loaded = this.getUniquelyAssociatedObject(CallType, RenderPolicy, value);
-	        if (this._receive_policy_loaded) {
-		        this._receive_policy = value[0];
+	        if (this._render_policy_loaded) {
+		        this._render_policy = value[0];
 	        }
         }
         return this._render_policy;
@@ -261,7 +261,7 @@ class CallType extends ModelItf {
      * @method zone
 	 */
 	zone() {
-		if(! this._zone) {
+		if(! this._zone_loaded) {
 			var value = [];
 			this._zone_loaded = this.getUniquelyAssociatedObject(CallType, Zone, value);
 			if (this._zone_loaded) {
@@ -343,13 +343,15 @@ class CallType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setSource(s : Source) : boolean {
-		if (this.source() !== null) {
-			throw new Error("The source is already set for this CallType.");
+		if (!s || !s.getId()) {
+			throw new ModelException("The source must be an existing object to be associated.");
 		}
 
-		if (s === null || s.getId() === undefined || s.getId() === null) {
-			throw new Error("The source must be an existing object to be associated.");
+		if (this.source() !== null) {
+			throw new ModelException("The source is already set for this CallType.");
 		}
+
+
 
 		if (this.associateObject(CallType, Source, s.getId())) {
 			s.desynchronize();
@@ -371,7 +373,7 @@ class CallType extends ModelItf {
 	 */
 	unsetSource() : boolean {
 		if (this.source() === null) {
-			throw new Error("No source has been set for this callType.");
+			throw new ModelException("No source has been set for this callType.");
 		}
 
 		if (this.deleteObjectAssociation(CallType, Source, this.source().getId())) {
@@ -393,12 +395,12 @@ class CallType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setRenderer(r : Renderer) : boolean {
-		if (this.renderer() !== null) {
-			throw new Error("The renderer is already set for this CallType.");
+		if (!r || !r.getId()) {
+			throw new ModelException("The renderer must be an existing object to be associated.");
 		}
 
-		if (r === null || r.getId() === undefined || r.getId() === null) {
-			throw new Error("The renderer must be an existing object to be associated.");
+		if (this.renderer() !== null) {
+			throw new ModelException("The renderer is already set for this CallType.");
 		}
 
 		if (this.associateObject(CallType, Renderer, r.getId())) {
@@ -421,7 +423,7 @@ class CallType extends ModelItf {
 	 */
 	unsetRenderer() : boolean {
 		if (this.renderer() === null) {
-			throw new Error("No renderer has been set for this callType.");
+			throw new ModelException("No renderer has been set for this callType.");
 		}
 
 		if (this.deleteObjectAssociation(CallType, Renderer, this.renderer().getId())) {
@@ -443,13 +445,15 @@ class CallType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setReceivePolicy(rp : ReceivePolicy) : boolean {
-		if (this.receivePolicy() !== null) {
-			throw new Error("The receivePolicy is already set for this CallType.");
+		if (!rp || !rp.getId()) {
+			throw new ModelException("The receivePolicy must be an existing object to be associated.");
 		}
 
-		if (rp === null || rp.getId() === undefined || rp.getId() === null) {
-			throw new Error("The receivePolicy must be an existing object to be associated.");
+		if (this.receivePolicy() !== null) {
+			throw new ModelException("The receivePolicy is already set for this CallType.");
 		}
+
+
 
 		if (this.associateObject(CallType, ReceivePolicy, rp.getId())) {
 			rp.desynchronize();
@@ -471,7 +475,7 @@ class CallType extends ModelItf {
 	 */
 	unsetReceivePolicy() : boolean {
 		if (this.receivePolicy() === null) {
-			throw new Error("No receivePolicy has been set for this callType.");
+			throw new ModelException("No receivePolicy has been set for this callType.");
 		}
 
 		if (this.deleteObjectAssociation(CallType, ReceivePolicy, this.receivePolicy().getId())) {
@@ -493,12 +497,12 @@ class CallType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setRenderPolicy(rp : RenderPolicy) : boolean {
-		if (this.renderPolicy() !== null) {
-			throw new Error("The renderPolicy is already set for this CallType.");
+		if (!rp || !rp.getId()) {
+			throw new ModelException("The renderPolicy must be an existing object to be associated.");
 		}
 
-		if (rp === null || rp.getId() === undefined || rp.getId() === null) {
-			throw new Error("The renderPolicy must be an existing object to be associated.");
+		if (this.renderPolicy() !== null) {
+			throw new ModelException("The renderPolicy is already set for this CallType.");
 		}
 
 		if (this.associateObject(CallType, RenderPolicy, rp.getId())) {
@@ -521,7 +525,7 @@ class CallType extends ModelItf {
 	 */
 	unsetRenderPolicy() : boolean {
 		if (this.renderPolicy() === null) {
-			throw new Error("No RenderPolicy has been set for this callType.");
+			throw new ModelException("No RenderPolicy has been set for this callType.");
 		}
 
 		if (this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId())) {
@@ -543,12 +547,12 @@ class CallType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setZone(z : Zone) : boolean {
-		if (this.zone() !== null) {
-			throw new Error("The zone is already set for this CallType.");
+		if (!z || !z.getId()) {
+			throw new ModelException("The zone must be an existing object to be associated.");
 		}
 
-		if (z === null || z.getId() === undefined || z.getId() === null) {
-			throw new Error("The zone must be an existing object to be associated.");
+		if (this.zone() !== null) {
+			throw new ModelException("The zone is already set for this CallType.");
 		}
 
 		if (this.associateObject(CallType, Zone, z.getId())) {
@@ -571,7 +575,7 @@ class CallType extends ModelItf {
 	 */
 	unsetZone() : boolean {
 		if (this.zone() === null) {
-			throw new Error("No RenderPolicy has been set for this callType.");
+			throw new ModelException("No Zone has been set for this callType.");
 		}
 
 		if (this.deleteObjectAssociation(CallType, Zone, this.zone().getId())) {
@@ -656,11 +660,16 @@ class CallType extends ModelItf {
 	 * @return {CallType} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : CallType {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new CallType(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A CallType object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A CallType object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A CallType object should have a description.");
+		}
+		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
     /**
