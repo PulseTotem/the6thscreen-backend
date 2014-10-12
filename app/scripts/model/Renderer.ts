@@ -187,12 +187,12 @@ class Renderer extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setInfoType(it : InfoType) : boolean {
-		if (this.infoType() !== null) {
-			throw new Error("The InfoType is already set for this Renderer.");
+		if (!it || !it.getId()) {
+			throw new ModelException("The InfoType must be an existing object to be associated.");
 		}
 
-		if (it === null || it.getId() === undefined || it.getId() === null) {
-			throw new Error("The InfoType must be an existing object to be associated.");
+		if (this.infoType() !== null) {
+			throw new ModelException("The InfoType is already set for this Renderer.");
 		}
 
 		if (this.associateObject(Renderer, InfoType, it.getId())) {
@@ -215,7 +215,7 @@ class Renderer extends ModelItf {
 	 */
 	unsetInfoType() : boolean {
 		if (this.infoType() === null) {
-			throw new Error("No InfoType has been set for this Renderer.");
+			throw new ModelException("No InfoType has been set for this Renderer.");
 		}
 
 		if (this.deleteObjectAssociation(Renderer, InfoType, this.infoType().getId())) {
@@ -300,11 +300,16 @@ class Renderer extends ModelItf {
 	 * @return {Renderer} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Renderer {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A Renderer object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A Renderer object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A Renderer object should have a description.");
+		}
+		return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
     /**
