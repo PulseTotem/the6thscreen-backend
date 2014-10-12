@@ -184,11 +184,12 @@ class User extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addSDI(s : SDI) : boolean {
-		if (this.sdis().indexOf(s) !== -1) {
-			throw new Error("You cannot add twice a SDI for a User.");
+		if (!s || !s.getId()) {
+			throw new ModelException("The SDI must be an existing object to be associated.");
 		}
-		if (s === null || s.getId() === undefined || s.getId() === null) {
-			throw new Error("The SDI must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.sdis(),s)) {
+			throw new ModelException("You cannot add twice a SDI for a User.");
 		}
 
 		if (this.associateObject(User, SDI, s.getId())) {
@@ -209,15 +210,17 @@ class User extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeSDI(s : SDI) : boolean {
-		var indexValue = this.sdis().indexOf(s);
-		if (indexValue === -1) {
-			throw new Error("The SDI you try to remove has not been added to the current User");
+		if (!s || !s.getId()) {
+			throw new ModelException("The SDI must be an existing object to be removed.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.sdis(),s)) {
+			throw new ModelException("The SDI you try to remove is not yet associated.");
 		}
 
 		if (this.deleteObjectAssociation(User, SDI, s.getId())) {
 			s.desynchronize();
-			this.sdis().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.sdis(), s);
 		} else {
 			return false;
 		}
@@ -232,11 +235,12 @@ class User extends ModelItf {
 	 * @returns {boolean} Returns true if the association is realized in database.
 	 */
 	addRole(r : Role) : boolean {
-		if (this.roles().indexOf(r) !== -1) {
-			throw new Error("You cannot add twice a Role for a User.");
+		if (!r || !r.getId()) {
+			throw new ModelException("The Role must be an existing object to be associated.");
 		}
-		if (r === null || r.getId() === undefined || r.getId() === null) {
-			throw new Error("The Role must be an existing object to be associated.");
+
+		if (ModelItf.isObjectInsideArray(this.roles(),r)) {
+			throw new ModelException("You cannot add twice a Role for a User.");
 		}
 
 		if (this.associateObject(User, Role, r.getId())) {
@@ -257,15 +261,17 @@ class User extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeRole(r : Role) : boolean {
-		var indexValue = this.roles().indexOf(r);
-		if (indexValue === -1) {
-			throw new Error("The Role you try to remove has not been added to the current User");
+		if (!r || !r.getId()) {
+			throw new ModelException("The Role must be an existing object to be removed.");
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.roles(),r)) {
+			throw new ModelException("The Role you try to remove is not yet associated.");
 		}
 
 		if (this.deleteObjectAssociation(User, Role, r.getId())) {
 			r.desynchronize();
-			this.roles().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.roles(),r);
 		} else {
 			return false;
 		}
