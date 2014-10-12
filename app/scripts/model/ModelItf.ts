@@ -389,7 +389,7 @@ class ModelItf {
 			if(response.status == "success") {
 				// in that case tere is no data to retrieve
 				if ((response.data instanceof Array) && (response.data.length == 0)) {
-					return true;
+					return false;
 				}
 				if(response.data === undefined || response.data.id === undefined) {
 					throw new DataException("The response is a success but the data does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response.data));

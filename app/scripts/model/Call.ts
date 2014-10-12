@@ -253,15 +253,16 @@ class Call extends ModelItf {
 	 * @returns {boolean} Returns true if the association is deleted in database.
 	 */
 	removeParamValue(p : ParamValue) : boolean {
-		var indexValue = this.paramValues().indexOf(p);
-		if (indexValue === -1) {
-			throw new Error("The ParamValue you try to remove has not been added to the current Call");
+		if (!p || !p.getId()) {
+			throw new ModelException("The ParamValue must be an existing object to be removed.");
+		}
+		if (!ModelItf.isObjectInsideArray(this.paramValues(), p)) {
+			throw new ModelException("The ParamValue you try to remove has not been added to the current Call");
 		}
 
 		if (this.deleteObjectAssociation(Call, ParamValue, p.getId())) {
 			p.desynchronize();
-			this.paramValues().splice(indexValue, 1);
-			return true;
+			return ModelItf.removeObjectFromArray(this.paramValues(), p);
 		} else {
 			return false;
 		}
@@ -277,11 +278,12 @@ class Call extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setProfil(p : Profil) : boolean {
-		if (this.profil() !== null) {
-			throw new Error("The profil is already set for the call : "+this+".");
+		if (!p || !p.getId()) {
+			throw new ModelException("The Profil must be an existing object to be associated.");
 		}
-		if (p === null || p.getId() === undefined || p.getId() === null) {
-			throw new Error("The Profil must be an existing object to be associated.");
+
+		if (this.profil() !== null) {
+			throw new ModelException("The profil is already set for the call: "+JSON.stringify(this.profil())+".");
 		}
 
 		if (this.associateObject(Call, Profil, p.getId())) {
@@ -304,7 +306,7 @@ class Call extends ModelItf {
 	 */
 	unsetProfil() : boolean {
 		if (this.profil() === null) {
-			throw new Error("No profil has been set for this call.");
+			throw new ModelException("No profil has been set for this call.");
 		}
 
 		if (this.deleteObjectAssociation(Call, Profil, this.profil().getId())) {
@@ -326,12 +328,13 @@ class Call extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setCallType(ct : CallType) : boolean {
+		if (!ct || !ct.getId()) {
+			throw new ModelException("The CallType must be an existing object to be associated.");
+		}
 		if (this.callType() !== null) {
-			throw new Error("The CallType is already set for the call : "+this+".");
+			throw new ModelException("The CallType is already set for the call : "+JSON.stringify(this.callType())+".");
 		}
-		if (ct === null || ct.getId() === undefined || ct.getId() === null) {
-			throw new Error("The CallType must be an existing object to be associated.");
-		}
+
 
 		if (this.associateObject(Call, CallType, ct.getId())) {
 			ct.desynchronize();
