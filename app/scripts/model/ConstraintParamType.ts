@@ -299,11 +299,16 @@ class ConstraintParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ConstraintParamType {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new ConstraintParamType(jsonObject.name, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A CallType object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A CallType object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A CallType object should have a description.");
+		}
+		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
 	/**
