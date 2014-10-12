@@ -181,11 +181,16 @@ class RenderPolicy extends ModelItf {
 	 * @return {RenderPolicy} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : RenderPolicy {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.description) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new RenderPolicy(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(!jsonObject.id) {
+			throw new ModelException("A RenderPolicy object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A RenderPolicy object should have a name.");
+		}
+		if(!jsonObject.description) {
+			throw new ModelException("A RenderPolicy object should have a description.");
+		}
+		return new RenderPolicy(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
     /**
