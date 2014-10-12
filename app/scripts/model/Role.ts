@@ -147,11 +147,13 @@ class Role extends ModelItf {
 	 * @return {Role} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Role {
-		if(typeof(jsonObject.name) == "undefined" || typeof(jsonObject.id) == "undefined") {
-			return null;
-		} else {
-			return new Role(jsonObject.name, jsonObject.id);
+		if (!jsonObject.id) {
+			throw new ModelException("A Role object should have an ID.");
 		}
+		if(!jsonObject.name) {
+			throw new ModelException("A Role object should have a name.");
+		}
+		return new Role(jsonObject.name, jsonObject.id);
 	}
 
     /**
