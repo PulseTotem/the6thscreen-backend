@@ -142,7 +142,7 @@ class Zone extends ModelItf {
 	 * @param positionFromTop a new positionFromTop
 	 */
 	setPositionFromTop(positionFromTop : number) : void {
-		if(!positionFromTop) {
+		if(!positionFromTop && positionFromTop != 0) {
 			throw new ModelException("The positionFromTop attribute is mandatory for a Zone.");
 		}
 
@@ -156,7 +156,7 @@ class Zone extends ModelItf {
 	 * @param positionFromTop a new positionFromTop
 	 */
 	setPositionFromLeft(positionFromLeft : number) : void {
-		if(!positionFromLeft) {
+		if(!positionFromLeft && positionFromLeft != 0) {
 			throw new ModelException("The positionFromTop attribute is mandatory for a Zone.");
 		}
 
@@ -345,10 +345,10 @@ class Zone extends ModelItf {
 		if(!jsonObject.height) {
 			throw new ModelException("A Zone object should have a height.");
 		}
-		if(!jsonObject.positionFromTop) {
+		if(!jsonObject.positionFromTop && jsonObject.positionFromTop != 0) {
 			throw new ModelException("A Zone object should have a positionFromTop.");
 		}
-		if(!jsonObject.positionFromLeft) {
+		if(!jsonObject.positionFromLeft && jsonObject.positionFromLeft != 0) {
 			throw new ModelException("A Zone object should have a positionFromLeft.");
 		}
 		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id);

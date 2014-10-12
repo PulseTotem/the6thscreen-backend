@@ -4,6 +4,8 @@
 
 /// <reference path="../core/Logger.ts" />
 /// <reference path="../model/Profil.ts" />
+/// <reference path="../model/Call.ts" />
+/// <reference path="../model/CallType.ts" />
 
 /**
  * Manage connection with client.
@@ -40,14 +42,21 @@ class ClientManager {
         var self = this;
 
         this._clientSocket.on("RetrieveProfilDescription", function(profilDescription) {
-            // profilDescription : {"userID" : string, "sdiID" : string, "profilID" : string}
-            self.sendProfilDescription(profilDescription.userID, profilDescription.sdiID, profilDescription.profilID);
+            // profilDescription : {"userId" : string, "sdiId" : string, "profilId" : string}
+            self.sendProfilDescription(profilDescription.userId, profilDescription.sdiId, profilDescription.profilId);
         });
 
         this._clientSocket.on("RetrieveCallDescription", function(callDescription) {
-            // callDescription : {"callID" : string}
-            self.sendCallDescription(callDescription.callID);
+            // callDescription : {"callId" : string}
+            self.sendCallDescription(callDescription.callId);
         });
+
+        this._clientSocket.on("RetrieveCallTypeDescription", function(callTypeDescription) {
+            // callTypeDescription : {"callTypeId" : string}
+            self.sendCallTypeDescription(callTypeDescription.callTypeId);
+        });
+
+
 
 
     }
@@ -56,12 +65,12 @@ class ClientManager {
      * Retrieve Profil instance description and send it to client.
      *
      * @method sendProfilDescription
-     * @param {string} userID - The User ID.
-     * @param {string} sdiID - The SDI ID.
-     * @param {string} profilID - The Profil ID.
+     * @param {string} userId - The User Id.
+     * @param {string} sdiId - The SDI Id.
+     * @param {string} profilId - The Profil Id.
      */
-    sendProfilDescription(userID : string, sdiID : string, profilID : string) {
-        var profil = Profil.read(parseInt(profilID));
+    sendProfilDescription(userId : string, sdiId : string, profilId : string) {
+        var profil = Profil.read(parseInt(profilId));
         Logger.debug(profil.toCompleteJSONObject());
         this._clientSocket.emit("ProfilDescription", profil.toCompleteJSONObject());
     }
@@ -70,11 +79,23 @@ class ClientManager {
      * Retrieve Call instance description and send it to client.
      *
      * @method sendCallDescription
-     * @param {string} callID - The Call ID.
+     * @param {string} callId - The Call Id.
      */
-    sendCallDescription(callID : string) {
-        var call = Call.read(parseInt(callID));
+    sendCallDescription(callId : string) {
+        var call = Call.read(parseInt(callId));
         Logger.debug(call.toCompleteJSONObject());
         this._clientSocket.emit("CallDescription", call.toCompleteJSONObject());
+    }
+
+    /**
+     * Retrieve CallType instance description and send it to client.
+     *
+     * @method sendCallTypeDescription
+     * @param {string} callTypeId - The CallType Id.
+     */
+    sendCallTypeDescription(callTypeId : string) {
+        var callType = CallType.read(parseInt(callTypeId));
+        Logger.debug(callType.toCompleteJSONObject());
+        this._clientSocket.emit("CallTypeDescription", callType.toCompleteJSONObject());
     }
 }

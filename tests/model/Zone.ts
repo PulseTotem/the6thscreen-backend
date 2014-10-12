@@ -104,6 +104,16 @@ describe('Zone', function() {
 			);
 		});
 
+        it('should not throw an error if the positionFromTop is 0', function(){
+            assert.doesNotThrow(
+                function() {
+                    new Zone("toto", "", 1,2, 0, 4);
+                },
+                ModelException,
+                "The exception has been thrown."
+            );
+        });
+
 		it('should throw an error if the positionFromLeft is undefined', function(){
 			assert.throws(
 				function() {
@@ -123,6 +133,16 @@ describe('Zone', function() {
 				"The exception has not been thrown."
 			);
 		});
+
+        it('should not throw an error if the positionFromLeft is 0', function(){
+            assert.doesNotThrow(
+                function() {
+                    new Zone("toto", "", 1,2, 3, 0);
+                },
+                ModelException,
+                "The exception has been thrown."
+            );
+        });
 
 		it('should store the name', function () {
 			var name = "machin";
