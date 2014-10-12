@@ -9,7 +9,7 @@
 /// <reference path="../../app/scripts/model/CallType.ts" />
 
 var assert = require("assert");
-var nock = require("nock");
+var nock : any = require("nock");
 var sinon : SinonStatic = require("sinon");
 
 describe('Call', function(){
@@ -457,6 +457,170 @@ describe('Call', function(){
 			assert.equal(renderer, null, "The renderer has a value not null: "+JSON.stringify(renderer));
 			assert.throws(function() {
 					c.unsetRenderer();
+				},
+				ModelException,
+				"The exception has not been thrown.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done");
+		});
+
+	});
+
+	describe('#setReceivePolicy', function() {
+		it('should set the given receivePolicy', function() {
+			var c = new CallType("toto","machin", 52);
+			var r = new ReceivePolicy("receivePolicy",12);
+			var spy = sinon.spy(r, "desynchronize");
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName()))
+				.times(2)  // un appel juste en dessous et un deuxieme dans la methode setProfil vu que le lazy loading reste false
+				.reply(200, JSON.stringify(reponse1));
+
+			var receivePolicy = c.receivePolicy();
+			assert.equal(receivePolicy, null, "The receivePolicy is not a null value: "+JSON.stringify(receivePolicy));
+
+			var reponse2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName(), r.getId().toString()))
+				.reply(200, JSON.stringify(reponse2));
+
+			var retour = c.setReceivePolicy(r);
+			assert.ok(retour, "The return of the setReceivePolicy is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the receivePolicy in database.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the receivePolicy");
+
+			// normalement le lazy_loading est true : plus besoin de mock pour la requête
+			receivePolicy = c.receivePolicy();
+			assert.deepEqual(receivePolicy, r, "The receivePolicy() does not return the exact receivePolicy we give: "+JSON.stringify(receivePolicy));
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+		});
+
+		it('should not allow to add a null object', function() {
+			nock.disableNetConnect();
+			var c = new CallType("toto","machin", 52);
+
+			assert.throws(function() {
+					c.setReceivePolicy(null);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to add an undefined object', function() {
+			nock.disableNetConnect();
+			var c = new CallType("toto","machin", 52);
+
+			assert.throws(function() {
+					c.setReceivePolicy(undefined);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to add a object which is not yet created', function() {
+			nock.disableNetConnect();
+			var c = new CallType("toto","machin", 52);
+			var s = new ReceivePolicy("toto");
+
+			assert.throws(function() {
+					c.setReceivePolicy(s);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+		});
+
+		it('should not allow to set a receivePolicy if there is already one', function() {
+			var c = new CallType("toto","machin", 52);
+			var s = new ReceivePolicy("toto", 42);
+			var s2 = new ReceivePolicy("tutu", 89);
+
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s2.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var receivePolicy = c.receivePolicy();
+
+			assert.ok(!!receivePolicy, "The receivePolicy has false value.");
+			assert.throws(function() {
+					c.setReceivePolicy(s);
+				},
+				ModelException,
+				"The exception has not been thrown.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the receivePolicy");
+		});
+
+	});
+
+	describe('#unsetReceivePolicy', function() {
+		it('should unset the ReceivePolicy', function() {
+			var c = new CallType("toto","machin", 52);
+			var s = new ReceivePolicy("toto", 42);
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var receivePolicy = c.receivePolicy();
+			assert.deepEqual(receivePolicy, s, "The receivePolicy is not the expected value");
+			var spy = sinon.spy(receivePolicy, "desynchronize");
+
+			var reponse2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName(), s.getId().toString()))
+				.reply(200, JSON.stringify(reponse2));
+
+			var retour = c.unsetReceivePolicy();
+			assert.ok(retour, "The return of the unsetReceivePolicy is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+
+			receivePolicy = c.receivePolicy();
+			assert.deepEqual(receivePolicy, null, "The receivePolicy() does not return a null value after unsetting");
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+		});
+
+		it('should not allow to unset a profil if there is none', function() {
+			var c = new CallType("toto","machin", 52);
+			var s = new ReceivePolicy("toto",42);
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName()))
+				.times(2)
+				.reply(200, JSON.stringify(reponse1));
+
+			var receivePolicy = c.receivePolicy();
+
+			assert.equal(receivePolicy, null, "The receivePolicy has a value not null: "+JSON.stringify(receivePolicy));
+			assert.throws(function() {
+					c.unsetReceivePolicy();
 				},
 				ModelException,
 				"The exception has not been thrown.");

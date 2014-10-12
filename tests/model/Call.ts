@@ -10,7 +10,7 @@
 /// <reference path="../../app/scripts/model/Call.ts" />
 
 var assert = require("assert");
-var nock = require("nock");
+var nock : any = require("nock");
 var sinon : SinonStatic = require("sinon");
 
 describe('Call', function(){

@@ -445,13 +445,15 @@ class CallType extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setReceivePolicy(rp : ReceivePolicy) : boolean {
-		if (this.receivePolicy() !== null) {
-			throw new Error("The receivePolicy is already set for this CallType.");
+		if (!rp || !rp.getId()) {
+			throw new ModelException("The receivePolicy must be an existing object to be associated.");
 		}
 
-		if (rp === null || rp.getId() === undefined || rp.getId() === null) {
-			throw new Error("The receivePolicy must be an existing object to be associated.");
+		if (this.receivePolicy() !== null) {
+			throw new ModelException("The receivePolicy is already set for this CallType.");
 		}
+
+
 
 		if (this.associateObject(CallType, ReceivePolicy, rp.getId())) {
 			rp.desynchronize();
@@ -473,7 +475,7 @@ class CallType extends ModelItf {
 	 */
 	unsetReceivePolicy() : boolean {
 		if (this.receivePolicy() === null) {
-			throw new Error("No receivePolicy has been set for this callType.");
+			throw new ModelException("No receivePolicy has been set for this callType.");
 		}
 
 		if (this.deleteObjectAssociation(CallType, ReceivePolicy, this.receivePolicy().getId())) {

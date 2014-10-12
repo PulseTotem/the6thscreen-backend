@@ -6,7 +6,7 @@
 // Imported from: https://github.com/soywiz/typescript-node-definitions/nock.d.ts
 
 declare module "nock" {
-	export = nock;
+export = nock;
 
 	function nock (host: string, options?: nock.Options): nock.Scope;
 

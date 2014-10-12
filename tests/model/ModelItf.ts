@@ -9,7 +9,7 @@
 /// <reference path="../../app/scripts/model/ModelItf.ts" />
 
 var assert = require("assert");
-var nock = require("nock");
+var nock : any = require("nock");
 
 describe('ModelItf', function() {
 	describe('#constructor(id)', function() {
