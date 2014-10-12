@@ -1207,7 +1207,7 @@ describe('ModelItf', function() {
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
 
-		it('should built a proper request to read a uniquely associated objects and return an empty array if there is no associated objects', function() {
+		it('should built a proper request to read a uniquely associated objects and return false if there is no associated objects', function() {
 			var originID = 1;
 
 			var model = new ModelItf(originID);
@@ -1224,7 +1224,7 @@ describe('ModelItf', function() {
 				.reply(200, JSON.stringify(reponse));
 
 			var result = model.getUniquelyAssociatedObject(ModelItf, ModelItf, []);
-			assert.ok(result, "The retrieve of associated objects did not return true.");
+			assert.ok(!result, "The retrieve of associated objects returns true.");
 			assert.ok(restClientMock.isDone(), "The mock request has not been done.");
 		});
 

@@ -278,11 +278,12 @@ class Call extends ModelItf {
 	 * @returns {boolean} Returns true if the association has been created in database.
 	 */
 	setProfil(p : Profil) : boolean {
-		if (this.profil() !== null) {
-			throw new ModelException("The profil is already set for the call : "+this+".");
-		}
-		if (p === null || p.getId() === undefined || p.getId() === null) {
+		if (!p || !p.getId()) {
 			throw new ModelException("The Profil must be an existing object to be associated.");
+		}
+
+		if (this.profil() !== null) {
+			throw new ModelException("The profil is already set for the call: "+JSON.stringify(this.profil())+".");
 		}
 
 		if (this.associateObject(Call, Profil, p.getId())) {
