@@ -406,7 +406,69 @@ describe('Call', function(){
 				ModelException,
 				"The exception has not been thrown.");
 			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
+		});
 
+	});
+
+	describe('#unsetProfil', function() {
+		it('should unset the Profil', function() {
+			var c = new Call("toto", 52);
+			var p = new Profil("toto", "machin", 42);
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": p.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
+				.reply(200, JSON.stringify(reponse1));
+
+			var profil = c.profil();
+			assert.deepEqual(profil, p, "The profil is not the expected value");
+			var spy = sinon.spy(profil, "desynchronize");
+
+			var reponse2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.delete(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName(), p.getId().toString()))
+				.reply(200, JSON.stringify(reponse2));
+
+			var retour = c.unsetProfil();
+			assert.ok(retour, "The return of the unsetProfil is false.");
+			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+
+			profil = c.profil();
+			assert.deepEqual(profil, null, "The profil() does not return a null value after unsetting");
+			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+		});
+
+		it('should not allow to unset a profil if there is none', function() {
+			var c = new Call("toto", 52);
+			var p = new Profil("toto","machin", 13);
+
+			var reponse1 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
+				.times(2)
+				.reply(200, JSON.stringify(reponse1));
+
+			var profil = c.profil();
+
+			assert.equal(profil, null, "The profil has a value not null: "+JSON.stringify(profil));
+			assert.throws(function() {
+					c.unsetProfil();
+				},
+				ModelException,
+				"The exception has not been thrown.");
+			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
 		});
 
 	});

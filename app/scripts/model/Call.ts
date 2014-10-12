@@ -306,7 +306,7 @@ class Call extends ModelItf {
 	 */
 	unsetProfil() : boolean {
 		if (this.profil() === null) {
-			throw new Error("No profil has been set for this call.");
+			throw new ModelException("No profil has been set for this call.");
 		}
 
 		if (this.deleteObjectAssociation(Call, Profil, this.profil().getId())) {
