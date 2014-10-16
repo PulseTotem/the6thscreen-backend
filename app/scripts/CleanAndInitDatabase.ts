@@ -151,7 +151,7 @@ class CleanAndInitDatabase {
 	    u.create();
 
 	    Logger.debug("Associate user");
-	    s.addUser(u);
+	    //s.addUser(u);
 	    // to check if doublons are created
 	    u.addSDI(s);
 
