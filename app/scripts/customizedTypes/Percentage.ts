@@ -16,7 +16,7 @@ class Percentage {
      * Percentage value.
      *
      * @property _value
-     * @type nulber
+     * @type number
      */
 	private _value : number;
 
