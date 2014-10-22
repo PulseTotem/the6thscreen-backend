@@ -5,7 +5,7 @@
 /// <reference path="../../libsdef/mocha.d.ts" />
 /// <reference path="../../libsdef/nock.d.ts" />
 
-/// <reference path="../../app/scripts/model/Role.ts" />
+/// <reference path="../../scripts/model/Role.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");

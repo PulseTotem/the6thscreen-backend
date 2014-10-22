@@ -5,8 +5,8 @@
 /// <reference path="../../libsdef/mocha.d.ts" />
 /// <reference path="../../libsdef/nock.d.ts" />
 
-/// <reference path="../../app/scripts/core/DatabaseConnection.ts" />
-/// <reference path="../../app/scripts/model/ModelItf.ts" />
+/// <reference path="../../scripts/core/DatabaseConnection.ts" />
+/// <reference path="../../scripts/model/ModelItf.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");

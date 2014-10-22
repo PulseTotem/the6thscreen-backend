@@ -6,7 +6,7 @@
 /// <reference path="../../libsdef/nock.d.ts" />
 /// <reference path="../../libsdef/sinon.d.ts" />
 
-/// <reference path="../../app/scripts/model/SDI.ts" />
+/// <reference path="../../scripts/model/SDI.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");
