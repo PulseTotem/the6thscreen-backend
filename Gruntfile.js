@@ -9,57 +9,76 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
+    grunt.loadNpmTasks('grunt-contrib-symlink');
 
 
 	// tasks
     grunt.initConfig({
 
+        coreReposConfig : grunt.file.readJSON('core-repos-config.json'),
 
+// ---------------------------------------------
+//                               configure tasks
+// ---------------------------------------------
+        symlink: {
+            // Enable overwrite to delete symlinks before recreating them
+            options: {
+                overwrite: false
+            },
+            // The "build/target.txt" symlink will be created and linked to
+            // "source/target.txt". It should appear like this in a file listing:
+            // build/target.txt -> ../source/target.txt
+            coreBackend: {
+                src: '<%= coreReposConfig.coreBackendRepoPath %>',
+                dest: 't6s-core/core-backend'
+            }
+        },
+// ---------------------------------------------
 
 // ---------------------------------------------
 //                          build and dist tasks
 // ---------------------------------------------
         copy: {
             buildConnectionInfosFile: {
-                files: 	[{'build/js/connection_infos.json': 'app/scripts/core/connection_infos.json'}]
+                files: 	[{'build/js/connection_infos.json': 'scripts/core/connection_infos.json'}]
             },
             distConnectionInfosFile: {
-                files: 	[{'dist/js/connection_infos.json': 'app/scripts/core/connection_infos.json'}]
+                files: 	[{'dist/js/connection_infos.json': 'scripts/core/connection_infos.json'}]
             },
 	        testConnectionInfosFile: {
-		        files: 	[{'build/tests/connection_infos.json': 'app/scripts/core/connection_infos-sample.json'}]
+		        files: 	[{'build/tests/connection_infos.json': 'scripts/core/connection_infos-sample.json'}]
 	        }
         },
 
         typescript: {
             build: {
                 src: [
-                    'app/scripts/The6thScreenBackend.ts'
+                    'scripts/The6thScreenBackend.ts'
                 ],
                 dest: 'build/js/The6thScreenBackend.js',
                 options: {
                     module: 'commonjs',
-                    basePath: 'app/scripts'
+                    basePath: 'scripts'
                 }
             },
             dbinit: {
                 src: [
-                    'app/scripts/CleanAndInitDatabase.ts'
+                    'scripts/CleanAndInitDatabase.ts'
                 ],
                 dest: 'build/js/CleanAndInitDatabase.js',
                 options: {
                     module: 'commonjs',
-                    basePath: 'app/scripts'
+                    basePath: 'scripts'
                 }
             },
             dist: {
                 src: [
-                    'app/scripts/The6thScreenBackend.ts'
+                    'scripts/The6thScreenBackend.ts'
                 ],
                 dest: 'dist/js/The6thScreenBackend.js',
                 options: {
                     module: 'commonjs',
-                    basePath: 'app/scripts'
+                    basePath: 'scripts'
                 }
             },
             test: {
@@ -107,7 +126,7 @@ module.exports = function (grunt) {
             },
 
             developServer: {
-                files: ['app/scripts/**/*.ts'],
+                files: ['scripts/**/*.ts'],
                 tasks: ['typescript:build']
             }
         },
@@ -124,7 +143,7 @@ module.exports = function (grunt) {
                 url: 'http://www.the6thscreen.fr',
                 options: {
                     extension: '.ts, .js',
-                    paths: ['app/scripts/'],
+                    paths: ['scripts/'],
                     outdir: 'doc/'
                 }
             }
@@ -171,6 +190,8 @@ module.exports = function (grunt) {
 
     // register tasks
     grunt.registerTask('default', ['build']);
+
+    grunt.registerTask('init', ['symlink']);
 
     grunt.registerTask('build', function () {
         grunt.task.run(['clean:build']);

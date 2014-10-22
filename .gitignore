@@ -5,6 +5,8 @@ node_modules/*
 src/**~
 *~
 .idea
-app/scripts/core/connection_infos.json
+scripts/core/connection_infos.json
 doc/
 coverage.html
+t6s-core/*
+core-repos-config.json
