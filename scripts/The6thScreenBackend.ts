@@ -10,6 +10,7 @@
 /// <reference path="../t6s-core/core-backend/scripts/LoggerLevel.ts" />
 
 /// <reference path="./client/ClientManager.ts" />
+/// <reference path="./sourcesserver/SourcesServerManager.ts" />
 
 var http = require("http");
 var express = require("express");
@@ -56,6 +57,8 @@ class The6thScreenBackend {
 
         sourcesNamespace.on('connection', function(socket){
             Logger.info("New The 6th Screen Sources Server Connection");
+
+            new SourcesServerManager(socket);
 
             socket.on('disconnect', function(){
                 Logger.info("The 6th Screen Sources Server disconnected.");
