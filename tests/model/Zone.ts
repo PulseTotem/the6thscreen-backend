@@ -104,6 +104,16 @@ describe('Zone', function() {
 			);
 		});
 
+        it('should throw an error if the positionFromTop is < 0', function(){
+            assert.throws(
+                function() {
+                    new Zone("toto", "", 1,2, -10, 4);
+                },
+                ModelException,
+                "The exception has not been thrown."
+            );
+        });
+
         it('should not throw an error if the positionFromTop is 0', function(){
             assert.doesNotThrow(
                 function() {
@@ -133,6 +143,16 @@ describe('Zone', function() {
 				"The exception has not been thrown."
 			);
 		});
+
+        it('should throw an error if the positionFromLeft is < 0', function(){
+            assert.throws(
+                function() {
+                    new Zone("toto", "", 1,2,3, -10);
+                },
+                ModelException,
+                "The exception has not been thrown."
+            );
+        });
 
         it('should not throw an error if the positionFromLeft is 0', function(){
             assert.doesNotThrow(
@@ -403,6 +423,23 @@ describe('Zone', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
+        it('should throw an exception if the positionFromTop is < 0', function () {
+            var json = {
+                "id": 42,
+                "name": "toto",
+                "description": "machin",
+                "width": 10,
+                "height": 20,
+                "positionFromTop": -10,
+                "positionFromLeft": 40
+            };
+
+            assert.throws(function () {
+                    Zone.fromJSONObject(json);
+                },
+                ModelException, "The exception has not been thrown.");
+        });
+
 		it('should throw an exception if the positionFromLeft is undefined', function () {
 			var json = {
 				"id": 42,
@@ -435,6 +472,23 @@ describe('Zone', function() {
 				},
 				ModelException, "The exception has not been thrown.");
 		});
+
+        it('should throw an exception if the positionFromLeft is < 0', function () {
+            var json = {
+                "id": 42,
+                "name": "toto",
+                "description": "machin",
+                "width": 10,
+                "height": 20,
+                "positionFromTop": 30,
+                "positionFromLeft": -10
+            };
+
+            assert.throws(function () {
+                    Zone.fromJSONObject(json);
+                },
+                ModelException, "The exception has not been thrown.");
+        });
 	});
 
 	describe('#toJsonObject', function () {

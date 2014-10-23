@@ -29,8 +29,8 @@ class Percentage {
 	constructor(value : number) {
 		if (value == null || value > 100 || value < 0) {
 			Logger.error("The given value must be strictly in the range [0, 100].");
-			// TODO : Throw exception !
 			value = 0;
+            throw new ModelException("Percentage : The given value must be strictly in the range [0, 100].");
 		}
 
 		this._value = value;
