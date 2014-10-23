@@ -9,6 +9,9 @@
 /// <reference path="../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="../t6s-core/core-backend/scripts/LoggerLevel.ts" />
 
+/// <reference path="./socketmanager/ClientConnectionManager.ts" />
+/// <reference path="./socketmanager/SourcesServerConnectionManager.ts" />
+/// <reference path="./socketmanager/CustomizerConnectionManager.ts" />
 /// <reference path="./client/ClientManager.ts" />
 /// <reference path="./sourcesserver/SourcesServerManager.ts" />
 
@@ -24,11 +27,45 @@ var sio = require("socket.io");
 class The6thScreenBackend {
 
     /**
+     * List of ConnectionManager for Clients.
+     *
+     * @property _clientConnectionManagers
+     * @type Array<ClientConnectionManager>
+     */
+    private _clientConnectionManagers: Array<ClientConnectionManager>;
+
+    /**
+     * List of ConnectionManager for SourcesServers.
+     *
+     * @property _sourcesServerConnectionManagers
+     * @type Array<SourcesServerConnectionManager>
+     */
+    private _sourcesServerConnectionManagers: Array<SourcesServerConnectionManager>;
+
+    /**
+     * List of ConnectionManager for Customizers.
+     *
+     * @property _customizerConnectionManagers
+     * @type Array<CustomizerConnectionManager>
+     */
+    private _customizerConnectionManagers: Array<CustomizerConnectionManager>;
+
+    /**
+     * @constructor
+     */
+    constructor() {
+        this._clientConnectionManagers = new Array<ClientConnectionManager>();
+        this._sourcesServerConnectionManagers = new Array<SourcesServerConnectionManager>();
+        this._customizerConnectionManagers = new Array<CustomizerConnectionManager>();
+    }
+
+    /**
      * Method to run the web socket server.
      *
      * @method run
      */
     run() {
+        var self = this;
         var listeningPort = process.env.PORT || 4000;
 
         var app = express();
@@ -44,34 +81,45 @@ class The6thScreenBackend {
         var clientNamespace = io.of("/clients");
 
         clientNamespace.on('connection', function(socket){
-            Logger.info("New The 6th Screen Client Connection");
+            var connectionManager : ClientConnectionManager = new ClientConnectionManager(socket.id);
+            self._clientConnectionManagers[socket.id] = connectionManager;
+            Logger.info("New The 6th Screen Client Connection : " + socket.id);
 
-            new ClientManager(socket);
+            var clientManager : ClientManager = new ClientManager(socket);
+            connectionManager.addClientManager(clientManager);
 
             socket.on('disconnect', function(){
-                Logger.info("The 6th Screen Client disconnected.");
+                delete(self._clientConnectionManagers[socket.id]);
+                Logger.info("The 6th Screen Client disconnected : " + socket.id);
             });
         });
 
         var sourcesNamespace = io.of("/sources");
 
         sourcesNamespace.on('connection', function(socket){
-            Logger.info("New The 6th Screen Sources Server Connection");
+            var connectionManager : SourcesServerConnectionManager = new SourcesServerConnectionManager(socket.id);
+            self._sourcesServerConnectionManagers[socket.id] = connectionManager;
+            Logger.info("New The 6th Screen Sources Server Connection : " + socket.id);
 
-            new SourcesServerManager(socket);
+            var sourcesServerManager : SourcesServerManager = new SourcesServerManager(socket);
+            connectionManager.addSourcesServerManager(sourcesServerManager);
 
             socket.on('disconnect', function(){
-                Logger.info("The 6th Screen Sources Server disconnected.");
+                delete(self._sourcesServerConnectionManagers[socket.id]);
+                Logger.info("The 6th Screen Sources Server disconnected : " + socket.id);
             });
         });
 
         var customizerNamespace = io.of("/customizers");
 
         customizerNamespace.on('connection', function(socket){
-            Logger.info("New The 6th Screen Customizer Connection");
+            var connectionManager : CustomizerConnectionManager = new CustomizerConnectionManager(socket.id);
+            self._customizerConnectionManagers[socket.id] = connectionManager;
+            Logger.info("New The 6th Screen Customizer Connection : " + socket.id);
 
             socket.on('disconnect', function(){
-                Logger.info("The 6th Screen Customizer disconnected.");
+                delete(self._customizerConnectionManagers[socket.id]);
+                Logger.info("The 6th Screen Customizer disconnected : " + socket.id);
             });
         });
 
