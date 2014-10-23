@@ -49,9 +49,19 @@ class SourcesServerManager {
             self.sendCallDescription(callDescription.callId);
         });
 
-        this._sourcesServerSocket.on("SourceDescription", function(sourceDescription) {
+        this._sourcesServerSocket.on("RetrieveCallTypeDescription", function(callTypeDescription) {
+            // callTypeDescription : {"callTypeId" : string}
+            self.sendCallTypeDescription(callTypeDescription.callTypeId);
+        });
+
+        this._sourcesServerSocket.on("RetrieveSourceDescription", function(sourceDescription) {
             // sourceDescription : {"sourceId" : string}
             self.sendSourceDescription(sourceDescription.sourceId);
+        });
+
+        this._sourcesServerSocket.on("RetrieveParamValueDescription", function(paramValueDescription) {
+            // paramValueDescription : {"paramValueId" : string}
+            self.sendParamValueDescription(paramValueDescription.paramValueId);
         });
     }
 
@@ -68,6 +78,18 @@ class SourcesServerManager {
     }
 
     /**
+     * Retrieve CallType instance description and send it to sourcesServer.
+     *
+     * @method sendCallTypeDescription
+     * @param {string} callTypeId - The CallType Id.
+     */
+    sendCallTypeDescription(callTypeId : string) {
+        var callType = CallType.read(parseInt(callTypeId));
+        Logger.debug(callType.toCompleteJSONObject());
+        this._sourcesServerSocket.emit("CallTypeDescription", callType.toCompleteJSONObject());
+    }
+
+    /**
      * Retrieve Source instance description and send it to sourcesServer.
      *
      * @method sendSourceDescription
@@ -77,5 +99,17 @@ class SourcesServerManager {
         var source = Source.read(parseInt(sourceId));
         Logger.debug(source.toCompleteJSONObject());
         this._sourcesServerSocket.emit("SourceDescription", source.toCompleteJSONObject());
+    }
+
+    /**
+     * Retrieve ParamValue instance description and send it to sourcesServer.
+     *
+     * @method sendParamValueDescription
+     * @param {string} sourceId - The ParamValue Id.
+     */
+    sendParamValueDescription(paramValueId : string) {
+        var paramValue = ParamValue.read(parseInt(paramValueId));
+        Logger.debug(paramValue.toCompleteJSONObject());
+        this._sourcesServerSocket.emit("ParamValueDescription", paramValue.toCompleteJSONObject());
     }
 }
