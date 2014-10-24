@@ -127,7 +127,7 @@ class CleanAndInitDatabase {
         var feed_content = new InfoType("FeedContent");
         feed_content.create();
 
-        var rss_feed_reader = new Source("RSSFeedReader", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 4000);
+        var rss_feed_reader = new Source("RetrieveFeedContent", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 6002);
         rss_feed_reader.create();
 
         var url_rss_feed_reader = new ParamType("FeedURL","Lien du flux RSS");
@@ -135,7 +135,7 @@ class CleanAndInitDatabase {
 	    url_rss_feed_reader.setType(chaineTypeInfoType);
 	    url_rss_feed_reader.setConstraint(urlConstraint);
 
-        var limit_rss_feed_reader = new ParamType("Limite","Limiter le nombre de résultats");
+        var limit_rss_feed_reader = new ParamType("Limit","Limiter le nombre de résultats");
         limit_rss_feed_reader.create();
 	    limit_rss_feed_reader.setType(entierTypeInfoType);
 	    limit_rss_feed_reader.setConstraint(positiveNumberConstraint);

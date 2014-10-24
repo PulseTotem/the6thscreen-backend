@@ -69,9 +69,9 @@ class ClientManager {
             self.sendCallDescription(callDescription.callId);
         });
 
-        this._clientSocket.on("RetrieveCallTypeDescription", function(callTypeDescription) {
-            // callTypeDescription : {"callTypeId" : string}
-            self.sendCallTypeDescription(callTypeDescription.callTypeId);
+        this._clientSocket.on("RetrieveCallTypeDescriptionWithCallId", function(callTypeDescriptionWithCallId) {
+            // callTypeDescription : {"callTypeId" : string, "callId" : string}
+            self.sendCallTypeDescriptionWithCallId(callTypeDescriptionWithCallId.callTypeId, callTypeDescriptionWithCallId.callId);
         });
     }
 
@@ -136,14 +136,17 @@ class ClientManager {
     }
 
     /**
-     * Retrieve CallType instance description and send it to client.
+     * Retrieve CallType instance description and send it to client with attached CallId.
      *
-     * @method sendCallTypeDescription
+     * @method sendCallTypeDescriptionWithCallId
      * @param {string} callTypeId - The CallType Id.
+     * @param {string} callId - The Call Id.
      */
-    sendCallTypeDescription(callTypeId : string) {
+    sendCallTypeDescriptionWithCallId(callTypeId : string, callId : string) {
         var callType = CallType.read(parseInt(callTypeId));
-        Logger.debug(callType.toCompleteJSONObject());
-        this._clientSocket.emit("CallTypeDescription", callType.toCompleteJSONObject());
+        var withCallId = callType.toCompleteJSONObject();
+        withCallId["callId"] = callId;
+        Logger.debug(withCallId);
+        this._clientSocket.emit("CallTypeDescriptionWithCallId", withCallId);
     }
 }
