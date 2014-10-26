@@ -63,6 +63,22 @@ class Zone extends ModelItf {
 	 */
 	private _position_from_left : Percentage;
 
+	/**
+	 * Behaviour property.
+	 *
+	 * @property _behaviour
+	 * @type Behaviour
+	 */
+	private _behaviour : Behaviour;
+
+	/**
+	 * Lazy loading for behaviour.
+	 *
+	 * @property _behaviour_loaded
+	 * @type boolean
+	 */
+	private _behaviour_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -81,6 +97,9 @@ class Zone extends ModelItf {
 	    this.setHeight(height);
 	    this.setPositionFromTop(positionFromTop);
 	    this.setPositionFromLeft(positionFromLeft);
+
+	    this._behaviour = null;
+	    this._behaviour_loaded = false;
     }
 
 	/**
@@ -217,7 +236,43 @@ class Zone extends ModelItf {
 		return this._position_from_left.value();
 	}
 
+	/**
+	 * Return the Zone's behaviour.
+	 *
+	 * @method behaviour
+	 */
+	behaviour() {
+		if(! this._behaviour_loaded) {
+			var value = this.getUniquelyAssociatedObject(Zone, Behaviour);
+			if (!!value) {
+				this._behaviour = value;
+			}
+			this._behaviour_loaded = true;
+		}
+		return this._behaviour;
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 *
+	 * @method loadAssociations
+	 */
+	loadAssociations() : void {
+		this.behaviour();
+	}
+
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 *
+	 * @method desynchronize
+	 */
+	desynchronize() : void {
+		this._behaviour_loaded = false;
+	}
+
 
 	/**
 	 * Return a Renderer instance as a JSON Object
@@ -245,10 +300,61 @@ class Zone extends ModelItf {
      * @method toJSONObjectWithAssociations
      */
     toJSONObjectWithAssociations() : Object {
+	    this.loadAssociations();
         var data = this.toJSONObject();
-
+	    data["behaviour"] = (this.behaviour() !== null) ? this.behaviour().toJSONObject() : null;
         return data;
     }
+
+	/**
+	 * Set the Behaviour of the Zone.
+	 * As a Zone can only have one Behaviour, if the value is already set, this method throws an exception: you need first to unset the Behaviour.
+	 * Moreover the given type must be created in database.
+	 *
+	 * @method setBehaviour
+	 * @param {Behaviour} beha The Behaviour to associate with the Zone.
+	 * @returns {boolean} Returns true if the association has been created in database.
+	 */
+	setBehaviour(beha : Behaviour) : boolean {
+		if (!beha || !beha.getId()) {
+			throw new ModelException("The Behaviour must be an existing object to be associated.");
+		}
+
+		if (this.behaviour() !== null) {
+			throw new ModelException("The Behaviour is already set for this Zone.");
+		}
+
+		if (this.associateObject(Zone, Behaviour, beha.getId())) {
+			beha.desynchronize();
+			this._behaviour = beha;
+			this._behaviour_loaded = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Unset the current Behaviour from the Zone.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A Behaviour must have been set before using it, else an exception is thrown.
+	 *
+	 * @method unsetBehaviour
+	 * @returns {boolean} Returns true if the Behaviour is well unset and the association removed in database.
+	 */
+	unsetBehaviour() : boolean {
+		if (this.behaviour() === null) {
+			throw new ModelException("No Behaviour has been set for this Source.");
+		}
+
+		if (this.deleteObjectAssociation(Zone, Behaviour, this.behaviour().getId())) {
+			this.behaviour().desynchronize();
+			this._behaviour = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
 
     /**
      * Create model in database.
