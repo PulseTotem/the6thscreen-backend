@@ -3,6 +3,7 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./Behaviour.ts" />
 
 /// <reference path="../customizedTypes/Percentage.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
