@@ -23,6 +23,7 @@
 /// <reference path="./model/Role.ts" />
 /// <reference path="./model/Source.ts" />
 /// <reference path="./model/User.ts" />
+/// <reference path="./model/Behaviour.ts" />
 
 /**
  * Class to clean and Initialise Database with some data.
@@ -162,6 +163,11 @@ class CleanAndInitDatabase {
         z.create();
 
         s.addZone(z);
+
+        var b : Behaviour = new Behaviour("Appearance", "Défilement des informations sans effet.");
+        b.create();
+
+        z.setBehaviour(b);
 
         var ct : CallType = new CallType("RSSMainZone","Display RSS feeds in the main zone with a specific renderer");
         ct.create();
