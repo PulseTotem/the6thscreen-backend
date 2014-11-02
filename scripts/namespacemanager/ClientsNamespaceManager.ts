@@ -47,7 +47,6 @@ class ClientsNamespaceManager extends NamespaceManager {
         var profilId = profilDescription.profilId;
 
         var profil = Profil.read(parseInt(profilId));
-        Logger.debug(profil.toCompleteJSONObject());
         self.socket.emit("ProfilDescription", profil.toCompleteJSONObject());
     }
 
@@ -67,7 +66,6 @@ class ClientsNamespaceManager extends NamespaceManager {
         var userId = userDescription.userId;
 
         var user = User.read(parseInt(userId));
-        Logger.debug(user.toCompleteJSONObject());
         self.socket.emit("UserDescription", user.toCompleteJSONObject());
     }
 
@@ -87,7 +85,6 @@ class ClientsNamespaceManager extends NamespaceManager {
         var sdiId = sdiDescription.sdiId;
 
         var sdi = SDI.read(parseInt(sdiId));
-        Logger.debug(sdi.toCompleteJSONObject());
         self.socket.emit("SDIDescription", sdi.toCompleteJSONObject());
     }
 
@@ -107,7 +104,6 @@ class ClientsNamespaceManager extends NamespaceManager {
         var zoneId = zoneDescription.zoneId;
 
         var zone = Zone.read(parseInt(zoneId));
-        Logger.debug(zone.toCompleteJSONObject());
         self.socket.emit("ZoneDescription", zone.toCompleteJSONObject());
     }
 
@@ -127,7 +123,6 @@ class ClientsNamespaceManager extends NamespaceManager {
         var callId = callDescription.callId;
 
         var call = Call.read(parseInt(callId));
-        Logger.debug(call.toCompleteJSONObject());
         self.socket.emit("CallDescription", call.toCompleteJSONObject());
     }
 
@@ -150,7 +145,6 @@ class ClientsNamespaceManager extends NamespaceManager {
         var callType = CallType.read(parseInt(callTypeId));
         var withCallId = callType.toCompleteJSONObject();
         withCallId["callId"] = callId;
-        Logger.debug(withCallId);
         self.socket.emit("CallTypeDescriptionWithCallId", withCallId);
     }
 }

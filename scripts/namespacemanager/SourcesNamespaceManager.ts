@@ -43,7 +43,6 @@ class SourcesNamespaceManager extends NamespaceManager {
         var callId = callDescription.callId;
 
         var call = Call.read(parseInt(callId));
-        Logger.debug(call.toCompleteJSONObject());
         self.socket.emit("zones/" + zoneId + "/calls/" + callId + "/CallDescription", call.toCompleteJSONObject());
     }
 
@@ -65,7 +64,6 @@ class SourcesNamespaceManager extends NamespaceManager {
         var callTypeId = callTypeDescription.callTypeId;
 
         var callType = CallType.read(parseInt(callTypeId));
-        Logger.debug(callType.toCompleteJSONObject());
         self.socket.emit("zones/" + zoneId + "/calls/" + callId + "/CallTypeDescription", callType.toCompleteJSONObject());
     }
 
@@ -87,7 +85,6 @@ class SourcesNamespaceManager extends NamespaceManager {
         var sourceId = sourceDescription.sourceId;
 
         var source = Source.read(parseInt(sourceId));
-        Logger.debug(source.toCompleteJSONObject());
         self.socket.emit("zones/" + zoneId + "/calls/" + callId + "/SourceDescription", source.toCompleteJSONObject());
     }
 
@@ -109,7 +106,6 @@ class SourcesNamespaceManager extends NamespaceManager {
         var paramValueId = paramValueDescription.paramValueId;
 
         var paramValue = ParamValue.read(parseInt(paramValueId));
-        Logger.debug(paramValue.toCompleteJSONObject());
         self.socket.emit("zones/" + zoneId + "/calls/" + callId + "/ParamValueDescription", paramValue.toCompleteJSONObject());
     }
 }
