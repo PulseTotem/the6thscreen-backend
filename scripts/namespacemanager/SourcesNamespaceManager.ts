@@ -34,16 +34,17 @@ class SourcesNamespaceManager extends NamespaceManager {
      * @param {SourcesNamespaceManager} self - The SourcesNamespaceManager instance.
      */
     sendCallDescription(callDescription : any, self : SourcesNamespaceManager = null) {
-        // callDescription : {"callId" : string}
+        // callDescription : {"zoneId" : string, "callId" : string}
         if(self == null) {
             self = this;
         }
 
+        var zoneId = callDescription.zoneId;
         var callId = callDescription.callId;
 
         var call = Call.read(parseInt(callId));
         Logger.debug(call.toCompleteJSONObject());
-        self.socket.emit("CallDescription", call.toCompleteJSONObject());
+        self.socket.emit("zones/" + zoneId + "/calls/" + callId + "/CallDescription", call.toCompleteJSONObject());
     }
 
     /**
@@ -54,16 +55,18 @@ class SourcesNamespaceManager extends NamespaceManager {
      * @param {SourcesNamespaceManager} self - The SourcesNamespaceManager instance.
      */
     sendCallTypeDescription(callTypeDescription : any, self : SourcesNamespaceManager = null) {
-        // callTypeDescription : {"callTypeId" : string}
+        // callTypeDescription : {"zoneId" : string, "callId" : string, "callTypeId" : string}
         if(self == null) {
             self = this;
         }
 
+        var zoneId = callTypeDescription.zoneId;
+        var callId = callTypeDescription.callId;
         var callTypeId = callTypeDescription.callTypeId;
 
         var callType = CallType.read(parseInt(callTypeId));
         Logger.debug(callType.toCompleteJSONObject());
-        self.socket.emit("CallTypeDescription", callType.toCompleteJSONObject());
+        self.socket.emit("zones/" + zoneId + "/calls/" + callId + "/CallTypeDescription", callType.toCompleteJSONObject());
     }
 
     /**
@@ -74,16 +77,18 @@ class SourcesNamespaceManager extends NamespaceManager {
      * @param {SourcesNamespaceManager} self - The SourcesNamespaceManager instance.
      */
     sendSourceDescription(sourceDescription : any, self : SourcesNamespaceManager = null) {
-        // sourceDescription : {"sourceId" : string}
+        // sourceDescription : {"zoneId" : string, "callId" : string, "sourceId" : string}
         if(self == null) {
             self = this;
         }
 
+        var zoneId = sourceDescription.zoneId;
+        var callId = sourceDescription.callId;
         var sourceId = sourceDescription.sourceId;
 
         var source = Source.read(parseInt(sourceId));
         Logger.debug(source.toCompleteJSONObject());
-        self.socket.emit("SourceDescription", source.toCompleteJSONObject());
+        self.socket.emit("zones/" + zoneId + "/calls/" + callId + "/SourceDescription", source.toCompleteJSONObject());
     }
 
     /**
@@ -94,15 +99,17 @@ class SourcesNamespaceManager extends NamespaceManager {
      * @param {SourcesNamespaceManager} self - The SourcesNamespaceManager instance.
      */
     sendParamValueDescription(paramValueDescription : any, self : SourcesNamespaceManager = null) {
-        // paramValueDescription : {"paramValueId" : string}
+        // paramValueDescription : {"zoneId" : string, "callId" : string, "paramValueId" : string}
         if(self == null) {
             self = this;
         }
 
+        var zoneId = paramValueDescription.zoneId;
+        var callId = paramValueDescription.callId;
         var paramValueId = paramValueDescription.paramValueId;
 
         var paramValue = ParamValue.read(parseInt(paramValueId));
         Logger.debug(paramValue.toCompleteJSONObject());
-        self.socket.emit("ParamValueDescription", paramValue.toCompleteJSONObject());
+        self.socket.emit("zones/" + zoneId + "/calls/" + callId + "/ParamValueDescription", paramValue.toCompleteJSONObject());
     }
 }
