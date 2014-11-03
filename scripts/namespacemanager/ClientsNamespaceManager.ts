@@ -28,7 +28,7 @@ class ClientsNamespaceManager extends NamespaceManager {
         this.addListenerToSocket('RetrieveSDIDescription', this.sendSDIDescription);
         this.addListenerToSocket('RetrieveZoneDescription', this.sendZoneDescription);
         this.addListenerToSocket('RetrieveCallDescription', this.sendCallDescription);
-        this.addListenerToSocket('RetrieveCallTypeDescriptionWithCallId', this.sendCallTypeDescriptionWithCallId);
+        this.addListenerToSocket('RetrieveCallTypeDescription', this.sendCallTypeDescription);
     }
 
     /**
@@ -127,24 +127,21 @@ class ClientsNamespaceManager extends NamespaceManager {
     }
 
     /**
-     * Retrieve CallType instance description and send it to client with attached CallId.
+     * Retrieve CallType instance description and send it to client.
      *
-     * @method sendCallTypeDescriptionWithCallId
-     * @param {any} callTypeDescriptionWithCallId - The CallType Description
+     * @method sendCallTypeDescription
+     * @param {any} callTypeDescription - The CallType Description
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
      */
-    sendCallTypeDescriptionWithCallId(callTypeDescriptionWithCallId : any, self : ClientsNamespaceManager = null) {
-        // callTypeDescription : {"callTypeId" : string, "callId" : string}
+    sendCallTypeDescription(callTypeDescription : any, self : ClientsNamespaceManager = null) {
+        // callTypeDescription : {"callTypeId" : string}
         if(self == null) {
             self = this;
         }
 
-        var callTypeId = callTypeDescriptionWithCallId.callTypeId;
-        var callId = callTypeDescriptionWithCallId.callId;
+        var callTypeId = callTypeDescription.callTypeId;
 
         var callType = CallType.read(parseInt(callTypeId));
-        var withCallId = callType.toCompleteJSONObject();
-        withCallId["callId"] = callId;
-        self.socket.emit("CallTypeDescriptionWithCallId", withCallId);
+        self.socket.emit("CallTypeDescription", callType.toCompleteJSONObject());
     }
 }
