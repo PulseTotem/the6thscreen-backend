@@ -182,13 +182,15 @@ class CleanAndInitDatabase {
         ct.setRenderer(renderer);
 
         //Receive : La politique de réception => ???
-        var rp : ReceivePolicy = new ReceivePolicy("Last");
+        //var rp : ReceivePolicy = new ReceivePolicy("Last");
+        var rp : ReceivePolicy = new ReceivePolicy("DumbReceivePolicy");
         rp.create();
 
         ct.setReceivePolicy(rp);
 
         //Render : La politique d'affichage => ???
-        var renderP : RenderPolicy = new RenderPolicy("Ordered","Alphabetically sort the informations");
+        //var renderP : RenderPolicy = new RenderPolicy("Ordered","Alphabetically sort the informations");
+        var renderP : RenderPolicy = new RenderPolicy("FeedContentDumbRenderPolicy","Dumb render policy for FeedContent.");
         renderP.create();
 
         ct.setRenderPolicy(renderP);
