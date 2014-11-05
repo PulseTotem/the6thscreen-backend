@@ -174,7 +174,7 @@ class CleanAndInitDatabase {
 	    ct.setZone(z);
         ct.setSource(rss_feed_reader);
 
-        var renderer : Renderer = new Renderer("FeedContentRendererGeneric", "Renderer générique pour les infos de type FeedContent.");
+        var renderer : Renderer = new Renderer("FeedNodeRendererGeneric", "Renderer générique pour les infos de type FeedNode.");
         renderer.create();
 
         renderer.setInfoType(feed_content);
