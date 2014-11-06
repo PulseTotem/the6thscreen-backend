@@ -159,7 +159,7 @@ class CleanAndInitDatabase {
 	    s.loadAssociations(); // ???
 	    Logger.debug(s);
 
-        var z : Zone = new Zone("MainZone", "Zone principale de SDItruc", 20, 10, 0, 0);
+        var z : Zone = new Zone("MainZone", "Zone principale de SDItruc", 50, 100, 0, 0);
         z.create();
 
         s.addZone(z);

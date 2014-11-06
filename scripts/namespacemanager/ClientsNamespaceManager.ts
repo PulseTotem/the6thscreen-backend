@@ -39,6 +39,7 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
      */
     sendProfilDescription(profilDescription : any, self : ClientsNamespaceManager = null) {
+        Logger.debug("sendProfilDescription");
         // profilDescription : {"profilId" : string}
         if(self == null) {
             self = this;
@@ -58,6 +59,7 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
      */
     sendUserDescription(userDescription : any, self : ClientsNamespaceManager = null) {
+        Logger.debug("sendUserDescription");
         // userDescription : {"userId" : string}
         if(self == null) {
             self = this;
@@ -77,6 +79,7 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
      */
     sendSDIDescription(sdiDescription : any, self : ClientsNamespaceManager = null) {
+        Logger.debug("sendSDIDescription");
         // sdiDescription : {"sdiId" : string}
         if(self == null) {
             self = this;
@@ -96,6 +99,7 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
      */
     sendZoneDescription(zoneDescription : any, self : ClientsNamespaceManager = null) {
+        Logger.debug("sendZoneDescription");
         // zoneDescription : {"zoneId" : string}
         if(self == null) {
             self = this;
@@ -115,6 +119,7 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
      */
     sendCallDescription(callDescription : any, self : ClientsNamespaceManager = null) {
+        Logger.debug("sendCallDescription");
         // callDescription : {"callId" : string}
         if(self == null) {
             self = this;
@@ -134,6 +139,7 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
      */
     sendCallTypeDescription(callTypeDescription : any, self : ClientsNamespaceManager = null) {
+        Logger.debug("sendCallTypeDescription");
         // callTypeDescription : {"callTypeId" : string}
         if(self == null) {
             self = this;
