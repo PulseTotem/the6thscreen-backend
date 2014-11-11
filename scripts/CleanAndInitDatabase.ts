@@ -23,6 +23,7 @@
 /// <reference path="./model/Role.ts" />
 /// <reference path="./model/Source.ts" />
 /// <reference path="./model/User.ts" />
+/// <reference path="./model/Behaviour.ts" />
 
 /**
  * Class to clean and Initialise Database with some data.
@@ -127,7 +128,7 @@ class CleanAndInitDatabase {
         var feed_content = new InfoType("FeedContent");
         feed_content.create();
 
-        var rss_feed_reader = new Source("RSSFeedReader", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 4000);
+        var rss_feed_reader = new Source("RetrieveFeedContent", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 6002);
         rss_feed_reader.create();
 
         var url_rss_feed_reader = new ParamType("FeedURL","Lien du flux RSS");
@@ -135,7 +136,7 @@ class CleanAndInitDatabase {
 	    url_rss_feed_reader.setType(chaineTypeInfoType);
 	    url_rss_feed_reader.setConstraint(urlConstraint);
 
-        var limit_rss_feed_reader = new ParamType("Limite","Limiter le nombre de résultats");
+        var limit_rss_feed_reader = new ParamType("Limit","Limiter le nombre de résultats");
         limit_rss_feed_reader.create();
 	    limit_rss_feed_reader.setType(entierTypeInfoType);
 	    limit_rss_feed_reader.setConstraint(positiveNumberConstraint);
@@ -158,17 +159,22 @@ class CleanAndInitDatabase {
 	    s.loadAssociations(); // ???
 	    Logger.debug(s);
 
-        var z : Zone = new Zone("MainZone", "Zone principale de SDItruc", 20, 10, 0, 0);
+        var z : Zone = new Zone("MainZone", "Zone principale de SDItruc", 50, 100, 0, 0);
         z.create();
 
         s.addZone(z);
+
+        var b : Behaviour = new Behaviour("Appearance", "Défilement des informations sans effet.");
+        b.create();
+
+        z.setBehaviour(b);
 
         var ct : CallType = new CallType("RSSMainZone","Display RSS feeds in the main zone with a specific renderer");
         ct.create();
 	    ct.setZone(z);
         ct.setSource(rss_feed_reader);
 
-        var renderer : Renderer = new Renderer("FeedContentRendererGeneric", "Renderer générique pour les infos de type FeedContent.");
+        var renderer : Renderer = new Renderer("FeedNodeRendererGeneric", "Renderer générique pour les infos de type FeedNode.");
         renderer.create();
 
         renderer.setInfoType(feed_content);
@@ -176,13 +182,15 @@ class CleanAndInitDatabase {
         ct.setRenderer(renderer);
 
         //Receive : La politique de réception => ???
-        var rp : ReceivePolicy = new ReceivePolicy("Last");
+        //var rp : ReceivePolicy = new ReceivePolicy("Last");
+        var rp : ReceivePolicy = new ReceivePolicy("DumbReceivePolicy");
         rp.create();
 
         ct.setReceivePolicy(rp);
 
         //Render : La politique d'affichage => ???
-        var renderP : RenderPolicy = new RenderPolicy("Ordered","Alphabetically sort the informations");
+        //var renderP : RenderPolicy = new RenderPolicy("Ordered","Alphabetically sort the informations");
+        var renderP : RenderPolicy = new RenderPolicy("FeedContentDumbRenderPolicy","Dumb render policy for FeedContent.");
         renderP.create();
 
         ct.setRenderPolicy(renderP);

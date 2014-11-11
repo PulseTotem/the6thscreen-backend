@@ -2,110 +2,64 @@
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
  */
 
-/// <reference path="../t6s-core/core-backend/libsdef/node.d.ts" />
-/// <reference path="../t6s-core/core-backend/libsdef/express.d.ts" />
-/// <reference path="../t6s-core/core-backend/libsdef/socket.io-0.9.10.d.ts" />
-
+/// <reference path="../t6s-core/core-backend/scripts/server/Server.ts" />
 /// <reference path="../t6s-core/core-backend/scripts/Logger.ts" />
-/// <reference path="../t6s-core/core-backend/scripts/LoggerLevel.ts" />
 
-/// <reference path="./client/ClientManager.ts" />
-
-var http = require("http");
-var express = require("express");
-var sio = require("socket.io");
+/// <reference path="./namespacemanager/ClientsNamespaceManager.ts" />
+/// <reference path="./namespacemanager/SourcesNamespaceManager.ts" />
+/// <reference path="./namespacemanager/CustomizersNamespaceManager.ts" />
 
 /**
  * Represents The 6th Screen's Backend.
  *
  * @class The6thScreenBackend
+ * @extends Server
  */
-class The6thScreenBackend {
+class The6thScreenBackend extends Server {
 
     /**
-     * Method to run the web socket server.
+     * Constructor.
      *
-     * @method run
+     * @param {number} listeningPort - Server's listening port..
+     * @param {Array<string>} arguments - Server's command line arguments.
      */
-    run() {
-        var listeningPort = process.env.PORT || 4000;
+    constructor(listeningPort : number, arguments : Array<string>) {
+        super(listeningPort, arguments);
 
-        var app = express();
-        var httpServer = http.createServer(app);
-        var io = sio.listen(httpServer);
+        this.init();
+    }
 
-        app.get('/', function(req, res){
-            res.send('<h1>Are you lost ? * <--- You are here !</h1>');
-        });
+    /**
+     * Method to init the RSSFeedReader server.
+     *
+     * @method init
+     */
+    init() {
+        var self = this;
 
-        //TODO : io.origins("allowedHosts"); // see : http://socket.io/docs/server-api/#server#origins(v:string):server
-
-        var clientNamespace = io.of("/clients");
-
-        clientNamespace.on('connection', function(socket){
-            Logger.info("New The 6th Screen Client Connection");
-
-            new ClientManager(socket);
-
-            socket.on('disconnect', function(){
-                Logger.info("The 6th Screen Client disconnected.");
-            });
-        });
-
-        var sourcesNamespace = io.of("/sources");
-
-        sourcesNamespace.on('connection', function(socket){
-            Logger.info("New The 6th Screen Sources Server Connection");
-
-            socket.on('disconnect', function(){
-                Logger.info("The 6th Screen Sources Server disconnected.");
-            });
-        });
-
-        var customizerNamespace = io.of("/customizers");
-
-        customizerNamespace.on('connection', function(socket){
-            Logger.info("New The 6th Screen Customizer Connection");
-
-            socket.on('disconnect', function(){
-                Logger.info("The 6th Screen Customizer disconnected.");
-            });
-        });
-
-        httpServer.listen(listeningPort, function(){
-            Logger.info("The 6th Screen's Backend listening on *:" + listeningPort);
-        });
+        this.addNamespace("clients", ClientsNamespaceManager);
+        this.addNamespace("sources", SourcesNamespaceManager);
+        this.addNamespace("customizers", CustomizersNamespaceManager);
     }
 }
 
-var logLevel = LoggerLevel.Error;
+/**
+ * Server's The6thScreenBackend listening port.
+ *
+ * @property _The6thScreenBackendListeningPort
+ * @type number
+ * @private
+ */
+var _The6thScreenBackendListeningPort : number = process.env.PORT_BACKEND || 4000;
 
-if(process.argv.length > 2) {
-    var param = process.argv[2];
-    var keyVal = param.split("=");
-    if(keyVal.length > 1) {
-        if (keyVal[0] == "loglevel") {
-            switch(keyVal[1]) {
-                case "error" :
-                    logLevel = LoggerLevel.Error;
-                    break;
-                case "warning" :
-                    logLevel = LoggerLevel.Warning;
-                    break;
-                case "info" :
-                    logLevel = LoggerLevel.Info;
-                    break;
-                case "debug" :
-                    logLevel = LoggerLevel.Debug;
-                    break;
-                default :
-                    logLevel = LoggerLevel.Error;
-            }
-        }
-    }
-}
+/**
+ * Server's The6thScreenBackend command line arguments.
+ *
+ * @property _The6thScreenBackendArguments
+ * @type Array<string>
+ * @private
+ */
+var _The6thScreenBackendArguments : Array<string> = process.argv;
 
-Logger.setLevel(logLevel);
-
-var backend = new The6thScreenBackend();
-backend.run();
+var serverInstance = new The6thScreenBackend(_The6thScreenBackendListeningPort, _The6thScreenBackendArguments);
+serverInstance.run();

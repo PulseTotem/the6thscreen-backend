@@ -70,7 +70,7 @@ class ModelItf {
         }
 
 	    var urlCreateObject = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
-	    Logger.debug("[ModelItf] Create a new object : "+urlCreateObject+" with data : "+JSON.stringify(data));
+	    //Logger.debug("[ModelItf] Create a new object : "+urlCreateObject+" with data : "+JSON.stringify(data));
 
         var result : RestClientResponse = RestClient.postSync(urlCreateObject, data);
 
@@ -105,7 +105,7 @@ class ModelItf {
 	    }
 
 	    var urlReadObject = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), id.toString());
-	    Logger.debug("[ModelItf] Read an object : "+urlReadObject);
+	    //Logger.debug("[ModelItf] Read an object : "+urlReadObject);
 
         var result : RestClientResponse = RestClient.getSync(urlReadObject);
 
@@ -145,7 +145,7 @@ class ModelItf {
         }
 
 	    var urlUpdate = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
-	    Logger.debug("[ModelItf] Update an object with the URL : "+urlUpdate+" and data : "+JSON.stringify(data));
+	    //Logger.debug("[ModelItf] Update an object with the URL : "+urlUpdate+" and data : "+JSON.stringify(data));
 
         var result : RestClientResponse = RestClient.putSync(urlUpdate, data);
 
@@ -182,7 +182,7 @@ class ModelItf {
         }
 
 	    var urlDelete = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
-	    Logger.debug("[ModelItf] Delete an object with the URL : "+urlDelete);
+	    //Logger.debug("[ModelItf] Delete an object with the URL : "+urlDelete);
 
         var result : RestClientResponse = RestClient.deleteSync(urlDelete);
 
@@ -215,7 +215,7 @@ class ModelItf {
 		var allModelItfs : any = new Array();
 
 		var urlAll = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
-		Logger.debug("[ModelItf] Read all objects with the URL: "+urlAll);
+		//Logger.debug("[ModelItf] Read all objects with the URL: "+urlAll);
 
 		var result : RestClientResponse = RestClient.getSync(urlAll);
 
@@ -261,7 +261,7 @@ class ModelItf {
 		}
 
 		var associationURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
-		Logger.debug("[ModelItf] Associate an object with the following URL: "+associationURL);
+		//Logger.debug("[ModelItf] Associate an object with the following URL: "+associationURL);
 
 		var result : RestClientResponse = RestClient.putSync(associationURL, {});
 
@@ -294,7 +294,7 @@ class ModelItf {
 			throw new ModelException("The two modelClasses and the ID of the second objects must be given to delete the association.");
 		}
 		var deleteAssoURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
-		Logger.debug("[ModelItf] Delete Association between Objects with the following URL: "+deleteAssoURL);
+		//Logger.debug("[ModelItf] Delete Association between Objects with the following URL: "+deleteAssoURL);
 
 		var result : RestClientResponse = RestClient.deleteSync(deleteAssoURL);
 
@@ -330,7 +330,7 @@ class ModelItf {
 		}
 
 		var urlAssociatedObjects = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
-		Logger.debug("[ModelItf] Get associated objects with the URL: "+urlAssociatedObjects);
+		//Logger.debug("[ModelItf] Get associated objects with the URL: "+urlAssociatedObjects);
 
 		var result : RestClientResponse = RestClient.getSync(urlAssociatedObjects);
 
@@ -375,7 +375,7 @@ class ModelItf {
 		}
 
 		var urlUniqueAssociatedOject = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
-		Logger.debug("[ModelItf] Get a uniquely associated object with the URL: "+urlUniqueAssociatedOject);
+		//Logger.debug("[ModelItf] Get a uniquely associated object with the URL: "+urlUniqueAssociatedOject);
 
 		var result : RestClientResponse = RestClient.getSync(urlUniqueAssociatedOject);
 

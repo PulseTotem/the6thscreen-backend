@@ -2,6 +2,8 @@ module.exports = function (grunt) {
     'use strict';
 
     // load extern tasks
+    grunt.loadNpmTasks('grunt-update-json');
+    grunt.loadNpmTasks('grunt-npm-install');
     grunt.loadNpmTasks('grunt-express-server');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-watch');
@@ -33,6 +35,20 @@ module.exports = function (grunt) {
                 dest: 't6s-core/core-backend'
             }
         },
+
+        update_json: {
+            packageBuild: {
+                src: ['t6s-core/core-backend/package.json', 'package.json'],
+                dest: 'package-tmp.json',
+                fields: [
+                    'name',
+                    'version',
+                    'dependencies',
+                    'devDependencies',
+                    'overrides'
+                ]
+            }
+        },
 // ---------------------------------------------
 
 // ---------------------------------------------
@@ -47,7 +63,17 @@ module.exports = function (grunt) {
             },
 	        testConnectionInfosFile: {
 		        files: 	[{'build/tests/connection_infos.json': 'scripts/core/connection_infos-sample.json'}]
-	        }
+	        },
+
+            buildPackageBak: {
+                files: 	[{'package-bak.json': 'package.json'}]
+            },
+            buildPackageReplace: {
+                files: 	[{'package.json': 'package-tmp.json'}]
+            },
+            buildPackageReinit: {
+                files: 	[{'package.json': 'package-bak.json'}]
+            }
         },
 
         typescript: {
@@ -126,7 +152,7 @@ module.exports = function (grunt) {
             },
 
             developServer: {
-                files: ['scripts/**/*.ts'],
+                files: ['scripts/**/*.ts', 't6s-core/core-backend/scripts/**/*.ts'],
                 tasks: ['typescript:build']
             }
         },
@@ -180,6 +206,7 @@ module.exports = function (grunt) {
 //                                    clean task
 // ---------------------------------------------
         clean: {
+            package: ['package-bak.json', 'package-tmp.json'],
             build: ['build/'],
             dist: ['dist/'],
             doc: ['doc'],
@@ -194,21 +221,21 @@ module.exports = function (grunt) {
     grunt.registerTask('init', ['symlink']);
 
     grunt.registerTask('build', function () {
-        grunt.task.run(['clean:build']);
+        grunt.task.run(['clean:package', 'clean:build']);
 
-        grunt.task.run(['copy:buildConnectionInfosFile', 'typescript:build']);
+        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'typescript:build', 'clean:package']);
     });
 
     grunt.registerTask('dbinit', function () {
-        grunt.task.run(['clean:build']);
+        grunt.task.run(['clean:package', 'clean:build']);
 
-        grunt.task.run(['copy:buildConnectionInfosFile', 'typescript:dbinit']);
+        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'typescript:dbinit', 'clean:package']);
     });
 
     grunt.registerTask('dist', function () {
-        grunt.task.run(['clean:dist']);
+        grunt.task.run(['clean:package', 'clean:dist']);
 
-        grunt.task.run(['copy:distConnectionInfosFile', 'typescript:dist']);
+        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:distConnectionInfosFile', 'typescript:dist', 'clean:package']);
     });
 
     grunt.registerTask('develop', ['build', 'express:build', 'watch']);
@@ -216,9 +243,9 @@ module.exports = function (grunt) {
     grunt.registerTask('doc', ['clean:doc', 'yuidoc']);
 
     grunt.registerTask('test', function() {
-        grunt.task.run(['clean:test']);
+        grunt.task.run(['clean:package', 'clean:test']);
 
-        grunt.task.run(['copy:testConnectionInfosFile', 'typescript:test', 'mochaTest:test']);
+        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:testConnectionInfosFile', 'typescript:test', 'mochaTest:test', 'clean:package']);
 	    //grunt.task.run(['mochaTest:test']);
     });
 

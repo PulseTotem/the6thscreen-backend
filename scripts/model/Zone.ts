@@ -3,6 +3,7 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./Behaviour.ts" />
 
 /// <reference path="../customizedTypes/Percentage.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
@@ -294,12 +295,13 @@ class Zone extends ModelItf {
 	}
 
     /**
-     * To transform Zone to JSON object containing
-     * description of associations.
+     * Return a User instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
      *
-     * @method toJSONObjectWithAssociations
+     * @method toCompleteJSONObject
+     * @returns {Object} a JSON Object representing the instance
      */
-    toJSONObjectWithAssociations() : Object {
+    toCompleteJSONObject() : Object {
 	    this.loadAssociations();
         var data = this.toJSONObject();
 	    data["behaviour"] = (this.behaviour() !== null) ? this.behaviour().toJSONObject() : null;
