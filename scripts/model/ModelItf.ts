@@ -9,6 +9,7 @@
 /// <reference path="../exceptions/DataException.ts" />
 /// <reference path="../exceptions/RequestException.ts" />
 /// <reference path="../exceptions/ResponseException.ts" />
+/// <reference path="../exceptions/ResponseTimeoutException.ts" />
 /// <reference path="../exceptions/ModelException.ts" />
 
 /**
@@ -98,31 +99,93 @@ class ModelItf {
      * @static
      * @param {ModelItf Class} modelClass - The model to retrieve.
      * @param {number} id - The model instance's id.
-     */
+     * /
     static readObject(modelClass : any, id : number) {
+        Logger.debug("[ModelItf] - readObject");
 	    if (!modelClass || !id) {
+            Logger.debug("[ModelItf] - ModelException");
 		    throw new ModelException("To read an object the modelClass and the id must be given.");
 	    }
 
 	    var urlReadObject = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), id.toString());
-	    //Logger.debug("[ModelItf] Read an object : "+urlReadObject);
+	    Logger.debug("[ModelItf] Read an object : "+urlReadObject);
 
         var result : RestClientResponse = RestClient.getSync(urlReadObject);
+
+        Logger.debug("[ModelItf] - result got");
 
         if(result.success()) {
             var response = result.data();
             if(response.status == "success") {
                 if(response.data === undefined || Object.keys(response.data).length == 0 ||response.data.id === undefined) {
+                    Logger.debug("[ModelItf] - DataException : response success but empty");
 	                throw new DataException("The response is a success but the data appears to be empty or does not have the right signature when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response.data));
                 } else {
+                    Logger.debug("[ModelItf] - OK : build and send object");
                     return modelClass.fromJSONObject(response.data);
                 }
             } else {
-	            throw new ResponseException("The request failed on the server when trying to read an object with URL:"+urlReadObject+".\nMessage : "+JSON.stringify(response));
+                Logger.debug("[ModelItf] - ResponseException : failed");
+                throw new ResponseException("The request failed on the server when trying to read an object with URL:"+urlReadObject+".\nMessage : "+JSON.stringify(response));
             }
         } else {
-	        throw new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
+            if(result.response() == "Response timeout reached.") {
+                Logger.debug("[ModelItf] - ResponseTimeoutException : failed");
+                throw new ResponseTimeoutException("The request failed on the server when trying to read an object with URL:"+urlReadObject+".\nMessage : "+JSON.stringify(result.response()));
+            } else {
+                Logger.debug("[ModelItf] - RequestException : failed");
+                throw new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
+            }
         }
+    }*/
+
+    /**
+     * Retrieve model description from database and create model instance.
+     *
+     * @method readObject
+     * @static
+     * @param {ModelItf Class} modelClass - The model to retrieve.
+     * @param {number} id - The model instance's id.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    static readObject(modelClass : any, id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        Logger.debug("[ModelItf] - readObject");
+        if (!modelClass || !id) {
+            Logger.debug("[ModelItf] - ModelException");
+            failCallback(new ModelException("To read an object the modelClass and the id must be given."), id, attemptNumber);
+        }
+
+        var success : Function = function(result) {
+            Logger.debug("[ModelItf] - result got : success");
+
+            var response = result.data();
+            if(response.status == "success") {
+                if(response.data === undefined || Object.keys(response.data).length == 0 ||response.data.id === undefined) {
+                    Logger.debug("[ModelItf] - DataException : response success but empty");
+                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response.data)), id, attemptNumber);
+                } else {
+                    Logger.debug("[ModelItf] - OK : build and send object");
+                    successCallback(modelClass.fromJSONObject(response.data));
+                }
+            } else {
+                Logger.debug("[ModelItf] - ResponseException : failed");
+                failCallback(new ResponseException("The request failed on the server when trying to read an object with URL:"+urlReadObject+".\nMessage : "+JSON.stringify(response)), id, attemptNumber);
+            }
+        };
+
+        var fail : Function = function(result) {
+            Logger.debug("[ModelItf] - result got : fail");
+
+            Logger.debug("[ModelItf] - RequestException : failed");
+            failCallback(new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), id, attemptNumber);
+        };
+
+        var urlReadObject = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), id.toString());
+        Logger.debug("[ModelItf] Read an object : "+urlReadObject);
+
+        RestClient.get(urlReadObject, success, fail);
     }
 
     /**
