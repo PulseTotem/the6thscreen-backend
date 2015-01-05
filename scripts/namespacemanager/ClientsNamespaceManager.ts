@@ -23,12 +23,15 @@ class ClientsNamespaceManager extends NamespaceManager {
      */
     constructor(socket : any) {
         super(socket);
-        this.addListenerToSocket('RetrieveProfilDescription', this.sendProfilDescription);
-        this.addListenerToSocket('RetrieveUserDescription', this.sendUserDescription);
-        this.addListenerToSocket('RetrieveSDIDescription', this.sendSDIDescription);
-        this.addListenerToSocket('RetrieveZoneDescription', this.sendZoneDescription);
-        this.addListenerToSocket('RetrieveCallDescription', this.sendCallDescription);
-        this.addListenerToSocket('RetrieveCallTypeDescription', this.sendCallTypeDescription);
+
+        var self = this;
+
+        this.addListenerToSocket('RetrieveProfilDescription', function(description) { self.sendProfilDescription(description); });
+        this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
+        this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
+        this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
+        this.addListenerToSocket('RetrieveCallDescription', function(description) { self.sendCallDescription(description); });
+        this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
     }
 
     /**
@@ -291,7 +294,7 @@ class ClientsNamespaceManager extends NamespaceManager {
 
         Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : retrieveProfil");
 
-        Profil.read(parseInt(profilId), self.retrieveProfilSuccess, self.retrieveProfilFail);
+        Profil.read(parseInt(profilId), function(profil) { self.retrieveProfilSuccess(profil); }, function(error) { self.retrieveProfilFail(error, profilId); });
     }
 
     /**
@@ -306,7 +309,7 @@ class ClientsNamespaceManager extends NamespaceManager {
         var success : Function = function(completeJSONObject) {
             Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : completeJSON done.");
 
-            this.socket.emit("ProfilDescription", completeJSONObject);
+            self.socket.emit("ProfilDescription", completeJSONObject);
 
             Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : send done.");
         };
@@ -362,7 +365,7 @@ class ClientsNamespaceManager extends NamespaceManager {
         Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : userId " + userId.toString());
 
         Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : retrieveUser");
-        User.read(parseInt(userId), self.retrieveUserSuccess, self.retrieveUserFail);
+        User.read(parseInt(userId), function(user) { self.retrieveUserSuccess(user); }, function(error) { self.retrieveUserFail(error, userId); });
     }
 
     /**
@@ -370,14 +373,15 @@ class ClientsNamespaceManager extends NamespaceManager {
      *
      * @method retrieveUserSuccess
      * @param {User} user - The User Description.
+     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
      */
-    retrieveUserSuccess(user : User) {
+    retrieveUserSuccess(user : User, self : ClientsNamespaceManager = null) {
         var self = this;
 
         var success : Function = function(completeJSONObject) {
             Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : completeJSON done.");
 
-            this.socket.emit("UserDescription", completeJSONObject);
+            self.socket.emit("UserDescription", completeJSONObject);
 
             Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : send done.");
         };
@@ -434,7 +438,7 @@ class ClientsNamespaceManager extends NamespaceManager {
         Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : sdiId " + sdiId.toString());
 
         Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : retrieveSDI");
-        SDI.read(parseInt(sdiId), self.retrieveSDISuccess, self.retrieveSDIFail);
+        SDI.read(parseInt(sdiId), function(sdi) { self.retrieveSDISuccess(sdi); }, function(error) { self.retrieveSDIFail(error, sdiId); });
     }
 
     /**
@@ -449,7 +453,7 @@ class ClientsNamespaceManager extends NamespaceManager {
         var success : Function = function(completeJSONObject) {
             Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : completeJSON done.");
 
-            this.socket.emit("SDIDescription", completeJSONObject);
+            self.socket.emit("SDIDescription", completeJSONObject);
 
             Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : send done.");
         };
@@ -507,7 +511,7 @@ class ClientsNamespaceManager extends NamespaceManager {
 
         Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : retrieveZone");
 
-        Zone.read(parseInt(zoneId), self.retrieveZoneSuccess, self.retrieveZoneFail);
+        Zone.read(parseInt(zoneId), function(zone) { self.retrieveZoneSuccess(zone); }, function(error) { self.retrieveZoneFail(error, zoneId); });
     }
 
     /**
@@ -522,7 +526,7 @@ class ClientsNamespaceManager extends NamespaceManager {
         var success : Function = function(completeJSONObject) {
             Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : completeJSON done.");
 
-            this.socket.emit("ZoneDescription", completeJSONObject);
+            self.socket.emit("ZoneDescription", completeJSONObject);
 
             Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : send done.");
         };
@@ -580,7 +584,7 @@ class ClientsNamespaceManager extends NamespaceManager {
 
         Logger.debug("SocketId: " + self.socket.id + " - sendCallDescription : retrieveCall");
 
-        Call.read(parseInt(callId), self.retrieveCallSuccess, self.retrieveCallFail);
+        Call.read(parseInt(callId), function(call) { self.retrieveCallSuccess(call); }, function(error) { self.retrieveCallFail(error, callId); });
     }
 
     /**
@@ -595,7 +599,7 @@ class ClientsNamespaceManager extends NamespaceManager {
         var success : Function = function(completeJSONObject) {
             Logger.debug("SocketId: " + self.socket.id + " - sendCallDescription : completeJSON done.");
 
-            this.socket.emit("CallDescription", completeJSONObject);
+            self.socket.emit("CallDescription", completeJSONObject);
 
             Logger.debug("SocketId: " + self.socket.id + " - sendCallDescription : send done.");
         };
@@ -653,7 +657,7 @@ class ClientsNamespaceManager extends NamespaceManager {
 
         Logger.debug("SocketId: " + self.socket.id + " - sendCallTypeDescription : retrieveCallType");
 
-        CallType.read(parseInt(callTypeId), self.retrieveCallTypeSuccess, self.retrieveCallTypeFail);
+        CallType.read(parseInt(callTypeId), function(callType) { self.retrieveCallTypeSuccess(callType); }, function(error) { self.retrieveCallTypeFail(error, callTypeId); });
     }
 
     /**
@@ -668,7 +672,7 @@ class ClientsNamespaceManager extends NamespaceManager {
         var success : Function = function(completeJSONObject) {
             Logger.debug("SocketId: " + self.socket.id + " - sendCallTypeDescription : completeJSON done.");
 
-            this.socket.emit("CallTypeDescription", completeJSONObject);
+            self.socket.emit("CallTypeDescription", completeJSONObject);
 
             Logger.debug("SocketId: " + self.socket.id + " - sendCallTypeDescription : send done.");
         };

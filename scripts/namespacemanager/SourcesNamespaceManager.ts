@@ -20,10 +20,12 @@ class SourcesNamespaceManager extends NamespaceManager {
      */
     constructor(socket : any) {
         super(socket);
-        this.addListenerToSocket('RetrieveCallDescription', this.sendCallDescription);
-        this.addListenerToSocket('RetrieveCallTypeDescription', this.sendCallTypeDescription);
-        this.addListenerToSocket('RetrieveSourceDescription', this.sendSourceDescription);
-        this.addListenerToSocket('RetrieveParamValueDescription', this.sendParamValueDescription);
+        var self = this;
+
+        this.addListenerToSocket('RetrieveCallDescription', function(description) { self.sendCallDescription(description); });
+        this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
+        this.addListenerToSocket('RetrieveSourceDescription', function(description) { self.sendSourceDescription(description); });
+        this.addListenerToSocket('RetrieveParamValueDescription', function(description) { self.sendParamValueDescription(description); });
     }
 
     /**
@@ -214,7 +216,7 @@ class SourcesNamespaceManager extends NamespaceManager {
 
         Logger.debug("SocketId: " + self.socket.id + " - sendCallDescription : retrieveCall");
 
-        Call.read(parseInt(callId), self.retrieveCallSuccess, self.retrieveCallFail);
+        Call.read(parseInt(callId), function(call) { self.retrieveCallSuccess(call); }, function(error) { self.retrieveCallFail(error, callId); });
     }
 
     /**
@@ -229,7 +231,7 @@ class SourcesNamespaceManager extends NamespaceManager {
         var success : Function = function(completeJSONObject) {
             Logger.debug("SocketId: " + self.socket.id + " - sendCallDescription : completeJSON done.");
 
-            this.socket.emit("CallDescription", completeJSONObject);
+            self.socket.emit("CallDescription", completeJSONObject);
 
             Logger.debug("SocketId: " + self.socket.id + " - sendCallDescription : send done.");
         };
@@ -287,7 +289,7 @@ class SourcesNamespaceManager extends NamespaceManager {
 
         Logger.debug("SocketId: " + self.socket.id + " - sendCallTypeDescription : retrieveCallType");
 
-        CallType.read(parseInt(callTypeId), self.retrieveCallTypeSuccess, self.retrieveCallTypeFail);
+        CallType.read(parseInt(callTypeId), function(callType) { self.retrieveCallTypeSuccess(callType); }, function(error) { self.retrieveCallTypeFail(error, callTypeId); });
     }
 
     /**
@@ -302,7 +304,7 @@ class SourcesNamespaceManager extends NamespaceManager {
         var success : Function = function(completeJSONObject) {
             Logger.debug("SocketId: " + self.socket.id + " - sendCallTypeDescription : completeJSON done.");
 
-            this.socket.emit("CallTypeDescription", completeJSONObject);
+            self.socket.emit("CallTypeDescription", completeJSONObject);
 
             Logger.debug("SocketId: " + self.socket.id + " - sendCallTypeDescription : send done.");
         };
@@ -360,7 +362,7 @@ class SourcesNamespaceManager extends NamespaceManager {
 
         Logger.debug("SocketId: " + self.socket.id + " - sendSourceDescription : retrieveSource");
 
-        Source.read(parseInt(sourceId), self.retrieveSourceSuccess, self.retrieveSourceFail);
+        Source.read(parseInt(sourceId), function(source) { self.retrieveSourceSuccess(source); }, function(error) { self.retrieveSourceFail(error, sourceId); });
     }
 
     /**
@@ -375,7 +377,7 @@ class SourcesNamespaceManager extends NamespaceManager {
         var success : Function = function(completeJSONObject) {
             Logger.debug("SocketId: " + self.socket.id + " - sendSourceDescription : completeJSON done.");
 
-            this.socket.emit("SourceDescription", completeJSONObject);
+            self.socket.emit("SourceDescription", completeJSONObject);
 
             Logger.debug("SocketId: " + self.socket.id + " - sendSourceDescription : send done.");
         };
@@ -433,7 +435,7 @@ class SourcesNamespaceManager extends NamespaceManager {
 
         Logger.debug("SocketId: " + self.socket.id + " - sendParamValueDescription : retrieveParamValue");
 
-        ParamValue.read(parseInt(paramValueId), self.retrieveParamValueSuccess, self.retrieveParamValueFail);
+        ParamValue.read(parseInt(paramValueId), function(paramValue) { self.retrieveParamValueSuccess(paramValue); }, function(error) { self.retrieveParamValueFail(error, paramValueId); });
     }
 
     /**
@@ -448,7 +450,7 @@ class SourcesNamespaceManager extends NamespaceManager {
         var success : Function = function(completeJSONObject) {
             Logger.debug("SocketId: " + self.socket.id + " - sendParamValueDescription : completeJSON done.");
 
-            this.socket.emit("ParamValueDescription", completeJSONObject);
+            self.socket.emit("ParamValueDescription", completeJSONObject);
 
             Logger.debug("SocketId: " + self.socket.id + " - sendParamValueDescription : send done.");
         };
