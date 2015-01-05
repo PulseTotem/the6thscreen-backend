@@ -301,9 +301,23 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {Profil} profil - The Profil Description.
      */
     retrieveProfilSuccess(profil : Profil) {
-        this.socket.emit("ProfilDescription", profil.toCompleteJSONObject());
+        var self = this;
 
-        Logger.debug("SocketId: " + this.socket.id + " - sendProfilDescription : send done.");
+        var success : Function = function(completeJSONObject) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : completeJSON done.");
+
+            this.socket.emit("ProfilDescription", completeJSONObject);
+
+            Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : send done.");
+        };
+
+        var fail : Function = function(error) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : completeJSON fail.");
+            Logger.error(JSON.stringify(error));
+            //self.socket.emit("ProfilDescriptionError", ???);
+        };
+
+        profil.toCompleteJSONObject(success, fail);
     }
 
     /**
@@ -358,9 +372,23 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {User} user - The User Description.
      */
     retrieveUserSuccess(user : User) {
-        this.socket.emit("UserDescription", user.toCompleteJSONObject());
+        var self = this;
 
-        Logger.debug("SocketId: " + this.socket.id + " - sendUserDescription : send done.");
+        var success : Function = function(completeJSONObject) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : completeJSON done.");
+
+            this.socket.emit("UserDescription", completeJSONObject);
+
+            Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : send done.");
+        };
+
+        var fail : Function = function(error) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : completeJSON fail.");
+            Logger.error(JSON.stringify(error));
+            //self.socket.emit("UserDescriptionError", ???);
+        };
+
+        user.toCompleteJSONObject(success, fail);
     }
 
     /**
@@ -416,9 +444,23 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {SDI} sdi - The SDI Description.
      */
     retrieveSDISuccess(sdi : SDI) {
-        this.socket.emit("SDIDescription", sdi.toCompleteJSONObject());
+        var self = this;
 
-        Logger.debug("SocketId: " + this.socket.id + " - sendSDIDescription : send done.");
+        var success : Function = function(completeJSONObject) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : completeJSON done.");
+
+            this.socket.emit("SDIDescription", completeJSONObject);
+
+            Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : send done.");
+        };
+
+        var fail : Function = function(error) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : completeJSON fail.");
+            Logger.error(JSON.stringify(error));
+            //self.socket.emit("SDIDescriptionError", ???);
+        };
+
+        sdi.toCompleteJSONObject(success, fail);
     }
 
     /**
@@ -475,9 +517,23 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {Zone} zone - The Zone Description.
      */
     retrieveZoneSuccess(zone : Zone) {
-        this.socket.emit("ZoneDescription", zone.toCompleteJSONObject());
+        var self = this;
 
-        Logger.debug("SocketId: " + this.socket.id + " - sendZoneDescription : send done.");
+        var success : Function = function(completeJSONObject) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : completeJSON done.");
+
+            this.socket.emit("ZoneDescription", completeJSONObject);
+
+            Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : send done.");
+        };
+
+        var fail : Function = function(error) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : completeJSON fail.");
+            Logger.error(JSON.stringify(error));
+            //self.socket.emit("ZoneDescriptionError", ???);
+        };
+
+        zone.toCompleteJSONObject(success, fail);
     }
 
     /**
@@ -534,9 +590,23 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {Call} call - The Call Description.
      */
     retrieveCallSuccess(call : Call) {
-        this.socket.emit("CallDescription", call.toCompleteJSONObject());
+        var self = this;
 
-        Logger.debug("SocketId: " + this.socket.id + " - sendCallDescription : send done.");
+        var success : Function = function(completeJSONObject) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendCallDescription : completeJSON done.");
+
+            this.socket.emit("CallDescription", completeJSONObject);
+
+            Logger.debug("SocketId: " + self.socket.id + " - sendCallDescription : send done.");
+        };
+
+        var fail : Function = function(error) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendCallDescription : completeJSON fail.");
+            Logger.error(JSON.stringify(error));
+            //self.socket.emit("CallDescriptionError", ???);
+        };
+
+        call.toCompleteJSONObject(success, fail);
     }
 
     /**
@@ -593,9 +663,23 @@ class ClientsNamespaceManager extends NamespaceManager {
      * @param {CallType} calltype - The CallType Description.
      */
     retrieveCallTypeSuccess(calltype : CallType) {
-        this.socket.emit("CallTypeDescription", calltype.toCompleteJSONObject());
+        var self = this;
 
-        Logger.debug("SocketId: " + this.socket.id + " - sendCallTypeDescription : send done.");
+        var success : Function = function(completeJSONObject) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendCallTypeDescription : completeJSON done.");
+
+            this.socket.emit("CallTypeDescription", completeJSONObject);
+
+            Logger.debug("SocketId: " + self.socket.id + " - sendCallTypeDescription : send done.");
+        };
+
+        var fail : Function = function(error) {
+            Logger.debug("SocketId: " + self.socket.id + " - sendCallTypeDescription : completeJSON fail.");
+            Logger.error(JSON.stringify(error));
+            //self.socket.emit("CallTypeDescriptionError", ???);
+        };
+
+        calltype.toCompleteJSONObject(success, fail);
     }
 
     /**
