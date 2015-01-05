@@ -247,14 +247,41 @@ class Source extends ModelItf {
      * @method infoType
      */
     infoType() {
-        if(! this._info_type_loaded) {
-	        var value = this.getUniquelyAssociatedObject(Source, InfoType);
-	        if (!!value) {
-		        this._info_type = value;
-	        }
-	        this._info_type_loaded = true;
-        }
         return this._info_type;
+    }
+
+    /**
+     * Load the Source's infoType.
+     *
+     * @method loadInfoType
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadInfoType(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._info_type_loaded) {
+            var self = this;
+            var success : Function = function(infoType) {
+                if(!!infoType) {
+                    self._info_type = infoType;
+                }
+                self._info_type_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(Source, InfoType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -263,12 +290,39 @@ class Source extends ModelItf {
      * @method paramTypes
      */
     paramTypes() {
-        if(! this._param_types_loaded) {
-            this.getAssociatedObjects(Source, ParamType, this._param_types);
-
-	        this._param_types_loaded = true;
-        }
         return this._param_types;
+    }
+
+    /**
+     * Load the Source's paramTypes.
+     *
+     * @method loadParamTypes
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadParamTypes(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._param_types_loaded) {
+            var self = this;
+            var success : Function = function(paramTypes) {
+                self._param_types = paramTypes;
+                self._param_types_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Source, ParamType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -277,12 +331,39 @@ class Source extends ModelItf {
      * @method paramValues
      */
     paramValues() {
-        if(! this._param_values_loaded) {
-            this.getAssociatedObjects(Source, ParamValue, this._param_values);
-
-	        this._param_values_loaded = true;
-        }
         return this._param_values;
+    }
+
+    /**
+     * Load the Source's paramValues.
+     *
+     * @method loadParamValues
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadParamValues(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._param_values_loaded) {
+            var self = this;
+            var success : Function = function(paramValues) {
+                self._param_values = paramValues;
+                self._param_values_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Source, ParamValue, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
@@ -292,12 +373,45 @@ class Source extends ModelItf {
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
+	 * /
 	loadAssociations() : void {
 		this.paramTypes();
 		this.paramValues();
 		this.infoType();
-	}
+	}*/
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._param_types_loaded && self._param_values_loaded && self._info_type_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+
+        this.loadParamTypes(success, fail);
+        this.loadParamValues(success, fail);
+        this.loadInfoType(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -334,7 +448,7 @@ class Source extends ModelItf {
 	 *
 	 * @method toCompleteJSONObject
 	 * @returns {Object} a JSON Object representing the instance
-	 */
+	 * /
 	toCompleteJSONObject() : Object {
 		this.loadAssociations();
 		var data = this.toJSONObject();
@@ -342,7 +456,34 @@ class Source extends ModelItf {
 		data["paramTypes"] = this.serializeArray(this.paramTypes());
 		data["paramValues"] = this.serializeArray(this.paramValues());
 		return data;
-	}
+	}*/
+
+    /**
+     * Return a Source instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["infoType"] = (self.infoType() !== null) ? self.infoType().toJSONObject() : null;
+            data["paramTypes"] = self.serializeArray(self.paramTypes());
+            data["paramValues"] = self.serializeArray(self.paramValues());
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Set the InfoType of the Source.

@@ -111,12 +111,39 @@ class Timeline extends ModelItf {
      * @method profils
      */
     profils() {
-        if(! this._profils_loaded) {
-            this.getAssociatedObjects(Timeline, Profil, this._profils);
-
-	        this._profils_loaded = true;
-        }
         return this._profils;
+    }
+
+    /**
+     * Load the Timeline's profils.
+     *
+     * @method loadProfils
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadProfils(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._profils_loaded) {
+            var self = this;
+            var success : Function = function(profils) {
+                self._profils = profils;
+                self._profils_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Timeline, Profil, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
@@ -126,10 +153,40 @@ class Timeline extends ModelItf {
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
+	 * /
 	loadAssociations() : void {
 		this.profils();
-	}
+	}*/
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._profils_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadProfils(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -161,13 +218,39 @@ class Timeline extends ModelItf {
 	 *
 	 * @method toCompleteJSONObject
 	 * @returns {Object} a JSON Object representing the instance
-	 */
+	 * /
 	toCompleteJSONObject() : Object {
 		this.loadAssociations();
 		var data = this.toJSONObject();
 		data["profils"] = this.serializeArray(this.profils());
 		return data;
-	}
+	}*/
+
+    /**
+     * Return a Timeline instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["profils"] = self.serializeArray(self.profils());
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
+
 	/**
 	 * Add a new Profil to the Timeline and associate it in the database.
 	 * A Profil can only be added once.

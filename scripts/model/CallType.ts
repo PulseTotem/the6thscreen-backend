@@ -191,14 +191,41 @@ class CallType extends ModelItf {
      * @method source
      */
     source() {
-        if(! this._source_loaded) {
-	        var value = this.getUniquelyAssociatedObject(CallType, Source);
-			if (!!value) {
-				this._source = value;
-			}
-	        this._source_loaded = true;
-        }
         return this._source;
+    }
+
+    /**
+     * Load the CallType's source.
+     *
+     * @method loadSource
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadSource(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._source_loaded) {
+            var self = this;
+            var success : Function = function(source) {
+                if(!!source) {
+                    self._source = source;
+                }
+                self._source_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(CallType, Source, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -207,14 +234,41 @@ class CallType extends ModelItf {
      * @method renderer
      */
     renderer() {
-        if(! this._renderer_loaded) {
-	        var value = this.getUniquelyAssociatedObject(CallType, Renderer);
-	        if (!!value) {
-		        this._renderer = value;
-	        }
-	        this._renderer_loaded = true;
-        }
         return this._renderer;
+    }
+
+    /**
+     * Load the CallType's renderer.
+     *
+     * @method loadRenderer
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadRenderer(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._renderer_loaded) {
+            var self = this;
+            var success : Function = function(renderer) {
+                if(!!renderer) {
+                    self._renderer = renderer;
+                }
+                self._renderer_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(CallType, Renderer, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -223,14 +277,41 @@ class CallType extends ModelItf {
      * @method receivePolicy
      */
     receivePolicy() {
-        if(! this._receive_policy_loaded) {
-	        var value = this.getUniquelyAssociatedObject(CallType, ReceivePolicy);
-	        if (!!value) {
-		        this._receive_policy = value;
-	        }
-	        this._receive_policy_loaded = true;
-        }
         return this._receive_policy;
+    }
+
+    /**
+     * Load the CallType's receivePolicy.
+     *
+     * @method loadReceivePolicy
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadReceivePolicy(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._receive_policy_loaded) {
+            var self = this;
+            var success : Function = function(receivePolicy) {
+                if(!!receivePolicy) {
+                    self._receive_policy = receivePolicy;
+                }
+                self._receive_policy_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(CallType, ReceivePolicy, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -239,14 +320,41 @@ class CallType extends ModelItf {
      * @method renderPolicy
      */
     renderPolicy() {
-        if(! this._render_policy_loaded) {
-	        var value = this.getUniquelyAssociatedObject(CallType, RenderPolicy);
-	        if (!!value) {
-		        this._render_policy = value;
-	        }
-	        this._render_policy_loaded = true;
-        }
         return this._render_policy;
+    }
+
+    /**
+     * Load the CallType's renderPolicy.
+     *
+     * @method loadRenderPolicy
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadRenderPolicy(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._render_policy_loaded) {
+            var self = this;
+            var success : Function = function(renderPolicy) {
+                if(!!renderPolicy) {
+                    self._render_policy = renderPolicy;
+                }
+                self._render_policy_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(CallType, RenderPolicy, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
 	/**
@@ -255,15 +363,42 @@ class CallType extends ModelItf {
      * @method zone
 	 */
 	zone() {
-		if(! this._zone_loaded) {
-			var value = this.getUniquelyAssociatedObject(CallType, Zone);
-			if (!!value) {
-				this._zone = value;
-			}
-			this._zone_loaded = true;
-		}
 		return this._zone;
 	}
+
+    /**
+     * Load the CallType's zone.
+     *
+     * @method loadZone
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadZone(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._zone_loaded) {
+            var self = this;
+            var success : Function = function(zone) {
+                if(!!zone) {
+                    self._zone = zone;
+                }
+                self._zone_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(CallType, Zone, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -272,14 +407,48 @@ class CallType extends ModelItf {
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
+	 * /
 	loadAssociations() : void {
 		this.source();
 		this.renderer();
 		this.receivePolicy();
 		this.renderPolicy();
 		this.zone();
-	}
+	}*/
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._source_loaded && self._renderer_loaded && self._receive_policy_loaded && self._render_policy_loaded && self._zone_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadSource(success, fail);
+        this.loadRenderer(success, fail);
+        this.loadReceivePolicy(success, fail);
+        this.loadRenderPolicy(success, fail);
+        this.loadZone(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -315,7 +484,7 @@ class CallType extends ModelItf {
 	 *
 	 * @method toCompleteJSONObject
 	 * @returns {Object} a JSON Object representing the instance
-	 */
+	 * /
 	toCompleteJSONObject() : Object {
 		this.loadAssociations();
 		var data = this.toJSONObject();
@@ -325,7 +494,36 @@ class CallType extends ModelItf {
 		data["receivePolicy"] = (this.receivePolicy() !== null) ? this.receivePolicy().toJSONObject() : null;
 		data["renderPolicy"] = (this.renderPolicy() !== null) ? this.renderPolicy().toJSONObject() : null;
 		return data;
-	}
+	}*/
+
+    /**
+     * Return a CallType instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["source"] = (self.source() !== null) ? self.source().toJSONObject() : null;
+            data["renderer"] = (self.renderer() !== null) ? self.renderer().toJSONObject() : null;
+            data["zone"] = (self.zone() !== null) ? self.zone().toJSONObject() : null;
+            data["receivePolicy"] = (self.receivePolicy() !== null) ? self.receivePolicy().toJSONObject() : null;
+            data["renderPolicy"] = (self.renderPolicy() !== null) ? self.renderPolicy().toJSONObject() : null;
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Set the Source of the CallType.

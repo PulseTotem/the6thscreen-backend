@@ -45,7 +45,7 @@ class ConstraintParamType extends ModelItf {
 	 * @property _type_loading
 	 * @type boolean
 	 */
-	private _type_loading : boolean;
+	private _type_loaded : boolean;
 
 	/**
 	 * Constructor.
@@ -61,7 +61,7 @@ class ConstraintParamType extends ModelItf {
 		this.setDescription(description);
 
 		this._type = null;
-		this._type_loading = false;
+		this._type_loaded = false;
 	}
 
 	/**
@@ -110,15 +110,42 @@ class ConstraintParamType extends ModelItf {
      * @method type
 	 */
 	type() {
-		if (!this._type_loading) {
-			var value = this.getUniquelyAssociatedObject(ConstraintParamType, TypeParamType);
-			if (!!value) {
-				this._type = value;
-			}
-			this._type_loading = true;
-		}
 		return this._type;
 	}
+
+    /**
+     * Load the ConstraintParamType's type
+     *
+     * @method loadType
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadType(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._type_loaded) {
+            var self = this;
+            var success : Function = function(type) {
+                if(!!type) {
+                    self._type = type;
+                }
+                self._type_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(ConstraintParamType, TypeParamType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
 
 	//////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -127,10 +154,40 @@ class ConstraintParamType extends ModelItf {
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
+	 * /
 	loadAssociations() : void {
 		this.type();
-	}
+	}*/
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._type_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadType(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -138,7 +195,7 @@ class ConstraintParamType extends ModelItf {
      * @method desynchronize
 	 */
 	desynchronize() : void {
-		this._type_loading = false;
+		this._type_loaded = false;
 	}
 
 	/**
@@ -162,13 +219,38 @@ class ConstraintParamType extends ModelItf {
 	 *
 	 * @method toCompleteJSONObject
 	 * @returns {Object} a JSON Object representing the instance
-	 */
+	 * /
 	toCompleteJSONObject() : Object {
 		this.loadAssociations();
 		var data = this.toJSONObject();
 		data["type"] = (this.type() !== null) ? this.type().toJSONObject() : null;
 		return data;
-	}
+	}*/
+
+    /**
+     * Return a ConstraintParamType instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["type"] = (self.type() !== null) ? self.type().toJSONObject() : null;
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Set the type of the ConstraintParamType.
@@ -191,7 +273,7 @@ class ConstraintParamType extends ModelItf {
 		if (this.associateObject(ConstraintParamType, TypeParamType, t.getId())) {
 			t.desynchronize();
 			this._type = t;
-			this._type_loading = true;
+			this._type_loaded = true;
 			return true;
 		} else {
 			return false;

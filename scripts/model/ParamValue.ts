@@ -84,15 +84,42 @@ class ParamValue extends ModelItf {
      * @method paramType
 	 */
 	paramType() {
-		if(! this._paramType_loaded) {
-			var value = this.getUniquelyAssociatedObject(ParamValue, ParamType);
-			if (!!value) {
-				this._paramType = value;
-			}
-			this._paramType_loaded = true;
-		}
 		return this._paramType;
 	}
+
+    /**
+     * Load the ParamValue's ParamType.
+     *
+     * @method loadParamType
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadParamType(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._paramType_loaded) {
+            var self = this;
+            var success : Function = function(paramType) {
+                if(!!paramType) {
+                    self._paramType = paramType;
+                }
+                self._paramType_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(ParamValue, ParamType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -101,10 +128,40 @@ class ParamValue extends ModelItf {
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
+	 * /
 	loadAssociations() : void {
 		this.paramType();
-	}
+	}*/
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._paramType_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadParamType(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -135,13 +192,38 @@ class ParamValue extends ModelItf {
 	 *
 	 * @method toCompleteJSONObject
 	 * @returns {Object} a JSON Object representing the instance
-	 */
+	 * /
 	toCompleteJSONObject() : Object {
 		this.loadAssociations();
 		var data = this.toJSONObject();
 		data["paramType"] = (this.paramType() !== null) ? this.paramType().toJSONObject() : null;
 		return data;
-	}
+	}*/
+
+    /**
+     * Return a ParamValue instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["paramType"] = (self.paramType() !== null) ? self.paramType().toJSONObject() : null;
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Set the ParamType of the ParamValue.

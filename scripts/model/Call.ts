@@ -124,11 +124,35 @@ class Call extends ModelItf {
      * @method paramValues
      */
     paramValues() {
-        if(! this._param_values_loaded) {
-            this.getAssociatedObjects(Call, ParamValue, this._param_values);
-	        this._param_values_loaded = true;
-        }
         return this._param_values;
+    }
+
+    /**
+     * Load the Profil's paramValues.
+     *
+     * @method loadParamValues
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadParamValues(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._param_values_loaded) {
+            var self = this;
+            var success : Function = function(param_values) {
+                self._param_values = param_values;
+                self._param_values_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Call, ParamValue, success, fail);
+        }
     }
 
 	/**
@@ -137,15 +161,42 @@ class Call extends ModelItf {
      * @method profil
 	 */
 	profil() {
-		if(! this._profil_loaded) {
-			var value = this.getUniquelyAssociatedObject(Call, Profil);
-			if (!!value) {
-				this._profil = value;
-			}
-			this._profil_loaded = true;
-		}
 		return this._profil;
 	}
+
+    /**
+     * Load the Call's profil.
+     *
+     * @method loadProfil
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadProfil(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._profil_loaded) {
+            var self = this;
+            var success : Function = function(profil) {
+                if(!!profil) {
+                    self._profil = profil;
+                }
+                self._profil_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(Call, Profil, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
 
 	/**
 	 * Return the Call's type.
@@ -153,15 +204,42 @@ class Call extends ModelItf {
      * @method callType
 	 */
 	callType() {
-		if(! this._call_type_loaded) {
-			var value = this.getUniquelyAssociatedObject(Call, CallType);
-			if (!!value) {
-				this._call_type = value;
-			}
-			this._call_type_loaded = true;
-		}
 		return this._call_type;
 	}
+
+    /**
+     * Load the Call's type.
+     *
+     * @method loadCallType
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadCallType(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._call_type_loaded) {
+            var self = this;
+            var success : Function = function(call_type) {
+                if(!!call_type) {
+                    self._call_type = call_type;
+                }
+                self._call_type_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(Call, CallType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -170,12 +248,44 @@ class Call extends ModelItf {
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
+	 * /
 	loadAssociations() : void {
 		this.paramValues();
 		this.profil();
 		this.callType();
-	}
+	}*/
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._param_values_loaded && self._profil_loaded && self._call_type_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadParamValues(success, fail);
+        this.loadProfil(success, fail);
+        this.loadCallType(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -208,7 +318,7 @@ class Call extends ModelItf {
 	 *
 	 * @method toCompleteJSONObject
 	 * @returns {Object} a JSON Object representing the instance
-	 */
+	 * /
 	toCompleteJSONObject() : Object {
 		this.loadAssociations();
 		var data = this.toJSONObject();
@@ -216,7 +326,34 @@ class Call extends ModelItf {
 		data["profil"] = (this.profil() !== null) ? this.profil().toJSONObject() : null;
 		data["paramValues"] = this.serializeArray(this.paramValues());
 		return data;
-	}
+	}*/
+
+    /**
+     * Return a Call instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["callType"] = (self.callType() !== null) ? self.callType().toJSONObject() : null;
+            data["profil"] = (self.profil() !== null) ? self.profil().toJSONObject() : null;
+            data["paramValues"] = self.serializeArray(self.paramValues());
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Add a new ParamValue to the Call and associate it in the database.

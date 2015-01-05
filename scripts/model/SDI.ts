@@ -199,12 +199,39 @@ class SDI extends ModelItf {
      * @method users
      */
     users() {
-        if(! this._users_loaded) {
-	        this.getAssociatedObjects(SDI, User, this._users);
-
-	        this._users_loaded = true;
-        }
         return this._users;
+    }
+
+    /**
+     * Load the SDI's users.
+     *
+     * @method loadUsers
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadUsers(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._users_loaded) {
+            var self = this;
+            var success : Function = function(users) {
+                self._users = users;
+                self._users_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(SDI, User, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -213,26 +240,80 @@ class SDI extends ModelItf {
      * @method zones
      */
     zones() {
-        if(! this._zones_loaded) {
-            this.getAssociatedObjects(SDI, Zone, this._zones);
-
-	        this._zones_loaded = true;
-        }
         return this._zones;
     }
 
     /**
-     * Return the SDI's profiles.
+     * Load the SDI's zones.
+     *
+     * @method loadZones
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadZones(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._zones_loaded) {
+            var self = this;
+            var success : Function = function(zones) {
+                self._zones = zones;
+                self._zones_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(SDI, Zone, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
+    /**
+     * Return the SDI's profils.
      *
      * @method profils
      */
     profils() {
-        if(! this._profils_loaded) {
-            this.getAssociatedObjects(SDI, Profil, this._profils);
-
-	        this._profils_loaded = true;
-        }
         return this._profils;
+    }
+
+    /**
+     * Load the SDI's profils.
+     *
+     * @method loadProfils
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadProfils(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._profils_loaded) {
+            var self = this;
+            var success : Function = function(profils) {
+                self._profils = profils;
+                self._profils_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(SDI, Profil, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -241,12 +322,39 @@ class SDI extends ModelItf {
      * @method timelines
      */
     timelines() {
-        if(! this._timelines_loaded) {
-            this.getAssociatedObjects(SDI, Timeline, this._timelines);
-
-	        this._timelines_loaded = true;
-        }
         return this._timelines;
+    }
+
+    /**
+     * Load the SDI's timelines.
+     *
+     * @method loadTimelines
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadTimelines(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._timelines_loaded) {
+            var self = this;
+            var success : Function = function(timelines) {
+                self._timelines = timelines;
+                self._timelines_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(SDI, Timeline, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
@@ -256,13 +364,46 @@ class SDI extends ModelItf {
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
+	 * /
 	loadAssociations() {
 		this.users();
 		this.profils();
 		this.zones();
 		this.timelines();
-	}
+	}*/
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._users_loaded && self._profils_loaded && self._zones_loaded && self._timelines_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadUsers(success, fail);
+        this.loadProfils(success, fail);
+        this.loadZones(success, fail);
+        this.loadTimelines(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -298,7 +439,7 @@ class SDI extends ModelItf {
 	 *
 	 * @method toCompleteJSONObject
 	 * @returns {Object} a JSON Object representing the instance
-	 */
+	 * /
 	toCompleteJSONObject() : Object {
 		this.loadAssociations();
 		var data = this.toJSONObject();
@@ -307,7 +448,35 @@ class SDI extends ModelItf {
 		data["users"] = this.serializeArray(this.users());
 		data["zones"] = this.serializeArray(this.zones());
 		return data;
-	}
+	}*/
+
+    /**
+     * Return a SDI instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["profils"] = self.serializeArray(self.profils());
+            data["timelines"] = self.serializeArray(self.timelines());
+            data["users"] = self.serializeArray(self.users());
+            data["zones"] = self.serializeArray(self.zones());
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Add a new User to the SDI and associate it in the database.

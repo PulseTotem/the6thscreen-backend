@@ -104,12 +104,39 @@ class User extends ModelItf {
      * @method roles
      */
     roles() {
-        if(! this._roles_loaded) {
-            this.getAssociatedObjects(User, Role, this._roles);
-
-	        this._roles_loaded = true;
-        }
         return this._roles;
+    }
+
+    /**
+     * Load the User's roles.
+     *
+     * @method loadRoles
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadRoles(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._roles_loaded) {
+            var self = this;
+            var success : Function = function(roles) {
+                self._roles = roles;
+                self._roles_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(User, Role, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -118,12 +145,39 @@ class User extends ModelItf {
      * @method sdis
      */
     sdis() {
-        if(! this._sdis_loaded) {
-            this.getAssociatedObjects(User, SDI, this._sdis);
-
-	        this._sdis_loaded = true;
-        }
         return this._sdis;
+    }
+
+    /**
+     * Load the SDIs owned by the User.
+     *
+     * @method loadSdis
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadSdis(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._sdis_loaded) {
+            var self = this;
+            var success : Function = function(sdis) {
+                self._sdis = sdis;
+                self._sdis_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(User, SDI, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
@@ -133,11 +187,42 @@ class User extends ModelItf {
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
+	 * /
 	loadAssociations() : void {
 		this.roles();
 		this.sdis();
-	}
+	}*/
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._roles_loaded && self._sdis_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadRoles(success, fail);
+        this.loadSdis(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -169,14 +254,40 @@ class User extends ModelItf {
 	 *
 	 * @method toCompleteJSONObject
 	 * @returns {Object} a JSON Object representing the instance
-	 */
+	 * /
 	toCompleteJSONObject() : Object {
 		this.loadAssociations();
 		var data = this.toJSONObject();
 		data["roles"] = this.serializeArray(this.roles());
 		data["sdis"] = this.serializeArray(this.sdis());
 		return data;
-	}
+	}*/
+
+    /**
+     * Return a User instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["roles"] = self.serializeArray(self.roles());
+            data["sdis"] = self.serializeArray(self.sdis());
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Add a new SDI to the User and associate it in the database.

@@ -113,13 +113,56 @@ class Profil extends ModelItf {
      *
      * @method calls
      * @return {Array<Call>} The Profil's calls.
-     */
+     * /
     calls() : Array<Call> {
         if(! this._calls_loaded) {
-            this.getAssociatedObjects(Profil, Call, this._calls);
+            this.getAssociatedObjects(Profil, Call);
+            this._calls
 	        this._calls_loaded = true;
         }
         return this._calls;
+    }*/
+
+    /**
+     * Return the Profil's calls.
+     *
+     * @method calls
+     * @return {Array<Call>} The Profil's calls.
+     */
+    calls() : Array<Call> {
+        return this._calls;
+    }
+
+    /**
+     * Load the Profil's calls.
+     *
+     * @method loadCalls
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadCalls(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._calls_loaded) {
+            var self = this;
+            var success : Function = function(calls) {
+                self._calls = calls;
+                self._calls_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Profil, Call, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
@@ -129,9 +172,29 @@ class Profil extends ModelItf {
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	loadAssociations() : void {
-		this.calls();
+	loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._calls_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadCalls(success, fail);
 	}
 
 	/**
@@ -164,12 +227,36 @@ class Profil extends ModelItf {
 	 *
 	 * @method toCompleteJSONObject
 	 * @returns {Object} a JSON Object representing the instance
-	 */
+	 * /
 	toCompleteJSONObject() : Object {
 		var data = this.toJSONObject();
 		data["calls"] = this.serializeArray(this.calls());
 		return data;
-	}
+	}*/
+
+    /**
+     * Return a Profil instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["calls"] = self.serializeArray(self.calls());
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Add a new Call to the Profil and associate it in the database.

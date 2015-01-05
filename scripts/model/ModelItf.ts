@@ -380,7 +380,7 @@ class ModelItf {
 	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
 	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
 	 * @param assoName - the array in which the objects have to be pushed
-	 */
+	 * /
 	getAssociatedObjects(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) {
 		if (!this.getId()) {
 			throw new ModelException("You cannot retrieve associated objects if the object does not exist.");
@@ -418,7 +418,57 @@ class ModelItf {
 		} else {
 			throw new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
 		}
-	}
+	}*/
+
+    /**
+     * Retrieve all associated objects
+     *
+     * @method getAssociatedObjects
+     * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
+     * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    getAssociatedObjects(modelClass : any, modelClassAssociated : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        if (!this.getId()) {
+            failCallback(new ModelException("You cannot retrieve associated objects if the object does not exist."), attemptNumber);
+        }
+        if (!modelClass || !modelClassAssociated) {
+            failCallback(new ModelException("The two modelClasses must be given as arguments to retrieve objects."), attemptNumber);
+        }
+
+        var success : Function = function(result) {
+            var response = result.data();
+            if(response.status == "success") {
+                if(response.data === undefined || !(response.data instanceof Array)) {
+                    failCallback(new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAssociatedObjects+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
+                } else {
+                    var assoName : Array<ModelItf> = new Array<ModelItf>();
+                    for(var i = 0; i < response.data.length; i++) {
+                        var object = response.data[i];
+                        if (object.id === undefined) {
+                            failCallback(new DataException("One data does not have any ID when retrieving all objects with URL: "+urlAssociatedObjects+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
+                            return;
+                        } else {
+                            assoName.push(modelClassAssociated.fromJSONObject(object));
+                        }
+                    }
+                    successCallback(assoName);
+                }
+            } else {
+                failCallback(new ResponseException("The request failed on the server when trying to retrieve all objects with URL:"+urlAssociatedObjects+".\nMessage : "+JSON.stringify(response)), attemptNumber);
+            }
+        };
+
+        var fail : Function = function(result) {
+            failCallback(new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+        };
+
+        var urlAssociatedObjects = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
+
+        RestClient.get(urlAssociatedObjects, success, fail);
+    }
 
 	/**
 	 * Retrieve all associated objects
@@ -428,7 +478,7 @@ class ModelItf {
 	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
 	 * @param assoName - where the object have to be saved
 	 * @returns {boolean}
-	 */
+	 * /
 	getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any) : any {
 		if (!this.getId()) {
 			throw new ModelException("You cannot retrieve uniquely associated object if the object does not exist.");
@@ -460,7 +510,52 @@ class ModelItf {
 		} else {
 			throw new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
 		}
-	}
+	}*/
+
+    /**
+     * Retrieve unique associated object
+     *
+     * @method getUniquelyAssociatedObject
+     * @param modelClass - the first model class, corresponding to the object responsible to get associated object
+     * @param modelClassAssociated - the second model class, corresponding to the object retrieved
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        if (!this.getId()) {
+            failCallback(new ModelException("You cannot retrieve uniquely associated object if the object does not exist."), attemptNumber);
+        }
+        if (!modelClass || !modelClassAssociated) {
+            failCallback(new ModelException("The two modelClasses arguments must be given to retrieve a uniquely associated object."), attemptNumber);
+        }
+
+        var success : Function = function(result) {
+            var response = result.data();
+            if(response.status == "success") {
+
+                // in that case tere is no data to retrieve
+                if ((response.data instanceof Array) && (response.data.length == 0)) {
+                    successCallback(null);
+                }
+                if(response.data === undefined || response.data.id === undefined) {
+                    failCallback(new DataException("The response is a success but the data does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
+                } else {
+                    successCallback(modelClassAssociated.fromJSONObject(response.data));
+                }
+            } else {
+                failCallback(new ResponseException("The request failed on the server when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nMessage : "+JSON.stringify(response)), attemptNumber);
+            }
+        };
+
+        var fail : Function = function(result) {
+            failCallback(new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+        };
+
+        var urlUniqueAssociatedOject = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
+
+        RestClient.get(urlUniqueAssociatedOject, success, fail);
+    }
 
 
 
@@ -471,8 +566,18 @@ class ModelItf {
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
-	loadAssociations() : void {}
+	 * /
+	loadAssociations() : void {}*/
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {}
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -584,10 +689,34 @@ class ModelItf {
 	 *
 	 * @method toCompleteJSONObject
 	 * @returns {Object} a JSON Object representing the instance
-	 */
+	 * /
 	toCompleteJSONObject() : Object {
 		return this.toJSONObject();
-	}
+	}*/
+
+    /**
+     * Return a ModelItf instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
     /**
      * Return a ModelItf instance from a JSON string.
