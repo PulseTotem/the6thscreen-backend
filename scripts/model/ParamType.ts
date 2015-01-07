@@ -279,18 +279,6 @@ class ParamType extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
-     *
-     * @method loadAssociations
-	 * /
-	loadAssociations() : void {
-		this.type();
-		this.constraint();
-		this.defaultValue();
-	}*/
-
     /**
      * Load all the lazy loading properties of the object.
      * Useful when you want to get a complete object.
@@ -348,22 +336,6 @@ class ParamType extends ModelItf {
 		};
 		return data;
 	}
-
-	/**
-	 * Return a ParamType instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 * /
-	toCompleteJSONObject() : Object {
-		this.loadAssociations();
-		var data = this.toJSONObject();
-		data["type"] = (this.type() !== null) ? this.type().toJSONObject() : null;
-		data["constraint"] = (this.constraint() !== null) ? this.constraint().toJSONObject() : null;
-		data["defaultValue"] = (this.defaultValue() !== null) ? this.defaultValue().toJSONObject() : null;
-		return data;
-	}*/
 
     /**
      * Return a ParamType instance as a JSON Object including associated object.
@@ -551,18 +523,6 @@ class ParamType extends ModelItf {
     create() : boolean {
        return this.createObject(ParamType, this.toJSONObject());
     }
-
-    /**
-     * Retrieve model description from database and create model instance.
-     *
-     * @method read
-     * @static
-     * @param {number} id - The model instance's id.
-     * @return {ParamType} The model instance.
-     * /
-    static read(id : number) : ParamType {
-        return this.readObject(ParamType, id);
-    }*/
 
     /**
      * Retrieve model description from database and create model instance.

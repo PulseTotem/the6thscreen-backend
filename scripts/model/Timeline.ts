@@ -148,16 +148,6 @@ class Timeline extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
-     *
-     * @method loadAssociations
-	 * /
-	loadAssociations() : void {
-		this.profils();
-	}*/
-
     /**
      * Load all the lazy loading properties of the object.
      * Useful when you want to get a complete object.
@@ -211,20 +201,6 @@ class Timeline extends ModelItf {
 		};
 		return data;
 	}
-
-	/**
-	 * Return a Timeline instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 * /
-	toCompleteJSONObject() : Object {
-		this.loadAssociations();
-		var data = this.toJSONObject();
-		data["profils"] = this.serializeArray(this.profils());
-		return data;
-	}*/
 
     /**
      * Return a Timeline instance as a JSON Object including associated object.
@@ -311,18 +287,6 @@ class Timeline extends ModelItf {
     create() : boolean {
         return this.createObject(Timeline, this.toJSONObject());
     }
-
-    /**
-     * Retrieve model description from database and create model instance.
-     *
-     * @method read
-     * @static
-     * @param {number} id - The model instance's id.
-     * @return {Timeline} The model instance.
-     * /
-    static read(id : number) : Timeline {
-        return this.readObject(Timeline, id);
-    }*/
 
     /**
      * Retrieve model description from database and create model instance.

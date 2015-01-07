@@ -282,16 +282,6 @@ class Zone extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
-	 *
-	 * @method loadAssociations
-	 * /
-	loadAssociations() : void {
-		this.behaviour();
-	}*/
-
     /**
      * Load all the lazy loading properties of the object.
      * Useful when you want to get a complete object.
@@ -350,20 +340,6 @@ class Zone extends ModelItf {
 		};
 		return data;
 	}
-
-    /**
-     * Return a User instance as a JSON Object including associated object.
-     * However the method should not be recursive due to cycle in the model.
-     *
-     * @method toCompleteJSONObject
-     * @returns {Object} a JSON Object representing the instance
-     * /
-    toCompleteJSONObject() : Object {
-	    this.loadAssociations();
-        var data = this.toJSONObject();
-	    data["behaviour"] = (this.behaviour() !== null) ? this.behaviour().toJSONObject() : null;
-        return data;
-    }*/
 
     /**
      * Return a User instance as a JSON Object including associated object.
@@ -449,18 +425,6 @@ class Zone extends ModelItf {
     create() : boolean {
         return this.createObject(Zone, this.toJSONObject());
     }
-
-    /**
-     * Retrieve model description from database and create model instance.
-     *
-     * @method read
-     * @static
-     * @param {number} id - The model instance's id.
-     * @return {Zone} The model instance.
-     * /
-    static read(id : number) : Zone {
-        return this.readObject(Zone, id);
-    }*/
 
     /**
      * Retrieve model description from database and create model instance.

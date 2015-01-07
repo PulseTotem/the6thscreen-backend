@@ -99,53 +99,6 @@ class ModelItf {
      * @static
      * @param {ModelItf Class} modelClass - The model to retrieve.
      * @param {number} id - The model instance's id.
-     * /
-    static readObject(modelClass : any, id : number) {
-        Logger.debug("[ModelItf] - readObject");
-	    if (!modelClass || !id) {
-            Logger.debug("[ModelItf] - ModelException");
-		    throw new ModelException("To read an object the modelClass and the id must be given.");
-	    }
-
-	    var urlReadObject = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), id.toString());
-	    Logger.debug("[ModelItf] Read an object : "+urlReadObject);
-
-        var result : RestClientResponse = RestClient.getSync(urlReadObject);
-
-        Logger.debug("[ModelItf] - result got");
-
-        if(result.success()) {
-            var response = result.data();
-            if(response.status == "success") {
-                if(response.data === undefined || Object.keys(response.data).length == 0 ||response.data.id === undefined) {
-                    Logger.debug("[ModelItf] - DataException : response success but empty");
-	                throw new DataException("The response is a success but the data appears to be empty or does not have the right signature when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response.data));
-                } else {
-                    Logger.debug("[ModelItf] - OK : build and send object");
-                    return modelClass.fromJSONObject(response.data);
-                }
-            } else {
-                Logger.debug("[ModelItf] - ResponseException : failed");
-                throw new ResponseException("The request failed on the server when trying to read an object with URL:"+urlReadObject+".\nMessage : "+JSON.stringify(response));
-            }
-        } else {
-            if(result.response() == "Response timeout reached.") {
-                Logger.debug("[ModelItf] - ResponseTimeoutException : failed");
-                throw new ResponseTimeoutException("The request failed on the server when trying to read an object with URL:"+urlReadObject+".\nMessage : "+JSON.stringify(result.response()));
-            } else {
-                Logger.debug("[ModelItf] - RequestException : failed");
-                throw new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
-            }
-        }
-    }*/
-
-    /**
-     * Retrieve model description from database and create model instance.
-     *
-     * @method readObject
-     * @static
-     * @param {ModelItf Class} modelClass - The model to retrieve.
-     * @param {number} id - The model instance's id.
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
@@ -373,53 +326,6 @@ class ModelItf {
 		}
 	}
 
-	/**
-	 * Retrieve all associated objects
-	 *
-     * @method getAssociatedObjects
-	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
-	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
-	 * @param assoName - the array in which the objects have to be pushed
-	 * /
-	getAssociatedObjects(modelClass : any, modelClassAssociated : any, assoName : Array<ModelItf>) {
-		if (!this.getId()) {
-			throw new ModelException("You cannot retrieve associated objects if the object does not exist.");
-		}
-		if (!modelClass || !modelClassAssociated || !assoName) {
-			throw new ModelException("The two modelClasses and the assoName argument must be given to retrieve objects.");
-		}
-		if (!(assoName instanceof Array)) {
-			throw new ModelException("The argument assoName must be an existing array.");
-		}
-
-		var urlAssociatedObjects = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
-		//Logger.debug("[ModelItf] Get associated objects with the URL: "+urlAssociatedObjects);
-
-		var result : RestClientResponse = RestClient.getSync(urlAssociatedObjects);
-
-		if(result.success()) {
-			var response = result.data();
-			if(response.status == "success") {
-				if(response.data === undefined || !(response.data instanceof Array)) {
-					throw new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAssociatedObjects+"\nResponse data: "+JSON.stringify(response.data));
-				} else {
-					for(var i = 0; i < response.data.length; i++) {
-						var object = response.data[i];
-						if (object.id === undefined) {
-							throw new DataException("One data does not have any ID when retrieving all objects with URL: "+urlAssociatedObjects+"\nResponse data: "+JSON.stringify(response.data));
-						} else {
-							assoName.push(modelClassAssociated.fromJSONObject(object));
-						}
-					}
-				}
-			}else {
-				throw new ResponseException("The request failed on the server when trying to retrieve all objects with URL:"+urlAssociatedObjects+".\nMessage : "+JSON.stringify(response));
-			}
-		} else {
-			throw new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
-		}
-	}*/
-
     /**
      * Retrieve all associated objects
      *
@@ -470,48 +376,6 @@ class ModelItf {
         RestClient.get(urlAssociatedObjects, success, fail);
     }
 
-	/**
-	 * Retrieve all associated objects
-	 *
-	 * @method getUniquelyAssociatedObject
-	 * @param modelClass - the first model class, corresponding to the object responsible to get associated objects
-	 * @param modelClassAssociated - the second model class, corresponding to the objects retrieved
-	 * @param assoName - where the object have to be saved
-	 * @returns {boolean}
-	 * /
-	getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any) : any {
-		if (!this.getId()) {
-			throw new ModelException("You cannot retrieve uniquely associated object if the object does not exist.");
-		}
-		if (!modelClass || !modelClassAssociated) {
-			throw new ModelException("The two modelClasses arguments must be given to retrieve a uniquely associated object.");
-		}
-
-		var urlUniqueAssociatedOject = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
-		//Logger.debug("[ModelItf] Get a uniquely associated object with the URL: "+urlUniqueAssociatedOject);
-
-		var result : RestClientResponse = RestClient.getSync(urlUniqueAssociatedOject);
-
-		if(result.success()) {
-			var response = result.data();
-			if(response.status == "success") {
-				// in that case tere is no data to retrieve
-				if ((response.data instanceof Array) && (response.data.length == 0)) {
-					return null;
-				}
-				if(response.data === undefined || response.data.id === undefined) {
-					throw new DataException("The response is a success but the data does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response.data));
-				} else {
-					return modelClassAssociated.fromJSONObject(response.data);
-				}
-			} else {
-				throw new ResponseException("The request failed on the server when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nMessage : "+JSON.stringify(response));
-			}
-		} else {
-			throw new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
-		}
-	}*/
-
     /**
      * Retrieve unique associated object
      *
@@ -561,14 +425,6 @@ class ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
-     *
-     * @method loadAssociations
-	 * /
-	loadAssociations() : void {}*/
-
     /**
      * Load all the lazy loading properties of the object.
      * Useful when you want to get a complete object.
@@ -596,19 +452,6 @@ class ModelItf {
         Logger.error("ModelItf - create : Method need to be implemented.");
         return false;
     }
-
-    /**
-     * Retrieve model description from database and create model instance.
-     *
-     * @method read
-     * @static
-     * @param {number} id - The model instance's id.
-     * @return {ModelItf} The model instance.
-     * /
-    static read(id : number) : ModelItf {
-        Logger.error("ModelItf - read : Method need to be implemented.");
-        return null;
-    }*/
 
     /**
      * Retrieve model description from database and create model instance.
@@ -682,17 +525,6 @@ class ModelItf {
 		var data = { "id": this.getId() };
 		return data;
 	}
-
-	/**
-	 * Return a ModelItf instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 * /
-	toCompleteJSONObject() : Object {
-		return this.toJSONObject();
-	}*/
 
     /**
      * Return a ModelItf instance as a JSON Object including associated object.

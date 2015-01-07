@@ -113,21 +113,6 @@ class Profil extends ModelItf {
      *
      * @method calls
      * @return {Array<Call>} The Profil's calls.
-     * /
-    calls() : Array<Call> {
-        if(! this._calls_loaded) {
-            this.getAssociatedObjects(Profil, Call);
-            this._calls
-	        this._calls_loaded = true;
-        }
-        return this._calls;
-    }*/
-
-    /**
-     * Return the Profil's calls.
-     *
-     * @method calls
-     * @return {Array<Call>} The Profil's calls.
      */
     calls() : Array<Call> {
         return this._calls;
@@ -221,19 +206,6 @@ class Profil extends ModelItf {
 		return data;
 	}
 
-	/**
-	 * Return a Profil instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 * /
-	toCompleteJSONObject() : Object {
-		var data = this.toJSONObject();
-		data["calls"] = this.serializeArray(this.calls());
-		return data;
-	}*/
-
     /**
      * Return a Profil instance as a JSON Object including associated object.
      * However the method should not be recursive due to cycle in the model.
@@ -318,18 +290,6 @@ class Profil extends ModelItf {
     create() : boolean {
         return this.createObject(Profil, this.toJSONObject());
     }
-
-    /**
-     * Retrieve model description from database and create model instance.
-     *
-     * @method read
-     * @static
-     * @param {number} id - The model instance's id.
-     * @return {Profil} The model instance.
-     * /
-    static read(id : number) : Profil {
-        return ModelItf.readObject(Profil, id);
-    }*/
 
     /**
      * Retrieve model description from database and create model instance.

@@ -402,20 +402,6 @@ class CallType extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
-     *
-     * @method loadAssociations
-	 * /
-	loadAssociations() : void {
-		this.source();
-		this.renderer();
-		this.receivePolicy();
-		this.renderPolicy();
-		this.zone();
-	}*/
-
     /**
      * Load all the lazy loading properties of the object.
      * Useful when you want to get a complete object.
@@ -477,24 +463,6 @@ class CallType extends ModelItf {
 		};
 		return data;
 	}
-
-	/**
-	 * Return a CallType instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 * /
-	toCompleteJSONObject() : Object {
-		this.loadAssociations();
-		var data = this.toJSONObject();
-		data["source"] = (this.source() !== null) ? this.source().toJSONObject() : null;
-		data["renderer"] = (this.renderer() !== null) ? this.renderer().toJSONObject() : null;
-		data["zone"] = (this.zone() !== null) ? this.zone().toJSONObject() : null;
-		data["receivePolicy"] = (this.receivePolicy() !== null) ? this.receivePolicy().toJSONObject() : null;
-		data["renderPolicy"] = (this.renderPolicy() !== null) ? this.renderPolicy().toJSONObject() : null;
-		return data;
-	}*/
 
     /**
      * Return a CallType instance as a JSON Object including associated object.
@@ -788,18 +756,6 @@ class CallType extends ModelItf {
     create() : boolean {
         return this.createObject(CallType, this.toJSONObject());
     }
-
-    /**
-     * Retrieve model description from database and create model instance.
-     *
-     * @method read
-     * @static
-     * @param {number} id - The model instance's id.
-     * @return {CallType} The model instance.
-     * /
-    static read(id : number) : CallType {
-        return this.readObject(CallType, id);
-    }*/
 
     /**
      * Retrieve model description from database and create model instance.

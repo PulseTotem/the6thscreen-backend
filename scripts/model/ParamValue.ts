@@ -123,16 +123,6 @@ class ParamValue extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
-     *
-     * @method loadAssociations
-	 * /
-	loadAssociations() : void {
-		this.paramType();
-	}*/
-
     /**
      * Load all the lazy loading properties of the object.
      * Useful when you want to get a complete object.
@@ -185,20 +175,6 @@ class ParamValue extends ModelItf {
 		};
 		return data;
 	}
-
-	/**
-	 * Return a ParamValue instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 * /
-	toCompleteJSONObject() : Object {
-		this.loadAssociations();
-		var data = this.toJSONObject();
-		data["paramType"] = (this.paramType() !== null) ? this.paramType().toJSONObject() : null;
-		return data;
-	}*/
 
     /**
      * Return a ParamValue instance as a JSON Object including associated object.
@@ -284,18 +260,6 @@ class ParamValue extends ModelItf {
     create() : boolean {
         return this.createObject(ParamValue, this.toJSONObject());
     }
-
-    /**
-     * Retrieve model description from database and create model instance.
-     *
-     * @method read
-     * @static
-     * @param {number} id - The model instance's id.
-     * @return {ParamValue} The model instance.
-     * /
-    static read(id : number) : ParamValue {
-        return this.readObject(ParamValue, id);
-    }*/
 
     /**
      * Retrieve model description from database and create model instance.

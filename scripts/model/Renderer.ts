@@ -150,16 +150,6 @@ class Renderer extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
-     *
-     * @method loadAssociations
-	 * /
-	loadAssociations() : void {
-		this.infoType();
-	}*/
-
     /**
      * Load all the lazy loading properties of the object.
      * Useful when you want to get a complete object.
@@ -213,20 +203,6 @@ class Renderer extends ModelItf {
 		};
 		return data;
 	}
-
-	/**
-	 * Return a Renderer instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 * /
-	toCompleteJSONObject() : Object {
-		this.loadAssociations();
-		var data = this.toJSONObject();
-		data["infoType"] = (this.infoType() !== null) ? this.infoType().toJSONObject() : null;
-		return data;
-	}*/
 
     /**
      * Return a Renderer instance as a JSON Object including associated object.
@@ -311,18 +287,6 @@ class Renderer extends ModelItf {
     create() : boolean {
         return this.createObject(Renderer, this.toJSONObject())
     }
-
-    /**
-     * Retrieve model description from database and create model instance.
-     *
-     * @method read
-     * @static
-     * @param {number} id - The model instance's id.
-     * @return {Renderer} The model instance.
-     * /
-    static read(id : number) : Renderer {
-        return this.readObject(Renderer, id);
-    }*/
 
     /**
      * Retrieve model description from database and create model instance.

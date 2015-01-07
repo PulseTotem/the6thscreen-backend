@@ -83,18 +83,6 @@ class TypeParamType extends ModelItf {
 		return this.createObject(TypeParamType, this.toJSONObject())
 	}
 
-	/**
-	 * Retrieve model description from database and create model instance.
-	 *
-	 * @method read
-	 * @static
-	 * @param {number} id - The model instance's id.
-	 * @return {TypeParamType} The model instance.
-	 * /
-	static read(id : number) : TypeParamType {
-		return this.readObject(TypeParamType, id);
-	}*/
-
     /**
      * Retrieve model description from database and create model instance.
      *

@@ -111,18 +111,6 @@ class Behaviour extends ModelItf {
 		return this.createObject(Behaviour, this.toJSONObject())
 	}
 
-	/**
-	 * Retrieve model description from database and create model instance.
-	 *
-	 * @method read
-	 * @static
-	 * @param {number} id - The model instance's id.
-	 * @return {Behaviour} The model instance.
-	 * /
-	static read(id : number) : Behaviour {
-		return this.readObject(Behaviour, id);
-	}*/
-
     /**
      * Retrieve model description from database and create model instance.
      *

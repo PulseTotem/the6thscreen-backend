@@ -118,18 +118,6 @@ class RenderPolicy extends ModelItf {
      * @method read
      * @static
      * @param {number} id - The model instance's id.
-     * @return {RenderPolicy} The model instance.
-     * /
-    static read(id : number) : RenderPolicy {
-        return this.readObject(RenderPolicy, id);
-    }*/
-
-    /**
-     * Retrieve model description from database and create model instance.
-     *
-     * @method read
-     * @static
-     * @param {number} id - The model instance's id.
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
