@@ -9,7 +9,6 @@
 /// <reference path="../exceptions/DataException.ts" />
 /// <reference path="../exceptions/RequestException.ts" />
 /// <reference path="../exceptions/ResponseException.ts" />
-/// <reference path="../exceptions/ResponseTimeoutException.ts" />
 /// <reference path="../exceptions/ModelException.ts" />
 
 /**
@@ -57,39 +56,42 @@ class ModelItf {
      * @method createObject
      * @param {ModelItf Class} modelClass - The model to create.
      * @param {Object} data - The data necessary to create object.
-     * @return {boolean} Create status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    createObject(modelClass : any, data : any) : boolean {
+    createObject(modelClass : any, data : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
 
 	    if (!modelClass || !data) {
-		    throw new ModelException("To create an object the modelClass and the data of the object must be given.");
+            failCallback(new ModelException("To create an object the modelClass and the data of the object must be given."), attemptNumber);
 	    }
 
 	    // if the object already exists we throw an error
         if (!!this.getId()) {
-            throw new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data));
+            failCallback(new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data)), attemptNumber);
         }
 
-	    var urlCreateObject = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
-	    //Logger.debug("[ModelItf] Create a new object : "+urlCreateObject+" with data : "+JSON.stringify(data));
-
-        var result : RestClientResponse = RestClient.postSync(urlCreateObject, data);
-
-        if(result.success()) {
+        var success : Function = function(result) {
             var response = result.data();
             if(response.status == "success") {
                 if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
-	                throw new DataException("The response is a success but the data appears to be empty or does not have the right signature when creating an object with URL: "+urlCreateObject+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data));
+                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when creating an object with URL: "+urlCreateObject+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
                 } else {
                     this._id = response.data.id;
-                    return true;
+                    successCallback();
                 }
             } else {
-	            throw new ResponseException("The request failed on the server when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nMessage : "+JSON.stringify(response));
+                failCallback(new ResponseException("The request failed on the server when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nMessage : "+JSON.stringify(response)), attemptNumber);
             }
-        } else {
-	        throw new RequestException("The request failed when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
-        }
+        };
+
+        var fail : Function = function(result) {
+            failCallback(new RequestException("The request failed when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+        };
+
+	    var urlCreateObject = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
+
+        RestClient.post(urlCreateObject, data, success, fail);
     }
 
     /**
@@ -104,39 +106,28 @@ class ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static readObject(modelClass : any, id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
-        Logger.debug("[ModelItf] - readObject");
         if (!modelClass || !id) {
-            Logger.debug("[ModelItf] - ModelException");
             failCallback(new ModelException("To read an object the modelClass and the id must be given."), id, attemptNumber);
         }
 
         var success : Function = function(result) {
-            Logger.debug("[ModelItf] - result got : success");
-
             var response = result.data();
             if(response.status == "success") {
                 if(response.data === undefined || Object.keys(response.data).length == 0 ||response.data.id === undefined) {
-                    Logger.debug("[ModelItf] - DataException : response success but empty");
                     failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response.data)), id, attemptNumber);
                 } else {
-                    Logger.debug("[ModelItf] - OK : build and send object");
                     successCallback(modelClass.fromJSONObject(response.data));
                 }
             } else {
-                Logger.debug("[ModelItf] - ResponseException : failed");
                 failCallback(new ResponseException("The request failed on the server when trying to read an object with URL:"+urlReadObject+".\nMessage : "+JSON.stringify(response)), id, attemptNumber);
             }
         };
 
         var fail : Function = function(result) {
-            Logger.debug("[ModelItf] - result got : fail");
-
-            Logger.debug("[ModelItf] - RequestException : failed");
             failCallback(new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), id, attemptNumber);
         };
 
         var urlReadObject = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), id.toString());
-        Logger.debug("[ModelItf] Read an object : "+urlReadObject);
 
         RestClient.get(urlReadObject, success, fail);
     }
@@ -147,38 +138,41 @@ class ModelItf {
      * @method updateObject
      * @param {ModelItf Class} modelClass - The model to update.
      * @param {Object} data - The data necessary to update object.
-     * @return {boolean} Update status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-     updateObject(modelClass : any, data : any) : boolean {
-
+     updateObject(modelClass : any, data : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
 	    if (!modelClass || !data) {
-		    throw new ModelException("To update an object, the modelClass and the datas must be given.");
+            failCallback(new ModelException("To update an object, the modelClass and the datas must be given."), attemptNumber);
 	    }
 
 	    // if the object does not exist yet, we need to create it instead updating!
         if(!this.getId()) {
-            throw new ModelException("The object does not exist yet. It can't be update. Datas: "+JSON.stringify(data));
+            failCallback(new ModelException("The object does not exist yet. It can't be update. Datas: "+JSON.stringify(data)), attemptNumber);
         }
+
+        var success : Function = function(result) {
+            var response = result.data();
+            if(response.status == "success") {
+                if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
+                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when updating an object with URL: "+urlUpdate+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
+                } else {
+                    successCallback();
+                }
+            } else {
+                failCallback(new ResponseException("The request failed on the server when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nMessage : "+JSON.stringify(response)), attemptNumber);
+            }
+        };
+
+        var fail : Function = function(result) {
+            failCallback(new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+        };
 
 	    var urlUpdate = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
 	    //Logger.debug("[ModelItf] Update an object with the URL : "+urlUpdate+" and data : "+JSON.stringify(data));
 
-        var result : RestClientResponse = RestClient.putSync(urlUpdate, data);
-
-        if(result.success()) {
-            var response = result.data();
-	        if(response.status == "success") {
-		        if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
-			        throw new DataException("The response is a success but the data appears to be empty or does not have the right signature when updating an object with URL: "+urlUpdate+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data));
-		        } else {
-			        return true;
-		        }
-	        } else {
-		        throw new ResponseException("The request failed on the server when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nMessage : "+JSON.stringify(response));
-	        }
-        } else {
-	        throw new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
-        }
+        RestClient.put(urlUpdate, data, success, fail);
     }
 
     /**
@@ -186,33 +180,37 @@ class ModelItf {
      *
      * @method deleteObject
      * @param {ModelItf Class} modelClass - The model to delete.
-     * @return {boolean} Delete status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    deleteObject(modelClass : any) : boolean {
+    deleteObject(modelClass : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
 	    if (!modelClass) {
-		    throw new ModelException("To delete an object, the modelClass must be given.");
+            failCallback(new ModelException("To delete an object, the modelClass must be given."), attemptNumber);
 	    }
 
         if (!this.getId()) {
-	        throw new ModelException("The object does not exist yet. It can't be delete in database.");
+            failCallback(new ModelException("The object does not exist yet. It can't be delete in database."), attemptNumber);
         }
+
+        var success : Function = function(result) {
+            var response = result.data();
+            if(response.status == "success") {
+                this._id = null;
+                successCallback();
+            } else {
+                failCallback(new ResponseException("The request failed on the server when trying to delete an object with URL:"+urlDelete+".\nMessage : "+JSON.stringify(response)), attemptNumber);
+            }
+        };
+
+        var fail : Function = function(result) {
+            failCallback(new RequestException("The request failed when trying to delete an object with URL:"+urlDelete+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+        };
 
 	    var urlDelete = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
 	    //Logger.debug("[ModelItf] Delete an object with the URL : "+urlDelete);
 
-        var result : RestClientResponse = RestClient.deleteSync(urlDelete);
-
-        if(result.success()) {
-            var response = result.data();
-            if(response.status == "success") {
-                this._id = null;
-                return true;
-            } else {
-	            throw new ResponseException("The request failed on the server when trying to delete an object with URL:"+urlDelete+".\nMessage : "+JSON.stringify(response));
-            }
-        } else {
-	        throw new RequestException("The request failed when trying to delete an object with URL:"+urlDelete+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
-        }
+        RestClient.delete(urlDelete, success, fail);
     }
 
 	/**
@@ -221,42 +219,45 @@ class ModelItf {
 	 * @method allObjects
 	 * @static
 	 * @param {ModelItf Class} modelClass - The model to retrieve all instances.
-	 * @return {Array<ModelItf>} The model instances.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
 	 */
-	static allObjects(modelClass : any) {
+	static allObjects(modelClass : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
 		if (!modelClass) {
-			throw new ModelException("To retrieve all objects, the modelClass must be given.");
+            failCallback(new ModelException("To retrieve all objects, the modelClass must be given."), attemptNumber);
 		}
 
-		var allModelItfs : any = new Array();
+        var success : Function = function(result) {
+            var response = result.data();
+            if(response.status == "success") {
+                var allModelItfs : any = new Array();
+                if(response.data === undefined || !(response.data instanceof Array)) {
+                    failCallback(new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAll+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
+                } else {
+                    for(var i = 0; i < response.data.length; i++) {
+                        var obj = response.data[i];
+                        if (obj.id === undefined) {
+                            failCallback(new DataException("One data does not have any ID when retrieving all objects with URL: "+urlAll+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
+                            return;
+                        } else {
+                            allModelItfs.push(modelClass.fromJSONObject(obj));
+                        }
+                    }
+                }
+                successCallback(allModelItfs);
+            } else {
+                failCallback(new ResponseException("The request failed on the server when trying to retrieve all objects with URL:"+urlAll+".\nMessage : "+JSON.stringify(response)), attemptNumber);
+            }
+        };
+
+        var fail : Function = function(result) {
+            failCallback(new RequestException("The request failed when trying to retrieve all objects with URL:"+urlAll+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+        };
 
 		var urlAll = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
-		//Logger.debug("[ModelItf] Read all objects with the URL: "+urlAll);
 
-		var result : RestClientResponse = RestClient.getSync(urlAll);
-
-		if(result.success()) {
-			var response = result.data();
-			if(response.status == "success") {
-				if(response.data === undefined || !(response.data instanceof Array)) {
-					throw new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAll+"\nResponse data: "+JSON.stringify(response.data));
-				} else {
-					for(var i = 0; i < response.data.length; i++) {
-						var obj = response.data[i];
-						if (obj.id === undefined) {
-							throw new DataException("One data does not have any ID when retrieving all objects with URL: "+urlAll+"\nResponse data: "+JSON.stringify(response.data));
-						} else {
-							allModelItfs.push(modelClass.fromJSONObject(obj));
-						}
-					}
-				}
-				return allModelItfs;
-			} else {
-				throw new ResponseException("The request failed on the server when trying to retrieve all objects with URL:"+urlAll+".\nMessage : "+JSON.stringify(response));
-			}
-		} else {
-			throw new RequestException("The request failed when trying to retrieve all objects with URL:"+urlAll+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
-		}
+		RestClient.get(urlAll, success, fail);
 	}
 
 	/**
@@ -266,31 +267,34 @@ class ModelItf {
 	 * @param {ModelItf Class} modelClass1 - the first model class
 	 * @param {ModelItf Class} modelClass2 - the second model class
 	 * @param {number} id2 - the ID of the second object
-	 * @return {boolean} Association status
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
 	 */
-	associateObject(modelClass1 : any, modelClass2: any, id2 : number) : boolean {
+	associateObject(modelClass1 : any, modelClass2: any, id2 : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
 		if (!this.getId()) {
-			throw new ModelException("The object to be associated does not exist yet. The association can't be created.");
+            failCallback(new ModelException("The object to be associated does not exist yet. The association can't be created."), attemptNumber);
 		}
 		if (!modelClass1 || !modelClass2 || !id2) {
-			throw new ModelException("The two modelClasses and the ID of the second objects must be given to create the association.");
+            failCallback(new ModelException("The two modelClasses and the ID of the second objects must be given to create the association."), attemptNumber);
 		}
+
+        var success : Function = function(result) {
+            var response = result.data();
+            if(response.status == "success") {
+                successCallback();
+            } else {
+                failCallback(new ResponseException("The request failed on the server when trying to associate objects with URL:"+associationURL+".\nMessage : "+JSON.stringify(response)), attemptNumber);
+            }
+        };
+
+        var fail : Function = function(result) {
+            failCallback(new RequestException("The request failed when trying to associate objects with URL:"+associationURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+        };
 
 		var associationURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
-		//Logger.debug("[ModelItf] Associate an object with the following URL: "+associationURL);
 
-		var result : RestClientResponse = RestClient.putSync(associationURL, {});
-
-		if(result.success()) {
-			var response = result.data();
-			if(response.status == "success") {
-				return true;
-			} else {
-				throw new ResponseException("The request failed on the server when trying to associate objects with URL:"+associationURL+".\nMessage : "+JSON.stringify(response));
-			}
-		} else {
-			throw new RequestException("The request failed when trying to associate objects with URL:"+associationURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
-		}
+		RestClient.put(associationURL, {}, success, fail);
 	}
 
 	/**
@@ -300,30 +304,34 @@ class ModelItf {
 	 * @param {ModelItf Class} modelClass1 the model class of the first object
 	 * @param {ModelItf Class} modelClass2 the model class of the second object
 	 * @param {number} id2 the ID of the second object
-	 * @returns {boolean} returns true if the deletion works well.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
 	 */
-	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number) : boolean {
+	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
 		if (!this.getId()) {
-			throw new ModelException("An association can't be deleted if the object does not exist.");
+            failCallback(new ModelException("An association can't be deleted if the object does not exist."), attemptNumber);
 		}
 		if (!modelClass1 || !modelClass2 || !id2) {
-			throw new ModelException("The two modelClasses and the ID of the second objects must be given to delete the association.");
+            failCallback(new ModelException("The two modelClasses and the ID of the second objects must be given to delete the association."), attemptNumber);
 		}
+
+        var success : Function = function(result) {
+            var response = result.data();
+            if(response.status == "success") {
+                successCallback();
+            } else {
+                failCallback(new ResponseException("The request failed on the server when trying to delete an association between objects with URL:"+deleteAssoURL+".\nMessage : "+JSON.stringify(response)), attemptNumber);
+            }
+        };
+
+        var fail : Function = function(result) {
+            failCallback(new RequestException("The request failed when trying to delete an association between objects with URL:"+deleteAssoURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+        };
+
 		var deleteAssoURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
-		//Logger.debug("[ModelItf] Delete Association between Objects with the following URL: "+deleteAssoURL);
 
-		var result : RestClientResponse = RestClient.deleteSync(deleteAssoURL);
-
-		if(result.success()) {
-			var response = result.data();
-			if(response.status == "success") {
-				return true;
-			} else {
-				throw new ResponseException("The request failed on the server when trying to delete an association between objects with URL:"+deleteAssoURL+".\nMessage : "+JSON.stringify(response));
-			}
-		} else {
-			throw new RequestException("The request failed when trying to delete an association between objects with URL:"+deleteAssoURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response());
-		}
+		RestClient.delete(deleteAssoURL, success, fail);
 	}
 
     /**
@@ -446,11 +454,12 @@ class ModelItf {
      * Create model in database.
      *
      * @method create
-     * @return {boolean} Create status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    create() : boolean {
+    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
         Logger.error("ModelItf - create : Method need to be implemented.");
-        return false;
     }
 
     /**
@@ -471,33 +480,36 @@ class ModelItf {
      * Update in database the model with current id.
      *
      * @method update
-     * @return {boolean} Update status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    update() : boolean {
+    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
         Logger.error("ModelItf - update : Method need to be implemented.");
-        return false;
     }
 
     /**
      * Delete in database the model with current id.
      *
      * @method delete
-     * @return {boolean} Delete status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    delete() : boolean {
+    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
         Logger.error("ModelItf - delete : Method need to be implemented.");
-        return false;
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
      * @method all
-     * @return {Array<ModelItf>} The model instances.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static all() : Array<ModelItf> {
+    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
         Logger.error("ModelItf - all : Method need to be implemented.");
-        return null;
     }
 
 	/**
