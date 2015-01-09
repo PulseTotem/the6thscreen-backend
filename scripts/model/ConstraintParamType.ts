@@ -279,14 +279,16 @@ class ConstraintParamType extends ModelItf {
 	}
 
 	/**
-	 * Create model in database.
-	 *
-	 * @method create
-	 * @return {boolean} Create status
-	 */
-	create() : boolean {
-		return this.createObject(ConstraintParamType, this.toJSONObject())
-	}
+     * Create model in database.
+     *
+     * @method create
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        this.createObject(ConstraintParamType, this.toJSONObject(), successCallback, failCallback);
+    }
 
     /**
      * Retrieve model description from database and create model instance.
@@ -302,35 +304,41 @@ class ConstraintParamType extends ModelItf {
         ModelItf.readObject(ConstraintParamType, id, successCallback, failCallback, attemptNumber);
     }
 
-	/**
-	 * Update in database the model with current id.
-	 *
-	 * @method update
-	 * @return {boolean} Update status
-	 */
-	update() : boolean {
-		return this.updateObject(ConstraintParamType, this.toJSONObject())
-	}
+    /**
+     * Update in database the model with current id.
+     *
+     * @method update
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.updateObject(ConstraintParamType, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+    }
 
-	/**
-	 * Delete in database the model with current id.
-	 *
-	 * @method delete
-	 * @return {boolean} Delete status
-	 */
-	delete() : boolean {
-		return this.deleteObject(ConstraintParamType);
-	}
+    /**
+     * Delete in database the model with current id.
+     *
+     * @method delete
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.deleteObject(ConstraintParamType, successCallback, failCallback, attemptNumber);
+    }
 
-	/**
-	 * Retrieve all models from database and create corresponding model instances.
-	 *
-	 * @method all
-	 * @return {Array<ConstraintParamType>} The model instances.
-	 */
-	static all() : Array<ConstraintParamType> {
-		return this.allObjects(ConstraintParamType);
-	}
+    /**
+     * Retrieve all models from database and create corresponding model instances.
+     *
+     * @method all
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.allObjects(ConstraintParamType, successCallback, failCallback, attemptNumber);
+    }
 
 	/**
 	 * Return an ConstraintParamType instance from a JSON string.
