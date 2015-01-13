@@ -62,13 +62,17 @@ class ModelItf {
      */
     createObject(modelClass : any, data : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
 
+        var self = this;
+
 	    if (!modelClass || !data) {
             failCallback(new ModelException("To create an object the modelClass and the data of the object must be given."), attemptNumber);
+            return;
 	    }
 
 	    // if the object already exists we throw an error
         if (!!this.getId()) {
             failCallback(new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data)), attemptNumber);
+            return;
         }
 
         var success : Function = function(result) {
@@ -77,7 +81,7 @@ class ModelItf {
                 if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
                     failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when creating an object with URL: "+urlCreateObject+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
                 } else {
-                    this._id = response.data.id;
+                    self._id = response.data.id;
                     successCallback();
                 }
             } else {
@@ -108,6 +112,7 @@ class ModelItf {
     static readObject(modelClass : any, id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
         if (!modelClass || !id) {
             failCallback(new ModelException("To read an object the modelClass and the id must be given."), id, attemptNumber);
+            return;
         }
 
         var success : Function = function(result) {
@@ -143,13 +148,15 @@ class ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
      updateObject(modelClass : any, data : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
-	    if (!modelClass || !data) {
+        if (!modelClass || !data) {
             failCallback(new ModelException("To update an object, the modelClass and the datas must be given."), attemptNumber);
+            return;
 	    }
 
 	    // if the object does not exist yet, we need to create it instead updating!
         if(!this.getId()) {
             failCallback(new ModelException("The object does not exist yet. It can't be update. Datas: "+JSON.stringify(data)), attemptNumber);
+            return;
         }
 
         var success : Function = function(result) {
@@ -185,18 +192,22 @@ class ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     deleteObject(modelClass : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
-	    if (!modelClass) {
+	    var self = this;
+
+        if (!modelClass) {
             failCallback(new ModelException("To delete an object, the modelClass must be given."), attemptNumber);
+            return;
 	    }
 
         if (!this.getId()) {
             failCallback(new ModelException("The object does not exist yet. It can't be delete in database."), attemptNumber);
+            return;
         }
 
         var success : Function = function(result) {
             var response = result.data();
             if(response.status == "success") {
-                this._id = null;
+                self._id = null;
                 successCallback();
             } else {
                 failCallback(new ResponseException("The request failed on the server when trying to delete an object with URL:"+urlDelete+".\nMessage : "+JSON.stringify(response)), attemptNumber);
@@ -226,6 +237,7 @@ class ModelItf {
 	static allObjects(modelClass : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
 		if (!modelClass) {
             failCallback(new ModelException("To retrieve all objects, the modelClass must be given."), attemptNumber);
+            return;
 		}
 
         var success : Function = function(result) {
@@ -274,9 +286,12 @@ class ModelItf {
 	associateObject(modelClass1 : any, modelClass2: any, id2 : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
 		if (!this.getId()) {
             failCallback(new ModelException("The object to be associated does not exist yet. The association can't be created."), attemptNumber);
+            return;
 		}
+
 		if (!modelClass1 || !modelClass2 || !id2) {
             failCallback(new ModelException("The two modelClasses and the ID of the second objects must be given to create the association."), attemptNumber);
+            return;
 		}
 
         var success : Function = function(result) {
@@ -311,9 +326,12 @@ class ModelItf {
 	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
 		if (!this.getId()) {
             failCallback(new ModelException("An association can't be deleted if the object does not exist."), attemptNumber);
+            return;
 		}
+
 		if (!modelClass1 || !modelClass2 || !id2) {
             failCallback(new ModelException("The two modelClasses and the ID of the second objects must be given to delete the association."), attemptNumber);
+            return;
 		}
 
         var success : Function = function(result) {
@@ -347,9 +365,12 @@ class ModelItf {
     getAssociatedObjects(modelClass : any, modelClassAssociated : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
         if (!this.getId()) {
             failCallback(new ModelException("You cannot retrieve associated objects if the object does not exist."), attemptNumber);
+            return;
         }
+
         if (!modelClass || !modelClassAssociated) {
             failCallback(new ModelException("The two modelClasses must be given as arguments to retrieve objects."), attemptNumber);
+            return;
         }
 
         var success : Function = function(result) {
@@ -397,9 +418,12 @@ class ModelItf {
     getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
         if (!this.getId()) {
             failCallback(new ModelException("You cannot retrieve uniquely associated object if the object does not exist."), attemptNumber);
+            return;
         }
+
         if (!modelClass || !modelClassAssociated) {
             failCallback(new ModelException("The two modelClasses arguments must be given to retrieve a uniquely associated object."), attemptNumber);
+            return;
         }
 
         var success : Function = function(result) {
