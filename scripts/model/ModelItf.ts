@@ -256,8 +256,9 @@ class ModelItf {
                             allModelItfs.push(modelClass.fromJSONObject(obj));
                         }
                     }
+                    successCallback(allModelItfs);
                 }
-                successCallback(allModelItfs);
+
             } else {
                 failCallback(new ResponseException("The request failed on the server when trying to retrieve all objects with URL:"+urlAll+".\nMessage : "+JSON.stringify(response)), attemptNumber);
             }
@@ -430,9 +431,10 @@ class ModelItf {
             var response = result.data();
             if(response.status == "success") {
 
-                // in that case tere is no data to retrieve
+                // in that case there is no data to retrieve
                 if ((response.data instanceof Array) && (response.data.length == 0)) {
                     successCallback(null);
+                    return;
                 }
                 if(response.data === undefined || response.data.id === undefined) {
                     failCallback(new DataException("The response is a success but the data does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
