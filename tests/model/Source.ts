@@ -758,116 +758,181 @@ describe('Source', function() {
 
 	});
 
-	describe('#addParamValue', function() {
-		it('should put the new ParamValue inside the array', function() {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
-			var pv = new ParamValue("mavaleur", 12);
-			var spy = sinon.spy(pv, "desynchronize");
+    describe('#addParamValue', function() {
+        it('should put the new ParamValue inside the array', function(done) {
+            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+            var pv = new ParamValue("mavaleur",12);
+            var spy = sinon.spy(pv, "desynchronize");
 
-			var reponse1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+            var response1 : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": []
+            };
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+            var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+                .get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName()))
+                .reply(200, JSON.stringify(response1));
 
-			var paramValues = c.paramValues();
+            var success = function() {
+                var paramValues = c.paramValues();
+                assert.deepEqual(paramValues, [], "The paramValue is not an empty array: "+JSON.stringify(paramValues));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
 
-			assert.deepEqual(paramValues, [], "The paramValue is not an empty array: "+JSON.stringify(paramValues));
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var reponse2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the addParamValue is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
-			var retour = c.addParamValue(pv);
-			assert.ok(retour, "The return of the addParamValue is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+                    paramValues = c.paramValues();
+                    var expected = [pv];
+                    assert.deepEqual(paramValues, expected, "The paramValues is not an array containing only the added paramValue: "+JSON.stringify(paramValues));
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
 
-			paramValues = c.paramValues();
-			var expected = [pv];
-			assert.deepEqual(paramValues, expected, "The paramValues is not an array containing only the added paramValue: "+JSON.stringify(paramValues));
-			assert.ok(spy.calledOnce, "The desynchronize method was not paramValueed once.");
-		});
+                    done();
+                };
 
-		it('should not allow to add a null object', function() {
-			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+                var fail2 = function(err) {
+                    done(err);
+                };
 
-			assert.throws(function() {
-					c.addParamValue(null);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-		});
+                c.addParamValue(pv, success2, fail2);
+            };
 
-		it('should not allow to add an undefined object', function() {
-			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+            var fail = function(err) {
+                done(err);
+            };
 
-			assert.throws(function() {
-					c.addParamValue(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-		});
+            c.loadParamValues(success, fail);
+        });
 
-		it('should not allow to add a object which is not yet created', function() {
-			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
-			var p = new ParamValue("bidule");
+        it('should not allow to add a null object', function(done) {
+            nock.disableNetConnect();
+            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
 
-			assert.throws(function() {
-					c.addParamValue(p);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-		});
+            var success = function() {
+                done(new Error("Test failed."));
+            };
 
-		it('should not allow to put an already existing object', function() {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
-			var pv = new ParamValue("toto", 13);
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
 
-			var reponse1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
-					{
-						"id":13,
-						"value": "toto"
-					},
-					{
-						"id": 14,
-						"value": "titi"
-					}
-				]
-			};
+            c.addParamValue(null, success, fail);
+        });
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+        it('should not allow to add an undefined object', function(done) {
+            nock.disableNetConnect();
+            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
 
-			var paramValues = c.paramValues();
+            var success = function() {
+                done(new Error("Test failed."));
+            };
 
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
 
-			assert.throws(function() {
-					c.addParamValue(pv);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-		});
+            c.addParamValue(undefined, success, fail);
 
-	});
+        });
+
+        it('should not allow to add a object which is not yet created', function(done) {
+            nock.disableNetConnect();
+            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+            var p = new ParamValue("bidule");
+
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.addParamValue(p, success, fail);
+        });
+
+        it('should not allow to put an already existing object', function(done) {
+            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+            var pv = new ParamValue("toto",13);
+
+            var response1 : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": [
+                    {
+                        "id":13,
+                        "value": "toto"
+                    },
+                    {
+                        "id": 14,
+                        "value": "titi"
+                    }
+                ]
+            };
+
+            var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+                .get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName()))
+                .reply(200, JSON.stringify(response1));
+
+            var success = function() {
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
+
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.addParamValue(pv, success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadParamValues(success, fail);
+
+
+        });
+
+    });
 
 	describe('#removeParamValue', function() {
-		it('should remove the ParamValue from the array', function() {
+		it('should remove the ParamValue from the array', function(done) {
 			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
 			var pv = new ParamValue("mavaleur", 12);
 
@@ -885,65 +950,113 @@ describe('Source', function() {
 				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName()))
 				.reply(200, JSON.stringify(reponse1));
 
-			var paramValues = c.paramValues();
+            var success = function() {
+                var paramValues = c.paramValues();
 
-			assert.deepEqual(paramValues, [pv], "The paramValue array is not an array fill only with PV: "+JSON.stringify(paramValues));
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+                assert.deepEqual(paramValues, [pv], "The paramValue array is not an array fill only with PV: "+JSON.stringify(paramValues));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
 
-			var spy = sinon.spy(pv, "desynchronize");
-			var reponse2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+                var spy = sinon.spy(pv, "desynchronize");
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .delete(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			var retour = c.removeParamValue(pv);
-			assert.ok(retour, "The return of the removeParamValue is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the removeParamValue is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
-			paramValues = c.paramValues();
-			assert.deepEqual(paramValues, [], "The paramValues is not an empty array: "+JSON.stringify(paramValues));
-			assert.ok(spy.calledOnce, "The desynchronize method was not paramValueed once.");
+                    paramValues = c.paramValues();
+                    assert.deepEqual(paramValues, [], "The paramValues is not an empty array: "+JSON.stringify(paramValues));
+                    assert.ok(spy.calledOnce, "The desynchronize method was not paramValueed once.");
+
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.removeParamValue(pv, success2, fail2);
+
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadParamValues(success, fail);
 		});
 
-		it('should not allow to remove a null object', function() {
+		it('should not allow to remove a null object', function(done) {
 			nock.disableNetConnect();
 			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
 
-			assert.throws(function() {
-					c.removeParamValue(null);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.removeParamValue(null, success, fail);
 		});
 
-		it('should not allow to add an undefined object', function() {
+		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
 			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
 
-			assert.throws(function() {
-					c.removeParamValue(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.removeParamValue(undefined, success, fail);
 		});
 
-		it('should not allow to add a object which is not yet created', function() {
+		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
 			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
 			var p = new ParamValue("bidule");
 
-			assert.throws(function() {
-					c.removeParamValue(p);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.removeParamValue(p, success, fail);
 		});
 
-		it('should not allow to remove an object which is not linked', function() {
+		it('should not allow to remove an object which is not linked', function(done) {
 			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
 			var pv = new ParamValue("toto", 12);
 
@@ -956,15 +1069,34 @@ describe('Source', function() {
 				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName()))
 				.reply(200, JSON.stringify(reponse1));
 
-			var paramValues = c.paramValues();
+            var success = function() {
+                var paramValues = c.paramValues();
 
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
 
-			assert.throws(function() {
-					c.removeParamValue(pv);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
+
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.removeParamValue(pv, success2, fail2);
+
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadParamValues(success, fail);
 		});
 
 	});

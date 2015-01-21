@@ -558,56 +558,76 @@ class Source extends ModelItf {
 		}
 	}
 
-	/**
-	 * Add a new ParamValue to the Source and associate it in the database.
-	 * A ParamValue can only be added once.
-	 *
+    /**
+     * Add a new ParamValue to the Source and associate it in the database.
+     * A ParamValue can only be added once.
+     *
      * @method addParamValue
-	 * @param {ParamValue} pv The ParamValue to add inside the Source. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
-	 */
-	addParamValue(pv : ParamValue) : boolean {
-		if (!pv  || !pv.getId()) {
-			throw new ModelException("The ParamValue must be an existing object to be associated.");
-		}
+     * @param {ParamValue} p The ParamValue to add inside the source. It cannot be a null value.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    addParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
+        if (!p || !p.getId()) {
+            failCallback(new ModelException("The ParamValue must be an existing object to be associated."));
+            return;
+        }
 
-		if (ModelItf.isObjectInsideArray(this.paramValues(), pv)) {
-			throw new ModelException("You cannot add twice a ParamValue for a SDI.");
-		}
+        if (ModelItf.isObjectInsideArray(this.paramValues(), p)) {
+            failCallback(new ModelException("You cannot add twice a parameter in a source."));
+            return;
+        }
 
-		if (this.associateObject(Source, ParamValue, pv.getId())) {
-			pv.desynchronize();
-			this.paramValues().push(pv);
-			return true;
-		} else {
-			return false;
-		}
-	}
+        var self = this;
 
-	/**
-	 * Remove a ParamValue from the Source: the association is removed both in the object and in database.
-	 * The ParamValue can only be removed if it exists first in the list of associated ParamValues, else an exception is thrown.
-	 *
+        var success : Function = function() {
+            p.desynchronize();
+            self.paramValues().push(p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Source, ParamValue, p.getId(), success, fail);
+    }
+
+    /**
+     * Remove a ParamValue from the Source: the association is removed both in the object and in database.
+     * The ParamValue can only be removed if it exists first in the list of associated ParamValue, else an exception is thrown.
+     *
      * @method removeParamValue
-	 * @param {ParamValue} pv The ParamValue to remove from that Source
-	 * @returns {boolean} Returns true if the association is deleted in database.
-	 */
-	removeParamValue(pv : ParamValue) : boolean {
-		if (!pv  || !pv.getId()) {
-			throw new ModelException("The ParamValue must be an existing object to be removed.");
-		}
+     * @param {ParamValue} p The ParamValue to remove from that Source
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    removeParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
+        if (!p || !p.getId()) {
+            failCallback(new ModelException("The ParamValue must be an existing object to be removed."));
+            return;
+        }
+        if (!ModelItf.isObjectInsideArray(this.paramValues(), p)) {
+            failCallback(new ModelException("The ParamValue you try to remove has not been added to the current Source"));
+            return;
+        }
 
-		if (!ModelItf.isObjectInsideArray(this.paramValues(), pv)) {
-			throw new ModelException("The ParamValue you try to remove is not yet associated.");
-		}
+        var self = this;
 
-		if (this.deleteObjectAssociation(Source, ParamValue, pv.getId())) {
-			pv.desynchronize();
-			return ModelItf.removeObjectFromArray(this.paramValues(), pv);
-		} else {
-			return false;
-		}
-	}
+        var success : Function = function() {
+            p.desynchronize();
+            ModelItf.removeObjectFromArray(self.paramValues(), p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Source, ParamValue, p.getId(), success, fail);
+    }
 
     /**
      * Create model in database.
