@@ -235,25 +235,35 @@ class ConstraintParamType extends ModelItf {
 	 *
      * @method setType
 	 * @param {TypeParamType} t The type to associate with the ConstraintParamType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setType(t : TypeParamType) : boolean {
+	setType(t : TypeParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!t || !t.getId()) {
-			throw new ModelException("The type must be an existing object to be associated.");
+            failCallback(new ModelException("The type must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.type() !== null) {
-			throw new ModelException("The type is already set for this ConstraintParamType.");
+            failCallback(new ModelException("The type is already set for this ConstraintParamType."));
+            return;
 		}
 
-		if (this.associateObject(ConstraintParamType, TypeParamType, t.getId())) {
-			t.desynchronize();
-			this._type = t;
-			this._type_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            t.desynchronize();
+            self._type = t;
+            self._type_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(ConstraintParamType, TypeParamType, t.getId(), success, fail);
 	}
 
 	/**
@@ -262,20 +272,29 @@ class ConstraintParamType extends ModelItf {
 	 * A type must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetType
-	 * @returns {boolean} Returns true if the type is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetType() : boolean {
+	unsetType(successCallback : Function = null, failCallback : Function = null) {
 		if (this.type() === null) {
-			throw new ModelException("No type has been set for this constraintParamType.");
+            failCallback(new ModelException("No type has been set for this constraintParamType."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(ConstraintParamType, TypeParamType, this.type().getId())) {
-			this.type().desynchronize();
-			this._type = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.type().desynchronize();
+            self._type = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(ConstraintParamType, TypeParamType, this.type().getId(), success, fail);
 	}
 
 	/**

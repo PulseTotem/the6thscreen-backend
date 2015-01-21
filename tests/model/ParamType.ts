@@ -167,167 +167,269 @@ describe('ParamType', function() {
 		})
 	});
 
-	describe('#setType', function() {
-		it('should set the given type', function() {
-			var c = new ParamType("toto","machin", 52);
-			var s = new TypeParamType("toto", 42);
-			var spy = sinon.spy(s, "desynchronize");
+    describe('#setType', function() {
+        it('should set the given type', function(done) {
+            var c = new ParamType("toto","machin", 52);
+            var s = new TypeParamType("toto", 42);
+            var spy = sinon.spy(s, "desynchronize");
 
-			var reponse1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+            var response1 : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": []
+            };
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+            var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+                .get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+                .reply(200, JSON.stringify(response1));
 
-			var type = c.type();
-			assert.equal(type, null, "The type is not a null value: "+JSON.stringify(type));
+            var success = function() {
+                var type = c.type();
+                assert.equal(type, null, "The type is not a null value: "+JSON.stringify(type));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the type");
 
-			var reponse2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .put(DatabaseConnection.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			var retour = c.setType(s);
-			assert.ok(retour, "The return of the setTypeParamType is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the type in database.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the type");
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the setTypeParamType is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the type in database.");
 
-			// normalement le lazy_loading est true : plus besoin de mock pour la requête
-			type = c.type();
-			assert.deepEqual(type, s, "The type() does not return the exact type we give: "+JSON.stringify(type));
-			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-		});
+                    type = c.type();
+                    assert.deepEqual(type, s, "The type() does not return the exact type we give: "+JSON.stringify(type));
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
 
-		it('should not allow to add a null object', function() {
-			nock.disableNetConnect();
-			var c = new ParamType("toto","machin", 52);
+                    done();
+                };
 
-			assert.throws(function() {
-					c.setType(null);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-		});
+                var fail2 = function(err) {
+                    done(err);
+                };
 
-		it('should not allow to add an undefined object', function() {
-			nock.disableNetConnect();
-			var c = new ParamType("toto","machin", 52);
+                c.setType(s, success2, fail2);
+            };
 
-			assert.throws(function() {
-					c.setType(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-		});
+            var fail = function(err) {
+                done(err);
+            };
 
-		it('should not allow to add a object which is not yet created', function() {
-			nock.disableNetConnect();
-			var c = new ParamType("toto","machin", 52);
-			var s = new TypeParamType("toto");
+            c.loadType(success, fail);
+        });
 
-			assert.throws(function() {
-					c.setType(s);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-		});
+        it('should not allow to add a null object', function(done) {
+            nock.disableNetConnect();
+            var c = new ParamType("toto","machin", 52);
 
-		it('should not allow to set a type if there is already one', function() {
-			var c = new ParamType("toto","machin", 52);
-			var s = new TypeParamType("toto", 42);
-			var s2 = new TypeParamType("tutu", 89);
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setType(null, success, fail);
+        });
+
+        it('should not allow to add an undefined object', function(done) {
+            nock.disableNetConnect();
+            var c = new ParamType("toto","machin", 52);
+
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setType(undefined, success, fail);
+        });
+
+        it('should not allow to add a object which is not yet created', function(done) {
+            nock.disableNetConnect();
+            var c = new ParamType("toto","machin", 52);
+            var s = new TypeParamType("toto");
+
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setType(s, success, fail);
+        });
+
+        it('should not allow to set a type if there is already one', function(done) {
+            var c = new ParamType("toto","machin", 52);
+            var s = new TypeParamType("toto", 42);
+            var s2 = new TypeParamType("tutu", 89);
 
 
-			var reponse1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s2.toJSONObject()
-			};
+            var response1 : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": s2.toJSONObject()
+            };
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+            var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+                .get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+                .reply(200, JSON.stringify(response1));
 
-			var type = c.type();
+            var success = function() {
+                var type = c.type();
 
-			assert.ok(!!type, "The type has false value.");
-			assert.throws(function() {
-					c.setType(s);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the type");
-		});
+                assert.ok(!!type, "The type has false value.");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the type");
 
-	});
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
 
-	describe('#unsetType', function() {
-		it('should unset the TypeParamType', function() {
-			var c = new ParamType("toto","machin", 52);
-			var s = new TypeParamType("toto", 42);
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
 
-			var reponse1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
+                c.setType(s, success2, fail2);
+            };
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+            var fail = function(err) {
+                done(err);
+            };
 
-			var type = c.type();
-			assert.deepEqual(type, s, "The type is not the expected value");
-			var spy = sinon.spy(type, "desynchronize");
+            c.loadType(success, fail);
+        });
 
-			var reponse2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+    });
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+    describe('#unsetType', function() {
+        it('should unset the TypeParamType', function(done) {
+            var c = new ParamType("toto","machin", 52);
+            var s = new TypeParamType("toto", 42);
 
-			var retour = c.unsetType();
-			assert.ok(retour, "The return of the unsetTypeParamType is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+            var response1 : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": s.toJSONObject()
+            };
 
-			type = c.type();
-			assert.deepEqual(type, null, "The type() does not return a null value after unsetting");
-			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-		});
+            var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+                .get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+                .reply(200, JSON.stringify(response1));
 
-		it('should not allow to unset a profil if there is none', function() {
-			var c = new ParamType("toto","machin", 52);
-			var s = new TypeParamType("toto", 42);
+            var success = function() {
+                var type = c.type();
+                assert.deepEqual(type, s, "The type is not the expected value");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the type");
+                var spy = sinon.spy(type, "desynchronize");
 
-			var reponse1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .delete(DatabaseConnection.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			var type = c.type();
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the unsetTypeParamType is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
 
-			assert.equal(type, null, "The type has a value not null: "+JSON.stringify(type));
-			assert.throws(function() {
-					c.unsetType();
-				},
-				ModelException,
-				"The exception has not been thrown.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done");
-		});
+                    type = c.type();
+                    assert.deepEqual(type, null, "The type() does not return a null value after unsetting");
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
 
-	});
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.unsetType(success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadType(success, fail);
+        });
+
+        it('should not allow to unset a type if there is none', function(done) {
+            var c = new ParamType("toto","machin", 52);
+            var s = new TypeParamType("toto", 42);
+
+            var response1 : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": []
+            };
+
+            var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+                .get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+                .reply(200, JSON.stringify(response1));
+
+            var success = function() {
+                var type = c.type();
+
+                assert.equal(type, null, "The type has a value not null: "+JSON.stringify(type));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done");
+
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
+
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.unsetType(success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadType(success, fail);
+        });
+
+    });
 
 	describe('#setConstraint', function() {
 		it('should set the given constraint', function() {
