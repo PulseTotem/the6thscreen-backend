@@ -500,27 +500,35 @@ class CallType extends ModelItf {
 	 *
      * @method setSource
 	 * @param {Source} s The Source to associate with the CallType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setSource(s : Source) : boolean {
+	setSource(s : Source, successCallback : Function = null, failCallback : Function = null) {
 		if (!s || !s.getId()) {
-			throw new ModelException("The source must be an existing object to be associated.");
+            failCallback(new ModelException("The source must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.source() !== null) {
-			throw new ModelException("The source is already set for this CallType.");
+            failCallback(new ModelException("The source is already set for this CallType."));
+            return;
 		}
 
+        var self = this;
 
+        var success : Function = function() {
+            s.desynchronize();
+            self._source = s;
+            self._source_loaded = true;
 
-		if (this.associateObject(CallType, Source, s.getId())) {
-			s.desynchronize();
-			this._source = s;
-			this._source_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(CallType, Source, s.getId(), success, fail);
 	}
 
 	/**
@@ -529,20 +537,29 @@ class CallType extends ModelItf {
 	 * A Source must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetSource
-	 * @returns {boolean} Returns true if the source is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetSource() : boolean {
+	unsetSource(successCallback : Function = null, failCallback : Function = null) {
 		if (this.source() === null) {
-			throw new ModelException("No source has been set for this callType.");
+            failCallback(new ModelException("No source has been set for this callType."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(CallType, Source, this.source().getId())) {
-			this.source().desynchronize();
-			this._source = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.source().desynchronize();
+            self._source = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(CallType, Source, this.source().getId(), success, fail);
 	}
 
 	/**
@@ -552,25 +569,35 @@ class CallType extends ModelItf {
 	 *
      * @method setRenderer
 	 * @param {Renderer} r The Renderer to associate with the CallType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setRenderer(r : Renderer) : boolean {
+	setRenderer(r : Renderer, successCallback : Function = null, failCallback : Function = null) {
 		if (!r || !r.getId()) {
-			throw new ModelException("The renderer must be an existing object to be associated.");
+            failCallback(new ModelException("The renderer must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.renderer() !== null) {
-			throw new ModelException("The renderer is already set for this CallType.");
+            failCallback(new ModelException("The renderer is already set for this CallType."));
+            return;
 		}
 
-		if (this.associateObject(CallType, Renderer, r.getId())) {
-			r.desynchronize();
-			this._renderer = r;
-			this._renderer_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            r.desynchronize();
+            self._renderer = r;
+            self._renderer_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(CallType, Renderer, r.getId(), success, fail);
 	}
 
 	/**
@@ -579,20 +606,29 @@ class CallType extends ModelItf {
 	 * A Renderer must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetRenderer
-	 * @returns {boolean} Returns true if the renderer is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetRenderer() : boolean {
+	unsetRenderer(successCallback : Function = null, failCallback : Function = null) {
 		if (this.renderer() === null) {
-			throw new ModelException("No renderer has been set for this callType.");
+            failCallback(new ModelException("No renderer has been set for this callType."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(CallType, Renderer, this.renderer().getId())) {
-			this.renderer().desynchronize();
-			this._renderer = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.renderer().desynchronize();
+            self._renderer = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(CallType, Renderer, this.renderer().getId(), success, fail);
 	}
 
 	/**
@@ -602,27 +638,35 @@ class CallType extends ModelItf {
 	 *
      * @method setReceivePolicy
 	 * @param {ReceivePolicy} rp The ReceivePolicy to associate with the CallType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setReceivePolicy(rp : ReceivePolicy) : boolean {
+	setReceivePolicy(rp : ReceivePolicy, successCallback : Function = null, failCallback : Function = null) {
 		if (!rp || !rp.getId()) {
-			throw new ModelException("The receivePolicy must be an existing object to be associated.");
+            failCallback(new ModelException("The receivePolicy must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.receivePolicy() !== null) {
-			throw new ModelException("The receivePolicy is already set for this CallType.");
+            failCallback(new ModelException("The receivePolicy is already set for this CallType."));
+            return;
 		}
 
+        var self = this;
 
+        var success : Function = function() {
+            rp.desynchronize();
+            self._receive_policy = rp;
+            self._receive_policy_loaded = true;
 
-		if (this.associateObject(CallType, ReceivePolicy, rp.getId())) {
-			rp.desynchronize();
-			this._receive_policy = rp;
-			this._receive_policy_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(CallType, ReceivePolicy, rp.getId(), success, fail);
 	}
 
 	/**
@@ -631,20 +675,29 @@ class CallType extends ModelItf {
 	 * A ReceivePolicy must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetReceivePolicy
-	 * @returns {boolean} Returns true if the ReceivePolicy is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetReceivePolicy() : boolean {
+	unsetReceivePolicy(successCallback : Function = null, failCallback : Function = null) {
 		if (this.receivePolicy() === null) {
-			throw new ModelException("No receivePolicy has been set for this callType.");
+            failCallback(new ModelException("No receivePolicy has been set for this callType."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(CallType, ReceivePolicy, this.receivePolicy().getId())) {
-			this.receivePolicy().desynchronize();
-			this._receive_policy = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.receivePolicy().desynchronize();
+            self._receive_policy = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(CallType, ReceivePolicy, this.receivePolicy().getId(), success, fail);
 	}
 
 	/**
@@ -654,25 +707,35 @@ class CallType extends ModelItf {
 	 *
      * @method setRenderPolicy
 	 * @param {RenderPolicy} rp The RenderPolicy to associate with the CallType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setRenderPolicy(rp : RenderPolicy) : boolean {
+	setRenderPolicy(rp : RenderPolicy, successCallback : Function = null, failCallback : Function = null) {
 		if (!rp || !rp.getId()) {
-			throw new ModelException("The renderPolicy must be an existing object to be associated.");
+            failCallback(new ModelException("The renderPolicy must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.renderPolicy() !== null) {
-			throw new ModelException("The renderPolicy is already set for this CallType.");
+            failCallback(new ModelException("The renderPolicy is already set for this CallType."));
+            return;
 		}
 
-		if (this.associateObject(CallType, RenderPolicy, rp.getId())) {
-			rp.desynchronize();
-			this._render_policy = rp;
-			this._render_policy_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            rp.desynchronize();
+            self._render_policy = rp;
+            self._render_policy_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(CallType, RenderPolicy, rp.getId(), success, fail);
 	}
 
 	/**
@@ -681,20 +744,29 @@ class CallType extends ModelItf {
 	 * A RenderPolicy must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetRenderPolicy
-	 * @returns {boolean} Returns true if the RenderPolicy is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetRenderPolicy() : boolean {
+	unsetRenderPolicy(successCallback : Function = null, failCallback : Function = null) {
 		if (this.renderPolicy() === null) {
-			throw new ModelException("No RenderPolicy has been set for this callType.");
+            failCallback(new ModelException("No RenderPolicy has been set for this callType."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId())) {
-			this.renderPolicy().desynchronize();
-			this._render_policy = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.renderPolicy().desynchronize();
+            self._render_policy = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId(), success, fail);
 	}
 
 	/**
@@ -704,25 +776,35 @@ class CallType extends ModelItf {
 	 *
      * @method setZone
 	 * @param {Zone} z The Zone to associate with the CallType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setZone(z : Zone) : boolean {
+	setZone(z : Zone, successCallback : Function = null, failCallback : Function = null) {
 		if (!z || !z.getId()) {
-			throw new ModelException("The zone must be an existing object to be associated.");
+            failCallback(new ModelException("The zone must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.zone() !== null) {
-			throw new ModelException("The zone is already set for this CallType.");
+            failCallback(new ModelException("The zone is already set for this CallType."));
+            return;
 		}
 
-		if (this.associateObject(CallType, Zone, z.getId())) {
-			z.desynchronize();
-			this._zone = z;
-			this._zone_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            z.desynchronize();
+            self._zone = z;
+            self._zone_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(CallType, Zone, z.getId(), success, fail);
 	}
 
 	/**
@@ -731,20 +813,29 @@ class CallType extends ModelItf {
 	 * A Zone must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetZone
-	 * @returns {boolean} Returns true if the Zone is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetZone() : boolean {
+	unsetZone(successCallback : Function = null, failCallback : Function = null) {
 		if (this.zone() === null) {
-			throw new ModelException("No Zone has been set for this callType.");
+            failCallback(new ModelException("No Zone has been set for this callType."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(CallType, Zone, this.zone().getId())) {
-			this.zone().desynchronize();
-			this._zone = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.zone().desynchronize();
+            self._zone = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(CallType, Zone, this.zone().getId(), success, fail);
 	}
 
     /**
