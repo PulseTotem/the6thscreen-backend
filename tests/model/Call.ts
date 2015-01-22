@@ -914,7 +914,7 @@ describe('Call', function(){
 	});
 
 	describe('#unsetCallType', function() {
-		it('should unset the Profil', function(done) {
+		it('should unset the calltype', function(done) {
 			var c = new Call("toto", 52);
 			var ct = new CallType("toto", "machin", 42);
 
@@ -968,7 +968,7 @@ describe('Call', function(){
 			c.loadCallType(success, fail);
 		});
 
-		it('should not allow to unset a profil if there is none', function(done) {
+		it('should not allow to unset a calltype if there is none', function(done) {
 			var c = new Call("toto", 52);
 
 			var response1 : SequelizeRestfulResponse = {

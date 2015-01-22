@@ -236,24 +236,34 @@ class Profil extends ModelItf {
 	 *
      * @method addCall
 	 * @param {Call} c The Call to add inside the Profil. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addCall(c : Call) : boolean {
+	addCall(c : Call, successCallback : Function = null, failCallback : Function = null) {
 		if (!c || !c.getId()) {
-			throw new ModelException("The Call must be an existing object to be associated.");
+            failCallback(new ModelException("The Call must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.calls(), c)) {
-			throw new ModelException("You cannot add twice a Call in a Profil.");
+            failCallback(new ModelException("You cannot add twice a Call in a Profil."));
+            return;
 		}
 
-		if (this.associateObject(Profil, Call, c.getId())) {
-			c.desynchronize();
-			this.calls().push(c);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            c.desynchronize();
+            self.calls().push(c);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Profil, Call, c.getId(), success, fail);
 	}
 
 	/**
@@ -262,23 +272,34 @@ class Profil extends ModelItf {
 	 *
      * @method removeCall
      * @param {Call} c The Call to remove from that Profil
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeCall(c : Call) : boolean {
+	removeCall(c : Call, successCallback : Function = null, failCallback : Function = null) {
 		if (!c || !c.getId()) {
-			throw new ModelException("The Call must be an existing object to be removed.");
+            failCallback(new ModelException("The Call must be an existing object to be removed."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.calls(), c)) {
-			throw new ModelException("The Call you try to remove has not been added to the current Profil");
+            failCallback(new ModelException("The Call you try to remove has not been added to the current Profil"));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Profil, Call, c.getId())) {
-			c.desynchronize();
-			return ModelItf.removeObjectFromArray(this.calls(), c);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            c.desynchronize();
+            ModelItf.removeObjectFromArray(self.calls(), c);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Profil, Call, c.getId(), success, fail);
 	}
 
     /**

@@ -388,7 +388,7 @@ describe('CallType', function(){
 			c.loadSource(success, fail);
 		});
 
-		it('should not allow to unset a profil if there is none', function(done) {
+		it('should not allow to unset a Source if there is none', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var s = new Source("toto", "machin","titi","tata", 12, 42);
 
@@ -654,7 +654,7 @@ describe('CallType', function(){
 			c.loadRenderer(success, fail);
 		});
 
-		it('should not allow to unset a profil if there is none', function(done) {
+		it('should not allow to unset a Renderer if there is none', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var s = new Renderer("toto", "machin",42);
 
@@ -928,7 +928,7 @@ describe('CallType', function(){
 			c.loadReceivePolicy(success, fail);
 		});
 
-		it('should not allow to unset a profil if there is none', function(done) {
+		it('should not allow to unset a ReceivePolicy if there is none', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var s = new ReceivePolicy("toto",42);
 
@@ -1201,7 +1201,7 @@ describe('CallType', function(){
 			c.loadRenderPolicy(success, fail);
 		});
 
-		it('should not allow to unset a profil if there is none', function (done) {
+		it('should not allow to unset a renderPolicy if there is none', function (done) {
 			var c = new CallType("toto", "machin", 52);
 			var s = new RenderPolicy("toto", "tata", 42);
 
@@ -1467,7 +1467,7 @@ describe('CallType', function(){
 			c.loadZone(success, fail);
 		});
 
-		it('should not allow to unset a profil if there is none', function (done) {
+		it('should not allow to unset a zone if there is none', function (done) {
 			var c = new CallType("toto", "machin", 52);
 			var s = new Zone("toto", "tata",2,3,4,5, 42);
 
