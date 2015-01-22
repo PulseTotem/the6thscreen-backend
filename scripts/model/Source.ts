@@ -464,25 +464,35 @@ class Source extends ModelItf {
 	 *
      * @method setInfoType
 	 * @param {InfoType} it The InfoType to associate with the Source.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setInfoType(it : InfoType) : boolean {
+	setInfoType(it : InfoType, successCallback : Function = null, failCallback : Function = null) {
 		if (!it || !it.getId()) {
-			throw new ModelException("The InfoType must be an existing object to be associated.");
+			failCallback(new ModelException("The InfoType must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.infoType() !== null) {
-			throw new ModelException("The InfoType is already set for this Source.");
+			failCallback(new ModelException("The InfoType is already set for this Source."));
+            return;
 		}
 
-		if (this.associateObject(Source, InfoType, it.getId())) {
-			it.desynchronize();
-			this._info_type = it;
-			this._info_type_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            it.desynchronize();
+            self._info_type = it;
+            self._info_type_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Source, InfoType, it.getId(), success, fail);
 	}
 
 	/**
@@ -491,20 +501,29 @@ class Source extends ModelItf {
 	 * An InfoType must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetInfoType
-	 * @returns {boolean} Returns true if the InfoType is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetInfoType() : boolean {
+	unsetInfoType(successCallback : Function = null, failCallback : Function = null) {
 		if (this.infoType() === null) {
-			throw new ModelException("No InfoType has been set for this Source.");
+			failCallback(new ModelException("No InfoType has been set for this Source."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Source, InfoType, this.infoType().getId())) {
-			this.infoType().desynchronize();
-			this._info_type = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.infoType().desynchronize();
+            self._info_type = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Source, InfoType, this.infoType().getId(), success, fail);
 	}
 
 	/**
@@ -513,24 +532,34 @@ class Source extends ModelItf {
 	 *
      * @method addParamType
 	 * @param {ParamType} pt The ParamType to add inside the Source. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addParamType(pt : ParamType) : boolean {
+	addParamType(pt : ParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!pt  || !pt.getId()) {
-			throw new ModelException("The ParamType must be an existing object to be associated.");
+			failCallback(new ModelException("The ParamType must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.paramTypes(), pt)) {
-			throw new ModelException("You cannot add twice a ParamType for a SDI.");
+			failCallback(new ModelException("You cannot add twice a ParamType for a SDI."));
+            return;
 		}
 
-		if (this.associateObject(Source, ParamType, pt.getId())) {
-			pt.desynchronize();
-			this.paramTypes().push(pt);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            pt.desynchronize();
+            self.paramTypes().push(pt);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Source, ParamType, pt.getId(), success, fail);
 	}
 
 	/**
@@ -539,23 +568,34 @@ class Source extends ModelItf {
 	 *
      * @method removeParamType
 	 * @param {ParamType} pt The ParamType to remove from that Source
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeParamType(pt : ParamType) : boolean {
+	removeParamType(pt : ParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!pt  || !pt.getId()) {
-			throw new ModelException("The ParamType must be an existing object to be removed.");
+			failCallback(new ModelException("The ParamType must be an existing object to be removed."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.paramTypes(), pt)) {
-			throw new ModelException("The ParamType you try to remove is not yet associated.");
+			failCallback(new ModelException("The ParamType you try to remove is not yet associated."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Source, ParamType, pt.getId())) {
-			pt.desynchronize();
-			return ModelItf.removeObjectFromArray(this.paramTypes(), pt);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            pt.desynchronize();
+            ModelItf.removeObjectFromArray(self.paramTypes(), pt);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Source, ParamType, pt.getId(), success, fail);
 	}
 
     /**
