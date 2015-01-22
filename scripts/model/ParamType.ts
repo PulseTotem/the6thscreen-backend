@@ -440,25 +440,35 @@ class ParamType extends ModelItf {
 	 *
      * @method setConstraint
 	 * @param {ConstraintParamType} t The Constraint to associate with the ParamType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setConstraint(c : ConstraintParamType) : boolean {
+	setConstraint(c : ConstraintParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!c || !c.getId()) {
-			throw new ModelException("The constraint must be an existing object to be associated.");
+            failCallback(new ModelException("The constraint must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.constraint() !== null) {
-			throw new ModelException("The constraint is already set for this CallType.");
+            failCallback(new ModelException("The constraint is already set for this CallType."))
+            return;
 		}
 
-		if (this.associateObject(ParamType, ConstraintParamType, c.getId())) {
-			c.desynchronize();
-			this._constraint = c;
-			this._constraint_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            c.desynchronize();
+            self._constraint = c;
+            self._constraint_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(ParamType, ConstraintParamType, c.getId(), success, fail);
 	}
 
 	/**
@@ -467,20 +477,29 @@ class ParamType extends ModelItf {
 	 * A Constraint must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetConstraint
-	 * @returns {boolean} Returns true if the Constraint is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetConstraint() : boolean {
+	unsetConstraint(successCallback : Function = null, failCallback : Function = null) {
 		if (this.constraint() === null) {
-			throw new ModelException("No constraint has been set for this ParamType.");
+            failCallback(new ModelException("No constraint has been set for this ParamType."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(ParamType, ConstraintParamType, this.constraint().getId())) {
-			this.constraint().desynchronize();
-			this._constraint = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.constraint().desynchronize();
+            self._constraint = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(ParamType, ConstraintParamType, this.constraint().getId(), success, fail);
 	}
 
 	/**
@@ -490,25 +509,35 @@ class ParamType extends ModelItf {
 	 *
      * @method setDefaultValue
 	 * @param {ParamValue} t The DefaultValue to associate with the ParamType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setDefaultValue(d : ParamValue) : boolean {
+	setDefaultValue(d : ParamValue, successCallback : Function = null, failCallback : Function = null) {
 		if (!d || !d.getId()) {
-			throw new ModelException("The defaultValue must be an existing object to be associated.");
+            failCallback(new ModelException("The defaultValue must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.defaultValue() !== null) {
-			throw new ModelException("The defaultValue is already set for this CallType.");
+            failCallback(new ModelException("The defaultValue is already set for this CallType."));
+            return;
 		}
 
-		if (this.associateObject(ParamType, ParamValue, d.getId())) {
-			d.desynchronize();
-			this._default_value = d;
-			this._default_value_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            d.desynchronize();
+            self._default_value = d;
+            self._default_value_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(ParamType, ParamValue, d.getId(), success, fail);
 	}
 
 	/**
@@ -517,20 +546,29 @@ class ParamType extends ModelItf {
 	 * A DefaultValue must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetDefaultValue
-	 * @returns {boolean} Returns true if the DefaultValue is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetDefaultValue() : boolean {
+	unsetDefaultValue(successCallback : Function = null, failCallback : Function = null) {
 		if (this.defaultValue() === null) {
-			throw new ModelException("No defaultValue has been set for this ParamType.");
+            failCallback(new ModelException("No defaultValue has been set for this ParamType."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(ParamType, ParamValue, this.defaultValue().getId())) {
-			this.defaultValue().desynchronize();
-			this._default_value = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.defaultValue().desynchronize();
+            self._default_value = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(ParamType, ParamValue, this.defaultValue().getId(), success, fail);
 	}
 
     /**
