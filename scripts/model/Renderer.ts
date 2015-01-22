@@ -235,25 +235,35 @@ class Renderer extends ModelItf {
 	 *
      * @method setInfoType
 	 * @param {InfoType} it The InfoType to associate with the Renderer.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setInfoType(it : InfoType) : boolean {
+	setInfoType(it : InfoType, successCallback : Function = null, failCallback : Function = null) {
 		if (!it || !it.getId()) {
-			throw new ModelException("The InfoType must be an existing object to be associated.");
+            failCallback(new ModelException("The InfoType must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.infoType() !== null) {
-			throw new ModelException("The InfoType is already set for this Renderer.");
+            failCallback(new ModelException("The InfoType is already set for this Renderer."));
+            return;
 		}
 
-		if (this.associateObject(Renderer, InfoType, it.getId())) {
-			it.desynchronize();
-			this._info_type = it;
-			this._info_type_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            it.desynchronize();
+            self._info_type = it;
+            self._info_type_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Renderer, InfoType, it.getId(), success, fail);
 	}
 
 	/**
@@ -262,20 +272,29 @@ class Renderer extends ModelItf {
 	 * An InfoType must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetInfoType
-	 * @returns {boolean} Returns true if the InfoType is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetInfoType() : boolean {
+	unsetInfoType(successCallback : Function = null, failCallback : Function = null) {
 		if (this.infoType() === null) {
-			throw new ModelException("No InfoType has been set for this Renderer.");
+            failCallback(new ModelException("No InfoType has been set for this Renderer."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Renderer, InfoType, this.infoType().getId())) {
-			this.infoType().desynchronize();
-			this._info_type = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.infoType().desynchronize();
+            self._info_type = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Renderer, InfoType, this.infoType().getId(), success, fail);
 	}
 
     /**
