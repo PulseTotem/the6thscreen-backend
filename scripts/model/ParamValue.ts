@@ -208,25 +208,35 @@ class ParamValue extends ModelItf {
 	 *
      * @method setParamType
 	 * @param {ParamType} t The ParamType to associate with the ParamValue.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setParamType(p : ParamType) : boolean {
+	setParamType(p : ParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
-			throw new ModelException("The ParamType must be an existing object to be associated.");
+            failCallback(new ModelException("The ParamType must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.paramType() !== null) {
-			throw new ModelException("The paramType is already set for this ParamValue.");
+            failCallback(new ModelException("The paramType is already set for this ParamValue."));
+            return;
 		}
 
-		if (this.associateObject(ParamValue, ParamType, p.getId())) {
-			p.desynchronize();
-			this._paramType = p;
-			this._paramType_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            p.desynchronize();
+            self._paramType = p;
+            self._paramType_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(ParamValue, ParamType, p.getId(), success, fail);
 	}
 
 	/**
@@ -235,20 +245,29 @@ class ParamValue extends ModelItf {
 	 * A ParamType must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetParamType
-	 * @returns {boolean} Returns true if the ParamType is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetParamType() : boolean {
+	unsetParamType(successCallback : Function = null, failCallback : Function = null) {
 		if (this.paramType() === null) {
-			throw new ModelException("No ParamType has been set for this ParamValue.");
+            failCallback(new ModelException("No ParamType has been set for this ParamValue."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(ParamValue, ParamType, this.paramType().getId())) {
-			this.paramType().desynchronize();
-			this._paramType = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.paramType().desynchronize();
+            self._paramType = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(ParamValue, ParamType, this.paramType().getId(), success, fail);
 	}
 
     /**
