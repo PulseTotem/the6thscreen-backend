@@ -512,163 +512,268 @@ describe('Zone', function() {
 	});
 
 	describe('#setBehaviour', function () {
-		it('should set the given behaviour', function () {
+		it('should set the given behaviour', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto", "machin", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
-			var reponse1:SequelizeRestfulResponse = {
+			var response1:SequelizeRestfulResponse = {
 				"status": "success",
 				"data": []
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var behaviour = c.behaviour();
-			assert.equal(behaviour, null, "The behaviour is not a null value: " + JSON.stringify(behaviour));
+            var success = function() {
+                var behaviour = c.behaviour();
+                assert.equal(behaviour, null, "The behaviour is not a null value: " + JSON.stringify(behaviour));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the behaviour");
 
-			var reponse2:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+                var response2:SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName(), s.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .put(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName(), s.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			var retour = c.setBehaviour(s);
-			assert.ok(retour, "The return of the setBehaviour is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the behaviour in database.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the behaviour");
 
-			// normalement le lazy_loading est true : plus besoin de mock pour la requête
-			behaviour = c.behaviour();
-			assert.deepEqual(behaviour, s, "The behaviour() does not return the exact behaviour we give: " + JSON.stringify(behaviour));
-			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the setBehaviour is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the behaviour in database.");
+
+                    // normalement le lazy_loading est true : plus besoin de mock pour la requête
+                    behaviour = c.behaviour();
+                    assert.deepEqual(behaviour, s, "The behaviour() does not return the exact behaviour we give: " + JSON.stringify(behaviour));
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.setBehaviour(s, success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+			c.loadBehaviour(success, fail);
 		});
 
-		it('should not allow to add a null object', function () {
+		it('should not allow to add a null object', function (done) {
 			nock.disableNetConnect();
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 
-			assert.throws(function () {
-					c.setBehaviour(null);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setBehaviour(null, success, fail);
 		});
 
-		it('should not allow to add an undefined object', function () {
+		it('should not allow to add an undefined object', function (done) {
 			nock.disableNetConnect();
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 
-			assert.throws(function () {
-					c.setBehaviour(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setBehaviour(undefined, success, fail);
 		});
 
-		it('should not allow to add a object which is not yet created', function () {
+		it('should not allow to add a object which is not yet created', function (done) {
 			nock.disableNetConnect();
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto","machin");
 
-			assert.throws(function () {
-					c.setBehaviour(s);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setBehaviour(s, success, fail);
 		});
 
-		it('should not allow to set a behaviour if there is already one', function () {
+		it('should not allow to set a behaviour if there is already one', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto","machin", 42);
 			var s2 = new Behaviour("tutu","blabla", 89);
 
 
-			var reponse1:SequelizeRestfulResponse = {
+			var response1:SequelizeRestfulResponse = {
 				"status": "success",
 				"data": s2.toJSONObject()
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var behaviour = c.behaviour();
+            var success = function() {
+                var behaviour = c.behaviour();
 
-			assert.ok(!!behaviour, "The behaviour has false value.");
-			assert.throws(function () {
-					c.setBehaviour(s);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the behaviour");
+                assert.ok(!!behaviour, "The behaviour has false value.");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the behaviour");
+
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
+
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.setBehaviour(s, success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadBehaviour(success, fail);
 		});
 
 	});
 
 	describe('#unsetBehaviour', function () {
-		it('should unset the Behaviour', function () {
+		it('should unset the Behaviour', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto", "machin", 42);
 
-			var reponse1:SequelizeRestfulResponse = {
+			var response1:SequelizeRestfulResponse = {
 				"status": "success",
 				"data": s.toJSONObject()
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var behaviour = c.behaviour();
-			assert.deepEqual(behaviour, s, "The behaviour is not the expected value");
-			var spy = sinon.spy(behaviour, "desynchronize");
+            var success = function() {
+                var behaviour = c.behaviour();
+                assert.deepEqual(behaviour, s, "The behaviour is not the expected value");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the behaviour");
 
-			var reponse2:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+                var spy = sinon.spy(behaviour, "desynchronize");
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName(), s.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+                var response2:SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var retour = c.unsetBehaviour();
-			assert.ok(retour, "The return of the unsetBehaviour is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .delete(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName(), s.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			behaviour = c.behaviour();
-			assert.deepEqual(behaviour, null, "The behaviour() does not return a null value after unsetting");
-			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the unsetBehaviour is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+
+                    behaviour = c.behaviour();
+                    assert.deepEqual(behaviour, null, "The behaviour() does not return a null value after unsetting");
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.unsetBehaviour(success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+			c.loadBehaviour(success, fail);
 		});
 
-		it('should not allow to unset a profil if there is none', function () {
+		it('should not allow to unset a profil if there is none', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto", "blabla", 42);
 
-			var reponse1:SequelizeRestfulResponse = {
+			var response1:SequelizeRestfulResponse = {
 				"status": "success",
 				"data": []
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var behaviour = c.behaviour();
+            var success = function() {
+                var behaviour = c.behaviour();
 
-			assert.equal(behaviour, null, "The behaviour has a value not null: " + JSON.stringify(behaviour));
-			assert.throws(function () {
-					c.unsetBehaviour();
-				},
-				ModelException,
-				"The exception has not been thrown.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done");
+                assert.equal(behaviour, null, "The behaviour has a value not null: " + JSON.stringify(behaviour));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done");
+
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
+
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.unsetBehaviour(success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+			c.loadBehaviour(success, fail);
 		});
 
 	});

@@ -373,25 +373,35 @@ class Zone extends ModelItf {
 	 *
 	 * @method setBehaviour
 	 * @param {Behaviour} beha The Behaviour to associate with the Zone.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setBehaviour(beha : Behaviour) : boolean {
+	setBehaviour(beha : Behaviour, successCallback : Function = null, failCallback : Function = null) {
 		if (!beha || !beha.getId()) {
-			throw new ModelException("The Behaviour must be an existing object to be associated.");
+            failCallback(new ModelException("The Behaviour must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.behaviour() !== null) {
-			throw new ModelException("The Behaviour is already set for this Zone.");
+            failCallback(new ModelException("The Behaviour is already set for this Zone."));
+            return;
 		}
 
-		if (this.associateObject(Zone, Behaviour, beha.getId())) {
-			beha.desynchronize();
-			this._behaviour = beha;
-			this._behaviour_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            beha.desynchronize();
+            self._behaviour = beha;
+            self._behaviour_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Zone, Behaviour, beha.getId(), success, fail);
 	}
 
 	/**
@@ -400,20 +410,29 @@ class Zone extends ModelItf {
 	 * A Behaviour must have been set before using it, else an exception is thrown.
 	 *
 	 * @method unsetBehaviour
-	 * @returns {boolean} Returns true if the Behaviour is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetBehaviour() : boolean {
+	unsetBehaviour(successCallback : Function = null, failCallback : Function = null) {
 		if (this.behaviour() === null) {
-			throw new ModelException("No Behaviour has been set for this Source.");
+            failCallback(new ModelException("No Behaviour has been set for this Source."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Zone, Behaviour, this.behaviour().getId())) {
-			this.behaviour().desynchronize();
-			this._behaviour = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.behaviour().desynchronize();
+            self._behaviour = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Zone, Behaviour, this.behaviour().getId(), success, fail);
 	}
 
     /**
