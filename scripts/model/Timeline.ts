@@ -233,24 +233,34 @@ class Timeline extends ModelItf {
 	 *
      * @method addProfil
 	 * @param {Profil} p The Profil to add inside the Timeline. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addProfil(p : Profil) : boolean {
+	addProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
-			throw new ModelException("The Profil must be an existing object to be associated.");
+            failCallback(new ModelException("The Profil must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.profils(), p)) {
-			throw new ModelException("You cannot add twice a Profil for a Timeline.");
+            failCallback(new ModelException("You cannot add twice a Profil for a Timeline."));
+            return;
 		}
 
-		if (this.associateObject(Timeline, Profil, p.getId())) {
-			p.desynchronize();
-			this.profils().push(p);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            p.desynchronize();
+            self.profils().push(p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Timeline, Profil, p.getId(), success, fail);
 	}
 
 	/**
@@ -259,23 +269,34 @@ class Timeline extends ModelItf {
 	 *
      * @method removeProfil
 	 * @param {Profil} p The Profil to remove from that Timeline
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeProfil(p : Profil) : boolean {
+	removeProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
-			throw new ModelException("The Profil must be an existing object to be removed.");
+            failCallback(new ModelException("The Profil must be an existing object to be removed."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.profils(), p)) {
-			throw new ModelException("The Profil you try to remove is not yet associated.");
+            failCallback(new ModelException("The Profil you try to remove is not yet associated."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Timeline, Profil, p.getId())) {
-			p.desynchronize();
-			return ModelItf.removeObjectFromArray(this.profils(), p);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            p.desynchronize();
+            ModelItf.removeObjectFromArray(self.profils(), p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Timeline, Profil, p.getId(), success, fail);
 	}
 
 	/**
