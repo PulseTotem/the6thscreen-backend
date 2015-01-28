@@ -111,25 +111,72 @@ class Timeline extends ModelItf {
      * @method profils
      */
     profils() {
-        if(! this._profils_loaded) {
-            this.getAssociatedObjects(Timeline, Profil, this._profils);
-
-	        this._profils_loaded = true;
-        }
         return this._profils;
+    }
+
+    /**
+     * Load the Timeline's profils.
+     *
+     * @method loadProfils
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadProfils(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._profils_loaded) {
+            var self = this;
+            var success : Function = function(profils) {
+                self._profils = profils;
+                self._profils_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Timeline, Profil, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
-	loadAssociations() : void {
-		this.profils();
-	}
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._profils_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadProfils(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -155,43 +202,65 @@ class Timeline extends ModelItf {
 		return data;
 	}
 
-	/**
-	 * Return a Timeline instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 */
-	toCompleteJSONObject() : Object {
-		this.loadAssociations();
-		var data = this.toJSONObject();
-		data["profils"] = this.serializeArray(this.profils());
-		return data;
-	}
+    /**
+     * Return a Timeline instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["profils"] = self.serializeArray(self.profils());
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
+
 	/**
 	 * Add a new Profil to the Timeline and associate it in the database.
 	 * A Profil can only be added once.
 	 *
      * @method addProfil
 	 * @param {Profil} p The Profil to add inside the Timeline. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addProfil(p : Profil) : boolean {
+	addProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
-			throw new ModelException("The Profil must be an existing object to be associated.");
+            failCallback(new ModelException("The Profil must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.profils(), p)) {
-			throw new ModelException("You cannot add twice a Profil for a Timeline.");
+            failCallback(new ModelException("You cannot add twice a Profil for a Timeline."));
+            return;
 		}
 
-		if (this.associateObject(Timeline, Profil, p.getId())) {
-			p.desynchronize();
-			this.profils().push(p);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            p.desynchronize();
+            self.profils().push(p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Timeline, Profil, p.getId(), success, fail);
 	}
 
 	/**
@@ -200,33 +269,46 @@ class Timeline extends ModelItf {
 	 *
      * @method removeProfil
 	 * @param {Profil} p The Profil to remove from that Timeline
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeProfil(p : Profil) : boolean {
+	removeProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
-			throw new ModelException("The Profil must be an existing object to be removed.");
+            failCallback(new ModelException("The Profil must be an existing object to be removed."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.profils(), p)) {
-			throw new ModelException("The Profil you try to remove is not yet associated.");
+            failCallback(new ModelException("The Profil you try to remove is not yet associated."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Timeline, Profil, p.getId())) {
-			p.desynchronize();
-			return ModelItf.removeObjectFromArray(this.profils(), p);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            p.desynchronize();
+            ModelItf.removeObjectFromArray(self.profils(), p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Timeline, Profil, p.getId(), success, fail);
 	}
 
 	/**
      * Create model in database.
      *
      * @method create
-     * @return {boolean} Create status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    create() : boolean {
-        return this.createObject(Timeline, this.toJSONObject());
+    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        this.createObject(Timeline, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -235,40 +317,48 @@ class Timeline extends ModelItf {
      * @method read
      * @static
      * @param {number} id - The model instance's id.
-     * @return {Timeline} The model instance.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number) : Timeline {
-        return this.readObject(Timeline, id);
+    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        ModelItf.readObject(Timeline, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Update in database the model with current id.
      *
      * @method update
-     * @return {boolean} Update status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    update() : boolean {
-        return this.updateObject(Timeline, this.toJSONObject());
+    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.updateObject(Timeline, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Delete in database the model with current id.
      *
      * @method delete
-     * @return {boolean} Delete status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    delete() : boolean {
-        return this.deleteObject(Timeline);
+    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.deleteObject(Timeline, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
      * @method all
-     * @return {Array<Timeline>} The model instances.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static all() : Array<Timeline> {
-        return this.allObjects(Timeline);
+    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.allObjects(Timeline, successCallback, failCallback, attemptNumber);
     }
 
 	/**

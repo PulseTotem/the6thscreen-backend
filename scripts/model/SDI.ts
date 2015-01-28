@@ -199,12 +199,39 @@ class SDI extends ModelItf {
      * @method users
      */
     users() {
-        if(! this._users_loaded) {
-	        this.getAssociatedObjects(SDI, User, this._users);
-
-	        this._users_loaded = true;
-        }
         return this._users;
+    }
+
+    /**
+     * Load the SDI's users.
+     *
+     * @method loadUsers
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadUsers(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._users_loaded) {
+            var self = this;
+            var success : Function = function(users) {
+                self._users = users;
+                self._users_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(SDI, User, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -213,26 +240,80 @@ class SDI extends ModelItf {
      * @method zones
      */
     zones() {
-        if(! this._zones_loaded) {
-            this.getAssociatedObjects(SDI, Zone, this._zones);
-
-	        this._zones_loaded = true;
-        }
         return this._zones;
     }
 
     /**
-     * Return the SDI's profiles.
+     * Load the SDI's zones.
+     *
+     * @method loadZones
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadZones(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._zones_loaded) {
+            var self = this;
+            var success : Function = function(zones) {
+                self._zones = zones;
+                self._zones_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(SDI, Zone, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
+    /**
+     * Return the SDI's profils.
      *
      * @method profils
      */
     profils() {
-        if(! this._profils_loaded) {
-            this.getAssociatedObjects(SDI, Profil, this._profils);
-
-	        this._profils_loaded = true;
-        }
         return this._profils;
+    }
+
+    /**
+     * Load the SDI's profils.
+     *
+     * @method loadProfils
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadProfils(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._profils_loaded) {
+            var self = this;
+            var success : Function = function(profils) {
+                self._profils = profils;
+                self._profils_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(SDI, Profil, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -241,28 +322,75 @@ class SDI extends ModelItf {
      * @method timelines
      */
     timelines() {
-        if(! this._timelines_loaded) {
-            this.getAssociatedObjects(SDI, Timeline, this._timelines);
-
-	        this._timelines_loaded = true;
-        }
         return this._timelines;
+    }
+
+    /**
+     * Load the SDI's timelines.
+     *
+     * @method loadTimelines
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadTimelines(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._timelines_loaded) {
+            var self = this;
+            var success : Function = function(timelines) {
+                self._timelines = timelines;
+                self._timelines_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(SDI, Timeline, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
-	loadAssociations() {
-		this.users();
-		this.profils();
-		this.zones();
-		this.timelines();
-	}
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._users_loaded && self._profils_loaded && self._zones_loaded && self._timelines_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadUsers(success, fail);
+        this.loadProfils(success, fail);
+        this.loadZones(success, fail);
+        this.loadTimelines(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -292,22 +420,33 @@ class SDI extends ModelItf {
 		return data;
 	}
 
-	/**
-	 * Return a SDI instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 */
-	toCompleteJSONObject() : Object {
-		this.loadAssociations();
-		var data = this.toJSONObject();
-		data["profils"] = this.serializeArray(this.profils());
-		data["timelines"] = this.serializeArray(this.timelines());
-		data["users"] = this.serializeArray(this.users());
-		data["zones"] = this.serializeArray(this.zones());
-		return data;
-	}
+    /**
+     * Return a SDI instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["profils"] = self.serializeArray(self.profils());
+            data["timelines"] = self.serializeArray(self.timelines());
+            data["users"] = self.serializeArray(self.users());
+            data["zones"] = self.serializeArray(self.zones());
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Add a new User to the SDI and associate it in the database.
@@ -315,24 +454,34 @@ class SDI extends ModelItf {
 	 *
      * @method addUser
 	 * @param {User} u The User to add inside the SDI. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addUser(u : User) : boolean {
+	addUser(u : User, successCallback : Function = null, failCallback : Function = null) {
 		if (!u || !u.getId()) {
-			throw new ModelException("The User must be an existing object to be associated.");
+			failCallback(new ModelException("The User must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.users(), u)) {
-			throw new ModelException("You cannot add twice a User for a SDI.");
+			failCallback(new ModelException("You cannot add twice a User for a SDI."));
+            return;
 		}
 
-		if (this.associateObject(SDI, User, u.getId())) {
-			u.desynchronize();
-			this.users().push(u);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            u.desynchronize();
+            self.users().push(u);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(SDI, User, u.getId(), success, fail);
 	}
 
 	/**
@@ -341,23 +490,34 @@ class SDI extends ModelItf {
 	 *
      * @method removeUser
 	 * @param {User} u The User to remove from that SDI
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeUser(u : User) : boolean {
+	removeUser(u : User, successCallback : Function = null, failCallback : Function = null) {
 		if (!u || !u.getId()) {
-			throw new ModelException("The User must be an existing object to be associated.");
+			failCallback(new ModelException("The User must be an existing object to be associated."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.users(), u)) {
-			throw new ModelException("The User you try to remove has not been added to the current SDI");
+			failCallback(new ModelException("The User you try to remove has not been added to the current SDI"));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(SDI, User, u.getId())) {
-			u.desynchronize();
-			return ModelItf.removeObjectFromArray(this.users(), u);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            u.desynchronize();
+            ModelItf.removeObjectFromArray(self.users(), u);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(SDI, User, u.getId(), success, fail);
 	}
 
 	/**
@@ -366,24 +526,34 @@ class SDI extends ModelItf {
 	 *
      * @method addZone
 	 * @param {Zone} z The Zone to add inside the SDI. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addZone(z : Zone) : boolean {
+	addZone(z : Zone, successCallback : Function = null, failCallback : Function = null) {
 		if (!z || !z.getId()) {
-			throw new ModelException("The Zone must be an existing object to be associated.");
+			failCallback(new ModelException("The Zone must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.zones(), z)) {
-			throw new ModelException("You cannot add twice a Zone for a SDI.");
+			failCallback(new ModelException("You cannot add twice a Zone for a SDI."));
+            return;
 		}
 
-		if (this.associateObject(SDI, Zone, z.getId())) {
-			z.desynchronize();
-			this.zones().push(z);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            z.desynchronize();
+            self.zones().push(z);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(SDI, Zone, z.getId(), success, fail);
 	}
 
 	/**
@@ -392,23 +562,34 @@ class SDI extends ModelItf {
 	 *
      * @method removeZone
 	 * @param {Zone} z The Zone to remove from that SDI
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeZone(z : Zone) : boolean {
+	removeZone(z : Zone, successCallback : Function = null, failCallback : Function = null) {
 		if (!z || !z.getId()) {
-			throw new ModelException("The Zone must be an existing object to be associated.");
+			failCallback(new ModelException("The Zone must be an existing object to be associated."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.zones(), z)) {
-			throw new ModelException("The Zone you try to remove has not been added to the current SDI");
+			failCallback(new ModelException("The Zone you try to remove has not been added to the current SDI"));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(SDI, Zone, z.getId())) {
-			z.desynchronize();
-			return ModelItf.removeObjectFromArray(this.zones(), z);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            z.desynchronize();
+            ModelItf.removeObjectFromArray(self.zones(), z);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(SDI, Zone, z.getId(), success, fail);
 	}
 
 	/**
@@ -417,24 +598,34 @@ class SDI extends ModelItf {
 	 *
      * @method addProfil
 	 * @param {Profil} p The Profil to add inside the SDI. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addProfil(p : Profil) : boolean {
+	addProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
-			throw new ModelException("The Profil must be an existing object to be associated.");
+			failCallback(new ModelException("The Profil must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.profils(), p)) {
-			throw new ModelException("You cannot add twice a Profil for a SDI.");
+			failCallback(new ModelException("You cannot add twice a Profil for a SDI."));
+            return;
 		}
 
-		if (this.associateObject(SDI, Profil, p.getId())) {
-			p.desynchronize();
-			this.profils().push(p);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            p.desynchronize();
+            self.profils().push(p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(SDI, Profil, p.getId(), success, fail);
 	}
 
 	/**
@@ -443,23 +634,34 @@ class SDI extends ModelItf {
 	 *
      * @method removeProfil
 	 * @param {Profil} p The Profil to remove from that SDI
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeProfil(p : Profil) : boolean {
+	removeProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
-			throw new ModelException("The Profil must be an existing object to be associated.");
+			failCallback(new ModelException("The Profil must be an existing object to be associated."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.profils(), p)) {
-			throw new ModelException("The profil you try to remove is not linked with the SDI.");
+			failCallback(new ModelException("The profil you try to remove is not linked with the SDI."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(SDI, Profil, p.getId())) {
-			p.desynchronize();
-			return ModelItf.removeObjectFromArray(this.profils(), p);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            p.desynchronize();
+            ModelItf.removeObjectFromArray(self.profils(), p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(SDI, Profil, p.getId(), success, fail);
 	}
 
 	/**
@@ -468,24 +670,34 @@ class SDI extends ModelItf {
 	 *
      * @method addTimeline
 	 * @param {Timeline} t The Timeline to add inside the SDI. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addTimeline(t : Timeline) : boolean {
+	addTimeline(t : Timeline, successCallback : Function = null, failCallback : Function = null) {
 		if (!t || !t.getId()) {
-			throw new ModelException("The Timeline must be an existing object to be associated.");
+			failCallback(new ModelException("The Timeline must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.timelines(), t)) {
-			throw new ModelException("You cannot add twice a Timeline for a SDI.");
+			failCallback(new ModelException("You cannot add twice a Timeline for a SDI."));
+            return;
 		}
 
-		if (this.associateObject(SDI, Timeline, t.getId())) {
-			t.desynchronize();
-			this.timelines().push(t);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            t.desynchronize();
+            self.timelines().push(t);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(SDI, Timeline, t.getId(), success, fail);
 	}
 
 	/**
@@ -494,33 +706,46 @@ class SDI extends ModelItf {
 	 *
      * @method removeTimeline
 	 * @param {Timeline} t The Timeline to remove from that SDI
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeTimeline(t : Timeline) : boolean {
+	removeTimeline(t : Timeline, successCallback : Function = null, failCallback : Function = null) {
 		if (!t || !t.getId()) {
-			throw new ModelException("The Timeline must be an existing object to be associated.");
+			failCallback(new ModelException("The Timeline must be an existing object to be associated."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.timelines(), t)) {
-			throw new ModelException("The Timeline you try to remove is not linked with the SDI.");
+			failCallback(new ModelException("The Timeline you try to remove is not linked with the SDI."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(SDI, Timeline, t.getId())) {
-			t.desynchronize();
-			return ModelItf.removeObjectFromArray(this.timelines(), t);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            t.desynchronize();
+            ModelItf.removeObjectFromArray(self.timelines(), t);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(SDI, Timeline, t.getId(), success, fail);
 	}
 
 	/**
      * Create model in database.
      *
      * @method create
-     * @return {boolean} Create status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    create() : boolean {
-        return this.createObject(SDI, this.toJSONObject());
+    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        this.createObject(SDI, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -529,40 +754,48 @@ class SDI extends ModelItf {
      * @method read
      * @static
      * @param {number} id - The model instance's id.
-     * @return {SDI} The model instance.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number) : SDI {
-        return this.readObject(SDI, id);
+    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        ModelItf.readObject(SDI, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Update in database the model with current id.
      *
      * @method update
-     * @return {boolean} Update status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    update() : boolean {
-	    return this.updateObject(SDI, this.toJSONObject());
+    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.updateObject(SDI, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Delete in database the model with current id.
      *
      * @method delete
-     * @return {boolean} Delete status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    delete() : boolean {
-        return this.deleteObject(SDI);
+    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.deleteObject(SDI, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
      * @method all
-     * @return {Array<SDI>} The model instances.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static all() : Array<SDI> {
-        return this.allObjects(SDI);
+    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.allObjects(SDI, successCallback, failCallback, attemptNumber);
     }
 
 	/**

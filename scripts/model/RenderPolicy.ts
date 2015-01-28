@@ -106,10 +106,12 @@ class RenderPolicy extends ModelItf {
      * Create model in database.
      *
      * @method create
-     * @return {boolean} Create status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    create() : boolean {
-        return this.createObject(RenderPolicy, this.toJSONObject());
+    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        this.createObject(RenderPolicy, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -118,40 +120,48 @@ class RenderPolicy extends ModelItf {
      * @method read
      * @static
      * @param {number} id - The model instance's id.
-     * @return {RenderPolicy} The model instance.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number) : RenderPolicy {
-        return this.readObject(RenderPolicy, id);
+    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        ModelItf.readObject(RenderPolicy, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Update in database the model with current id.
      *
      * @method update
-     * @return {boolean} Update status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    update() : boolean {
-        return this.updateObject(RenderPolicy, this.toJSONObject());
+    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.updateObject(RenderPolicy, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Delete in database the model with current id.
      *
      * @method delete
-     * @return {boolean} Delete status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    delete() : boolean {
-        return this.deleteObject(RenderPolicy);
+    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.deleteObject(RenderPolicy, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
      * @method all
-     * @return {Array<RenderPolicy>} The model instances.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static all() : Array<RenderPolicy> {
-        return this.allObjects(RenderPolicy);
+    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.allObjects(RenderPolicy, successCallback, failCallback, attemptNumber);
     }
 
 	/**

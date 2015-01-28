@@ -154,14 +154,41 @@ class ParamType extends ModelItf {
      * @method type
      */
 	type() {
-	    if(! this._type_loaded) {
-		    var value = this.getUniquelyAssociatedObject(ParamType, TypeParamType);
-		    if (!!value) {
-			    this._type = value;
-		    }
-		    this._type_loaded = true;
-	    }
 	    return this._type;
+    }
+
+    /**
+     * Load the ParamType's type
+     *
+     * @method loadType
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadType(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._type_loaded) {
+            var self = this;
+            var success : Function = function(type) {
+                if(!!type) {
+                    self._type = type;
+                }
+                self._type_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(ParamType, TypeParamType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -170,14 +197,41 @@ class ParamType extends ModelItf {
      * @method constraint
      */
     constraint() {
-	    if(! this._constraint_loaded) {
-		    var value = this.getUniquelyAssociatedObject(ParamType, ConstraintParamType);
-		    if (!!value) {
-			    this._constraint = value;
-		    }
-		    this._constraint_loaded = true;
-	    }
 	    return this._constraint;
+    }
+
+    /**
+     * Load the ParamType's constraint
+     *
+     * @method loadConstraint
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadConstraint(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._constraint_loaded) {
+            var self = this;
+            var success : Function = function(constraint) {
+                if(!!constraint) {
+                    self._constraint = constraint;
+                }
+                self._constraint_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(ParamType, ConstraintParamType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
 	/**
@@ -186,29 +240,76 @@ class ParamType extends ModelItf {
      * @method defaultValue
 	 */
 	defaultValue() {
-		if(! this._default_value_loaded) {
-			var value = this.getUniquelyAssociatedObject(ParamType, ParamValue);
-			if (!!value) {
-				this._default_value = value;
-			}
-			this._default_value_loaded = true;
-		}
 		return this._default_value;
 	}
 
+    /**
+     * Load the ParamType's default value.
+     *
+     * @method loadDefaultValue
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadDefaultValue(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._default_value_loaded) {
+            var self = this;
+            var success : Function = function(defaultValue) {
+                if(!!defaultValue) {
+                    self._default_value = defaultValue;
+                }
+                self._default_value_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(ParamType, ParamValue, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
-	loadAssociations() : void {
-		this.type();
-		this.constraint();
-		this.defaultValue();
-	}
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._type_loaded && self._constraint_loaded && self._default_value_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadType(success, fail);
+        this.loadConstraint(success, fail);
+        this.loadDefaultValue(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -236,21 +337,32 @@ class ParamType extends ModelItf {
 		return data;
 	}
 
-	/**
-	 * Return a ParamType instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 */
-	toCompleteJSONObject() : Object {
-		this.loadAssociations();
-		var data = this.toJSONObject();
-		data["type"] = (this.type() !== null) ? this.type().toJSONObject() : null;
-		data["constraint"] = (this.constraint() !== null) ? this.constraint().toJSONObject() : null;
-		data["defaultValue"] = (this.defaultValue() !== null) ? this.defaultValue().toJSONObject() : null;
-		return data;
-	}
+    /**
+     * Return a ParamType instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["type"] = (self.type() !== null) ? self.type().toJSONObject() : null;
+            data["constraint"] = (self.constraint() !== null) ? self.constraint().toJSONObject() : null;
+            data["defaultValue"] = (self.defaultValue() !== null) ? self.defaultValue().toJSONObject() : null;
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Set the Type of the ParamType.
@@ -259,26 +371,36 @@ class ParamType extends ModelItf {
 	 *
      * @method setType
 	 * @param {TypeParamType} t The Type to associate with the ParamType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setType(t : TypeParamType) : boolean {
-		if (!t  || !t.getId()) {
-			throw new ModelException("The type must be an existing object to be associated.");
-		}
+    setType(t : TypeParamType, successCallback : Function = null, failCallback : Function = null) {
+        if (!t || !t.getId()) {
+            failCallback(new ModelException("The type must be an existing object to be associated."));
+            return;
+        }
 
-		if (this.type() !== null) {
-			throw new ModelException("The type is already set for this CallType.");
-		}
+        if (this.type() !== null) {
+            failCallback(new ModelException("The type is already set for this ParamType."));
+            return;
+        }
 
-		if (this.associateObject(ParamType, TypeParamType, t.getId())) {
-			t.desynchronize();
-			this._type = t;
-			this._type_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
-	}
+        var self = this;
+
+        var success : Function = function() {
+            t.desynchronize();
+            self._type = t;
+            self._type_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(ParamType, TypeParamType, t.getId(), success, fail);
+    }
 
 	/**
 	 * Unset the current Type from the ParamType.
@@ -286,21 +408,30 @@ class ParamType extends ModelItf {
 	 * A Type must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetType
-	 * @returns {boolean} Returns true if the Type is well unset and the association removed in database.
-	 */
-	unsetType() : boolean {
-		if (this.type() === null) {
-			throw new ModelException("No Type has been set for this ParamType.");
-		}
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    unsetType(successCallback : Function = null, failCallback : Function = null) {
+        if (this.type() === null) {
+            failCallback(new ModelException("No type has been set for this ParamType."));
+            return;
+        }
 
-		if (this.deleteObjectAssociation(ParamType, TypeParamType, this.type().getId())) {
-			this.type().desynchronize();
-			this._type = null;
-			return true;
-		} else {
-			return false;
-		}
-	}
+        var self = this;
+
+        var success : Function = function() {
+            self.type().desynchronize();
+            self._type = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(ParamType, TypeParamType, this.type().getId(), success, fail);
+    }
 
 	/**
 	 * Set the Constraint of the ParamType.
@@ -309,25 +440,35 @@ class ParamType extends ModelItf {
 	 *
      * @method setConstraint
 	 * @param {ConstraintParamType} t The Constraint to associate with the ParamType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setConstraint(c : ConstraintParamType) : boolean {
+	setConstraint(c : ConstraintParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!c || !c.getId()) {
-			throw new ModelException("The constraint must be an existing object to be associated.");
+            failCallback(new ModelException("The constraint must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.constraint() !== null) {
-			throw new ModelException("The constraint is already set for this CallType.");
+            failCallback(new ModelException("The constraint is already set for this CallType."))
+            return;
 		}
 
-		if (this.associateObject(ParamType, ConstraintParamType, c.getId())) {
-			c.desynchronize();
-			this._constraint = c;
-			this._constraint_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            c.desynchronize();
+            self._constraint = c;
+            self._constraint_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(ParamType, ConstraintParamType, c.getId(), success, fail);
 	}
 
 	/**
@@ -336,20 +477,29 @@ class ParamType extends ModelItf {
 	 * A Constraint must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetConstraint
-	 * @returns {boolean} Returns true if the Constraint is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetConstraint() : boolean {
+	unsetConstraint(successCallback : Function = null, failCallback : Function = null) {
 		if (this.constraint() === null) {
-			throw new ModelException("No constraint has been set for this ParamType.");
+            failCallback(new ModelException("No constraint has been set for this ParamType."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(ParamType, ConstraintParamType, this.constraint().getId())) {
-			this.constraint().desynchronize();
-			this._constraint = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.constraint().desynchronize();
+            self._constraint = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(ParamType, ConstraintParamType, this.constraint().getId(), success, fail);
 	}
 
 	/**
@@ -359,25 +509,35 @@ class ParamType extends ModelItf {
 	 *
      * @method setDefaultValue
 	 * @param {ParamValue} t The DefaultValue to associate with the ParamType.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setDefaultValue(d : ParamValue) : boolean {
+	setDefaultValue(d : ParamValue, successCallback : Function = null, failCallback : Function = null) {
 		if (!d || !d.getId()) {
-			throw new ModelException("The defaultValue must be an existing object to be associated.");
+            failCallback(new ModelException("The defaultValue must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.defaultValue() !== null) {
-			throw new ModelException("The defaultValue is already set for this CallType.");
+            failCallback(new ModelException("The defaultValue is already set for this CallType."));
+            return;
 		}
 
-		if (this.associateObject(ParamType, ParamValue, d.getId())) {
-			d.desynchronize();
-			this._default_value = d;
-			this._default_value_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            d.desynchronize();
+            self._default_value = d;
+            self._default_value_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(ParamType, ParamValue, d.getId(), success, fail);
 	}
 
 	/**
@@ -386,30 +546,41 @@ class ParamType extends ModelItf {
 	 * A DefaultValue must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetDefaultValue
-	 * @returns {boolean} Returns true if the DefaultValue is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetDefaultValue() : boolean {
+	unsetDefaultValue(successCallback : Function = null, failCallback : Function = null) {
 		if (this.defaultValue() === null) {
-			throw new ModelException("No defaultValue has been set for this ParamType.");
+            failCallback(new ModelException("No defaultValue has been set for this ParamType."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(ParamType, ParamValue, this.defaultValue().getId())) {
-			this.defaultValue().desynchronize();
-			this._default_value = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.defaultValue().desynchronize();
+            self._default_value = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(ParamType, ParamValue, this.defaultValue().getId(), success, fail);
 	}
 
     /**
      * Create model in database.
      *
      * @method create
-     * @return {boolean} Create status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    create() : boolean {
-       return this.createObject(ParamType, this.toJSONObject());
+    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        this.createObject(ParamType, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -418,40 +589,48 @@ class ParamType extends ModelItf {
      * @method read
      * @static
      * @param {number} id - The model instance's id.
-     * @return {ParamType} The model instance.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number) : ParamType {
-        return this.readObject(ParamType, id);
+    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        ModelItf.readObject(ParamType, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Update in database the model with current id.
      *
      * @method update
-     * @return {boolean} Update status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    update() : boolean {
-        return this.updateObject(ParamType, this.toJSONObject());
+    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.updateObject(ParamType, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Delete in database the model with current id.
      *
      * @method delete
-     * @return {boolean} Delete status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    delete() : boolean {
-        return this.deleteObject(ParamType);
+    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.deleteObject(ParamType, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
      * @method all
-     * @return {Array<ParamType>} The model instances.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static all() : Array<ParamType> {
-        return this.allObjects(ParamType);
+    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.allObjects(ParamType, successCallback, failCallback, attemptNumber);
     }
 
 	/**

@@ -101,56 +101,66 @@ class Behaviour extends ModelItf {
 		return data;
 	}
 
-	/**
-	 * Create model in database.
-	 *
-	 * @method create
-	 * @return {boolean} Create status
-	 */
-	create() : boolean {
-		return this.createObject(Behaviour, this.toJSONObject())
+    /**
+     * Create model in database.
+     *
+     * @method create
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+		this.createObject(Behaviour, this.toJSONObject(), successCallback, failCallback);
 	}
 
-	/**
-	 * Retrieve model description from database and create model instance.
-	 *
-	 * @method read
-	 * @static
-	 * @param {number} id - The model instance's id.
-	 * @return {Behaviour} The model instance.
-	 */
-	static read(id : number) : Behaviour {
-		return this.readObject(Behaviour, id);
+    /**
+     * Retrieve model description from database and create model instance.
+     *
+     * @method read
+     * @static
+     * @param {number} id - The model instance's id.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        ModelItf.readObject(Behaviour, id, successCallback, failCallback, attemptNumber);
+    }
+
+    /**
+     * Update in database the model with current id.
+     *
+     * @method update
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+		return this.updateObject(Behaviour, this.toJSONObject(), successCallback, failCallback, attemptNumber);
 	}
 
-	/**
-	 * Update in database the model with current id.
-	 *
-	 * @method update
-	 * @return {boolean} Update status
-	 */
-	update() : boolean {
-		return this.updateObject(Behaviour, this.toJSONObject());
+    /**
+     * Delete in database the model with current id.
+     *
+     * @method delete
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+		return this.deleteObject(Behaviour, successCallback, failCallback, attemptNumber);
 	}
 
-	/**
-	 * Delete in database the model with current id.
-	 *
-	 * @method delete
-	 * @return {boolean} Delete status
-	 */
-	delete() : boolean {
-		return this.deleteObject(Behaviour);
-	}
-
-	/**
-	 * Retrieve all models from database and create corresponding model instances.
-	 *
-	 * @method all
-	 * @return {Array<Behaviour>} The model instances.
-	 */
-	static all() : Array<Behaviour> {
-		return this.allObjects(Behaviour);
+    /**
+     * Retrieve all models from database and create corresponding model instances.
+     *
+     * @method all
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
+     */
+    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+		return this.allObjects(Behaviour, successCallback, failCallback, attemptNumber);
 	}
 
 	/**

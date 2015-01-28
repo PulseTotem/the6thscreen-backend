@@ -124,11 +124,35 @@ class Call extends ModelItf {
      * @method paramValues
      */
     paramValues() {
-        if(! this._param_values_loaded) {
-            this.getAssociatedObjects(Call, ParamValue, this._param_values);
-	        this._param_values_loaded = true;
-        }
         return this._param_values;
+    }
+
+    /**
+     * Load the Profil's paramValues.
+     *
+     * @method loadParamValues
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadParamValues(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._param_values_loaded) {
+            var self = this;
+            var success : Function = function(param_values) {
+                self._param_values = param_values;
+                self._param_values_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Call, ParamValue, success, fail);
+        }
     }
 
 	/**
@@ -137,15 +161,42 @@ class Call extends ModelItf {
      * @method profil
 	 */
 	profil() {
-		if(! this._profil_loaded) {
-			var value = this.getUniquelyAssociatedObject(Call, Profil);
-			if (!!value) {
-				this._profil = value;
-			}
-			this._profil_loaded = true;
-		}
 		return this._profil;
 	}
+
+    /**
+     * Load the Call's profil.
+     *
+     * @method loadProfil
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadProfil(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._profil_loaded) {
+            var self = this;
+            var success : Function = function(profil) {
+                if(!!profil) {
+                    self._profil = profil;
+                }
+                self._profil_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(Call, Profil, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
 
 	/**
 	 * Return the Call's type.
@@ -153,29 +204,76 @@ class Call extends ModelItf {
      * @method callType
 	 */
 	callType() {
-		if(! this._call_type_loaded) {
-			var value = this.getUniquelyAssociatedObject(Call, CallType);
-			if (!!value) {
-				this._call_type = value;
-			}
-			this._call_type_loaded = true;
-		}
 		return this._call_type;
 	}
 
+    /**
+     * Load the Call's type.
+     *
+     * @method loadCallType
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadCallType(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._call_type_loaded) {
+            var self = this;
+            var success : Function = function(call_type) {
+                if(!!call_type) {
+                    self._call_type = call_type;
+                }
+                self._call_type_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(Call, CallType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
-	loadAssociations() : void {
-		this.paramValues();
-		this.profil();
-		this.callType();
-	}
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._param_values_loaded && self._profil_loaded && self._call_type_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadParamValues(success, fail);
+        this.loadProfil(success, fail);
+        this.loadCallType(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -202,21 +300,32 @@ class Call extends ModelItf {
 		return data;
 	}
 
-	/**
-	 * Return a Call instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 */
-	toCompleteJSONObject() : Object {
-		this.loadAssociations();
-		var data = this.toJSONObject();
-		data["callType"] = (this.callType() !== null) ? this.callType().toJSONObject() : null;
-		data["profil"] = (this.profil() !== null) ? this.profil().toJSONObject() : null;
-		data["paramValues"] = this.serializeArray(this.paramValues());
-		return data;
-	}
+    /**
+     * Return a Call instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["callType"] = (self.callType() !== null) ? self.callType().toJSONObject() : null;
+            data["profil"] = (self.profil() !== null) ? self.profil().toJSONObject() : null;
+            data["paramValues"] = self.serializeArray(self.paramValues());
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Add a new ParamValue to the Call and associate it in the database.
@@ -224,24 +333,34 @@ class Call extends ModelItf {
 	 *
      * @method addParamValue
 	 * @param {ParamValue} p The ParamValue to add inside the call. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addParamValue(p : ParamValue) : boolean {
+	addParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
-			throw new ModelException("The ParamValue must be an existing object to be associated.");
+            failCallback(new ModelException("The ParamValue must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.paramValues(), p)) {
-			throw new ModelException("You cannot add twice a parameter in a call.");  // TODO: cannot it be useful sometimes?
+            failCallback(new ModelException("You cannot add twice a parameter in a call."));  // TODO: cannot it be useful sometimes?
+            return;
 		}
 
-		if (this.associateObject(Call, ParamValue, p.getId())) {
-			p.desynchronize();
-			this.paramValues().push(p);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            p.desynchronize();
+            self.paramValues().push(p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Call, ParamValue, p.getId(), success, fail);
 	}
 
 	/**
@@ -250,22 +369,33 @@ class Call extends ModelItf {
 	 *
      * @method removeParamValue
 	 * @param {ParamValue} p The ParamValue to remove from that Call
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeParamValue(p : ParamValue) : boolean {
+	removeParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
-			throw new ModelException("The ParamValue must be an existing object to be removed.");
+            failCallback(new ModelException("The ParamValue must be an existing object to be removed."));
+            return;
 		}
 		if (!ModelItf.isObjectInsideArray(this.paramValues(), p)) {
-			throw new ModelException("The ParamValue you try to remove has not been added to the current Call");
+            failCallback(new ModelException("The ParamValue you try to remove has not been added to the current Call"));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Call, ParamValue, p.getId())) {
-			p.desynchronize();
-			return ModelItf.removeObjectFromArray(this.paramValues(), p);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            p.desynchronize();
+            ModelItf.removeObjectFromArray(self.paramValues(), p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Call, ParamValue, p.getId(), success, fail);
 	}
 
 	/**
@@ -275,25 +405,35 @@ class Call extends ModelItf {
 	 *
      * @method setProfil
 	 * @param {Profil} p The Profil to associate with the Call.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setProfil(p : Profil) : boolean {
+	setProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
-			throw new ModelException("The Profil must be an existing object to be associated.");
+            failCallback(new ModelException("The Profil must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.profil() !== null) {
-			throw new ModelException("The profil is already set for the call: "+JSON.stringify(this.profil())+".");
+            failCallback(new ModelException("The profil is already set for the call: "+JSON.stringify(this.profil())+"."));
+            return;
 		}
 
-		if (this.associateObject(Call, Profil, p.getId())) {
-			p.desynchronize();
-			this._profil = p;
-			this._profil_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success = function() {
+            p.desynchronize();
+            self._profil = p;
+            self._profil_loaded = true;
+
+            successCallback();
+        };
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        this.associateObject(Call, Profil, p.getId(), success, fail);
 	}
 
 	/**
@@ -302,20 +442,29 @@ class Call extends ModelItf {
 	 * A Profil must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetProfil
-	 * @returns {boolean} Returns true if the profil is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetProfil() : boolean {
+	unsetProfil(successCallback : Function = null, failCallback : Function = null) {
 		if (this.profil() === null) {
-			throw new ModelException("No profil has been set for this call.");
+            failCallback(new ModelException("No profil has been set for this call."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Call, Profil, this.profil().getId())) {
-			this.profil().desynchronize();
-			this._profil = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success = function() {
+            self.profil().desynchronize();
+            self._profil = null;
+
+            successCallback();
+        };
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        this.deleteObjectAssociation(Call, Profil, this.profil().getId(), success, fail);
 	}
 
 	/**
@@ -325,25 +474,35 @@ class Call extends ModelItf {
 	 *
      * @method setCallType
 	 * @param {CallType} ct The CallType to associate with the Call.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setCallType(ct : CallType) : boolean {
+	setCallType(ct : CallType, successCallback : Function = null, failCallback : Function = null) {
 		if (!ct || !ct.getId()) {
-			throw new ModelException("The CallType must be an existing object to be associated.");
+            failCallback(new ModelException("The CallType must be an existing object to be associated."));
+            return;
 		}
+
 		if (this.callType() !== null) {
-			throw new ModelException("The CallType is already set for the call : "+JSON.stringify(this.callType())+".");
+            failCallback(new ModelException("The CallType is already set for the call : "+JSON.stringify(this.callType())+"."));
+            return;
 		}
 
+        var self = this;
 
-		if (this.associateObject(Call, CallType, ct.getId())) {
-			ct.desynchronize();
-			this._call_type = ct;
-			this._call_type_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var success = function() {
+            ct.desynchronize();
+            self._call_type = ct;
+            self._call_type_loaded = true;
+
+            successCallback();
+        };
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        this.associateObject(Call, CallType, ct.getId(), success, fail);
 	}
 
 	/**
@@ -352,30 +511,41 @@ class Call extends ModelItf {
 	 * A CallType must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetCallType
-	 * @returns {boolean} Returns true if the CallType is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetCallType() : boolean {
+	unsetCallType(successCallback : Function = null, failCallback : Function = null) : boolean {
 		if (this.callType() === null) {
-			throw new ModelException("No CallType has been set for this call.");
+            failCallback(new ModelException("No CallType has been set for this call."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Call, CallType, this.callType().getId())) {
-			this.callType().desynchronize();
-			this._call_type = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success = function() {
+            self.callType().desynchronize();
+            self._call_type = null;
+
+            successCallback();
+        };
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        this.deleteObjectAssociation(Call, CallType, this.callType().getId(), success, fail);
 	}
 
     /**
      * Create model in database.
      *
      * @method create
-     * @return {boolean} Create status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    create() : boolean {
-        return this.createObject(Call, this.toJSONObject());
+    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        this.createObject(Call, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -384,40 +554,48 @@ class Call extends ModelItf {
      * @method read
      * @static
      * @param {number} id - The model instance's id.
-     * @return {Call} The model instance.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number) : Call {
-        return this.readObject(Call, id);
+    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        ModelItf.readObject(Call, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Update in database the model with current id.
      *
      * @method update
-     * @return {boolean} Update status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    update() : boolean {
-        return this.updateObject(Call, this.toJSONObject());
+    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.updateObject(Call, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Delete in database the model with current id.
      *
      * @method delete
-     * @return {boolean} Delete status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    delete() : boolean {
-        return this.deleteObject(Call);
+    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.deleteObject(Call, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
      * @method all
-     * @return {Array<Call>} The model instances.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static all() : Array<Call> {
-        return this.allObjects(Call);
+    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.allObjects(Call, successCallback, failCallback, attemptNumber);
     }
 
     /**

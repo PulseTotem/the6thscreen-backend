@@ -129,83 +129,130 @@ describe('Call', function(){
 	});
 
 	describe('#addParamValue', function() {
-		it('should put the new ParamValue inside the array', function() {
+		it('should put the new ParamValue inside the array', function(done) {
 			var c = new Call("toto", 52);
 			var pv = new ParamValue("mavaleur",12);
 			var spy = sinon.spy(pv, "desynchronize");
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": []
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var paramValues = c.paramValues();
+            var success = function() {
+                var paramValues = c.paramValues();
+                assert.deepEqual(paramValues, [], "The paramValue is not an empty array: "+JSON.stringify(paramValues));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
 
-			assert.deepEqual(paramValues, [], "The paramValue is not an empty array: "+JSON.stringify(paramValues));
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var reponse2 : SequelizeRestfulResponse = {
-			 "status": "success",
-			 "data": {}
-			 };
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .put(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			 var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-			 .put(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
-			 .reply(200, JSON.stringify(reponse2));
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the addParamValue is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
-			 var retour = c.addParamValue(pv);
-			 assert.ok(retour, "The return of the addParamValue is false.");
-			 assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+                    paramValues = c.paramValues();
+                    var expected = [pv];
+                    assert.deepEqual(paramValues, expected, "The paramValues is not an array containing only the added paramValue: "+JSON.stringify(paramValues));
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
 
-			 paramValues = c.paramValues();
-			 var expected = [pv];
-			 assert.deepEqual(paramValues, expected, "The paramValues is not an array containing only the added paramValue: "+JSON.stringify(paramValues));
-			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.addParamValue(pv, success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+			c.loadParamValues(success, fail);
 		});
 
-		it('should not allow to add a null object', function() {
+		it('should not allow to add a null object', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 
-			assert.throws(function() {
-				c.addParamValue(null);
-			},
-			ModelException,
-			"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.addParamValue(null, success, fail);
 		});
 
-		it('should not allow to add an undefined object', function() {
+		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 
-			assert.throws(function() {
-					c.addParamValue(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.addParamValue(undefined, success, fail);
+
 		});
 
-		it('should not allow to add a object which is not yet created', function() {
+		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 			var p = new ParamValue("bidule");
 
-			assert.throws(function() {
-					c.addParamValue(p);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.addParamValue(p, success, fail);
 		});
 
-		it('should not allow to put an already existing object', function() {
+		it('should not allow to put an already existing object', function(done) {
 			var c = new Call("toto", 52);
 			var pv = new ParamValue("toto",13);
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": [
 					{
@@ -221,27 +268,45 @@ describe('Call', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var paramValues = c.paramValues();
+            var success = function() {
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
 
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
 
-			assert.throws(function() {
-				c.addParamValue(pv);
-			},
-			ModelException,
-			"The exception has not been thrown.");
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.addParamValue(pv, success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+			c.loadParamValues(success, fail);
+
+
 		});
 
 	});
 
 	describe('#removeParamValue', function() {
-		it('should remove the ParamValue from the array', function() {
+		it('should remove the ParamValue from the array', function(done) {
 			var c = new Call("toto", 52);
 			var pv = new ParamValue("mavaleur",12);
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": [
 					{
@@ -253,169 +318,285 @@ describe('Call', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var paramValues = c.paramValues();
+            var success = function() {
+                var paramValues = c.paramValues();
 
-			assert.deepEqual(paramValues, [pv], "The paramValue array is not an array fill only with PV: "+JSON.stringify(paramValues));
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+                assert.deepEqual(paramValues, [pv], "The paramValue array is not an array fill only with PV: "+JSON.stringify(paramValues));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
 
-			var spy = sinon.spy(pv, "desynchronize");
-			var reponse2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+                var spy = sinon.spy(pv, "desynchronize");
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .delete(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			var retour = c.removeParamValue(pv);
-			assert.ok(retour, "The return of the removeParamValue is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the removeParamValue is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
-			paramValues = c.paramValues();
-			assert.deepEqual(paramValues, [], "The paramValues is not an empty array: "+JSON.stringify(paramValues));
-			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+                    paramValues = c.paramValues();
+                    assert.deepEqual(paramValues, [], "The paramValues is not an empty array: "+JSON.stringify(paramValues));
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.removeParamValue(pv, success2, fail2);
+
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadParamValues(success, fail);
 		});
 
-		it('should not allow to remove a null object', function() {
+		it('should not allow to remove a null object', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 
-			assert.throws(function() {
-					c.removeParamValue(null);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.removeParamValue(null, success, fail);
 		});
 
-		it('should not allow to add an undefined object', function() {
+		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 
-			assert.throws(function() {
-					c.removeParamValue(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.removeParamValue(undefined, success, fail);
 		});
 
-		it('should not allow to add a object which is not yet created', function() {
+		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 			var p = new ParamValue("bidule");
 
-			assert.throws(function() {
-					c.removeParamValue(p);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.removeParamValue(p, success, fail);
 		});
 
-		it('should not allow to remove an object which is not linked', function() {
+		it('should not allow to remove an object which is not linked', function(done) {
 			var c = new Call("toto", 52);
 			var pv = new ParamValue("toto",12);
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": []
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), ParamValue.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var paramValues = c.paramValues();
+            var success = function() {
+                var paramValues = c.paramValues();
 
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
 
-			assert.throws(function() {
-					c.removeParamValue(pv);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
+
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.removeParamValue(pv, success2, fail2);
+
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadParamValues(success, fail);
+
 		});
 
 	});
 
 	describe('#setProfil', function() {
-		it('should set the given Profil', function() {
+		it('should set the given Profil', function(done) {
 			var c = new Call("toto", 52);
 			var p = new Profil("toto", "machin", 42);
 			var spy = sinon.spy(p, "desynchronize");
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": []
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var profil = c.profil();
-			assert.equal(profil, null, "The profil is not a null value: "+JSON.stringify(profil));
+            var success = function() {
+                var profil = c.profil();
+                assert.equal(profil, null, "The profil is not a null value: "+JSON.stringify(profil));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
 
-			var reponse2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName(), p.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .put(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName(), p.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			var retour = c.setProfil(p);
-			assert.ok(retour, "The return of the setProfil is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the setProfil is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
-			// normalement le lazy_loading est true : plus besoin de mock pour la requête
-			profil = c.profil();
-			assert.deepEqual(profil, p, "The profil() does not return the exact profil we give: "+JSON.stringify(profil));
-			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+                    // normalement le lazy_loading est true : plus besoin de mock pour la requête
+                    profil = c.profil();
+                    assert.deepEqual(profil, p, "The profil() does not return the exact profil we give: "+JSON.stringify(profil));
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.setProfil(p, success2, fail2);
+
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadProfil(success, fail);
+
 		});
 
-		it('should not allow to add a null object', function() {
+		it('should not allow to add a null object', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 
-			assert.throws(function() {
-					c.setProfil(null);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setProfil(null, success, fail);
 		});
 
-		it('should not allow to add an undefined object', function() {
+		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 
-			assert.throws(function() {
-					c.setProfil(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setProfil(undefined, success, fail);
 		});
 
-		it('should not allow to add a object which is not yet created', function() {
+		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 			var p = new Profil("bidule","machin");
 
-			assert.throws(function() {
-					c.setProfil(p);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setProfil(p, success, fail);
 		});
 
-		it('should not allow to set a profil if there is already one', function() {
+		it('should not allow to set a profil if there is already one', function(done) {
 			var c = new Call("toto", 52);
 			var p = new Profil("toto","machin", 13);
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": {
 					"id": 1,
@@ -426,160 +607,267 @@ describe('Call', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var profil = c.profil();
+            var success = function() {
 
-			assert.ok(!!profil, "The profil has false value.");
-			assert.throws(function() {
-					c.setProfil(p);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
+                var profil = c.profil();
+
+                assert.ok(!!profil, "The profil has false value.");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
+
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
+
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.setProfil(p, success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+			c.loadProfil(success, fail);
 		});
 
 	});
 
 	describe('#unsetProfil', function() {
-		it('should unset the Profil', function() {
+		it('should unset the Profil', function(done) {
 			var c = new Call("toto", 52);
 			var p = new Profil("toto", "machin", 42);
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": p.toJSONObject()
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var profil = c.profil();
-			assert.deepEqual(profil, p, "The profil is not the expected value");
-			var spy = sinon.spy(profil, "desynchronize");
+            var success = function() {
 
-			var reponse2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+                var profil = c.profil();
+                assert.deepEqual(profil, p, "The profil is not the expected value");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName(), p.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+                var spy = sinon.spy(profil, "desynchronize");
 
-			var retour = c.unsetProfil();
-			assert.ok(retour, "The return of the unsetProfil is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			profil = c.profil();
-			assert.deepEqual(profil, null, "The profil() does not return a null value after unsetting");
-			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .delete(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName(), p.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
+
+
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the unsetProfil is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+
+                    profil = c.profil();
+                    assert.deepEqual(profil, null, "The profil() does not return a null value after unsetting");
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.unsetProfil(success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadProfil(success, fail);
+
 		});
 
-		it('should not allow to unset a profil if there is none', function() {
+		it('should not allow to unset a profil if there is none', function(done) {
 			var c = new Call("toto", 52);
-			var p = new Profil("toto","machin", 13);
 
-			var reponse1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+            var response1 : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": []
+            };
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+            var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+                .get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
+                .reply(200, JSON.stringify(response1));
 
-			var profil = c.profil();
+            var success = function() {
 
-			assert.equal(profil, null, "The profil has a value not null: "+JSON.stringify(profil));
-			assert.throws(function() {
-					c.unsetProfil();
-				},
-				ModelException,
-				"The exception has not been thrown.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
+                var profil = c.profil();
+
+                assert.equal(profil, null, "The profil has a value not null: "+JSON.stringify(profil));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
+
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
+
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.unsetProfil(success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+			c.loadProfil(success, fail);
 		});
 
 	});
 
 	describe('#setCallType', function() {
-		it('should set the given CallType', function() {
+		it('should set the given CallType', function(done) {
 			var c = new Call("toto", 52);
 			var ct = new CallType("tptp", "blabla",12)
 			var spy = sinon.spy(ct, "desynchronize");
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": []
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), CallType.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var calltype = c.callType();
-			assert.equal(calltype, null, "The callType is not a null value: "+JSON.stringify(calltype));
+            var success = function() {
+                var calltype = c.callType();
+                assert.equal(calltype, null, "The callType is not a null value: "+JSON.stringify(calltype));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the callType");
 
-			var reponse2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), CallType.getTableName(), ct.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .put(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), CallType.getTableName(), ct.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			var retour = c.setCallType(ct);
-			assert.ok(retour, "The return of the setCallType is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the callType");
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the setCallType is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
-			// normalement le lazy_loading est true : plus besoin de mock pour la requête
-			calltype = c.callType();
-			assert.deepEqual(calltype, ct, "The calltype() does not return the exact calltype we give: "+JSON.stringify(calltype));
-			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+                    calltype = c.callType();
+                    assert.deepEqual(calltype, ct, "The calltype() does not return the exact calltype we give: "+JSON.stringify(calltype));
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.setCallType(ct, success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+			c.loadCallType(success, fail);
 		});
 
-		it('should not allow to add a null object', function() {
+		it('should not allow to add a null object', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 
-			assert.throws(function() {
-					c.setCallType(null);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setCallType(null, success, fail);
 		});
 
-		it('should not allow to add an undefined object', function() {
+		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 
-			assert.throws(function() {
-					c.setCallType(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setCallType(undefined, success, fail);
 		});
 
-		it('should not allow to add a object which is not yet created', function() {
+		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
 			var c = new Call("toto", 52);
 			var ct = new CallType("machin","bidule")
 
-			assert.throws(function() {
-					c.setCallType(ct);
-				},
-				ModelException,
-				"The exception has not been thrown.");
+            var success = function() {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function(err) {
+                assert.throws(function() {
+                        if(err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The ModelException has not been thrown.");
+                done();
+            };
+
+            c.setCallType(ct, success, fail);
 		});
 
-		it('should not allow to set a callType if there is already one', function() {
+		it('should not allow to set a callType if there is already one', function(done) {
 			var c = new Call("toto", 52);
 			var ct = new CallType("machin","bidule");
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": {
 					"id": 1,
@@ -590,78 +878,138 @@ describe('Call', function(){
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), CallType.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var calltype = c.callType();
+            var success = function() {
 
-			assert.ok(!!calltype, "The calltype has false value.");
-			assert.throws(function() {
-					c.setCallType(ct);
-				},
-				ModelException,
-				"The exception has not been thrown.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the calltype");
+                var calltype = c.callType();
+
+                assert.ok(!!calltype, "The calltype has false value.");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the calltype");
+
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
+
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.setCallType(ct, success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+			c.loadCallType(success, fail);
 		});
 
 	});
 
 	describe('#unsetCallType', function() {
-		it('should unset the Profil', function() {
+		it('should unset the calltype', function(done) {
 			var c = new Call("toto", 52);
 			var ct = new CallType("toto", "machin", 42);
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": ct.toJSONObject()
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), CallType.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var calltype = c.callType();
-			assert.deepEqual(calltype, ct, "The calltype is not the expected value");
-			var spy = sinon.spy(calltype, "desynchronize");
+            var success = function() {
+                var calltype = c.callType();
+                assert.deepEqual(calltype, ct, "The calltype is not the expected value");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the calltype");
+                var spy = sinon.spy(calltype, "desynchronize");
 
-			var reponse2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), CallType.getTableName(), ct.getId().toString()))
-				.reply(200, JSON.stringify(reponse2));
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .delete(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), CallType.getTableName(), ct.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
 
-			var retour = c.unsetCallType();
-			assert.ok(retour, "The return of the unsetCallType is false.");
-			assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the unsetCallType is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
-			calltype = c.callType();
-			assert.deepEqual(calltype, null, "The calltype() does not return a null value after unsetting");
-			assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+                    calltype = c.callType();
+                    assert.deepEqual(calltype, null, "The calltype() does not return a null value after unsetting");
+                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.unsetCallType(success2, fail2);
+
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+			c.loadCallType(success, fail);
 		});
 
-		it('should not allow to unset a profil if there is none', function() {
+		it('should not allow to unset a calltype if there is none', function(done) {
 			var c = new Call("toto", 52);
 
-			var reponse1 : SequelizeRestfulResponse = {
+			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": []
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), CallType.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+				.reply(200, JSON.stringify(response1));
 
-			var calltype = c.callType();
+            var success = function() {
+                var calltype = c.callType();
 
-			assert.equal(calltype, null, "The calltype has a value not null: "+JSON.stringify(calltype));
-			assert.throws(function() {
-					c.unsetCallType();
-				},
-				ModelException,
-				"The exception has not been thrown.");
-			assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the calltype");
+                assert.equal(calltype, null, "The calltype has a value not null: "+JSON.stringify(calltype));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the calltype");
+
+                var success2 = function() {
+                    done(new Error("Test failed."));
+                };
+
+                var fail2 = function(err) {
+                    assert.throws(function() {
+                            if(err) {
+                                throw err;
+                            }
+                        },
+                        ModelException, "The ModelException has not been thrown.");
+                    done();
+                };
+
+                c.unsetCallType(success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadCallType(success, fail);
+
+
 		});
 
 	});

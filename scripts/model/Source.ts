@@ -247,14 +247,41 @@ class Source extends ModelItf {
      * @method infoType
      */
     infoType() {
-        if(! this._info_type_loaded) {
-	        var value = this.getUniquelyAssociatedObject(Source, InfoType);
-	        if (!!value) {
-		        this._info_type = value;
-	        }
-	        this._info_type_loaded = true;
-        }
         return this._info_type;
+    }
+
+    /**
+     * Load the Source's infoType.
+     *
+     * @method loadInfoType
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadInfoType(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._info_type_loaded) {
+            var self = this;
+            var success : Function = function(infoType) {
+                if(!!infoType) {
+                    self._info_type = infoType;
+                }
+                self._info_type_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(Source, InfoType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -263,12 +290,39 @@ class Source extends ModelItf {
      * @method paramTypes
      */
     paramTypes() {
-        if(! this._param_types_loaded) {
-            this.getAssociatedObjects(Source, ParamType, this._param_types);
-
-	        this._param_types_loaded = true;
-        }
         return this._param_types;
+    }
+
+    /**
+     * Load the Source's paramTypes.
+     *
+     * @method loadParamTypes
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadParamTypes(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._param_types_loaded) {
+            var self = this;
+            var success : Function = function(paramTypes) {
+                self._param_types = paramTypes;
+                self._param_types_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Source, ParamType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     /**
@@ -277,27 +331,75 @@ class Source extends ModelItf {
      * @method paramValues
      */
     paramValues() {
-        if(! this._param_values_loaded) {
-            this.getAssociatedObjects(Source, ParamValue, this._param_values);
-
-	        this._param_values_loaded = true;
-        }
         return this._param_values;
+    }
+
+    /**
+     * Load the Source's paramValues.
+     *
+     * @method loadParamValues
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadParamValues(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._param_values_loaded) {
+            var self = this;
+            var success : Function = function(paramValues) {
+                self._param_values = paramValues;
+                self._param_values_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Source, ParamValue, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
     }
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
      *
      * @method loadAssociations
-	 */
-	loadAssociations() : void {
-		this.paramTypes();
-		this.paramValues();
-		this.infoType();
-	}
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._param_types_loaded && self._param_values_loaded && self._info_type_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+
+        this.loadParamTypes(success, fail);
+        this.loadParamValues(success, fail);
+        this.loadInfoType(success, fail);
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -328,21 +430,32 @@ class Source extends ModelItf {
 		return data;
 	}
 
-	/**
-	 * Return a Source instance as a JSON Object including associated object.
-	 * However the method should not be recursive due to cycle in the model.
-	 *
-	 * @method toCompleteJSONObject
-	 * @returns {Object} a JSON Object representing the instance
-	 */
-	toCompleteJSONObject() : Object {
-		this.loadAssociations();
-		var data = this.toJSONObject();
-		data["infoType"] = (this.infoType() !== null) ? this.infoType().toJSONObject() : null;
-		data["paramTypes"] = this.serializeArray(this.paramTypes());
-		data["paramValues"] = this.serializeArray(this.paramValues());
-		return data;
-	}
+    /**
+     * Return a Source instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            data["infoType"] = (self.infoType() !== null) ? self.infoType().toJSONObject() : null;
+            data["paramTypes"] = self.serializeArray(self.paramTypes());
+            data["paramValues"] = self.serializeArray(self.paramValues());
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
 	/**
 	 * Set the InfoType of the Source.
@@ -351,25 +464,35 @@ class Source extends ModelItf {
 	 *
      * @method setInfoType
 	 * @param {InfoType} it The InfoType to associate with the Source.
-	 * @returns {boolean} Returns true if the association has been created in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	setInfoType(it : InfoType) : boolean {
+	setInfoType(it : InfoType, successCallback : Function = null, failCallback : Function = null) {
 		if (!it || !it.getId()) {
-			throw new ModelException("The InfoType must be an existing object to be associated.");
+			failCallback(new ModelException("The InfoType must be an existing object to be associated."));
+            return;
 		}
 
 		if (this.infoType() !== null) {
-			throw new ModelException("The InfoType is already set for this Source.");
+			failCallback(new ModelException("The InfoType is already set for this Source."));
+            return;
 		}
 
-		if (this.associateObject(Source, InfoType, it.getId())) {
-			it.desynchronize();
-			this._info_type = it;
-			this._info_type_loaded = true;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            it.desynchronize();
+            self._info_type = it;
+            self._info_type_loaded = true;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Source, InfoType, it.getId(), success, fail);
 	}
 
 	/**
@@ -378,20 +501,29 @@ class Source extends ModelItf {
 	 * An InfoType must have been set before using it, else an exception is thrown.
 	 *
      * @method unsetInfoType
-	 * @returns {boolean} Returns true if the InfoType is well unset and the association removed in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetInfoType() : boolean {
+	unsetInfoType(successCallback : Function = null, failCallback : Function = null) {
 		if (this.infoType() === null) {
-			throw new ModelException("No InfoType has been set for this Source.");
+			failCallback(new ModelException("No InfoType has been set for this Source."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Source, InfoType, this.infoType().getId())) {
-			this.infoType().desynchronize();
-			this._info_type = null;
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            self.infoType().desynchronize();
+            self._info_type = null;
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Source, InfoType, this.infoType().getId(), success, fail);
 	}
 
 	/**
@@ -400,24 +532,34 @@ class Source extends ModelItf {
 	 *
      * @method addParamType
 	 * @param {ParamType} pt The ParamType to add inside the Source. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addParamType(pt : ParamType) : boolean {
+	addParamType(pt : ParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!pt  || !pt.getId()) {
-			throw new ModelException("The ParamType must be an existing object to be associated.");
+			failCallback(new ModelException("The ParamType must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.paramTypes(), pt)) {
-			throw new ModelException("You cannot add twice a ParamType for a SDI.");
+			failCallback(new ModelException("You cannot add twice a ParamType for a SDI."));
+            return;
 		}
 
-		if (this.associateObject(Source, ParamType, pt.getId())) {
-			pt.desynchronize();
-			this.paramTypes().push(pt);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            pt.desynchronize();
+            self.paramTypes().push(pt);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Source, ParamType, pt.getId(), success, fail);
 	}
 
 	/**
@@ -426,84 +568,117 @@ class Source extends ModelItf {
 	 *
      * @method removeParamType
 	 * @param {ParamType} pt The ParamType to remove from that Source
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeParamType(pt : ParamType) : boolean {
+	removeParamType(pt : ParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!pt  || !pt.getId()) {
-			throw new ModelException("The ParamType must be an existing object to be removed.");
+			failCallback(new ModelException("The ParamType must be an existing object to be removed."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.paramTypes(), pt)) {
-			throw new ModelException("The ParamType you try to remove is not yet associated.");
+			failCallback(new ModelException("The ParamType you try to remove is not yet associated."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(Source, ParamType, pt.getId())) {
-			pt.desynchronize();
-			return ModelItf.removeObjectFromArray(this.paramTypes(), pt);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            pt.desynchronize();
+            ModelItf.removeObjectFromArray(self.paramTypes(), pt);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Source, ParamType, pt.getId(), success, fail);
 	}
 
-	/**
-	 * Add a new ParamValue to the Source and associate it in the database.
-	 * A ParamValue can only be added once.
-	 *
+    /**
+     * Add a new ParamValue to the Source and associate it in the database.
+     * A ParamValue can only be added once.
+     *
      * @method addParamValue
-	 * @param {ParamValue} pv The ParamValue to add inside the Source. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
-	 */
-	addParamValue(pv : ParamValue) : boolean {
-		if (!pv  || !pv.getId()) {
-			throw new ModelException("The ParamValue must be an existing object to be associated.");
-		}
+     * @param {ParamValue} p The ParamValue to add inside the source. It cannot be a null value.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    addParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
+        if (!p || !p.getId()) {
+            failCallback(new ModelException("The ParamValue must be an existing object to be associated."));
+            return;
+        }
 
-		if (ModelItf.isObjectInsideArray(this.paramValues(), pv)) {
-			throw new ModelException("You cannot add twice a ParamValue for a SDI.");
-		}
+        if (ModelItf.isObjectInsideArray(this.paramValues(), p)) {
+            failCallback(new ModelException("You cannot add twice a parameter in a source."));
+            return;
+        }
 
-		if (this.associateObject(Source, ParamValue, pv.getId())) {
-			pv.desynchronize();
-			this.paramValues().push(pv);
-			return true;
-		} else {
-			return false;
-		}
-	}
+        var self = this;
 
-	/**
-	 * Remove a ParamValue from the Source: the association is removed both in the object and in database.
-	 * The ParamValue can only be removed if it exists first in the list of associated ParamValues, else an exception is thrown.
-	 *
+        var success : Function = function() {
+            p.desynchronize();
+            self.paramValues().push(p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(Source, ParamValue, p.getId(), success, fail);
+    }
+
+    /**
+     * Remove a ParamValue from the Source: the association is removed both in the object and in database.
+     * The ParamValue can only be removed if it exists first in the list of associated ParamValue, else an exception is thrown.
+     *
      * @method removeParamValue
-	 * @param {ParamValue} pv The ParamValue to remove from that Source
-	 * @returns {boolean} Returns true if the association is deleted in database.
-	 */
-	removeParamValue(pv : ParamValue) : boolean {
-		if (!pv  || !pv.getId()) {
-			throw new ModelException("The ParamValue must be an existing object to be removed.");
-		}
+     * @param {ParamValue} p The ParamValue to remove from that Source
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    removeParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
+        if (!p || !p.getId()) {
+            failCallback(new ModelException("The ParamValue must be an existing object to be removed."));
+            return;
+        }
+        if (!ModelItf.isObjectInsideArray(this.paramValues(), p)) {
+            failCallback(new ModelException("The ParamValue you try to remove has not been added to the current Source"));
+            return;
+        }
 
-		if (!ModelItf.isObjectInsideArray(this.paramValues(), pv)) {
-			throw new ModelException("The ParamValue you try to remove is not yet associated.");
-		}
+        var self = this;
 
-		if (this.deleteObjectAssociation(Source, ParamValue, pv.getId())) {
-			pv.desynchronize();
-			return ModelItf.removeObjectFromArray(this.paramValues(), pv);
-		} else {
-			return false;
-		}
-	}
+        var success : Function = function() {
+            p.desynchronize();
+            ModelItf.removeObjectFromArray(self.paramValues(), p);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(Source, ParamValue, p.getId(), success, fail);
+    }
 
     /**
      * Create model in database.
      *
      * @method create
-     * @return {boolean} Create status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    create() : boolean {
-        return this.createObject(Source, this.toJSONObject());
+    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        this.createObject(Source, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -512,40 +687,48 @@ class Source extends ModelItf {
      * @method read
      * @static
      * @param {number} id - The model instance's id.
-     * @return {Source} The model instance.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number) : Source {
-        return this.readObject(Source, id);
+    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        ModelItf.readObject(Source, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Update in database the model with current id.
      *
      * @method update
-     * @return {boolean} Update status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    update() : boolean {
-        return this.updateObject(Source, this.toJSONObject());
+    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.updateObject(Source, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Delete in database the model with current id.
      *
      * @method delete
-     * @return {boolean} Delete status
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    delete() : boolean {
-        return this.deleteObject(Source);
+    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.deleteObject(Source, successCallback, failCallback, attemptNumber);
     }
 
     /**
      * Retrieve all models from database and create corresponding model instances.
      *
      * @method all
-     * @return {Array<Source>} The model instances.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     * @param {number} attemptNumber - The attempt number.
      */
-    static all() : Array<Source> {
-        return this.allObjects(Source);
+    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+        return this.allObjects(Source, successCallback, failCallback, attemptNumber);
     }
 
 	/**
