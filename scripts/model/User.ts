@@ -269,24 +269,34 @@ class User extends ModelItf {
 	 *
      * @method addSDI
 	 * @param {SDI} s The SDI to link with the User. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addSDI(s : SDI) : boolean {
+	addSDI(s : SDI, successCallback : Function = null, failCallback : Function = null) {
 		if (!s || !s.getId()) {
-			throw new ModelException("The SDI must be an existing object to be associated.");
+            failCallback(new ModelException("The SDI must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.sdis(),s)) {
-			throw new ModelException("You cannot add twice a SDI for a User.");
+            failCallback(new ModelException("You cannot add twice a SDI for a User."));
+            return;
 		}
 
-		if (this.associateObject(User, SDI, s.getId())) {
-			s.desynchronize();
-			this.sdis().push(s);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            s.desynchronize();
+            self.sdis().push(s);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(User, SDI, s.getId(), success, fail);
 	}
 
 	/**
@@ -295,23 +305,34 @@ class User extends ModelItf {
 	 *
      * @method removeSDI
 	 * @param {SDI} s The SDI to remove from that User
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeSDI(s : SDI) : boolean {
+	removeSDI(s : SDI, successCallback : Function = null, failCallback : Function = null) {
 		if (!s || !s.getId()) {
-			throw new ModelException("The SDI must be an existing object to be removed.");
+            failCallback(new ModelException("The SDI must be an existing object to be removed."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.sdis(),s)) {
-			throw new ModelException("The SDI you try to remove is not yet associated.");
+            failCallback(new ModelException("The SDI you try to remove is not yet associated."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(User, SDI, s.getId())) {
-			s.desynchronize();
-			return ModelItf.removeObjectFromArray(this.sdis(), s);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            s.desynchronize();
+            ModelItf.removeObjectFromArray(self.sdis(), s);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(User, SDI, s.getId(), success, fail);
 	}
 
 	/**
@@ -320,24 +341,34 @@ class User extends ModelItf {
 	 *
      * @method addRole
 	 * @param {Role} r The Role to link with the User. It cannot be a null value.
-	 * @returns {boolean} Returns true if the association is realized in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	addRole(r : Role) : boolean {
+	addRole(r : Role, successCallback : Function = null, failCallback : Function = null) {
 		if (!r || !r.getId()) {
-			throw new ModelException("The Role must be an existing object to be associated.");
+            failCallback(new ModelException("The Role must be an existing object to be associated."));
+            return;
 		}
 
 		if (ModelItf.isObjectInsideArray(this.roles(),r)) {
-			throw new ModelException("You cannot add twice a Role for a User.");
+            failCallback(new ModelException("You cannot add twice a Role for a User."));
+            return;
 		}
 
-		if (this.associateObject(User, Role, r.getId())) {
-			r.desynchronize();
-			this.roles().push(r);
-			return true;
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            r.desynchronize();
+            self.roles().push(r);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.associateObject(User, Role, r.getId(), success, fail);
 	}
 
 	/**
@@ -346,23 +377,34 @@ class User extends ModelItf {
 	 *
      * @method removeRole
 	 * @param {Role} r The Role to remove from that User
-	 * @returns {boolean} Returns true if the association is deleted in database.
+	 * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeRole(r : Role) : boolean {
+	removeRole(r : Role, successCallback : Function = null, failCallback : Function = null) {
 		if (!r || !r.getId()) {
-			throw new ModelException("The Role must be an existing object to be removed.");
+            failCallback(new ModelException("The Role must be an existing object to be removed."));
+            return;
 		}
 
 		if (!ModelItf.isObjectInsideArray(this.roles(),r)) {
-			throw new ModelException("The Role you try to remove is not yet associated.");
+            failCallback(new ModelException("The Role you try to remove is not yet associated."));
+            return;
 		}
 
-		if (this.deleteObjectAssociation(User, Role, r.getId())) {
-			r.desynchronize();
-			return ModelItf.removeObjectFromArray(this.roles(),r);
-		} else {
-			return false;
-		}
+        var self = this;
+
+        var success : Function = function() {
+            r.desynchronize();
+            ModelItf.removeObjectFromArray(self.roles(),r);
+
+            successCallback();
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.deleteObjectAssociation(User, Role, r.getId(), success, fail);
 	}
 
 	/**
