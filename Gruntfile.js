@@ -65,6 +65,10 @@ module.exports = function (grunt) {
 		        files: 	[{'build/tests/connection_infos.json': 'scripts/core/connection_infos-sample.json'}]
 	        },
 
+            dbInitFiles : {
+                files: 	[{expand: true, cwd: 'dbInitFiles', src: ['**'], dest: 'build/dbInitFiles/'}]
+            },
+
             buildPackageBak: {
                 files: 	[{'package-bak.json': 'package.json'}]
             },
@@ -229,7 +233,7 @@ module.exports = function (grunt) {
     grunt.registerTask('dbinit', function () {
         grunt.task.run(['clean:package', 'clean:build']);
 
-        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'typescript:dbinit', 'clean:package']);
+        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'copy:dbInitFiles', 'typescript:dbinit', 'clean:package']);
     });
 
     grunt.registerTask('dist', function () {

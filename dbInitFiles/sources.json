@@ -1,0 +1,68 @@
+[
+    {
+        "name" : "RetrieveFeedContent",
+        "service" : "RSSFeedReader",
+        "description" : "Récupération d'un flux RSS",
+        "host" : "localhost",
+        "port" : 6002,
+        "paramTypes" : [
+            {
+                "name" : "FeedURL",
+                "description" : "Lien du flux RSS",
+                "type" : {
+                    "name" : "String"
+                },
+                "constraint" : {
+                    "name" : "URL",
+                    "description" : "Ensure the string is an URL",
+                    "type" : {
+                        "name" : "String"
+                    }
+                }
+            },
+            {
+                "name" : "Limit",
+                "description" : "Limiter le nombre de résultats",
+                "type" : {
+                    "name" : "Entier"
+                },
+                "constraint" : {
+                    "name" : "Positive",
+                    "description" : "Ensure the number is >= 0",
+                    "type" : {
+                        "name" : "Entier"
+                    }
+                }
+            }
+        ],
+        "infoType" : {
+            "name" : "FeedContent"
+        }
+    },
+    {
+        "name" : "RetrieveDiscounts",
+        "service" : "SmartShopping",
+        "description" : "Récupération des discounts du SmartShopping",
+        "host" : "localhost",
+        "port" : 6003,
+        "paramTypes" : [
+            {
+                "name" : "Limit",
+                "description" : "Limiter le nombre de résultats",
+                "type" : {
+                    "name" : "Entier"
+                },
+                "constraint" : {
+                    "name" : "Positive",
+                    "description" : "Ensure the number is >= 0",
+                    "type" : {
+                        "name" : "Entier"
+                    }
+                }
+            }
+        ],
+        "infoType" : {
+            "name" : "DiscountsList"
+        }
+    }
+]

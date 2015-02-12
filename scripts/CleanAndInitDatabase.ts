@@ -33,71 +33,447 @@
 class CleanAndInitDatabase {
 
     static toClean : Array<any> = [Profil,SDI];
+    static toCleanSources : Array<any> = [Source];
 
     /**
      * Method to clean and fulfill database with some data.
      *
      * @method run
+     * @param (Array<String>) runParams - Params to configure steps to do during Database Initialization
      */
-    run() {
-        this.cleanAll();
-        this.fulfill();
+    run(runParams : Array<string>) {
+        var self = this;
+
+        var success = function() {
+            Logger.info("Good job Rogue group!");
+        };
+
+        var fail = function(err) {
+            if(err) {
+                Logger.error(err);
+            }
+        };
+
+        if(runParams.length > 2) {
+            for(var i = 2; i < runParams.length; i++) {
+                var param = runParams[i];
+                var keyVal = param.split("=");
+                if (keyVal.length > 1) {
+                    if (keyVal[0] == "step") {
+                        switch (keyVal[1]) {
+                            case "sources" :
+                                var successCleanAllSources = function() {
+                                    self.fulfillSources(success, fail);
+                                };
+                                self.cleanAll(CleanAndInitDatabase.toCleanSources, successCleanAllSources, fail);
+
+                                break;
+                            case "users" :
+                                //TODO : Clean and Init Users
+                                break;
+                            case "sdis" :
+                                //TODO : Clean and Init SDIs
+                                break;
+                            case "profils" :
+                                //TODO : Clean and Init Profils
+                                break;
+                            default :
+                                Logger.info("Nothing to do !?");
+                        }
+                        break;
+                    }
+                }
+            }
+        } else {
+            Logger.error("Missing some arguments !?");
+        }
+
+        /*this.cleanAll();
+        this.fulfill();*/
     }
 
     /**
-     * Method to clean the database.
+     * Method to fulfill database with sources.
      *
-     * @method cleanAll
+     * @method fulfillSources
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
      */
-    cleanAll() {
-        for(var i = 0; i < CleanAndInitDatabase.toClean.length; i++) {
-            var modelToClean = CleanAndInitDatabase.toClean[i];
-	        Logger.debug("Iterating on models to clean");
-	        Logger.debug(modelToClean);
-            var instances = modelToClean.all();
-            for(var j in instances) {
-                var toDelete = instances[j];
-                toDelete.delete();
+    fulfillSources(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var sourcesNb = 0;
+
+        var sources : any = require("../dbInitFiles/sources.json");
+
+        if(sources.length == 0) {
+            Logger.info("No sources to create.");
+            successCallback();
+            return;
+        }
+
+        sources.forEach(function(sourceDesc) {
+            sourcesNb = sourcesNb + 1;
+
+            var fail = function(err) {
+                failCallback(err);
+            };
+
+            var source = new Source(sourceDesc.name, sourceDesc.service, sourceDesc.description, sourceDesc.host, sourceDesc.port);
+
+            var createdParamTypes = new Array();
+
+            var successParamTypeCreate = function(newParamType) {
+                createdParamTypes.push(newParamType);
+                Logger.info("ParamType '" + createdParamTypes.length + "' create successfully.");
+
+                if(createdParamTypes.length == sourceDesc.paramTypes.length) {
+                    var nbAssociation = 0;
+                    var successParamTypeAssociation = function() {
+                        nbAssociation = nbAssociation + 1;
+                        Logger.info("ParamType associated to Source successfully.");
+
+                        if(nbAssociation == createdParamTypes.length && sourcesNb == sources.length) {
+                            successCallback();
+                        }
+                    };
+
+                    createdParamTypes.forEach(function(paramType) {
+                        source.addParamType(paramType, successParamTypeAssociation, fail);
+                    });
+
+                }
+            };
+
+            var successInfoTypeCreate = function(newInfoType) {
+                Logger.info("InfoType create successfully.");
+
+                var successInfoTypeAssociation = function() {
+                    Logger.info("InfoType associated to Source successfully.");
+                    sourceDesc.paramTypes.forEach(function(paramType) {
+                        self.manageParamTypeCreation(paramType, successParamTypeCreate, fail);
+                    });
+                };
+
+                source.setInfoType(newInfoType, successInfoTypeAssociation, fail);
+            };
+
+            var successSourceCreate = function() {
+                Logger.info("Source create successfully.");
+                self.manageInfoTypeCreation(sourceDesc.infoType, successInfoTypeCreate, fail);
+            };
+
+            source.create(successSourceCreate, fail);
+        });
+
+            /*var chaineTypeInfoType = new TypeParamType("String");
+            chaineTypeInfoType.create();
+
+            var entierTypeInfoType = new TypeParamType("Entier");
+            entierTypeInfoType.create();
+
+            var urlConstraint = new ConstraintParamType("URL", "Ensure the string is an URL");
+            urlConstraint.create();
+            urlConstraint.setType(chaineTypeInfoType);
+
+            var positiveNumberConstraint = new ConstraintParamType("Positive", "Ensure the number is >= 0");
+            positiveNumberConstraint.create();
+            positiveNumberConstraint.setType(entierTypeInfoType);
+
+            var feed_content = new InfoType("FeedContent");
+            feed_content.create();
+
+            var rss_feed_reader = new Source("RetrieveFeedContent", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 6002);
+            rss_feed_reader.create();
+
+            var url_rss_feed_reader = new ParamType("FeedURL","Lien du flux RSS");
+            url_rss_feed_reader.create();
+            url_rss_feed_reader.setType(chaineTypeInfoType);
+            url_rss_feed_reader.setConstraint(urlConstraint);
+
+            var limit_rss_feed_reader = new ParamType("Limit","Limiter le nombre de résultats");
+            limit_rss_feed_reader.create();
+            limit_rss_feed_reader.setType(entierTypeInfoType);
+            limit_rss_feed_reader.setConstraint(positiveNumberConstraint);*/
+    }
+
+    /**
+     * Method to manage creation of InfoType.
+     *
+     * @method manageInfoTypeCreation
+     * @param {JSON Object} infoTypeDesc - The InfoType's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageInfoTypeCreation(infoTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allInfoTypes) {
+            var infoType = null;
+            allInfoTypes.forEach(function(it) {
+                if(it.name() == infoTypeDesc.name) {
+                    infoType = it;
+                }
+            });
+
+            if(infoType == null) {
+                infoType = new InfoType(infoTypeDesc.name);
+
+                var successInfoTypeCreation = function() {
+                    successCallback(infoType);
+                };
+
+                infoType.create(successInfoTypeCreation, fail);
+
+            } else {
+                successCallback(infoType);
+            }
+        };
+
+        InfoType.all(successAll, fail);
+
+    }
+
+    /**
+     * Method to manage creation of ParamType.
+     *
+     * @method manageParamTypeCreation
+     * @param {JSON Object} paramTypeDesc - The ParamType's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageParamTypeCreation(paramTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allParamTypes) {
+            var paramType = null;
+            allParamTypes.forEach(function(pt) {
+                if(pt.name() == paramTypeDesc.name) {
+                    paramType = pt;
+                }
+            });
+
+            if(paramType == null) {
+                paramType = new ParamType(paramTypeDesc.name, paramTypeDesc.description);
+
+                var successConstraintAssociation = function() {
+                    Logger.info("Constraint associated to ParamType successfully.");
+                    successCallback(paramType);
+                }
+
+                var successConstraintCreate = function(newConstraint) {
+                    Logger.info("Constraint create successfully.");
+                    paramType.setConstraint(newConstraint, successConstraintAssociation, fail);
+                }
+
+                var successTypeParamTypeAssociation = function() {
+                    Logger.info("TypeParamType associated to ParamType successfully.");
+                    self.manageConstraintCreation(paramTypeDesc.constraint, successConstraintCreate, fail);
+                };
+
+                var successTypeParamTypeCreate = function(newTypeParamType) {
+                    Logger.info("TypeParamType create successfully.");
+                    paramType.setType(newTypeParamType, successTypeParamTypeAssociation, fail);
+                };
+
+                var successParamTypeCreate = function() {
+                    Logger.info("ParamType create successfully.");
+                    self.manageTypeParamTypeCreation(paramTypeDesc.type, successTypeParamTypeCreate, fail);
+                };
+
+                paramType.create(successParamTypeCreate, fail);
+
+            } else {
+                successCallback(paramType);
+            }
+        };
+
+        ParamType.all(successAll, fail);
+
+    }
+
+    /**
+     * Method to manage creation of TypeParamType.
+     *
+     * @method manageTypeParamTypeCreation
+     * @param {JSON Object} typeParamTypeDesc - The TypeParamType's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageTypeParamTypeCreation(typeParamTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allTypeParamTypes) {
+            var typeParamType = null;
+            allTypeParamTypes.forEach(function(pt) {
+                if(pt.name() == typeParamTypeDesc.name) {
+                    typeParamType = pt;
+                }
+            });
+
+            if(typeParamType == null) {
+                typeParamType = new TypeParamType(typeParamTypeDesc.name);
+
+                var successTypeParamTypeCreation = function() {
+                    successCallback(typeParamType);
+                };
+
+                typeParamType.create(successTypeParamTypeCreation, fail);
+            } else {
+                successCallback(typeParamType);
             }
         }
+
+        TypeParamType.all(successAll, fail);
+    }
+
+    /**
+     * Method to manage creation of Constraint.
+     *
+     * @method manageParamTypeCreation
+     * @param {JSON Object} constraintDesc - The Constraint's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageConstraintCreation(constraintDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(constraintParamTypes) {
+            var constraint = null;
+            constraintParamTypes.forEach(function(c) {
+                if(c.name() == constraintDesc.name) {
+                    constraint = c;
+                }
+            });
+
+            if(constraint == null) {
+                constraint = new ConstraintParamType(constraintDesc.name, constraintDesc.description);
+
+                var successTypeParamTypeAssociation = function() {
+                    Logger.info("TypeParamType associated to Constraint successfully.");
+                    successCallback(constraint);
+                };
+
+                var successTypeParamTypeCreate = function(newTypeParamType) {
+                    Logger.info("TypeParamType create successfully.");
+                    constraint.setType(newTypeParamType, successTypeParamTypeAssociation, fail);
+                };
+
+                var successConstraintCreation = function() {
+                    Logger.info("Constraint create successfully.");
+                    self.manageTypeParamTypeCreation(constraintDesc.type, successTypeParamTypeCreate, fail);
+                };
+
+                constraint.create(successConstraintCreation, fail);
+            } else {
+                successCallback(constraint);
+            }
+        }
+
+        ConstraintParamType.all(successAll, fail);
+
+    }
+
+    /**
+     * Method to clean selected tables in database.
+     *
+     * @method cleanAll
+     * @params (Array<any>) models - models to clean.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    cleanAll(models : Array<any>, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        if(models.length == 0) {
+            Logger.info("No models to clean.");
+            successCallback();
+            return;
+        }
+
+        var nbModels = 0;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(instances) {
+            nbModels = nbModels + 1;
+            var nbInstances = 0;
+            instances.forEach(function(toDelete) {
+                var deleteSuccess = function() {
+                    Logger.info("Instance delete successfully.");
+                    nbInstances = nbInstances + 1;
+                    if(nbModels == models.length && nbInstances == instances.length) {
+                        successCallback();
+                    }
+                };
+
+                toDelete.delete(deleteSuccess, fail);
+            });
+
+            if(nbModels == models.length && instances.length == 0) {
+                Logger.info("Nothing to clean.");
+                successCallback();
+            }
+        };
+
+        Logger.info("Iterating on models to clean");
+        models.forEach(function(modelToClean) {
+            Logger.info("Cleaning : " + modelToClean.getTableName());
+
+            modelToClean.all(successAll, fail);
+        });
     }
 
 	createSources() : void {
-		/*var picture_album = new InfoType("PictureAlbum");
-		picture_album.create();
+        /*var chaineTypeInfoType = new TypeParamType("String");
+        chaineTypeInfoType.create();
 
-		var recherche_flickr = new Source("RechercheFlickR","FlickR","Recherche à partir de l'API FlickR","localhost",4000);
-		recherche_flickr.create();
+        var entierTypeInfoType = new TypeParamType("Entier");
+        entierTypeInfoType.create();
 
-		var param_recherche_flickr = new ParamType("Recherche","Champs de recherche pour FlickR","String","None");
-		param_recherche_flickr.create();
+        var urlConstraint = new ConstraintParamType("URL", "Ensure the string is an URL");
+        urlConstraint.create();
+        urlConstraint.setType(chaineTypeInfoType);
 
-		var limit_recherche_flickr = new ParamType("Limite","Limiter le nombre de résultats","Entier","Positif");
-		limit_recherche_flickr.create();
-
-		recherche_flickr.addParamType(param_recherche_flickr);
-		recherche_flickr.setInfoType(picture_album);
-		recherche_flickr.addParamType(limit_recherche_flickr);
-
-		Logger.debug("Avant le lazy loading: ");
-		Logger.debug(recherche_flickr);
-
-		recherche_flickr.infoType();
-		Logger.debug("Après le lazy loading: ");
-		Logger.debug(recherche_flickr);
-
-        var feed_node = new InfoType("FeedNode");
-        feed_node.create();
+        var positiveNumberConstraint = new ConstraintParamType("Positive", "Ensure the number is >= 0");
+        positiveNumberConstraint.create();
+        positiveNumberConstraint.setType(entierTypeInfoType);
 
         var feed_content = new InfoType("FeedContent");
         feed_content.create();
 
-        var rss_feed_reader = new Source("RSSFeedReader", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 4000);
+        var rss_feed_reader = new Source("RetrieveFeedContent", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 6002);
         rss_feed_reader.create();
 
-        var limit_rss_feed_reader = new ParamType("Limite","Limiter le nombre de résultats","Entier","Positif");
-        limit_rss_feed_reader.create();
+        var url_rss_feed_reader = new ParamType("FeedURL","Lien du flux RSS");
+        url_rss_feed_reader.create();
+        url_rss_feed_reader.setType(chaineTypeInfoType);
+        url_rss_feed_reader.setConstraint(urlConstraint);
 
+        var limit_rss_feed_reader = new ParamType("Limit","Limiter le nombre de résultats");
+        limit_rss_feed_reader.create();
+        limit_rss_feed_reader.setType(entierTypeInfoType);
+        limit_rss_feed_reader.setConstraint(positiveNumberConstraint);
+
+        rss_feed_reader.addParamType(url_rss_feed_reader);
         rss_feed_reader.addParamType(limit_rss_feed_reader);
         rss_feed_reader.setInfoType(feed_content);*/
 	}
@@ -108,7 +484,7 @@ class CleanAndInitDatabase {
      * @method fulfill
      */
     fulfill() {
-	    var chaineTypeInfoType = new TypeParamType("String");
+	    /*var chaineTypeInfoType = new TypeParamType("String");
 	    chaineTypeInfoType.create();
 
 	    var entierTypeInfoType = new TypeParamType("Entier");
@@ -122,8 +498,6 @@ class CleanAndInitDatabase {
 	    positiveNumberConstraint.create();
 	    positiveNumberConstraint.setType(entierTypeInfoType);
 
-        /*var feed_node = new InfoType("FeedNode");
-        feed_node.create();*/
 
         var feed_content = new InfoType("FeedContent");
         feed_content.create();
@@ -223,19 +597,7 @@ class CleanAndInitDatabase {
 
         //
 
-        /*
-        var p : Profil = new Profil("profil1", "description de profil1");
-        p.create();
-
-        p.setName("profil 5");
-
-        p.update();
-
-        var p2 : Profil = Profil.read(2);
-        p2.delete();
-        */
-
-        Logger.debug(SDI.all());
+        Logger.debug(SDI.all());*/
     }
 }
 
@@ -243,25 +605,28 @@ try {
     var logLevel = LoggerLevel.Error;
 
     if(process.argv.length > 2) {
-        var param = process.argv[2];
-        var keyVal = param.split("=");
-        if(keyVal.length > 1) {
-            if (keyVal[0] == "loglevel") {
-                switch(keyVal[1]) {
-                    case "error" :
-                        logLevel = LoggerLevel.Error;
-                        break;
-                    case "warning" :
-                        logLevel = LoggerLevel.Warning;
-                        break;
-                    case "info" :
-                        logLevel = LoggerLevel.Info;
-                        break;
-                    case "debug" :
-                        logLevel = LoggerLevel.Debug;
-                        break;
-                    default :
-                        logLevel = LoggerLevel.Error;
+        for(var i = 2; i < process.argv.length; i++) {
+            var param = process.argv[i];
+            var keyVal = param.split("=");
+            if (keyVal.length > 1) {
+                if (keyVal[0] == "loglevel") {
+                    switch (keyVal[1]) {
+                        case "error" :
+                            logLevel = LoggerLevel.Error;
+                            break;
+                        case "warning" :
+                            logLevel = LoggerLevel.Warning;
+                            break;
+                        case "info" :
+                            logLevel = LoggerLevel.Info;
+                            break;
+                        case "debug" :
+                            logLevel = LoggerLevel.Debug;
+                            break;
+                        default :
+                            logLevel = LoggerLevel.Error;
+                    }
+                    break;
                 }
             }
         }
@@ -270,7 +635,7 @@ try {
     Logger.setLevel(logLevel);
 
 	var caid = new CleanAndInitDatabase();
-	caid.run();
+	caid.run(process.argv);
 } catch (e) {
 	console.log(e);
 	throw e;
