@@ -32,8 +32,8 @@
  */
 class CleanAndInitDatabase {
 
-    static toClean : Array<any> = [Profil,SDI];
     static toCleanSources : Array<any> = [Source];
+    static toCleanUsers : Array<any> = [User];
 
     /**
      * Method to clean and fulfill database with some data.
@@ -69,7 +69,10 @@ class CleanAndInitDatabase {
 
                                 break;
                             case "users" :
-                                //TODO : Clean and Init Users
+                                var successCleanAllUsers = function() {
+                                    self.fulfillUsers(success, fail);
+                                };
+                                self.cleanAll(CleanAndInitDatabase.toCleanUsers, successCleanAllUsers, fail);
                                 break;
                             case "sdis" :
                                 //TODO : Clean and Init SDIs
@@ -165,36 +168,47 @@ class CleanAndInitDatabase {
 
             source.create(successSourceCreate, fail);
         });
+    }
 
-            /*var chaineTypeInfoType = new TypeParamType("String");
-            chaineTypeInfoType.create();
+    /**
+     * Method to fulfill database with users.
+     *
+     * @method fulfillUsers
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillUsers(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
 
-            var entierTypeInfoType = new TypeParamType("Entier");
-            entierTypeInfoType.create();
+        var usersNb = 0;
 
-            var urlConstraint = new ConstraintParamType("URL", "Ensure the string is an URL");
-            urlConstraint.create();
-            urlConstraint.setType(chaineTypeInfoType);
+        var users : any = require("../dbInitFiles/users.json");
 
-            var positiveNumberConstraint = new ConstraintParamType("Positive", "Ensure the number is >= 0");
-            positiveNumberConstraint.create();
-            positiveNumberConstraint.setType(entierTypeInfoType);
+        if(users.length == 0) {
+            Logger.info("No users to create.");
+            successCallback();
+            return;
+        }
 
-            var feed_content = new InfoType("FeedContent");
-            feed_content.create();
+        users.forEach(function(userDesc) {
+            usersNb = usersNb + 1;
 
-            var rss_feed_reader = new Source("RetrieveFeedContent", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 6002);
-            rss_feed_reader.create();
+            var fail = function (err) {
+                failCallback(err);
+            };
 
-            var url_rss_feed_reader = new ParamType("FeedURL","Lien du flux RSS");
-            url_rss_feed_reader.create();
-            url_rss_feed_reader.setType(chaineTypeInfoType);
-            url_rss_feed_reader.setConstraint(urlConstraint);
+            var user = new User(userDesc.username);
 
-            var limit_rss_feed_reader = new ParamType("Limit","Limiter le nombre de résultats");
-            limit_rss_feed_reader.create();
-            limit_rss_feed_reader.setType(entierTypeInfoType);
-            limit_rss_feed_reader.setConstraint(positiveNumberConstraint);*/
+            var successUserCreate = function() {
+                Logger.info("User create successfully.");
+                if(usersNb == users.length) {
+                    successCallback();
+                }
+            };
+
+            user.create(successUserCreate, fail);
+
+        });
     }
 
     /**
@@ -442,83 +456,13 @@ class CleanAndInitDatabase {
         });
     }
 
-	createSources() : void {
-        /*var chaineTypeInfoType = new TypeParamType("String");
-        chaineTypeInfoType.create();
-
-        var entierTypeInfoType = new TypeParamType("Entier");
-        entierTypeInfoType.create();
-
-        var urlConstraint = new ConstraintParamType("URL", "Ensure the string is an URL");
-        urlConstraint.create();
-        urlConstraint.setType(chaineTypeInfoType);
-
-        var positiveNumberConstraint = new ConstraintParamType("Positive", "Ensure the number is >= 0");
-        positiveNumberConstraint.create();
-        positiveNumberConstraint.setType(entierTypeInfoType);
-
-        var feed_content = new InfoType("FeedContent");
-        feed_content.create();
-
-        var rss_feed_reader = new Source("RetrieveFeedContent", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 6002);
-        rss_feed_reader.create();
-
-        var url_rss_feed_reader = new ParamType("FeedURL","Lien du flux RSS");
-        url_rss_feed_reader.create();
-        url_rss_feed_reader.setType(chaineTypeInfoType);
-        url_rss_feed_reader.setConstraint(urlConstraint);
-
-        var limit_rss_feed_reader = new ParamType("Limit","Limiter le nombre de résultats");
-        limit_rss_feed_reader.create();
-        limit_rss_feed_reader.setType(entierTypeInfoType);
-        limit_rss_feed_reader.setConstraint(positiveNumberConstraint);
-
-        rss_feed_reader.addParamType(url_rss_feed_reader);
-        rss_feed_reader.addParamType(limit_rss_feed_reader);
-        rss_feed_reader.setInfoType(feed_content);*/
-	}
-
     /**
      * Method to fulfill database with some data.
      *
      * @method fulfill
      */
     fulfill() {
-	    /*var chaineTypeInfoType = new TypeParamType("String");
-	    chaineTypeInfoType.create();
-
-	    var entierTypeInfoType = new TypeParamType("Entier");
-	    entierTypeInfoType.create();
-
-	    var urlConstraint = new ConstraintParamType("URL", "Ensure the string is an URL");
-	    urlConstraint.create();
-	    urlConstraint.setType(chaineTypeInfoType);
-
-	    var positiveNumberConstraint = new ConstraintParamType("Positive", "Ensure the number is >= 0");
-	    positiveNumberConstraint.create();
-	    positiveNumberConstraint.setType(entierTypeInfoType);
-
-
-        var feed_content = new InfoType("FeedContent");
-        feed_content.create();
-
-        var rss_feed_reader = new Source("RetrieveFeedContent", "RSSFeedReader", "Récupération d'un flux RSS", "localhost", 6002);
-        rss_feed_reader.create();
-
-        var url_rss_feed_reader = new ParamType("FeedURL","Lien du flux RSS");
-        url_rss_feed_reader.create();
-	    url_rss_feed_reader.setType(chaineTypeInfoType);
-	    url_rss_feed_reader.setConstraint(urlConstraint);
-
-        var limit_rss_feed_reader = new ParamType("Limit","Limiter le nombre de résultats");
-        limit_rss_feed_reader.create();
-	    limit_rss_feed_reader.setType(entierTypeInfoType);
-	    limit_rss_feed_reader.setConstraint(positiveNumberConstraint);
-
-        rss_feed_reader.addParamType(url_rss_feed_reader);
-        rss_feed_reader.addParamType(limit_rss_feed_reader);
-        rss_feed_reader.setInfoType(feed_content);
-
+/*
 	    var s : SDI = new SDI("SDItruc", "Un super SDI de test ! ", "*");
 	    s.create();
 
