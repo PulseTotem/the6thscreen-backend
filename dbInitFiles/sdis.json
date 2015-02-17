@@ -1,0 +1,107 @@
+[
+    {
+        "name" : "SDITruc",
+        "description" : "Un super SDI de test !",
+        "allowedHost" : "*",
+        "user" : {
+            "username" : "christian"
+        },
+        "behaviours" : [
+            {
+                "name" : "Appearance",
+                "description" : "Défilement des informations sans effet."
+            }
+        ],
+        "zones" : [
+            {
+                "name" : "LeftZone",
+                "description" : "Zone gauche de SDItruc",
+                "width" : 45,
+                "height" : 100,
+                "positionFromTop" : 0,
+                "positionFromLeft" : 0,
+                "behaviour" : {
+                    "name" : "Appearance"
+                }
+            },
+            {
+                "name" : "RightZone",
+                "description" : "Zone droite de SDItruc",
+                "width" : 45,
+                "height" : 100,
+                "positionFromTop" : 0,
+                "positionFromLeft" : 55,
+                "behaviour" : {
+                    "name" : "Appearance"
+                }
+            }
+        ],
+        "renderers" : [
+            {
+                "name" : "FeedNodeRendererGeneric",
+                "description" : "Renderer générique pour les infos de type FeedNode.",
+                "infoType" : {
+                    "name" : "FeedContent"
+                }
+            },
+            {
+                "name" : "DiscountRenderer",
+                "description" : "Renderer pour les infos de type Discount.",
+                "infoType" : {
+                    "name" : "DiscountsList"
+                }
+            }
+        ],
+        "renderPolicies" : [
+            {
+                "name" : "FeedContentDumbRenderPolicy",
+                "description" : "Dumb render policy for FeedContent."
+            }
+        ],
+        "receivePolicies" : [
+            {
+                "name" : "DumbReceivePolicy"
+            }
+        ],
+        "callTypes" : [
+            {
+                "name" : "RSSLeftZone",
+                "description" : "Display RSS feeds in the left zone with generic renderer",
+                "zone" : {
+                    "name" : "LeftZone"
+                },
+                "source" : {
+                    "name" : "RetrieveFeedContent"
+                },
+                "renderer" : {
+                    "name" : "FeedNodeRendererGeneric"
+                },
+                "renderPolicy" : {
+                    "name" : "FeedContentDumbRenderPolicy"
+                },
+                "receivePolicy" : {
+                    "name" : "DumbReceivePolicy"
+                }
+            },
+            {
+                "name" : "DiscountsRightZone",
+                "description" : "Display Discounts in the right zone with specific renderer",
+                "zone" : {
+                    "name" : "RightZone"
+                },
+                "source" : {
+                    "name" : "RetrieveDiscounts"
+                },
+                "renderer" : {
+                    "name" : "DiscountRenderer"
+                },
+                "renderPolicy" : {
+                    "name" : "FeedContentDumbRenderPolicy"
+                },
+                "receivePolicy" : {
+                    "name" : "DumbReceivePolicy"
+                }
+            }
+        ]
+    }
+]

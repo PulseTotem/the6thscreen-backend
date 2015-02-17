@@ -34,6 +34,7 @@ class CleanAndInitDatabase {
 
     static toCleanSources : Array<any> = [Source];
     static toCleanUsers : Array<any> = [User];
+    static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, RenderPolicy, ReceivePolicy];
 
     /**
      * Method to clean and fulfill database with some data.
@@ -49,9 +50,13 @@ class CleanAndInitDatabase {
         };
 
         var fail = function(err) {
+            Logger.error("Une erreur est survenue...");
+
             if(err) {
                 Logger.error(err);
             }
+
+            process.exit(0);
         };
 
         if(runParams.length > 2) {
@@ -75,7 +80,10 @@ class CleanAndInitDatabase {
                                 self.cleanAll(CleanAndInitDatabase.toCleanUsers, successCleanAllUsers, fail);
                                 break;
                             case "sdis" :
-                                //TODO : Clean and Init SDIs
+                                var successCleanAllSDIs = function() {
+                                    self.fulfillSDIs(success, fail);
+                                };
+                                self.cleanAll(CleanAndInitDatabase.toCleanSDIs, successCleanAllSDIs, fail);
                                 break;
                             case "profils" :
                                 //TODO : Clean and Init Profils
@@ -207,6 +215,149 @@ class CleanAndInitDatabase {
             };
 
             user.create(successUserCreate, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with SDIs.
+     *
+     * @method fulfillSDIs
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillSDIs(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var sdisNb = 0;
+
+        var sdis : any = require("../dbInitFiles/sdis.json");
+
+        if(sdis.length == 0) {
+            Logger.info("No sdis to create.");
+            successCallback();
+            return;
+        }
+
+        sdis.forEach(function(sdiDesc : any) {
+            sdisNb = sdisNb + 1;
+
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var sdi = new SDI(sdiDesc.name, sdiDesc.description, sdiDesc.allowedHost);
+
+            var nbCreatedCallTypes = 0;
+
+            var successCallTypeCreate = function(newCallType) {
+                nbCreatedCallTypes = nbCreatedCallTypes + 1;
+                Logger.info("CallType created successfully.");
+
+                if(nbCreatedCallTypes == sdiDesc.callTypes.length && sdisNb == sdis.length) {
+                    Logger.info("Fulfill SDIs END !");
+                    successCallback();
+                }
+            };
+
+            var nbCreatedReceivePolicies = 0;
+
+            var successReceivePolicyCreate = function(newReceivePolicy) {
+                Logger.info("ReceivePolicy created successfully.");
+                nbCreatedReceivePolicies = nbCreatedReceivePolicies + 1;
+
+                if(nbCreatedReceivePolicies == sdiDesc.receivePolicies.length) {
+                    sdiDesc.callTypes.forEach(function(callType) {
+                        self.manageCallTypeCreation(callType, successCallTypeCreate, fail);
+                    });
+                }
+            };
+
+            var nbCreatedRenderPolicies = 0;
+
+            var successRenderPolicyCreate = function(newRenderPolicy) {
+                Logger.info("RenderPolicy created successfully.");
+                nbCreatedRenderPolicies = nbCreatedRenderPolicies + 1;
+
+                if(nbCreatedRenderPolicies == sdiDesc.renderPolicies.length) {
+                    sdiDesc.receivePolicies.forEach(function(receivePolicy) {
+                        self.manageReceivePolicyCreation(receivePolicy, successReceivePolicyCreate, fail);
+                    });
+                }
+            };
+
+            var nbCreatedRenderers = 0;
+
+            var successRendererCreate = function(newRenderer) {
+                Logger.info("Renderer created successfully.");
+                nbCreatedRenderers = nbCreatedRenderers + 1;
+
+                if(nbCreatedRenderers == sdiDesc.renderers.length) {
+                    sdiDesc.renderPolicies.forEach(function(renderPolicy) {
+                        self.manageRenderPolicyCreation(renderPolicy, successRenderPolicyCreate, fail);
+                    });
+                }
+            };
+
+            var createdZones = new Array();
+
+            var successZoneCreate = function(newZone) {
+                createdZones.push(newZone);
+                Logger.info("Zone created successfully.");
+
+                if(createdZones.length == sdiDesc.zones.length) {
+                    var nbAssociation = 0;
+                    var successZoneAssociation = function() {
+                        nbAssociation = nbAssociation + 1;
+                        Logger.info("Zone associated to SDI successfully.");
+
+                        if(nbAssociation == createdZones.length) {
+                            sdiDesc.renderers.forEach(function(renderer) {
+                                self.manageRendererCreation(renderer, successRendererCreate, fail);
+                            });
+                        }
+                    };
+
+                    createdZones.forEach(function(zone) {
+                        sdi.addZone(zone, successZoneAssociation, fail);
+                    });
+                }
+            }
+
+            var nbCreatedBehaviours = 0;
+
+            var successBehaviourCreate = function(newBehaviour) {
+                Logger.info("Behaviour created successfully.");
+                nbCreatedBehaviours = nbCreatedBehaviours + 1;
+
+                if(sdiDesc.behaviours.length == nbCreatedBehaviours) {
+                    sdiDesc.zones.forEach(function(zone) {
+                        self.manageZoneCreation(zone, successZoneCreate, fail);
+                    });
+                }
+            };
+
+            var successUserRetrieve = function(user) {
+                Logger.info("User retrieved successfully.");
+
+                var successUserAssociation = function() {
+                    Logger.info("SDI associated to User successfully.");
+                    Logger.info("Begin loop for behaviours : " + sdiDesc.behaviours.length);
+                    sdiDesc.behaviours.forEach(function(behaviour) {
+                        self.manageBehaviourCreation(behaviour, successBehaviourCreate, fail);
+                    });
+                };
+
+                user.addSDI(sdi, successUserAssociation, fail);
+            };
+
+            var successSDICreate = function() {
+                Logger.info("SDI create successfully.");
+
+                self.retrieveUser(sdiDesc.user, successUserRetrieve, fail);
+            };
+
+            sdi.create(successSDICreate, fail);
 
         });
     }
@@ -405,6 +556,590 @@ class CleanAndInitDatabase {
     }
 
     /**
+     * Method to retrieve User.
+     *
+     * @method retrieveUser
+     * @param {JSON Object} userDesc - The User's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveUser(userDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allUsers) {
+            var user = null;
+            allUsers.forEach(function(u) {
+                if(u.username() == userDesc.username) {
+                    user = u;
+                }
+            });
+
+            if(user == null) {
+                failCallback(new Error("The User '" + userDesc.username + "' doesn't exist !"));
+            } else {
+                successCallback(user);
+            }
+        };
+
+        User.all(successAll, fail);
+    }
+
+    /**
+     * Method to manage creation of Zone.
+     *
+     * @method manageZoneCreation
+     * @param {JSON Object} zoneDesc - The Zone's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageZoneCreation(zoneDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allZones) {
+            var zone = null;
+            allZones.forEach(function(z) {
+                if(z.name() == zoneDesc.name) {
+                    zone = z;
+                }
+            });
+
+            if(zone == null) {
+                zone = new Zone(zoneDesc.name, zoneDesc.description, zoneDesc.width, zoneDesc.height, zoneDesc.positionFromTop, zoneDesc.positionFromLeft);
+
+                var successBehaviourRetrieved = function(newBehaviour) {
+                    Logger.info("Behaviour retrieved successfully.");
+                    var successBehaviourAssociation = function() {
+                        Logger.info("Behaviour associated to Zone successfully.");
+                        successCallback(zone);
+                    };
+
+                    zone.setBehaviour(newBehaviour, successBehaviourAssociation, fail);
+                };
+
+                var successZoneCreation = function() {
+                    Logger.info("Zone created successfully.");
+                    self.retrieveBehaviour(zoneDesc.behaviour, successBehaviourRetrieved, fail);
+                };
+
+                zone.create(successZoneCreation, fail);
+
+            } else {
+                successCallback(zone);
+            }
+        };
+
+        Zone.all(successAll, fail);
+
+    }
+
+    /**
+     * Method to manage creation of CallType.
+     *
+     * @method manageCallTypeCreation
+     * @param {JSON Object} callTypeDesc - The CallType's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageCallTypeCreation(callTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allCallTypes) {
+            var callType = null;
+            allCallTypes.forEach(function(ct) {
+                if(ct.name() == callTypeDesc.name) {
+                    callType = ct;
+                }
+            });
+
+            if(callType == null) {
+                callType = new CallType(callTypeDesc.name, callTypeDesc.description);
+
+                var successReceivePolicyRetrieved = function(newReceivePolicy) {
+                    Logger.info("ReceivePolicy retrieved successfully.");
+
+                    var successReceivePolicyAssociation = function() {
+                        Logger.info("ReceivePolicy associated to CallType successfully.");
+                        successCallback(callType);
+                    };
+
+                    callType.setReceivePolicy(newReceivePolicy, successReceivePolicyAssociation, fail);
+                };
+
+                var successRenderPolicyRetrieved = function(newRenderPolicy) {
+                    Logger.info("RenderPolicy retrieved successfully.");
+
+                    var successRenderPolicyAssociation = function() {
+                        Logger.info("RenderPolicy associated to CallType successfully.");
+                        self.retrieveReceivePolicy(callTypeDesc.receivePolicy, successReceivePolicyRetrieved, fail);
+                    };
+
+                    callType.setRenderPolicy(newRenderPolicy, successRenderPolicyAssociation, fail);
+                };
+
+                var successRendererRetrieved = function(newRenderer) {
+                    Logger.info("Renderer retrieved successfully.");
+
+                    var successRendererAssociation = function() {
+                        Logger.info("Renderer associated to CallType successfully.");
+                        self.retrieveRenderPolicy(callTypeDesc.renderPolicy, successRenderPolicyRetrieved, fail);
+                    };
+
+                    callType.setRenderer(newRenderer, successRendererAssociation, fail);
+                };
+
+                var successSourceRetrieve = function(newSource) {
+                    Logger.info("Source retrieved successfully.");
+
+                    var successSourceAssociation = function() {
+                        Logger.info("Source associated to CallType successfully.");
+                        self.retrieveRenderer(callTypeDesc.renderer, successRendererRetrieved, fail);
+                    };
+
+                    callType.setSource(newSource, successSourceAssociation, fail);
+                };
+
+                var successZoneRetrieve = function(newZone) {
+                    Logger.info("Zone retrieved successfully.");
+
+                    var successZoneAssociation = function() {
+                        Logger.info("Zone associated to CallType successfully.");
+                        self.retrieveSource(callTypeDesc.source, successSourceRetrieve, fail);
+                    };
+
+                    callType.setZone(newZone, successZoneAssociation, fail);
+                };
+
+                var successCallTypeCreation = function() {
+                    Logger.info("CallType created successfully.");
+                    self.retrieveZone(callTypeDesc.zone, successZoneRetrieve, fail);
+                };
+
+                callType.create(successCallTypeCreation, fail);
+
+            } else {
+                successCallback(callType);
+            }
+        };
+
+        CallType.all(successAll, fail);
+
+    }
+
+    /**
+     * Method to manage creation of Behaviour.
+     *
+     * @method manageBehaviourCreation
+     * @param {JSON Object} behaviourDesc - The Behaviour's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageBehaviourCreation(behaviourDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allBehaviours) {
+            Logger.debug(allBehaviours);
+            var behaviour = null;
+            allBehaviours.forEach(function(b) {
+                if(b.name() == behaviourDesc.name) {
+                    behaviour = b;
+                }
+            });
+
+            if(behaviour == null) {
+                behaviour = new Behaviour(behaviourDesc.name, behaviourDesc.description);
+
+                var successBehaviourCreation = function() {
+                    Logger.info("Behaviour create successfully");
+                    successCallback(behaviour);
+                };
+
+                behaviour.create(successBehaviourCreation, fail);
+            } else {
+                successCallback(behaviour);
+            }
+        };
+
+        Behaviour.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve Behaviour.
+     *
+     * @method retrieveBehaviour
+     * @param {JSON Object} behaviourDesc - The Behaviour's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveBehaviour(behaviourDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allBehaviours) {
+            var behaviour = null;
+            allBehaviours.forEach(function(b) {
+                if(b.name() == behaviourDesc.name) {
+                    behaviour = b;
+                }
+            });
+
+            if(behaviour == null) {
+                failCallback(new Error("The Behaviour '" + behaviourDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(behaviour);
+            }
+        };
+
+        Behaviour.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve Zone.
+     *
+     * @method retrieveZone
+     * @param {JSON Object} zoneDesc - The Zone's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveZone(zoneDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allZones) {
+            var zone = null;
+            allZones.forEach(function(z) {
+                if(z.name() == zoneDesc.name) {
+                    zone = z;
+                }
+            });
+
+            if(zone == null) {
+                failCallback(new Error("The Zone '" + zoneDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(zone);
+            }
+        };
+
+        Zone.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve Source.
+     *
+     * @method retrieveSource
+     * @param {JSON Object} sourceDesc - The Source's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveSource(sourceDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allSources) {
+            var source = null;
+            allSources.forEach(function(s) {
+                if(s.name() == sourceDesc.name) {
+                    source = s;
+                }
+            });
+
+            if(source == null) {
+                failCallback(new Error("The Source '" + sourceDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(source);
+            }
+        };
+
+        Source.all(successAll, fail);
+    }
+
+    /**
+     * Method to manage creation of Renderer.
+     *
+     * @method manageRendererCreation
+     * @param {JSON Object} rendererDesc - The Renderer's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageRendererCreation(rendererDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allRenderers) {
+            var renderer = null;
+            allRenderers.forEach(function(r) {
+                if(r.name() == rendererDesc.name) {
+                    renderer = r;
+                }
+            });
+
+            if(renderer == null) {
+                renderer = new Renderer(rendererDesc.name, rendererDesc.description);
+
+                var successInfoTypeRetrieve = function(newInfotype) {
+                    Logger.info("InfoType retrieved successfully.");
+
+                    var successInfoTypeAssociation = function() {
+                        Logger.info("InfoType associated to Renderer successfully.");
+                        successCallback(renderer);
+                    };
+
+                    renderer.setInfoType(newInfotype, successInfoTypeAssociation, fail);
+                };
+
+                var successRendererCreation = function() {
+                    Logger.info("Renderer created successfully.");
+
+                    self.retrieveInfoType(rendererDesc.infoType, successInfoTypeRetrieve, fail);
+                };
+
+                renderer.create(successRendererCreation, fail);
+            } else {
+                successCallback(renderer);
+            }
+        };
+
+        Renderer.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve InfoType.
+     *
+     * @method retrieveInfoType
+     * @param {JSON Object} infoTypeDesc - The InfoType's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveInfoType(infoTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allInfoTypes) {
+            var infoType = null;
+            allInfoTypes.forEach(function(it) {
+                if(it.name() == infoTypeDesc.name) {
+                    infoType = it;
+                }
+            });
+
+            if(infoType == null) {
+                failCallback(new Error("The InfoType '" + infoTypeDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(infoType);
+            }
+        };
+
+        InfoType.all(successAll, fail);
+    }
+
+    /**
+     * Method to manage creation of RenderPolicy.
+     *
+     * @method manageRenderPolicyCreation
+     * @param {JSON Object} renderPolicyDesc - The RenderPolicy's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageRenderPolicyCreation(renderPolicyDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allRenderPolicys) {
+            var renderPolicy = null;
+            allRenderPolicys.forEach(function(rp) {
+                if(rp.name() == renderPolicyDesc.name) {
+                    renderPolicy = rp;
+                }
+            });
+
+            if(renderPolicy == null) {
+                renderPolicy = new RenderPolicy(renderPolicyDesc.name, renderPolicyDesc.description);
+
+                var successRenderPolicyCreation = function() {
+                    successCallback(renderPolicy);
+                };
+
+                renderPolicy.create(successRenderPolicyCreation, fail);
+            } else {
+                successCallback(renderPolicy);
+            }
+        };
+
+        RenderPolicy.all(successAll, fail);
+    }
+
+    /**
+     * Method to manage creation of ReceivePolicy.
+     *
+     * @method manageReceivePolicyCreation
+     * @param {JSON Object} receivePolicyDesc - The ReceivePolicy's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageReceivePolicyCreation(receivePolicyDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allReceivePolicys) {
+            var receivePolicy = null;
+            allReceivePolicys.forEach(function(rp) {
+                if(rp.name() == receivePolicyDesc.name) {
+                    receivePolicy = rp;
+                }
+            });
+
+            if(receivePolicy == null) {
+                receivePolicy = new ReceivePolicy(receivePolicyDesc.name);
+
+                var successReceivePolicyCreation = function() {
+                    successCallback(receivePolicy);
+                };
+
+                receivePolicy.create(successReceivePolicyCreation, fail);
+            } else {
+                successCallback(receivePolicy);
+            }
+        };
+
+        ReceivePolicy.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve Renderer.
+     *
+     * @method retrieveRenderer
+     * @param {JSON Object} rendererDesc - The Renderer's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveRenderer(rendererDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allRenderers) {
+            var renderer = null;
+            allRenderers.forEach(function(r) {
+                if(r.name() == rendererDesc.name) {
+                    renderer = r;
+                }
+            });
+
+            if(renderer == null) {
+                failCallback(new Error("The Renderer '" + rendererDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(renderer);
+            }
+        };
+
+        Renderer.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve RenderPolicy.
+     *
+     * @method retrieveRenderPolicy
+     * @param {JSON Object} renderPolicyDesc - The RenderPolicy's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveRenderPolicy(renderPolicyDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allRenderPolicies) {
+            var renderPolicy = null;
+            allRenderPolicies.forEach(function(rp) {
+                if(rp.name() == renderPolicyDesc.name) {
+                    renderPolicy = rp;
+                }
+            });
+
+            if(renderPolicy == null) {
+                failCallback(new Error("The RenderPolicy '" + renderPolicyDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(renderPolicy);
+            }
+        };
+
+        RenderPolicy.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve ReceivePolicy.
+     *
+     * @method retrieveReceivePolicy
+     * @param {JSON Object} receivePolicyDesc - The ReceivePolicy's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveReceivePolicy(receivePolicyDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allReceivePolicies) {
+            var receivePolicy = null;
+            allReceivePolicies.forEach(function(rp) {
+                if(rp.name() == receivePolicyDesc.name) {
+                    receivePolicy = rp;
+                }
+            });
+
+            if(receivePolicy == null) {
+                failCallback(new Error("The ReceivePolicy '" + receivePolicyDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(receivePolicy);
+            }
+        };
+
+        ReceivePolicy.all(successAll, fail);
+    }
+
+    /**
      * Method to clean selected tables in database.
      *
      * @method cleanAll
@@ -428,23 +1163,36 @@ class CleanAndInitDatabase {
         };
 
         var successAll = function(instances) {
-            nbModels = nbModels + 1;
-            var nbInstances = 0;
-            instances.forEach(function(toDelete) {
-                var deleteSuccess = function() {
-                    Logger.info("Instance delete successfully.");
-                    nbInstances = nbInstances + 1;
-                    if(nbModels == models.length && nbInstances == instances.length) {
-                        successCallback();
-                    }
-                };
 
-                toDelete.delete(deleteSuccess, fail);
-            });
-
-            if(nbModels == models.length && instances.length == 0) {
+            if(instances.length == 0) {
                 Logger.info("Nothing to clean.");
-                successCallback();
+                nbModels = nbModels + 1;
+
+                if(nbModels == models.length) {
+                    Logger.info("All models were clean.");
+                    successCallback();
+                }
+            } else {
+
+                var nbInstances = 0;
+                instances.forEach(function (toDelete) {
+                    var deleteSuccess = function () {
+                        Logger.info("Instance delete successfully.");
+                        nbInstances = nbInstances + 1;
+
+                        if(nbInstances == instances.length) {
+                            Logger.info("Model clean !");
+                            nbModels = nbModels + 1;
+
+                            if(nbModels == models.length) {
+                                Logger.info("All models were clean.");
+                                successCallback();
+                            }
+                        }
+                    };
+
+                    toDelete.delete(deleteSuccess, fail);
+                });
             }
         };
 
@@ -512,6 +1260,12 @@ class CleanAndInitDatabase {
         renderP.create();
 
         ct.setRenderPolicy(renderP);
+
+
+
+
+
+
 
         var p : Profil = new Profil("ProfilSDItruc1", "Profil n°1 de SDItruc");
         p.create();
