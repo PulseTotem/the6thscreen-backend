@@ -6,12 +6,6 @@
         "user" : {
             "username" : "christian"
         },
-        "behaviours" : [
-            {
-                "name" : "Appearance",
-                "description" : "Défilement des informations sans effet."
-            }
-        ],
         "zones" : [
             {
                 "name" : "LeftZone",
@@ -34,33 +28,6 @@
                 "behaviour" : {
                     "name" : "Appearance"
                 }
-            }
-        ],
-        "renderers" : [
-            {
-                "name" : "FeedNodeRendererGeneric",
-                "description" : "Renderer générique pour les infos de type FeedNode.",
-                "infoType" : {
-                    "name" : "FeedContent"
-                }
-            },
-            {
-                "name" : "DiscountRenderer",
-                "description" : "Renderer pour les infos de type Discount.",
-                "infoType" : {
-                    "name" : "DiscountsList"
-                }
-            }
-        ],
-        "renderPolicies" : [
-            {
-                "name" : "FeedContentDumbRenderPolicy",
-                "description" : "Dumb render policy for FeedContent."
-            }
-        ],
-        "receivePolicies" : [
-            {
-                "name" : "DumbReceivePolicy"
             }
         ],
         "callTypes" : [
