@@ -35,6 +35,7 @@ class CleanAndInitDatabase {
     static toCleanSources : Array<any> = [Source, ParamType, InfoType, TypeParamType, ConstraintParamType];
     static toCleanUsers : Array<any> = [User];
     static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, RenderPolicy, ReceivePolicy];
+    static toCleanProfils : Array<any> = [ParamValue, Call, Profil];
 
     /**
      * Method to clean and fulfill database with some data.
@@ -119,7 +120,10 @@ class CleanAndInitDatabase {
                                 self.cleanAll(CleanAndInitDatabase.toCleanSDIs, successCleanAllSDIs, fail);
                                 break;
                             case "profils" :
-                                //TODO : Clean and Init Profils
+                                var successCleanAllProfils = function() {
+                                    self.fulfillProfils(success, fail);
+                                }
+                                self.cleanAll(CleanAndInitDatabase.toCleanProfils, successCleanAllProfils, fail);
                                 break;
                             default :
                                 Logger.info("Nothing to do !?");
@@ -722,6 +726,74 @@ class CleanAndInitDatabase {
     }
 
     /**
+     * Method to fulfill database with Profils.
+     *
+     * @method fulfillProfils
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillProfils(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var profilsNb = 0;
+
+        var profils : any = require("../dbInitFiles/profils.json");
+
+        if(profils.length == 0) {
+            Logger.info("No profils to create.");
+            successCallback();
+            return;
+        }
+
+        profils.forEach(function(profilDesc : any) {
+
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var profil = new Profil(profilDesc.name, profilDesc.description);
+
+            var createdCalls = new Array();
+
+            var successCallCreate = function(newCall) {
+                createdCalls.push(newCall);
+                Logger.info("Call created successfully.");
+
+                if(createdCalls.length == profilDesc.calls.length) {
+                    var nbAssociation = 0;
+                    var successCallAssociation = function() {
+                        Logger.info("Call associated to Profil successfully.");
+                        nbAssociation = nbAssociation + 1;
+
+                        if(nbAssociation == createdCalls.length) {
+                            profilsNb = profilsNb + 1;
+
+                            if(profilsNb == profils.length) {
+                                successCallback();
+                            }
+                        }
+                    };
+
+                    createdCalls.forEach(function(call) {
+                        profil.addCall(call, successCallAssociation, fail);
+                    });
+                }
+            };
+
+            var successProfilCreate = function() {
+                Logger.info("Profil create successfully.");
+
+                profilDesc.calls.forEach(function(call) {
+                    self.manageCallCreation(call, successCallCreate, fail);
+                });
+            };
+
+            profil.create(successProfilCreate, fail);
+
+        });
+    }
+
+    /**
      * Method to retrieve ParamType.
      *
      * @method retrieveParamType
@@ -969,6 +1041,138 @@ class CleanAndInitDatabase {
 
         callType.create(successCallTypeCreation, fail);
 
+    }
+
+    /**
+     * Method to manage creation of Call.
+     *
+     * @method manageCallCreation
+     * @param {JSON Object} callDesc - The Call's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageCallCreation(callDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var call = new Call(callDesc.name);
+
+        var createdParamValues = new Array();
+
+        var successParamValueCreate = function(newParamValue) {
+            createdParamValues.push(newParamValue);
+            Logger.info("ParamValue created successfully.");
+
+            if(createdParamValues.length == callDesc.paramValues.length) {
+                var nbAssociation = 0;
+                var successParamValueAssociation = function() {
+                    Logger.info("ParamValue associated to Call successfully.");
+                    nbAssociation = nbAssociation + 1;
+
+                    if(nbAssociation == createdParamValues.length) {
+                        successCallback(call);
+                    }
+                };
+
+                createdParamValues.forEach(function(paramValue) {
+                    call.addParamValue(paramValue, successParamValueAssociation, fail);
+                });
+            }
+        };
+
+        var successCallTypeRetrieved = function(newCallType) {
+            Logger.info("CallType retrieved successfully.");
+            var successCallTypeAssociation = function() {
+                Logger.info("CallType associated to Call successfully.");
+
+                callDesc.paramValues.forEach(function(paramValue) {
+                    self.manageParamValueCreation(paramValue, successParamValueCreate, fail);
+                });
+            };
+
+            call.setCallType(newCallType, successCallTypeAssociation, fail);
+        };
+
+        var successCallCreation = function() {
+            Logger.info("Call created successfully.");
+            self.retrieveCallType(callDesc.callType, successCallTypeRetrieved, fail);
+        };
+
+        call.create(successCallCreation, fail);
+
+    }
+
+    /**
+     * Method to manage creation of ParamValue.
+     *
+     * @method manageParamValueCreation
+     * @param {JSON Object} paramValueDesc - The ParamValue's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    manageParamValueCreation(paramValueDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var paramValue = new ParamValue(paramValueDesc.value);
+
+        var successParamTypeRetrieved = function(newParamType) {
+            Logger.info("ParamType retrieved successfully.");
+            var successParamTypeAssociation = function() {
+                Logger.info("ParamType associated to ParamValue successfully.");
+
+                successCallback(paramValue);
+            };
+
+            paramValue.setParamType(newParamType, successParamTypeAssociation, fail);
+        };
+
+        var successParamValueCreation = function() {
+            Logger.info("ParamValue created successfully.");
+            self.retrieveParamType(paramValueDesc.paramType, successParamTypeRetrieved, fail);
+        };
+
+        paramValue.create(successParamValueCreation, fail);
+
+    }
+
+    /**
+     * Method to retrieve CallType.
+     *
+     * @method retrieveCallType
+     * @param {JSON Object} callTypeDesc - The CallType's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveCallType(callTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allCallTypes) {
+            var callType = null;
+            allCallTypes.forEach(function(ct) {
+                if(ct.name() == callTypeDesc.name) {
+                    callType = ct;
+                }
+            });
+
+            if(callType == null) {
+                failCallback(new Error("The CallType '" + callTypeDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(callType);
+            }
+        };
+
+        CallType.all(successAll, fail);
     }
 
     /**
