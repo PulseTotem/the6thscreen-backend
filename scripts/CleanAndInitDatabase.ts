@@ -32,7 +32,7 @@
  */
 class CleanAndInitDatabase {
 
-    static toCleanSources : Array<any> = [Source];
+    static toCleanSources : Array<any> = [Source, ParamType, InfoType, TypeParamType, ConstraintParamType];
     static toCleanUsers : Array<any> = [User];
     static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, RenderPolicy, ReceivePolicy];
 
@@ -67,8 +67,24 @@ class CleanAndInitDatabase {
                     if (keyVal[0] == "step") {
                         switch (keyVal[1]) {
                             case "sources" :
-                                var successCleanAllSources = function() {
+                                var successFulfillInfoTypes = function() {
                                     self.fulfillSources(success, fail);
+                                };
+
+                                var successFulfillParamTypes = function() {
+                                    self.fulfillInfoTypes(successFulfillInfoTypes, fail);
+                                };
+
+                                var successFulfillConstraints = function() {
+                                    self.fulfillParamTypes(successFulfillParamTypes, fail);
+                                };
+
+                                var successFulfillTypeParamTypes = function() {
+                                    self.fulfillConstraints(successFulfillConstraints, fail);
+                                };
+
+                                var successCleanAllSources = function() {
+                                    self.fulfillTypeParamTypes(successFulfillTypeParamTypes, fail);
                                 };
                                 self.cleanAll(CleanAndInitDatabase.toCleanSources, successCleanAllSources, fail);
 
@@ -124,45 +140,47 @@ class CleanAndInitDatabase {
         }
 
         sources.forEach(function(sourceDesc) {
-            sourcesNb = sourcesNb + 1;
-
             var fail = function(err) {
                 failCallback(err);
             };
 
             var source = new Source(sourceDesc.name, sourceDesc.service, sourceDesc.description, sourceDesc.host, sourceDesc.port);
 
-            var createdParamTypes = new Array();
+            var retrievedParamTypes = new Array();
 
-            var successParamTypeCreate = function(newParamType) {
-                createdParamTypes.push(newParamType);
-                Logger.info("ParamType '" + createdParamTypes.length + "' create successfully.");
+            var successParamTypeRetrieve = function(newParamType) {
+                retrievedParamTypes.push(newParamType);
+                Logger.info("ParamType '" + retrievedParamTypes.length + "' retrieve successfully.");
 
-                if(createdParamTypes.length == sourceDesc.paramTypes.length) {
+                if(retrievedParamTypes.length == sourceDesc.paramTypes.length) {
                     var nbAssociation = 0;
                     var successParamTypeAssociation = function() {
                         nbAssociation = nbAssociation + 1;
                         Logger.info("ParamType associated to Source successfully.");
 
-                        if(nbAssociation == createdParamTypes.length && sourcesNb == sources.length) {
-                            successCallback();
+                        if(nbAssociation == retrievedParamTypes.length) {
+                            sourcesNb = sourcesNb + 1;
+
+                            if(sourcesNb == sources.length) {
+                                successCallback();
+                            }
                         }
                     };
 
-                    createdParamTypes.forEach(function(paramType) {
+                    retrievedParamTypes.forEach(function(paramType) {
                         source.addParamType(paramType, successParamTypeAssociation, fail);
                     });
 
                 }
             };
 
-            var successInfoTypeCreate = function(newInfoType) {
-                Logger.info("InfoType create successfully.");
+            var successInfoTypeRetrieve = function(newInfoType) {
+                Logger.info("InfoType retrieve successfully.");
 
                 var successInfoTypeAssociation = function() {
                     Logger.info("InfoType associated to Source successfully.");
                     sourceDesc.paramTypes.forEach(function(paramType) {
-                        self.manageParamTypeCreation(paramType, successParamTypeCreate, fail);
+                        self.retrieveParamType(paramType, successParamTypeRetrieve, fail);
                     });
                 };
 
@@ -171,10 +189,206 @@ class CleanAndInitDatabase {
 
             var successSourceCreate = function() {
                 Logger.info("Source create successfully.");
-                self.manageInfoTypeCreation(sourceDesc.infoType, successInfoTypeCreate, fail);
+                self.retrieveInfoType(sourceDesc.infoType, successInfoTypeRetrieve, fail);
             };
 
             source.create(successSourceCreate, fail);
+        });
+    }
+
+    /**
+     * Method to fulfill database with infoTypes.
+     *
+     * @method fulfillInfoTypes
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillInfoTypes(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var infoTypesNb = 0;
+
+        var infoTypes : any = require("../dbInitFiles/infotypes.json");
+
+        if(infoTypes.length == 0) {
+            Logger.info("No InfoType to create.");
+            successCallback();
+            return;
+        }
+
+        infoTypes.forEach(function(infoTypeDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var infoType = new InfoType(infoTypeDesc.name);
+
+            var successInfoTypeCreation = function() {
+                Logger.info("InfoType created successfully.");
+                infoTypesNb = infoTypesNb + 1;
+
+                if(infoTypesNb == infoTypes.length) {
+                    successCallback();
+                }
+            };
+
+            infoType.create(successInfoTypeCreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with paramTypes.
+     *
+     * @method fulfillParamTypes
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillParamTypes(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var paramTypesNb = 0;
+
+        var paramTypes : any = require("../dbInitFiles/paramtypes.json");
+
+        if(paramTypes.length == 0) {
+            Logger.info("No ParamType to create.");
+            successCallback();
+            return;
+        }
+
+        paramTypes.forEach(function(paramTypeDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var paramType = new ParamType(paramTypeDesc.name, paramTypeDesc.description);
+
+            var successConstraintAssociation = function() {
+                Logger.info("Constraint associated to ParamType successfully.");
+                paramTypesNb = paramTypesNb + 1;
+
+                if(paramTypesNb == paramTypes.length) {
+                    successCallback();
+                }
+            }
+
+            var successConstraintRetrieve = function(newConstraint) {
+                Logger.info("Constraint retrieve successfully.");
+                paramType.setConstraint(newConstraint, successConstraintAssociation, fail);
+            }
+
+            var successTypeParamTypeAssociation = function() {
+                Logger.info("TypeParamType associated to ParamType successfully.");
+                self.retrieveConstraint(paramTypeDesc.constraint, successConstraintRetrieve, fail);
+            };
+
+            var successTypeParamTypeRetrieve = function(newTypeParamType) {
+                Logger.info("TypeParamType retrieve successfully.");
+                paramType.setType(newTypeParamType, successTypeParamTypeAssociation, fail);
+            };
+
+            var successParamTypeCreate = function() {
+                Logger.info("ParamType create successfully.");
+
+                self.retrieveTypeParamType(paramTypeDesc.type, successTypeParamTypeRetrieve, fail);
+            };
+
+            paramType.create(successParamTypeCreate, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with constraintParamTypes.
+     *
+     * @method fulfillConstraints
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillConstraints(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var constraintsNb = 0;
+
+        var constraints : any = require("../dbInitFiles/constraints.json");
+
+        if(constraints.length == 0) {
+            Logger.info("No constraint to create.");
+            successCallback();
+            return;
+        }
+
+        constraints.forEach(function(constraintDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var constraint = new ConstraintParamType(constraintDesc.name, constraintDesc.description);
+
+            var successTypeParamTypeAssociation = function() {
+                Logger.info("TypeParamType associated to Constraint successfully.");
+                constraintsNb = constraintsNb + 1;
+
+                if(constraintsNb == constraints.length) {
+                    successCallback();
+                }
+            };
+
+            var successTypeParamTypeRetrieve = function(newTypeParamType) {
+                Logger.info("TypeParamType retrieve successfully.");
+                constraint.setType(newTypeParamType, successTypeParamTypeAssociation, fail);
+            };
+
+            var successConstraintCreation = function() {
+                Logger.info("Constraint create successfully.");
+
+                self.retrieveTypeParamType(constraintDesc.type, successTypeParamTypeRetrieve, fail);
+            };
+
+            constraint.create(successConstraintCreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with typeParamTypes.
+     *
+     * @method fulfillTypeParamTypes
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillTypeParamTypes(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var typeParamTypesNb = 0;
+
+        var typeParamTypes : any = require("../dbInitFiles/typeparamtypes.json");
+
+        if(typeParamTypes.length == 0) {
+            Logger.info("No typeParamType to create.");
+            successCallback();
+            return;
+        }
+
+        typeParamTypes.forEach(function(typeParamTypeDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var typeParamType = new TypeParamType(typeParamTypeDesc.name);
+
+            var successTypeParamTypeCreation = function() {
+                Logger.info("TypeParamType create successfully.");
+                typeParamTypesNb = typeParamTypesNb + 1;
+
+                if(typeParamTypesNb == typeParamTypes.length) {
+                    successCallback();
+                }
+            };
+
+            typeParamType.create(successTypeParamTypeCreation, fail);
+
         });
     }
 
@@ -199,7 +413,6 @@ class CleanAndInitDatabase {
         }
 
         users.forEach(function(userDesc) {
-            usersNb = usersNb + 1;
 
             var fail = function (err) {
                 failCallback(err);
@@ -209,6 +422,8 @@ class CleanAndInitDatabase {
 
             var successUserCreate = function() {
                 Logger.info("User create successfully.");
+                usersNb = usersNb + 1;
+
                 if(usersNb == users.length) {
                     successCallback();
                 }
@@ -363,58 +578,17 @@ class CleanAndInitDatabase {
     }
 
     /**
-     * Method to manage creation of InfoType.
+     * Method to retrieve ParamType.
      *
-     * @method manageInfoTypeCreation
-     * @param {JSON Object} infoTypeDesc - The InfoType's description
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    manageInfoTypeCreation(infoTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
-        var self = this;
-
-        var fail = function(err) {
-            failCallback(err);
-        };
-
-        var successAll = function(allInfoTypes) {
-            var infoType = null;
-            allInfoTypes.forEach(function(it) {
-                if(it.name() == infoTypeDesc.name) {
-                    infoType = it;
-                }
-            });
-
-            if(infoType == null) {
-                infoType = new InfoType(infoTypeDesc.name);
-
-                var successInfoTypeCreation = function() {
-                    successCallback(infoType);
-                };
-
-                infoType.create(successInfoTypeCreation, fail);
-
-            } else {
-                successCallback(infoType);
-            }
-        };
-
-        InfoType.all(successAll, fail);
-
-    }
-
-    /**
-     * Method to manage creation of ParamType.
-     *
-     * @method manageParamTypeCreation
+     * @method retrieveParamType
      * @param {JSON Object} paramTypeDesc - The ParamType's description
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    manageParamTypeCreation(paramTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
+    retrieveParamType(paramTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
         var self = this;
 
-        var fail = function(err) {
+        var fail = function (err) {
             failCallback(err);
         };
 
@@ -427,53 +601,24 @@ class CleanAndInitDatabase {
             });
 
             if(paramType == null) {
-                paramType = new ParamType(paramTypeDesc.name, paramTypeDesc.description);
-
-                var successConstraintAssociation = function() {
-                    Logger.info("Constraint associated to ParamType successfully.");
-                    successCallback(paramType);
-                }
-
-                var successConstraintCreate = function(newConstraint) {
-                    Logger.info("Constraint create successfully.");
-                    paramType.setConstraint(newConstraint, successConstraintAssociation, fail);
-                }
-
-                var successTypeParamTypeAssociation = function() {
-                    Logger.info("TypeParamType associated to ParamType successfully.");
-                    self.manageConstraintCreation(paramTypeDesc.constraint, successConstraintCreate, fail);
-                };
-
-                var successTypeParamTypeCreate = function(newTypeParamType) {
-                    Logger.info("TypeParamType create successfully.");
-                    paramType.setType(newTypeParamType, successTypeParamTypeAssociation, fail);
-                };
-
-                var successParamTypeCreate = function() {
-                    Logger.info("ParamType create successfully.");
-                    self.manageTypeParamTypeCreation(paramTypeDesc.type, successTypeParamTypeCreate, fail);
-                };
-
-                paramType.create(successParamTypeCreate, fail);
-
+                failCallback(new Error("The ParamType '" + paramTypeDesc.name + "' doesn't exist !"));
             } else {
                 successCallback(paramType);
             }
         };
 
         ParamType.all(successAll, fail);
-
     }
 
     /**
-     * Method to manage creation of TypeParamType.
+     * Method to retrieve TypeParamType.
      *
-     * @method manageTypeParamTypeCreation
+     * @method retrieveTypeParamType
      * @param {JSON Object} typeParamTypeDesc - The TypeParamType's description
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    manageTypeParamTypeCreation(typeParamTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
+    retrieveTypeParamType(typeParamTypeDesc : any, successCallback : Function = null, failCallback : Function = null) {
         var self = this;
 
         var fail = function (err) {
@@ -482,77 +627,53 @@ class CleanAndInitDatabase {
 
         var successAll = function(allTypeParamTypes) {
             var typeParamType = null;
-            allTypeParamTypes.forEach(function(pt) {
-                if(pt.name() == typeParamTypeDesc.name) {
-                    typeParamType = pt;
+            allTypeParamTypes.forEach(function(tpt) {
+                if(tpt.name() == typeParamTypeDesc.name) {
+                    typeParamType = tpt;
                 }
             });
 
             if(typeParamType == null) {
-                typeParamType = new TypeParamType(typeParamTypeDesc.name);
-
-                var successTypeParamTypeCreation = function() {
-                    successCallback(typeParamType);
-                };
-
-                typeParamType.create(successTypeParamTypeCreation, fail);
+                failCallback(new Error("The TypeParamType '" + typeParamTypeDesc.name + "' doesn't exist !"));
             } else {
                 successCallback(typeParamType);
             }
-        }
+        };
 
         TypeParamType.all(successAll, fail);
     }
 
     /**
-     * Method to manage creation of Constraint.
+     * Method to retrieve Constraint.
      *
-     * @method manageParamTypeCreation
+     * @method retrieveConstraint
      * @param {JSON Object} constraintDesc - The Constraint's description
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    manageConstraintCreation(constraintDesc : any, successCallback : Function = null, failCallback : Function = null) {
+    retrieveConstraint(constraintDesc : any, successCallback : Function = null, failCallback : Function = null) {
         var self = this;
 
         var fail = function (err) {
             failCallback(err);
         };
 
-        var successAll = function(constraintParamTypes) {
+        var successAll = function(allConstraints) {
             var constraint = null;
-            constraintParamTypes.forEach(function(c) {
+            allConstraints.forEach(function(c) {
                 if(c.name() == constraintDesc.name) {
                     constraint = c;
                 }
             });
 
             if(constraint == null) {
-                constraint = new ConstraintParamType(constraintDesc.name, constraintDesc.description);
-
-                var successTypeParamTypeAssociation = function() {
-                    Logger.info("TypeParamType associated to Constraint successfully.");
-                    successCallback(constraint);
-                };
-
-                var successTypeParamTypeCreate = function(newTypeParamType) {
-                    Logger.info("TypeParamType create successfully.");
-                    constraint.setType(newTypeParamType, successTypeParamTypeAssociation, fail);
-                };
-
-                var successConstraintCreation = function() {
-                    Logger.info("Constraint create successfully.");
-                    self.manageTypeParamTypeCreation(constraintDesc.type, successTypeParamTypeCreate, fail);
-                };
-
-                constraint.create(successConstraintCreation, fail);
+                failCallback(new Error("The ConstraintParamType '" + constraintDesc.name + "' doesn't exist !"));
             } else {
                 successCallback(constraint);
             }
-        }
+        };
 
         ConstraintParamType.all(successAll, fail);
-
     }
 
     /**
