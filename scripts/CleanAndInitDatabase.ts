@@ -848,6 +848,18 @@ class CleanAndInitDatabase {
 
             var profil = new Profil(profilDesc.name, profilDesc.description);
 
+
+            var successSDIRetrieve = function(newSDI) {
+                Logger.info("SDI retrieve successfully");
+
+                var successSDIAssociation = function() {
+                    Logger.info("Profil associated to SDI successfully.");
+                    successCallback();
+                }
+
+                newSDI.addProfil(profil, successSDIAssociation, fail);
+            };
+
             var createdCalls = new Array();
 
             var successCallCreate = function(newCall) {
@@ -864,7 +876,7 @@ class CleanAndInitDatabase {
                             profilsNb = profilsNb + 1;
 
                             if(profilsNb == profils.length) {
-                                successCallback();
+                                self.retrieveSDI(profilDesc.sdi, successSDIRetrieve, fail);
                             }
                         }
                     };
@@ -886,6 +898,39 @@ class CleanAndInitDatabase {
             profil.create(successProfilCreate, fail);
 
         });
+    }
+
+    /**
+     * Method to retrieve SDI.
+     *
+     * @method retrieveSDI
+     * @param {JSON Object} sdiDesc - The SDI's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveSDI(sdiDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allSDIs) {
+            var sdi = null;
+            allSDIs.forEach(function(sdiInstance) {
+                if(sdiInstance.name() == sdiDesc.name) {
+                    sdi = sdiInstance;
+                }
+            });
+
+            if(sdi == null) {
+                failCallback(new Error("The SDI '" + sdiDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(sdi);
+            }
+        };
+
+        SDI.all(successAll, fail);
     }
 
     /**

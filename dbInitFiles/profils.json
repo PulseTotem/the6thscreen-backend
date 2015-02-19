@@ -2,6 +2,9 @@
     {
         "name" : "ProfilSDItruc1",
         "description" : "Profil n°1 de SDItruc",
+        "sdi" : {
+            "name" : "SDITruc"
+        },
         "calls" : [
             {
                 "name" : "FilUNS",
