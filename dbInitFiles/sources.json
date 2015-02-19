@@ -1,0 +1,40 @@
+[
+    {
+        "name" : "RetrieveFeedContent",
+        "service" : "RSSFeedReader",
+        "description" : "Récupération d'un flux RSS",
+        "host" : "localhost",
+        "port" : 6002,
+        "paramTypes" : [
+            {
+                "name" : "FeedURL"
+            },
+            {
+                "name" : "Limit"
+            }
+        ],
+        "infoType" : {
+            "name" : "FeedContent"
+        }
+    },
+    {
+        "name" : "RetrieveDiscounts",
+        "service" : "SmartShopping",
+        "description" : "Récupération des discounts du SmartShopping",
+        "host" : "localhost",
+        "port" : 6003,
+        "constraints" : [
+            {
+                "name" : "Positive"
+            }
+        ],
+        "paramTypes" : [
+            {
+                "name" : "Limit"
+            }
+        ],
+        "infoType" : {
+            "name" : "DiscountsList"
+        }
+    }
+]

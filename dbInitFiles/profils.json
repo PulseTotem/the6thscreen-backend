@@ -1,0 +1,42 @@
+[
+    {
+        "name" : "ProfilSDItruc1",
+        "description" : "Profil n°1 de SDItruc",
+        "calls" : [
+            {
+                "name" : "FilUNS",
+                "callType" : {
+                    "name" : "RSSLeftZone"
+                },
+                "paramValues" : [
+                    {
+                        "value" : "http://filuns.unice.fr/accueil/atom.xml",
+                        "paramType" : {
+                            "name" : "FeedURL"
+                        }
+                    },
+                    {
+                        "value" : "10",
+                        "paramType" : {
+                            "name" : "Limit"
+                        }
+                    }
+                ]
+            },
+            {
+                "name" : "DiscountsSmartShopping",
+                "callType" : {
+                    "name" : "DiscountsRightZone"
+                },
+                "paramValues" : [
+                    {
+                        "value" : "10",
+                        "paramType" : {
+                            "name" : "Limit"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,16 @@
+[
+    {
+        "name" : "FeedNodeRendererGeneric",
+        "description" : "Renderer générique pour les infos de type FeedNode.",
+        "infoType" : {
+            "name" : "FeedContent"
+        }
+    },
+    {
+        "name" : "DiscountRenderer",
+        "description" : "Renderer pour les infos de type Discount.",
+        "infoType" : {
+            "name" : "DiscountsList"
+        }
+    }
+]
