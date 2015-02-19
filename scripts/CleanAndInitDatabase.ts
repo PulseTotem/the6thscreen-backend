@@ -68,62 +68,31 @@ class CleanAndInitDatabase {
                     if (keyVal[0] == "step") {
                         switch (keyVal[1]) {
                             case "sources" :
-                                var successFulfillInfoTypes = function() {
-                                    self.fulfillSources(success, fail);
-                                };
-
-                                var successFulfillParamTypes = function() {
-                                    self.fulfillInfoTypes(successFulfillInfoTypes, fail);
-                                };
-
-                                var successFulfillConstraints = function() {
-                                    self.fulfillParamTypes(successFulfillParamTypes, fail);
-                                };
-
-                                var successFulfillTypeParamTypes = function() {
-                                    self.fulfillConstraints(successFulfillConstraints, fail);
-                                };
-
-                                var successCleanAllSources = function() {
-                                    self.fulfillTypeParamTypes(successFulfillTypeParamTypes, fail);
-                                };
-                                self.cleanAll(CleanAndInitDatabase.toCleanSources, successCleanAllSources, fail);
-
+                                self.cleanAndInitForSources(success, fail);
                                 break;
                             case "users" :
-                                var successCleanAllUsers = function() {
-                                    self.fulfillUsers(success, fail);
-                                };
-                                self.cleanAll(CleanAndInitDatabase.toCleanUsers, successCleanAllUsers, fail);
+                                self.cleanAndInitForUsers(success, fail);
                                 break;
                             case "sdis" :
-                                var successFulfillReceivePolicies = function() {
-                                    self.fulfillSDIs(success, fail);
-                                };
-
-                                var successFulfillRenderPolicies = function() {
-                                    self.fulfillReceivePolicies(successFulfillReceivePolicies, fail);
-                                };
-
-                                var successFulfillRenderers = function() {
-                                    self.fulfillRenderPolicies(successFulfillRenderPolicies, fail);
-                                };
-
-                                var successFulfillBehaviours = function() {
-                                    self.fulfillRenderers(successFulfillRenderers, fail);
-                                };
-
-                                var successCleanAllSDIs = function() {
-                                    self.fulfillBehaviours(successFulfillBehaviours, fail);
-                                };
-
-                                self.cleanAll(CleanAndInitDatabase.toCleanSDIs, successCleanAllSDIs, fail);
+                                self.cleanAndInitForSDIs(success, fail);
                                 break;
                             case "profils" :
-                                var successCleanAllProfils = function() {
-                                    self.fulfillProfils(success, fail);
-                                }
-                                self.cleanAll(CleanAndInitDatabase.toCleanProfils, successCleanAllProfils, fail);
+                                self.cleanAndInitForProfils(success, fail);
+                                break;
+                            case "all" :
+                                var successCleanAndInitForSDIs = function() {
+                                    self.cleanAndInitForProfils(success, fail);
+                                };
+
+                                var successCleanAndInitForUsers = function() {
+                                    self.cleanAndInitForSDIs(successCleanAndInitForSDIs, fail);
+                                };
+
+                                var successCleanAndInitForSources = function() {
+                                    self.cleanAndInitForUsers(successCleanAndInitForUsers, fail);
+                                };
+
+                                self.cleanAndInitForSources(successCleanAndInitForSources, fail);
                                 break;
                             default :
                                 Logger.info("Nothing to do !?");
@@ -135,9 +104,135 @@ class CleanAndInitDatabase {
         } else {
             Logger.error("Missing some arguments !?");
         }
+    }
 
-        /*this.cleanAll();
-        this.fulfill();*/
+    /**
+     * Method to clean and init database for sources.
+     *
+     * @method cleanAndInitForSources
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    cleanAndInitForSources(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success = function() {
+            successCallback();
+        };
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        var successFulfillInfoTypes = function() {
+            self.fulfillSources(success, fail);
+        };
+
+        var successFulfillParamTypes = function() {
+            self.fulfillInfoTypes(successFulfillInfoTypes, fail);
+        };
+
+        var successFulfillConstraints = function() {
+            self.fulfillParamTypes(successFulfillParamTypes, fail);
+        };
+
+        var successFulfillTypeParamTypes = function() {
+            self.fulfillConstraints(successFulfillConstraints, fail);
+        };
+
+        var successCleanAllSources = function() {
+            self.fulfillTypeParamTypes(successFulfillTypeParamTypes, fail);
+        };
+        self.cleanAll(CleanAndInitDatabase.toCleanSources, successCleanAllSources, fail);
+    }
+
+    /**
+     * Method to clean and init database for users.
+     *
+     * @method cleanAndInitForUsers
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    cleanAndInitForUsers(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success = function() {
+            successCallback();
+        };
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        var successCleanAllUsers = function() {
+            self.fulfillUsers(success, fail);
+        };
+        self.cleanAll(CleanAndInitDatabase.toCleanUsers, successCleanAllUsers, fail);
+    }
+
+    /**
+     * Method to clean and init database for sdis.
+     *
+     * @method cleanAndInitForSDIs
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    cleanAndInitForSDIs(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success = function() {
+            successCallback();
+        };
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        var successFulfillReceivePolicies = function() {
+            self.fulfillSDIs(success, fail);
+        };
+
+        var successFulfillRenderPolicies = function() {
+            self.fulfillReceivePolicies(successFulfillReceivePolicies, fail);
+        };
+
+        var successFulfillRenderers = function() {
+            self.fulfillRenderPolicies(successFulfillRenderPolicies, fail);
+        };
+
+        var successFulfillBehaviours = function() {
+            self.fulfillRenderers(successFulfillRenderers, fail);
+        };
+
+        var successCleanAllSDIs = function() {
+            self.fulfillBehaviours(successFulfillBehaviours, fail);
+        };
+
+        self.cleanAll(CleanAndInitDatabase.toCleanSDIs, successCleanAllSDIs, fail);
+    }
+
+    /**
+     * Method to clean and init database for profils.
+     *
+     * @method cleanAndInitForProfils
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    cleanAndInitForProfils(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success = function() {
+            successCallback();
+        };
+
+        var fail = function(err) {
+            failCallback(err);
+        };
+
+        var successCleanAllProfils = function() {
+            self.fulfillProfils(success, fail);
+        }
+        self.cleanAll(CleanAndInitDatabase.toCleanProfils, successCleanAllProfils, fail);
     }
 
     /**
@@ -1469,100 +1564,6 @@ class CleanAndInitDatabase {
 
             modelToClean.all(successAll, fail);
         });
-    }
-
-    /**
-     * Method to fulfill database with some data.
-     *
-     * @method fulfill
-     */
-    fulfill() {
-/*
-	    var s : SDI = new SDI("SDItruc", "Un super SDI de test ! ", "*");
-	    s.create();
-
-	    var u : User = new User("toto");
-	    u.create();
-
-	    Logger.debug("Associate user");
-	    //s.addUser(u);
-	    // to check if doublons are created
-	    u.addSDI(s);
-
-	    s.loadAssociations(); // ???
-	    Logger.debug(s);
-
-        var z : Zone = new Zone("MainZone", "Zone principale de SDItruc", 50, 100, 0, 0);
-        z.create();
-
-        s.addZone(z);
-
-        var b : Behaviour = new Behaviour("Appearance", "Défilement des informations sans effet.");
-        b.create();
-
-        z.setBehaviour(b);
-
-        var ct : CallType = new CallType("RSSMainZone","Display RSS feeds in the main zone with a specific renderer");
-        ct.create();
-	    ct.setZone(z);
-        ct.setSource(rss_feed_reader);
-
-        var renderer : Renderer = new Renderer("FeedNodeRendererGeneric", "Renderer générique pour les infos de type FeedNode.");
-        renderer.create();
-
-        renderer.setInfoType(feed_content);
-
-        ct.setRenderer(renderer);
-
-        //Receive : La politique de réception => ???
-        //var rp : ReceivePolicy = new ReceivePolicy("Last");
-        var rp : ReceivePolicy = new ReceivePolicy("DumbReceivePolicy");
-        rp.create();
-
-        ct.setReceivePolicy(rp);
-
-        //Render : La politique d'affichage => ???
-        //var renderP : RenderPolicy = new RenderPolicy("Ordered","Alphabetically sort the informations");
-        var renderP : RenderPolicy = new RenderPolicy("FeedContentDumbRenderPolicy","Dumb render policy for FeedContent.");
-        renderP.create();
-
-        ct.setRenderPolicy(renderP);
-
-
-
-
-
-
-
-        var p : Profil = new Profil("ProfilSDItruc1", "Profil n°1 de SDItruc");
-        p.create();
-
-        s.addProfil(p);
-
-        var c : Call = new Call("FilUNS");
-        c.create();
-
-        c.setCallType(ct);
-
-        var feedUrl_pv : ParamValue = new ParamValue("http://filuns.unice.fr/accueil/atom.xml");
-        feedUrl_pv.create();
-        feedUrl_pv.setParamType(url_rss_feed_reader);
-
-        var limit_pv : ParamValue = new ParamValue("10");
-        limit_pv.create();
-        limit_pv.setParamType(limit_rss_feed_reader);
-
-        c.addParamValue(feedUrl_pv);
-        c.addParamValue(limit_pv);
-
-        p.addCall(c);
-
-        //Enlever le lien call -> source
-        //Enlever le lien call -> zone
-
-        //
-
-        Logger.debug(SDI.all());*/
     }
 }
 
