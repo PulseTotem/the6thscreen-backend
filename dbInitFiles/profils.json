@@ -1,15 +1,15 @@
 [
     {
-        "name" : "ProfilSDItruc1",
-        "description" : "Profil n°1 de SDItruc",
+        "name" : "ProfilSDIRSSDiscounts",
+        "description" : "Profil n°1 de SDIRSSDiscounts",
         "sdi" : {
-            "name" : "SDITruc"
+            "name" : "SDIRSSDiscounts"
         },
         "calls" : [
             {
-                "name" : "FilUNS",
+                "name" : "FilUNS1",
                 "callType" : {
-                    "name" : "RSSLeftZone"
+                    "name" : "RSSLeftZone1"
                 },
                 "paramValues" : [
                     {
@@ -27,11 +27,60 @@
                 ]
             },
             {
-                "name" : "DiscountsSmartShopping",
+                "name" : "DiscountsSmartShopping1",
                 "callType" : {
-                    "name" : "DiscountsRightZone"
+                    "name" : "DiscountsRightZone1"
                 },
                 "paramValues" : [
+                    {
+                        "value" : "10",
+                        "paramType" : {
+                            "name" : "Limit"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name" : "ProfilSDIDoubleRSS",
+        "description" : "Profil n°1 de SDIDoubleRSS",
+        "sdi" : {
+            "name" : "SDIDoubleRSS"
+        },
+        "calls" : [
+            {
+                "name" : "FilUNS2",
+                "callType" : {
+                    "name" : "RSSLeftZone2"
+                },
+                "paramValues" : [
+                    {
+                        "value" : "http://filuns.unice.fr/accueil/atom.xml",
+                        "paramType" : {
+                            "name" : "FeedURL"
+                        }
+                    },
+                    {
+                        "value" : "10",
+                        "paramType" : {
+                            "name" : "Limit"
+                        }
+                    }
+                ]
+            },
+            {
+                "name" : "FilUNS3",
+                "callType" : {
+                    "name" : "RSSRightZone2"
+                },
+                "paramValues" : [
+                    {
+                        "value" : "https://www.facebook.com/feeds/page.php?format=rss20&id=219679114761075",
+                        "paramType" : {
+                            "name" : "FeedURL"
+                        }
+                    },
                     {
                         "value" : "10",
                         "paramType" : {

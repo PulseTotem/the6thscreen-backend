@@ -854,7 +854,11 @@ class CleanAndInitDatabase {
 
                 var successSDIAssociation = function() {
                     Logger.info("Profil associated to SDI successfully.");
-                    successCallback();
+                    profilsNb = profilsNb + 1;
+
+                    if(profilsNb == profils.length) {
+                        successCallback();
+                    }
                 }
 
                 newSDI.addProfil(profil, successSDIAssociation, fail);
@@ -873,11 +877,7 @@ class CleanAndInitDatabase {
                         nbAssociation = nbAssociation + 1;
 
                         if(nbAssociation == createdCalls.length) {
-                            profilsNb = profilsNb + 1;
-
-                            if(profilsNb == profils.length) {
-                                self.retrieveSDI(profilDesc.sdi, successSDIRetrieve, fail);
-                            }
+                            self.retrieveSDI(profilDesc.sdi, successSDIRetrieve, fail);
                         }
                     };
 

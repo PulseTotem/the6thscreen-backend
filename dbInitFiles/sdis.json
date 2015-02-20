@@ -1,15 +1,15 @@
 [
     {
-        "name" : "SDITruc",
-        "description" : "Un super SDI de test !",
+        "name" : "SDIRSSDiscounts",
+        "description" : "SDI avec 2 zones, un call FluxRSS, un call Discounts, un par zone",
         "allowedHost" : "*",
         "user" : {
             "username" : "christian"
         },
         "zones" : [
             {
-                "name" : "LeftZone",
-                "description" : "Zone gauche de SDItruc",
+                "name" : "LeftZone1",
+                "description" : "Zone gauche de SDIRSSDiscount",
                 "width" : 45,
                 "height" : 100,
                 "positionFromTop" : 0,
@@ -19,8 +19,8 @@
                 }
             },
             {
-                "name" : "RightZone",
-                "description" : "Zone droite de SDItruc",
+                "name" : "RightZone1",
+                "description" : "Zone droite de SDIRSSDiscount",
                 "width" : 45,
                 "height" : 100,
                 "positionFromTop" : 0,
@@ -32,10 +32,10 @@
         ],
         "callTypes" : [
             {
-                "name" : "RSSLeftZone",
+                "name" : "RSSLeftZone1",
                 "description" : "Display RSS feeds in the left zone with generic renderer",
                 "zone" : {
-                    "name" : "LeftZone"
+                    "name" : "LeftZone1"
                 },
                 "source" : {
                     "name" : "RetrieveFeedContent"
@@ -51,16 +51,88 @@
                 }
             },
             {
-                "name" : "DiscountsRightZone",
+                "name" : "DiscountsRightZone1",
                 "description" : "Display Discounts in the right zone with specific renderer",
                 "zone" : {
-                    "name" : "RightZone"
+                    "name" : "RightZone1"
                 },
                 "source" : {
                     "name" : "RetrieveDiscounts"
                 },
                 "renderer" : {
                     "name" : "DiscountRenderer"
+                },
+                "renderPolicy" : {
+                    "name" : "FeedContentDumbRenderPolicy"
+                },
+                "receivePolicy" : {
+                    "name" : "DumbReceivePolicy"
+                }
+            }
+        ]
+    },
+    {
+        "name" : "SDIDoubleRSS",
+        "description" : "SDI avec 2 zones, 2 calls FluxRSS, un par zone",
+        "allowedHost" : "*",
+        "user" : {
+            "username" : "christian"
+        },
+        "zones" : [
+            {
+                "name" : "LeftZone2",
+                "description" : "Zone gauche de SDIDoubleRSS",
+                "width" : 49,
+                "height" : 100,
+                "positionFromTop" : 0,
+                "positionFromLeft" : 0,
+                "behaviour" : {
+                    "name" : "Appearance"
+                }
+            },
+            {
+                "name" : "RightZone2",
+                "description" : "Zone droite de SDIDoubleRSS",
+                "width" : 49,
+                "height" : 100,
+                "positionFromTop" : 0,
+                "positionFromLeft" : 51,
+                "behaviour" : {
+                    "name" : "Appearance"
+                }
+            }
+        ],
+        "callTypes" : [
+            {
+                "name" : "RSSLeftZone2",
+                "description" : "Display RSS feeds in the left zone with generic renderer",
+                "zone" : {
+                    "name" : "LeftZone2"
+                },
+                "source" : {
+                    "name" : "RetrieveFeedContent"
+                },
+                "renderer" : {
+                    "name" : "FeedNodeRendererGeneric"
+                },
+                "renderPolicy" : {
+                    "name" : "FeedContentDumbRenderPolicy"
+                },
+                "receivePolicy" : {
+                    "name" : "DumbReceivePolicy"
+                }
+            },
+            {
+                "name" : "RSSRightZone2",
+                "description" : "Display RSS feeds in the left zone with generic renderer",
+                "zone" : {
+                    "name" : "RightZone2"
+                },
+                "source" : {
+                    "name" : "RetrieveFeedContent"
+                },
+                "renderer" : {
+                    "name" : "FeedNodeRendererGeneric"
                 },
                 "renderPolicy" : {
                     "name" : "FeedContentDumbRenderPolicy"
