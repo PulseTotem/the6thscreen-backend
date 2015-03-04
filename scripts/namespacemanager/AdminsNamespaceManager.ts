@@ -5,7 +5,7 @@
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/server/NamespaceManager.ts" />
 
-class CustomizersNamespaceManager extends NamespaceManager {
+class AdminsNamespaceManager extends NamespaceManager {
 
     /**
      * Constructor.
@@ -29,15 +29,17 @@ class CustomizersNamespaceManager extends NamespaceManager {
      *
      * @method checkUserAuthentication
      * @param {any} userDescription - The User Description.
-     * @param {CustomizersNamespaceManager} self - The CustomizersNamespaceManager instance.
+     * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
      */
-    checkUserAuthentication(userDescription : any, self : CustomizersNamespaceManager = null) {
+    checkUserAuthentication(userDescription : any, self : AdminsNamespaceManager = null) {
         // userDescription : ???
         //TODO
         if(self == null) {
             self = this;
         }
         Logger.debug("SocketId: " + self.socket.id + " - checkUserAuthentication");
+
+        self.socket.emit("SingInStatus", {"SingInStatus" : "OK!"});
 
         //TODO
 

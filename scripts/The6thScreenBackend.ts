@@ -7,7 +7,7 @@
 
 /// <reference path="./namespacemanager/ClientsNamespaceManager.ts" />
 /// <reference path="./namespacemanager/SourcesNamespaceManager.ts" />
-/// <reference path="./namespacemanager/CustomizersNamespaceManager.ts" />
+/// <reference path="./namespacemanager/AdminsNamespaceManager.ts" />
 
 /**
  * Represents The 6th Screen's Backend.
@@ -39,7 +39,7 @@ class The6thScreenBackend extends Server {
 
         this.addNamespace("clients", ClientsNamespaceManager);
         this.addNamespace("sources", SourcesNamespaceManager);
-        this.addNamespace("customizers", CustomizersNamespaceManager);
+        this.addNamespace("admins", AdminsNamespaceManager);
     }
 }
 
