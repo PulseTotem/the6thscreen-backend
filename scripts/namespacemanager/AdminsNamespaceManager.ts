@@ -20,6 +20,7 @@ class AdminsNamespaceManager extends NamespaceManager {
 
         //Authentication
         this.addListenerToSocket('SignIn', function(userDescription) { self.checkUserAuthentication(userDescription); });
+	    this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
     }
 
     ////////////////////// Begin: Manage SendProfilDescription //////////////////////
@@ -98,5 +99,73 @@ class AdminsNamespaceManager extends NamespaceManager {
         }*/
     }
 
-////////////////////// End: Manage SendProfilDescription //////////////////////
+	/**
+	 * Retrieve User instance description and send it to client.
+	 *
+	 * @method sendUserDescription
+	 * @param {any} userDescription - The User Description.
+	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 */
+	sendUserDescription(userDescription : any, self : AdminsNamespaceManager = null) {
+		// userDescription : {"userId" : string}
+		if(self == null) {
+			self = this;
+		}
+		Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription");
+
+		var userId = userDescription.userId;
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : userId " + userId.toString());
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : retrieveUser");
+		User.read(parseInt(userId), function(user) { self.retrieveUserSuccess(user); }, function(error) { self.retrieveUserFail(error, userId); });
+	}
+
+	/**
+	 * Retrieve User instance success, so send it to client.
+	 *
+	 * @method retrieveUserSuccess
+	 * @param {User} user - The User Description.
+	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 */
+	retrieveUserSuccess(user : User, self : AdminsNamespaceManager = null) {
+		var self = this;
+
+		var success : Function = function(completeJSONObject) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : completeJSON done.");
+
+			self.socket.emit("UserDescription", completeJSONObject);
+
+			Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : send done.");
+		};
+
+		var fail : Function = function(error) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : completeJSON fail.");
+			Logger.error(JSON.stringify(error));
+			//self.socket.emit("UserDescriptionError", ???);
+		};
+
+		user.toCompleteJSONObject(success, fail);
+	}
+
+	/**
+	 * Retrieve User instance fail, so retry or send an error.
+	 *
+	 * @method retrieveUserFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {number} userId - The User Id.
+	 * @param {number} attemptNumber - The attempt number.
+	 */
+	retrieveUserFail(error : Error, userId : number, attemptNumber : number = 0) {
+		if(attemptNumber >= 3) {
+			Logger.debug("SocketId: " + this.socket.id + " - sendUserDescription : error");
+			Logger.error(JSON.stringify(error));
+			//self.socket.emit("UserDescriptionError", ???);
+		} else {
+			Logger.debug("SocketId: " + this.socket.id + " - sendUserDescription : attemptNumber " + attemptNumber);
+			User.read(userId, this.retrieveUserSuccess, this.retrieveUserFail, attemptNumber+1);
+		}
+	}
+
+////////////////////// End: Manage SendUserDescription //////////////////////
 }
