@@ -21,6 +21,7 @@ class AdminsNamespaceManager extends NamespaceManager {
         //Authentication
         this.addListenerToSocket('SignIn', function(userDescription) { self.checkUserAuthentication(userDescription); });
 	    this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
+	    this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
     }
 
     ////////////////////// Begin: Manage SendProfilDescription //////////////////////
@@ -168,4 +169,76 @@ class AdminsNamespaceManager extends NamespaceManager {
 	}
 
 ////////////////////// End: Manage SendUserDescription //////////////////////
+
+////////////////////// Begin: Manage SendSDIDescription //////////////////////
+
+	/**
+	 * Retrieve SDI instance description and send it to client.
+	 *
+	 * @method sendSDIDescription
+	 * @param {any} sdiDescription - The SDI Description.
+	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 */
+	sendSDIDescription(sdiDescription : any, self : AdminsNamespaceManager = null) {
+		// sdiDescription : {"sdiId" : string}
+		if(self == null) {
+			self = this;
+		}
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription");
+
+		var sdiId = sdiDescription.sdiId;
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : sdiId " + sdiId.toString());
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : retrieveSDI");
+		SDI.read(parseInt(sdiId), function(sdi) { self.retrieveSDISuccess(sdi); }, function(error) { self.retrieveSDIFail(error, sdiId); });
+	}
+
+	/**
+	 * Retrieve SDI instance success, so send it to client.
+	 *
+	 * @method retrieveSDISuccess
+	 * @param {SDI} sdi - The SDI Description.
+	 */
+	retrieveSDISuccess(sdi : SDI) {
+		var self = this;
+
+		var success : Function = function(completeJSONObject) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : completeJSON done.");
+
+			self.socket.emit("SDIDescription", completeJSONObject);
+
+			Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : send done.");
+		};
+
+		var fail : Function = function(error) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendSDIDescription : completeJSON fail.");
+			Logger.error(JSON.stringify(error));
+			//self.socket.emit("SDIDescriptionError", ???);
+		};
+
+		sdi.toCompleteJSONObject(success, fail);
+	}
+
+	/**
+	 * Retrieve SDI instance fail, so retry or send an error.
+	 *
+	 * @method retrieveSDIFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {number} sdiId - The SDI Id.
+	 * @param {number} attemptNumber - The attempt number.
+	 */
+	retrieveSDIFail(error : Error, sdiId : number, attemptNumber : number = 0) {
+		if(attemptNumber >= 3) {
+			Logger.debug("SocketId: " + this.socket.id + " - sendSDIDescription : error");
+			Logger.error(JSON.stringify(error));
+			//self.socket.emit("SDIDescriptionError", ???);
+		} else {
+			Logger.debug("SocketId: " + this.socket.id + " - sendSDIDescription : attemptNumber " + attemptNumber);
+			SDI.read(sdiId, this.retrieveSDISuccess, this.retrieveSDIFail, attemptNumber+1);
+		}
+	}
+
+////////////////////// End: Manage SendSDIDescription //////////////////////
 }
