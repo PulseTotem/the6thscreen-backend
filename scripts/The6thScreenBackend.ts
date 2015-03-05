@@ -33,6 +33,9 @@ class The6thScreenBackend extends Server {
 
         this.app.post('/login', function (req, res) {
 
+            Logger.debug(req.body.usernameOrEmail);
+            Logger.debug(req.body.password);
+
             // TODO: validate the actual user user
             var profile = {
                 first_name: 'John',
@@ -42,7 +45,7 @@ class The6thScreenBackend extends Server {
             };
 
             // we are sending the profile in the token
-            var token = jwt.sign(profile, BackendConfig.getJWTSecret(), { expiresInMinutes: 60*5 });
+            var token = jwt.sign(profile, BackendConfig.getJWTSecret());
 
             res.json({token: token});
         });
@@ -70,6 +73,8 @@ class The6thScreenBackend extends Server {
 
         adminNamespace.use(function(socket, next) {
             var handshakeData = socket.request;
+            Logger.debug("JWT validate");
+            Logger.debug(handshakeData);
             // make sure the handshake data looks good as before
             // if error do this:
             // next(new Error('not authorized');

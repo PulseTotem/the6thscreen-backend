@@ -65,6 +65,16 @@ module.exports = function (grunt) {
 		        files: 	[{'build/tests/connection_infos.json': 'scripts/core/connection_infos-sample.json'}]
 	        },
 
+            buildBackendConfigInfosFile: {
+                files: 	[{'build/js/backend_config.json': 'scripts/core/backend_config.json'}]
+            },
+            distBackendConfigInfosFile: {
+                files: 	[{'dist/js/backend_config.json': 'scripts/core/backend_config.json'}]
+            },
+            testBackendConfigInfosFile: {
+                files: 	[{'build/tests/backend_config.json': 'scripts/core/backend_config-sample.json'}]
+            },
+
             dbInitFiles : {
                 files: 	[{expand: true, cwd: 'dbInitFiles', src: ['**'], dest: 'build/dbInitFiles/'}]
             },
@@ -227,7 +237,7 @@ module.exports = function (grunt) {
     grunt.registerTask('build', function () {
         grunt.task.run(['clean:package', 'clean:build']);
 
-        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'typescript:build', 'clean:package']);
+        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'copy:buildBackendConfigInfosFile', 'typescript:build', 'clean:package']);
     });
 
     grunt.registerTask('dbinit', function () {
@@ -239,7 +249,7 @@ module.exports = function (grunt) {
     grunt.registerTask('dist', function () {
         grunt.task.run(['clean:package', 'clean:dist']);
 
-        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:distConnectionInfosFile', 'typescript:dist', 'clean:package']);
+        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:distConnectionInfosFile', 'copy:distBackendConfigInfosFile', 'typescript:dist', 'clean:package']);
     });
 
     grunt.registerTask('develop', ['build', 'express:build', 'watch']);
@@ -249,7 +259,7 @@ module.exports = function (grunt) {
     grunt.registerTask('test', function() {
         grunt.task.run(['clean:package', 'clean:test']);
 
-        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:testConnectionInfosFile', 'typescript:test', 'mochaTest:test', 'clean:package']);
+        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:testConnectionInfosFile', 'copy:testBackendConfigInfosFile', 'typescript:test', 'mochaTest:test', 'clean:package']);
 	    //grunt.task.run(['mochaTest:test']);
     });
 

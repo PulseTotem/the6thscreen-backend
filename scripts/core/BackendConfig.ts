@@ -38,6 +38,7 @@ class BackendConfig {
                 BackendConfig.jwtSecret = configInfos.jwtSecret;
             } catch (e) {
                 Logger.error("Backend configuration file can't be read.");
+                Logger.debug(e);
                 //TODO ? Throw Exception ?
             }
         }
