@@ -22,6 +22,8 @@ class AdminsNamespaceManager extends NamespaceManager {
         this.addListenerToSocket('SignIn', function(userDescription) { self.checkUserAuthentication(userDescription); });
 	    this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
 	    this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
+	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
+
     }
 
     ////////////////////// Begin: Manage SendProfilDescription //////////////////////
@@ -241,4 +243,78 @@ class AdminsNamespaceManager extends NamespaceManager {
 	}
 
 ////////////////////// End: Manage SendSDIDescription //////////////////////
+
+////////////////////// Begin: Manage SendZoneDescription //////////////////////
+
+	/**
+	 * Retrieve Zone instance description and send it to client.
+	 *
+	 * @method sendZoneDescription
+	 * @param {any} zoneDescription - The Zone Description.
+	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 */
+	sendZoneDescription(zoneDescription : any, self : AdminsNamespaceManager = null) {
+		// zoneDescription : {"zoneId" : string}
+		if(self == null) {
+			self = this;
+		}
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription");
+
+		var zoneId = zoneDescription.zoneId;
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : zoneId " + zoneId.toString());
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : retrieveZone");
+
+		Zone.read(parseInt(zoneId), function(zone) { self.retrieveZoneSuccess(zone); }, function(error) { self.retrieveZoneFail(error, zoneId); });
+	}
+
+	/**
+	 * Retrieve Zone instance success, so send it to client.
+	 *
+	 * @method retrieveZoneSuccess
+	 * @param {Zone} zone - The Zone Description.
+	 */
+	retrieveZoneSuccess(zone : Zone) {
+		var self = this;
+
+		var success : Function = function(completeJSONObject) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : completeJSON done.");
+
+			self.socket.emit("ZoneDescription", completeJSONObject);
+
+			Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : send done.");
+		};
+
+		var fail : Function = function(error) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendZoneDescription : completeJSON fail.");
+			Logger.error(JSON.stringify(error));
+			//self.socket.emit("ZoneDescriptionError", ???);
+		};
+
+		zone.toCompleteJSONObject(success, fail);
+	}
+
+	/**
+	 * Retrieve Zone instance fail, so retry or send an error.
+	 *
+	 * @method retrieveZoneFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {number} zoneId - The Zone Id.
+	 * @param {number} attemptNumber - The attempt number.
+	 */
+	retrieveZoneFail(error : Error, zoneId : number, attemptNumber : number = 0) {
+		if(attemptNumber >= 3) {
+			Logger.debug("SocketId: " + this.socket.id + " - sendZoneDescription : error");
+			Logger.error(JSON.stringify(error));
+			//self.socket.emit("ZoneDescriptionError", ???);
+		} else {
+			Logger.debug("SocketId: " + this.socket.id + " - sendZoneDescription : attemptNumber " + attemptNumber);
+			Zone.read(zoneId, this.retrieveZoneSuccess, this.retrieveZoneFail, attemptNumber+1);
+		}
+	}
+
+////////////////////// End: Manage SendZoneDescription //////////////////////
+
 }
