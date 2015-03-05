@@ -467,7 +467,9 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {}
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+	    successCallback();
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.

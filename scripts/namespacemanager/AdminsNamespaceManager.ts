@@ -24,6 +24,8 @@ class AdminsNamespaceManager extends NamespaceManager {
 	    this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
 	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllSourceDescription(); });
+	    this.addListenerToSocket('RetrieveAllInfoTypeDescription', function() { self.sendAllInfoTypeDescription(); });
+	    this.addListenerToSocket('RetrieveAllParamTypeDescription', function() { self.sendAllParamTypeDescription(); });
     }
 
     ////////////////////// Begin: Manage SendProfilDescription //////////////////////
@@ -107,7 +109,7 @@ class AdminsNamespaceManager extends NamespaceManager {
 	 *
 	 * @method sendUserDescription
 	 * @param {any} userDescription - The User Description.
-	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
 	 */
 	sendUserDescription(userDescription : any, self : AdminsNamespaceManager = null) {
 		// userDescription : {"userId" : string}
@@ -129,7 +131,7 @@ class AdminsNamespaceManager extends NamespaceManager {
 	 *
 	 * @method retrieveUserSuccess
 	 * @param {User} user - The User Description.
-	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
 	 */
 	retrieveUserSuccess(user : User, self : AdminsNamespaceManager = null) {
 		var self = this;
@@ -179,7 +181,7 @@ class AdminsNamespaceManager extends NamespaceManager {
 	 *
 	 * @method sendSDIDescription
 	 * @param {any} sdiDescription - The SDI Description.
-	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
 	 */
 	sendSDIDescription(sdiDescription : any, self : AdminsNamespaceManager = null) {
 		// sdiDescription : {"sdiId" : string}
@@ -251,7 +253,7 @@ class AdminsNamespaceManager extends NamespaceManager {
 	 *
 	 * @method sendZoneDescription
 	 * @param {any} zoneDescription - The Zone Description.
-	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
 	 */
 	sendZoneDescription(zoneDescription : any, self : AdminsNamespaceManager = null) {
 		// zoneDescription : {"zoneId" : string}
@@ -323,7 +325,7 @@ class AdminsNamespaceManager extends NamespaceManager {
 	 * Retrieve all Source instances description and send it to client.
 	 *
 	 * @method sendAllSourceDescription
-	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
 	 */
 	sendAllSourceDescription(self : AdminsNamespaceManager = null) {
 		if(self == null) {
@@ -382,6 +384,140 @@ class AdminsNamespaceManager extends NamespaceManager {
 		}
 	}
 
-////////////////////// End: Manage SendZoneDescription //////////////////////
+////////////////////// End: Manage SendAllSourceDescription //////////////////////
+
+////////////////////// Begin: Manage SendAllInfoTypeDescription //////////////////////
+
+	/**
+	 * Retrieve all InfoType instances description and send it to client.
+	 *
+	 * @method sendAllInfoTypeDescription
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
+	 */
+	sendAllInfoTypeDescription(self : AdminsNamespaceManager = null) {
+		if(self == null) {
+			self = this;
+		}
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllInfoTypeDescription");
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllInfoTypeDescription : retrieveAllInfoType");
+
+		InfoType.all(function (arrayInfoType) { self.retrieveAllInfoTypeSuccess(arrayInfoType); }, function (error) { self.retrieveAllInfoTypeFail(error); });
+	}
+
+	/**
+	 * Retrieve all InfoType instance success, so send it to client.
+	 *
+	 * @method retrieveAllInfoTypeSuccess
+	 * @param {Array} infoTypes - The InfoType Description.
+	 */
+	retrieveAllInfoTypeSuccess(infoTypes : Array<InfoType>) {
+		var self = this;
+
+		var success : Function = function(completeJSONObject) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendAllInfoTypeDescription : completeJSON done.");
+
+			self.socket.emit("AllInfoTypeDescription", completeJSONObject);
+
+			Logger.debug("SocketId: " + self.socket.id + " - sendAllInfoTypeDescription : send done.");
+		};
+
+		var fail : Function = function(error) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendAllInfoTypeDescription : completeJSON fail.");
+			Logger.error(JSON.stringify(error));
+			//self.socket.emit("ZoneDescriptionError", ???);
+		};
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllInfoTypeDescription : read all InfoType");
+		ModelItf.completeArraySerialization(infoTypes, success, fail);
+	}
+
+	/**
+	 * Retrieve all InfoType instance fail, so retry or send an error.
+	 *
+	 * @method retrieveAllInfoTypeFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {number} attemptNumber - The attempt number.
+	 */
+	retrieveAllInfoTypeFail(error : Error, attemptNumber : number = 0) {
+		if(attemptNumber >= 3) {
+			Logger.debug("SocketId: " + this.socket.id + " - sendAllInfoTypeDescription : error");
+			Logger.error(JSON.stringify(error));
+		} else {
+			var self = this;
+			Logger.debug("SocketId: " + this.socket.id + " - sendAllInfoTypeDescription : attemptNumber " + attemptNumber);
+			InfoType.all(function (arrayInfoType) { self.retrieveAllInfoTypeSuccess(arrayInfoType); }, function (error) { self.retrieveAllInfoTypeFail(error); }, attemptNumber+1);
+		}
+	}
+
+////////////////////// End: Manage SendAllInfoTypeDescription //////////////////////
+
+////////////////////// Begin: Manage SendAllParamTypeDescription //////////////////////
+
+	/**
+	 * Retrieve all ParamType instances description and send it to client.
+	 *
+	 * @method sendAllParamTypeDescription
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
+	 */
+	sendAllParamTypeDescription(self : AdminsNamespaceManager = null) {
+		if(self == null) {
+			self = this;
+		}
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllParamTypeDescription");
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllParamTypeDescription : retrieveAllParamType");
+
+		ParamType.all(function (arrayParamType) { self.retrieveAllParamTypeSuccess(arrayParamType); }, function (error) { self.retrieveAllParamTypeFail(error); });
+	}
+
+	/**
+	 * Retrieve all ParamType instance success, so send it to client.
+	 *
+	 * @method retrieveAllParamTypeSuccess
+	 * @param {Array} paramTypes - The ParamType Description.
+	 */
+	retrieveAllParamTypeSuccess(paramTypes : Array<ParamType>) {
+		var self = this;
+
+		var success : Function = function(completeJSONObject) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendAllParamTypeDescription : completeJSON done.");
+
+			self.socket.emit("AllParamTypeDescription", completeJSONObject);
+
+			Logger.debug("SocketId: " + self.socket.id + " - sendAllParamTypeDescription : send done.");
+		};
+
+		var fail : Function = function(error) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendAllParamTypeDescription : completeJSON fail.");
+			Logger.error(JSON.stringify(error));
+			//self.socket.emit("ZoneDescriptionError", ???);
+		};
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllParamTypeDescription : read all InfoType : ");
+		ModelItf.completeArraySerialization(paramTypes, success, fail);
+	}
+
+	/**
+	 * Retrieve all ParamType instance fail, so retry or send an error.
+	 *
+	 * @method retrieveAllParamTypeFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {number} attemptNumber - The attempt number.
+	 */
+	retrieveAllParamTypeFail(error : Error, attemptNumber : number = 0) {
+		if(attemptNumber >= 3) {
+			Logger.debug("SocketId: " + this.socket.id + " - sendAllParamTypeDescription : error");
+			Logger.error(JSON.stringify(error));
+		} else {
+			var self = this;
+			Logger.debug("SocketId: " + this.socket.id + " - sendAllParamTypeDescription : attemptNumber " + attemptNumber);
+			ParamType.all(function (arrayParamType) { self.retrieveAllParamTypeSuccess(arrayParamType); }, function (error) { self.retrieveAllParamTypeFail(error); }, attemptNumber+1);
+		}
+	}
+
+////////////////////// End: Manage sendAllParamTypeDescription //////////////////////
 
 }
