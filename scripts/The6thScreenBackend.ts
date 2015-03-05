@@ -9,6 +9,11 @@
 /// <reference path="./namespacemanager/SourcesNamespaceManager.ts" />
 /// <reference path="./namespacemanager/AdminsNamespaceManager.ts" />
 
+/// <reference path="./core/BackendConfig.ts" />
+
+var jwt : any = require('jsonwebtoken');
+var socketioJwt : any = require('socketio-jwt');
+
 /**
  * Represents The 6th Screen's Backend.
  *
@@ -26,6 +31,23 @@ class The6thScreenBackend extends Server {
     constructor(listeningPort : number, arguments : Array<string>) {
         super(listeningPort, arguments);
 
+        this.app.post('/login', function (req, res) {
+
+            // TODO: validate the actual user user
+            var profile = {
+                first_name: 'John',
+                last_name: 'Doe',
+                email: 'john@doe.com',
+                id: 123
+            };
+
+            // we are sending the profile in the token
+            var token = jwt.sign(profile, BackendConfig.getJWTSecret(), { expiresInMinutes: 60*5 });
+
+            res.json({token: token});
+        });
+
+
         this.init();
     }
 
@@ -39,7 +61,21 @@ class The6thScreenBackend extends Server {
 
         this.addNamespace("clients", ClientsNamespaceManager);
         this.addNamespace("sources", SourcesNamespaceManager);
-        this.addNamespace("admins", AdminsNamespaceManager);
+        var adminNamespace : any = this.addNamespace("admins", AdminsNamespaceManager);
+
+        adminNamespace.use(socketioJwt.authorize({
+            secret: BackendConfig.getJWTSecret(),
+            handshake: true
+        }));
+
+        adminNamespace.use(function(socket, next) {
+            var handshakeData = socket.request;
+            // make sure the handshake data looks good as before
+            // if error do this:
+            // next(new Error('not authorized');
+            // else just call next
+            next();
+        });
     }
 }
 
