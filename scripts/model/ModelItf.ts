@@ -554,6 +554,42 @@ class ModelItf {
 	}
 
 	/**
+	 * Serialize an array of ModelItf instances using the function toCompleteJSONObject.
+	 * It is used when reading all objects of a ModelItf.
+	 *
+	 * TODO : Test that method !
+	 *
+	 * @param {Array<ModelItf>} tableau an array of ModelItf instances
+	 * @param {Function} successCallback The callback function when success
+	 * @param {Function} failCallback The callback function when fail.
+	 */
+	static completeArraySerialization(tableau : Array<ModelItf>, successCallback : Function = null, failCallback : Function = null) {
+		var data = [];
+		var numberProcessedInfo = 0;
+		var totalInfo = tableau.length;
+
+		var success : Function = function(json) {
+			data.push(json);
+
+			numberProcessedInfo++;
+
+			if (numberProcessedInfo == totalInfo)  {
+				successCallback(data);
+			}
+		};
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		for (var i = 0; i < tableau.length; i++) {
+			var objet : ModelItf = tableau[i];
+
+			objet.toCompleteJSONObject(success, fail);
+		}
+	}
+
+	/**
 	 * Return a ModelItf instance as a JSON Object
 	 *
 	 * @method toJSONObject

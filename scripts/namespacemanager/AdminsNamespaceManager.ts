@@ -23,7 +23,7 @@ class AdminsNamespaceManager extends NamespaceManager {
 	    this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
 	    this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
 	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
-
+	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllSourceDescription(); });
     }
 
     ////////////////////// Begin: Manage SendProfilDescription //////////////////////
@@ -312,6 +312,73 @@ class AdminsNamespaceManager extends NamespaceManager {
 		} else {
 			Logger.debug("SocketId: " + this.socket.id + " - sendZoneDescription : attemptNumber " + attemptNumber);
 			Zone.read(zoneId, this.retrieveZoneSuccess, this.retrieveZoneFail, attemptNumber+1);
+		}
+	}
+
+////////////////////// End: Manage SendZoneDescription //////////////////////
+
+////////////////////// Begin: Manage SendAllSourceDescription //////////////////////
+
+	/**
+	 * Retrieve all Source instances description and send it to client.
+	 *
+	 * @method sendAllSourceDescription
+	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 */
+	sendAllSourceDescription(self : AdminsNamespaceManager = null) {
+		if(self == null) {
+			self = this;
+		}
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllSourceDescription");
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllSourceDescription : retrieveAllSource");
+
+		Source.all(function (arraySource) { self.retrieveAllSourceSuccess(arraySource); }, function (error) { self.retrieveAllSourceFail(error); });
+	}
+
+	/**
+	 * Retrieve all Source instance success, so send it to client.
+	 *
+	 * @method retrieveAllSourceSuccess
+	 * @param {Array} sources - The Sources Description.
+	 */
+	retrieveAllSourceSuccess(sources : Array<Source>) {
+		var self = this;
+
+		var success : Function = function(completeJSONObject) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendAllSourceDescription : completeJSON done.");
+
+			self.socket.emit("AllSourceDescription", completeJSONObject);
+
+			Logger.debug("SocketId: " + self.socket.id + " - sendAllSourceDescription : send done.");
+		};
+
+		var fail : Function = function(error) {
+			Logger.debug("SocketId: " + self.socket.id + " - sendAllSourceDescription : completeJSON fail.");
+			Logger.error(JSON.stringify(error));
+			//self.socket.emit("ZoneDescriptionError", ???);
+		};
+
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllSourceDescription : read all sources : ");
+		ModelItf.completeArraySerialization(sources, success, fail);
+	}
+
+	/**
+	 * Retrieve all Source instance fail, so retry or send an error.
+	 *
+	 * @method retrieveAllSourceFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {number} attemptNumber - The attempt number.
+	 */
+	retrieveAllSourceFail(error : Error, attemptNumber : number = 0) {
+		if(attemptNumber >= 3) {
+			Logger.debug("SocketId: " + this.socket.id + " - sendAllSourceDescription : error");
+			Logger.error(JSON.stringify(error));
+		} else {
+			var self = this;
+			Logger.debug("SocketId: " + this.socket.id + " - sendAllSourceDescription : attemptNumber " + attemptNumber);
+			Source.all(function (arraySource) { self.retrieveAllSourceSuccess(arraySource); }, function (error) { self.retrieveAllSourceFail(error); }, attemptNumber+1);
 		}
 	}
 
