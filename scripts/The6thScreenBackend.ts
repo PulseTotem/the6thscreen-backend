@@ -10,11 +10,11 @@
 /// <reference path="./namespacemanager/AdminsNamespaceManager.ts" />
 
 /// <reference path="./core/BackendConfig.ts" />
+/// <reference path="./model/User.ts" />
 
 var jwt : any = require('jsonwebtoken');
 var socketioJwt : any = require('socketio-jwt');
 var get_ip : any = require('ipware')().get_ip;
-var crypto : any = require('crypto');
 
 /**
  * Represents The 6th Screen's Backend.
@@ -34,26 +34,53 @@ class The6thScreenBackend extends Server {
         super(listeningPort, arguments);
 
         this.app.post('/login', function (req, res) {
-            var ip_info = get_ip(req);
-            // { clientIp: '127.0.0.1', clientIpRoutable: false }
-            var clientIp = ip_info.clientIp;
 
-            var encryptedPwd = crypto.createHash('sha256').update(BackendConfig.getJWTSecret() + req.body.password).digest("hex");
+            var success = function(user) {
 
-            //Logger.debug(req.body.usernameOrEmail);
-            //Logger.debug(req.body.password);
+                var successCheck = function() {
+                    var ip_info = get_ip(req);
+                    // { clientIp: '127.0.0.1', clientIpRoutable: false }
+                    var clientIp = ip_info.clientIp;
 
-            // TODO: validate the actual user user
-            var profile = {
-                username: 'John',
-                ip: clientIp,
-                id: 123
+                    var profile = {
+                        username: user.username(),
+                        ip: clientIp,
+                        id: user.getId()
+                    };
+
+                    // we are sending the profile in the token
+                    var token = jwt.sign(profile, BackendConfig.getJWTSecret());
+
+                    var successUpdate = function() {
+                        res.json({token: token});
+                    };
+
+                    var failUpdate = function(error) {
+                        res.status(500).send({ 'error': JSON.stringify(error) });
+                    };
+
+                    user.setLastIp(clientIp);
+                    user.setToken(token);
+
+                    user.update(successUpdate, failUpdate);
+                };
+
+                var failCheck = function(error) {
+                    res.status(500).send({ 'error': JSON.stringify(error) });
+                };
+
+                user.checkPassword(req.body.password, successCheck, failCheck);
             };
 
-            // we are sending the profile in the token
-            var token = jwt.sign(profile, BackendConfig.getJWTSecret());
+            var fail = function(error) {
+                var fail2 = function(error) {
+                    res.status(500).send({ 'error': JSON.stringify(error) });
+                }
 
-            res.json({token: token});
+                User.findByEmail(req.body.usernameOrEmail, success, fail2);
+            };
+
+            User.findByUsername(req.body.usernameOrEmail, success, fail);
         });
 
 
@@ -79,14 +106,24 @@ class The6thScreenBackend extends Server {
 
         adminNamespace.use(function(socket, next) {
             var handshakeData : any = socket.request;
-            Logger.debug("JWT validate");
-            Logger.debug(handshakeData.client._peername);
-            Logger.debug(handshakeData._query);
+
+            var success = function(user) {
+                if(user.lastIp == handshakeData.client._peername.address) {
+                    next();
+                } else {
+                    next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));
+                }
+            };
+
+            var fail = function(error) {
+                next(error);
+            };
+
+            User.findByToken(handshakeData._query.token, success, fail);
             // make sure the handshake data looks good as before
             // if error do this:
             // next(new Error('not authorized');
             // else just call next
-            next();
         });
     }
 }
