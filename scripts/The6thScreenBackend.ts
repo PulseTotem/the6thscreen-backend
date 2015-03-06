@@ -13,6 +13,8 @@
 
 var jwt : any = require('jsonwebtoken');
 var socketioJwt : any = require('socketio-jwt');
+var get_ip : any = require('ipware')().get_ip;
+var crypto : any = require('crypto');
 
 /**
  * Represents The 6th Screen's Backend.
@@ -32,15 +34,19 @@ class The6thScreenBackend extends Server {
         super(listeningPort, arguments);
 
         this.app.post('/login', function (req, res) {
+            var ip_info = get_ip(req);
+            // { clientIp: '127.0.0.1', clientIpRoutable: false }
+            var clientIp = ip_info.clientIp;
 
-            Logger.debug(req.body.usernameOrEmail);
-            Logger.debug(req.body.password);
+            var encryptedPwd = crypto.createHash('sha256').update(BackendConfig.getJWTSecret() + req.body.password).digest("hex");
+
+            //Logger.debug(req.body.usernameOrEmail);
+            //Logger.debug(req.body.password);
 
             // TODO: validate the actual user user
             var profile = {
-                first_name: 'John',
-                last_name: 'Doe',
-                email: 'john@doe.com',
+                username: 'John',
+                ip: clientIp,
                 id: 123
             };
 
@@ -72,9 +78,10 @@ class The6thScreenBackend extends Server {
         }));
 
         adminNamespace.use(function(socket, next) {
-            var handshakeData = socket.request;
+            var handshakeData : any = socket.request;
             Logger.debug("JWT validate");
-            Logger.debug(handshakeData);
+            Logger.debug(handshakeData.client._peername);
+            Logger.debug(handshakeData._query);
             // make sure the handshake data looks good as before
             // if error do this:
             // next(new Error('not authorized');
