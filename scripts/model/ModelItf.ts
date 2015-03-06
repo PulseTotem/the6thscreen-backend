@@ -467,7 +467,9 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {}
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+	    successCallback();
+    }
 
 	/**
 	 * Set the object as desynchronized given the different lazy properties.
@@ -551,6 +553,42 @@ class ModelItf {
 			data.push(tableau[i].toJSONObject());
 		}
 		return data;
+	}
+
+	/**
+	 * Serialize an array of ModelItf instances using the function toCompleteJSONObject.
+	 * It is used when reading all objects of a ModelItf.
+	 *
+	 * TODO : Test that method !
+	 *
+	 * @param {Array<ModelItf>} tableau an array of ModelItf instances
+	 * @param {Function} successCallback The callback function when success
+	 * @param {Function} failCallback The callback function when fail.
+	 */
+	static completeArraySerialization(tableau : Array<ModelItf>, successCallback : Function = null, failCallback : Function = null) {
+		var data = [];
+		var numberProcessedInfo = 0;
+		var totalInfo = tableau.length;
+
+		var success : Function = function(json) {
+			data.push(json);
+
+			numberProcessedInfo++;
+
+			if (numberProcessedInfo == totalInfo)  {
+				successCallback(data);
+			}
+		};
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		for (var i = 0; i < tableau.length; i++) {
+			var objet : ModelItf = tableau[i];
+
+			objet.toCompleteJSONObject(success, fail);
+		}
 	}
 
 	/**
