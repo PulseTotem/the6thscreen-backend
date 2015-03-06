@@ -7,6 +7,8 @@
 
 class AdminsNamespaceManager extends NamespaceManager {
 
+	private paramTypeLength : number;
+
     /**
      * Constructor.
      *
@@ -26,6 +28,7 @@ class AdminsNamespaceManager extends NamespaceManager {
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllSourceDescription(); });
 	    this.addListenerToSocket('RetrieveAllInfoTypeDescription', function() { self.sendAllInfoTypeDescription(); });
 	    this.addListenerToSocket('RetrieveAllParamTypeDescription', function() { self.sendAllParamTypeDescription(); });
+	    this.addListenerToSocket('SaveSourceDescription', function(source) { self.saveSourceDescription(source); });
     }
 
     ////////////////////// Begin: Manage SendProfilDescription //////////////////////
@@ -519,5 +522,78 @@ class AdminsNamespaceManager extends NamespaceManager {
 	}
 
 ////////////////////// End: Manage sendAllParamTypeDescription //////////////////////
+
+////////////////////// Begin: Manage saveSourceDescription //////////////////////
+
+	saveSourceDescription(sourceInfo : any) {
+		var self = this;
+		Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription");
+		Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - JSON : "+sourceInfo);
+
+		var source : Source = new Source(sourceInfo.name, sourceInfo.service, sourceInfo.description, sourceInfo.host, sourceInfo.port);
+
+		source.create(function (result) { self.createSourceCallbackSuccess(sourceInfo, result); }, function (error) { self.createSourceCallbackFail(error); })
+	}
+
+	createSourceCallbackSuccess(sourceInfo : any, source : Source) {
+		var self = this;
+
+		if (!!sourceInfo.infoType) {
+			Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - save infotype : "+sourceInfo.infoType);
+			var infoTypeId : string = sourceInfo.infoType;
+			InfoType.read(parseInt(infoTypeId), function(infoType) { self.associateInfoTypeAndSource(source, infoType, sourceInfo); }, function(error) { self.createSourceCallbackFail(error); });
+		} else {
+			self.createSourceCallbackFail(new DataException("A source must have a type info."));
+		}
+	}
+
+	associateInfoTypeAndSource(source: Source, infoType : InfoType, sourceInfo: any) {
+		var self = this;
+
+		Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - association infotype and source");
+		source.setInfoType(infoType, function (source) { self.checkParamTypesOrSuccess(source, sourceInfo); }, function (error) { self.createSourceCallbackFail(error); });
+	}
+
+	checkParamTypesOrSuccess(source : Source, sourceInfo : any) {
+		var self = this;
+		if (!!sourceInfo.paramTypes) {
+			Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - No param types return success");
+			self.socket.emit("sourceSaved", {"status": "success", "msg": source.toJSONObject()});
+		} else {
+			if (sourceInfo.paramTypes instanceof Array) {
+				self.paramTypeLength = sourceInfo.paramTypes.length;
+
+				for (var i = 0;i < sourceInfo.paramTypes.length; i++)
+				{
+					Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - Iterate on param types return success");
+					var paramTypeId : string = sourceInfo.paramTypes[i];
+
+					ParamType.read(parseInt(paramTypeId), function (paramType) { self.associateParamTypeAndSource(paramType, source); }, function (error) { self.createSourceCallbackFail(error); });
+				}
+			} else {
+				self.createSourceCallbackFail(new DataException("ParamTypes must be an array !"));
+			}
+		}
+	}
+
+	associateParamTypeAndSource(paramType : ParamType, source : Source) {
+		var self = this;
+		source.addParamType(paramType, function (source) { self.successLinkParamType(source); } , function (error) { self.createSourceCallbackFail(error); });
+	}
+
+	successLinkParamType(source : Source) {
+		var self = this;
+		this.paramTypeLength--;
+
+		if (this.paramTypeLength == 0) {
+			self.socket.emit("sourceSaved", {"status": "success", "msg": source.toJSONObject()});
+		}
+	}
+
+	createSourceCallbackFail(error : Error, attemptNumber : number = 0) {
+		this.socket.emit("sourceSaved", {'status': 'error', 'msg': error});
+	}
+
+////////////////////// End: Manage saveSourceDescription //////////////////////
 
 }
