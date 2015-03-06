@@ -528,18 +528,18 @@ class AdminsNamespaceManager extends NamespaceManager {
 	saveSourceDescription(sourceInfo : any) {
 		var self = this;
 		Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription");
-		Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - JSON : "+sourceInfo);
+		Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - JSON : "+JSON.stringify(sourceInfo));
 
 		var source : Source = new Source(sourceInfo.name, sourceInfo.service, sourceInfo.description, sourceInfo.host, sourceInfo.port);
 
-		source.create(function (result) { self.createSourceCallbackSuccess(sourceInfo, result); }, function (error) { self.createSourceCallbackFail(error); })
+		source.create(function () { self.createSourceCallbackSuccess(sourceInfo, source); }, function (error) { self.createSourceCallbackFail(error); })
 	}
 
 	createSourceCallbackSuccess(sourceInfo : any, source : Source) {
 		var self = this;
-
 		if (!!sourceInfo.infoType) {
 			Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - save infotype : "+sourceInfo.infoType);
+			Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - save infotype - source : "+JSON.stringify(source));
 			var infoTypeId : string = sourceInfo.infoType;
 			InfoType.read(parseInt(infoTypeId), function(infoType) { self.associateInfoTypeAndSource(source, infoType, sourceInfo); }, function(error) { self.createSourceCallbackFail(error); });
 		} else {
@@ -551,22 +551,22 @@ class AdminsNamespaceManager extends NamespaceManager {
 		var self = this;
 
 		Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - association infotype and source");
-		source.setInfoType(infoType, function (source) { self.checkParamTypesOrSuccess(source, sourceInfo); }, function (error) { self.createSourceCallbackFail(error); });
+		source.setInfoType(infoType, function () { self.checkParamTypesOrSuccess(source, sourceInfo); }, function (error) { self.createSourceCallbackFail(error); });
 	}
 
 	checkParamTypesOrSuccess(source : Source, sourceInfo : any) {
 		var self = this;
-		if (!!sourceInfo.paramTypes) {
+		if (!!!sourceInfo.paramType) {
 			Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - No param types return success");
 			self.socket.emit("sourceSaved", {"status": "success", "msg": source.toJSONObject()});
 		} else {
-			if (sourceInfo.paramTypes instanceof Array) {
-				self.paramTypeLength = sourceInfo.paramTypes.length;
+			if (!!sourceInfo.paramType && sourceInfo.paramType.length > 0) {
+				self.paramTypeLength = sourceInfo.paramType.length;
 
-				for (var i = 0;i < sourceInfo.paramTypes.length; i++)
+				for (var i = 0;i < sourceInfo.paramType.length; i++)
 				{
 					Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - Iterate on param types return success");
-					var paramTypeId : string = sourceInfo.paramTypes[i];
+					var paramTypeId : string = sourceInfo.paramType[i];
 
 					ParamType.read(parseInt(paramTypeId), function (paramType) { self.associateParamTypeAndSource(paramType, source); }, function (error) { self.createSourceCallbackFail(error); });
 				}
@@ -578,7 +578,7 @@ class AdminsNamespaceManager extends NamespaceManager {
 
 	associateParamTypeAndSource(paramType : ParamType, source : Source) {
 		var self = this;
-		source.addParamType(paramType, function (source) { self.successLinkParamType(source); } , function (error) { self.createSourceCallbackFail(error); });
+		source.addParamType(paramType, function () { self.successLinkParamType(source); } , function (error) { self.createSourceCallbackFail(error); });
 	}
 
 	successLinkParamType(source : Source) {
