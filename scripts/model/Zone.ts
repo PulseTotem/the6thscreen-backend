@@ -4,6 +4,7 @@
 
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Behaviour.ts" />
+/// <reference path="./CallType.ts" />
 
 /// <reference path="../customizedTypes/Percentage.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
@@ -80,6 +81,22 @@ class Zone extends ModelItf {
 	 */
 	private _behaviour_loaded : boolean;
 
+	/**
+	 * CallTypes property.
+	 *
+	 * @property _callTypes
+	 * @type Array<CallType>
+	 */
+	private _callTypes : Array<CallType>;
+
+	/**
+	 * Lazy loading for _callTypes property.
+	 *
+	 * @property _callTypes_loaded
+	 * @type boolean
+	 */
+	private _callTypes_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -101,6 +118,9 @@ class Zone extends ModelItf {
 
 	    this._behaviour = null;
 	    this._behaviour_loaded = false;
+
+	    this._callTypes = null;
+	    this._callTypes_loaded = false;
     }
 
 	/**
@@ -280,6 +300,47 @@ class Zone extends ModelItf {
         }
     }
 
+	/**
+	 * Return the CallTypes owned by the Zone.
+	 *
+	 * @method callTypes
+	 */
+	callTypes() {
+		return this._callTypes;
+	}
+
+	/**
+	 * Load the CallTypes owned by the Zone.
+	 *
+	 * @method loadCallTypes
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadCallTypes(successCallback : Function = null, failCallback : Function = null) {
+		if(! this._callTypes_loaded) {
+			var self = this;
+			var success : Function = function(callTypes) {
+				self._callTypes = callTypes;
+				self._callTypes_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getAssociatedObjects(Zone, CallType, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -294,7 +355,7 @@ class Zone extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._behaviour_loaded) {
+            if(self._behaviour_loaded && self._callTypes_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -310,6 +371,7 @@ class Zone extends ModelItf {
         };
 
         this.loadBehaviour(success, fail);
+	    this.loadCallTypes(success, fail);
     }
 
 	/**
@@ -319,6 +381,7 @@ class Zone extends ModelItf {
 	 */
 	desynchronize() : void {
 		this._behaviour_loaded = false;
+		this._callTypes_loaded = false;
 	}
 
 
@@ -355,6 +418,7 @@ class Zone extends ModelItf {
         var success : Function = function() {
             var data = self.toJSONObject();
             data["behaviour"] = (self.behaviour() !== null) ? self.behaviour().toJSONObject() : null;
+	        data["callTypes"] = self.serializeArray(self.callTypes());
 
             successCallback(data);
         };
@@ -435,7 +499,80 @@ class Zone extends ModelItf {
         this.deleteObjectAssociation(Zone, Behaviour, this.behaviour().getId(), success, fail);
 	}
 
-    /**
+	/**
+	 * Add a new CallType to the Zone and associate it in the database.
+	 * A CallType can only be added once.
+	 *
+	 * @method addCallType
+	 * @param {CallType} ct The CallType to link with the Zone. It cannot be a null value.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	addCallType(ct : CallType, successCallback : Function = null, failCallback : Function = null) {
+		if (!ct || !ct.getId()) {
+			failCallback(new ModelException("The CallType must be an existing object to be associated."));
+			return;
+		}
+
+		if (ModelItf.isObjectInsideArray(this.callTypes(),ct)) {
+			failCallback(new ModelException("You cannot add twice a CallType for a Zone."));
+			return;
+		}
+
+		var self = this;
+
+		var success : Function = function() {
+			ct.desynchronize();
+			self.callTypes().push(ct);
+
+			successCallback();
+		};
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		this.associateObject(Zone, CallType, ct.getId(), success, fail);
+	}
+
+	/**
+	 * Remove a CallType from the Zone: the association is removed both in the object and in database.
+	 * The CallType can only be removed if it exists first in the list of associated CallTypes, else an exception is thrown.
+	 *
+	 * @method removeCallType
+	 * @param {CallType} ct The CallType to remove from that Zone
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	removeCallType(ct : CallType, successCallback : Function = null, failCallback : Function = null) {
+		if (!ct || !ct.getId()) {
+			failCallback(new ModelException("The CallType must be an existing object to be removed."));
+			return;
+		}
+
+		if (!ModelItf.isObjectInsideArray(this.callTypes(),ct)) {
+			failCallback(new ModelException("The CallType you try to remove is not yet associated."));
+			return;
+		}
+
+		var self = this;
+
+		var success : Function = function() {
+			ct.desynchronize();
+			ModelItf.removeObjectFromArray(self.callTypes(), ct);
+
+			successCallback();
+		};
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		this.deleteObjectAssociation(Zone, CallType, ct.getId(), success, fail);
+	}
+
+
+	/**
      * Create model in database.
      *
      * @method create
