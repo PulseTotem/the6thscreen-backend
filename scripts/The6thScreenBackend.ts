@@ -108,7 +108,7 @@ class The6thScreenBackend extends Server {
             var handshakeData : any = socket.request;
 
             var success = function(user) {
-                if(user.lastIp == handshakeData.client._peername.address) {
+                if(user.lastIp() == handshakeData.client._peername.address) {
                     next();
                 } else {
                     next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));

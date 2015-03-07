@@ -58,7 +58,7 @@ class AdminsNamespaceManager extends NamespaceManager {
     retrieveUserFromTokenSuccess(user : User, self : AdminsNamespaceManager = null) {
         var self = this;
 
-        self.socket.emit("UserDescription", user.toJSONObject());
+        self.socket.emit("UserDescriptionFromToken", user.toJSONObject());
     }
 
     /**
@@ -69,7 +69,7 @@ class AdminsNamespaceManager extends NamespaceManager {
      * @param {string} token - The User Token.
      */
     retrieveUserFromTokenFail(error : Error, token : string) {
-        Logger.debug("SocketId: " + this.socket.id + " - sendUserDescription : error");
+        Logger.debug("SocketId: " + this.socket.id + " - sendUserDescriptionFromToken : error");
         Logger.error(JSON.stringify(error));
         //self.socket.emit("UserDescriptionError", ???);
     }
