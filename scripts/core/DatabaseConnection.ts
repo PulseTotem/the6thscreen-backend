@@ -164,4 +164,18 @@ class DatabaseConnection {
 	static associatedObjectEndpoint(objectType : string, objectID : string, associatedType : string, associatedID : string) {
 		return "/"+DatabaseConnection.getEndpoint()+"/"+objectType+"/"+objectID+"/"+associatedType+"/"+associatedID;
 	}
+
+    /**
+     * Return database endpoint to work on objects search
+     *
+     * @method associationEndpoint
+     * @static
+     * @param objectType
+     * @param objectParamName
+     * @param objectParamValue
+     * @returns {string}
+     */
+    static searchEndpoint(objectType : string, objectParamName : string, objectParamValue : string) {
+        return "/" + DatabaseConnection.getEndpoint() + "/" + objectType + "?" + objectParamName + "=" + objectParamValue;
+    }
 }

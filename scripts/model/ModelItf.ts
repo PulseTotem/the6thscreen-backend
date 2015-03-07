@@ -138,6 +138,112 @@ class ModelItf {
     }
 
     /**
+     * Retrieve model descriptions from database by search and create model instances.
+     *
+     * @method findBy
+     * @static
+     * @param {ModelItf Class} modelClass - The model to retrieve.
+     * @param {string} paramName - The model param's name.
+     * @param {string} paramValue - The model param's value.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    static findBy(modelClass : any, paramName : string, paramValue : string, successCallback : Function = null, failCallback : Function = null) {
+        if (!modelClass || !paramName || !paramValue) {
+            failCallback(new ModelException("To find an object the modelClass, the paramName and the paramValue must be given."));
+            return;
+        }
+
+        var success : Function = function(result) {
+            var response = result.data();
+            if(response.status == "success") {
+                if(response.data === undefined || Object.keys(response.data).length == 0 || response.count === undefined || !(response.data instanceof Array) ) {
+                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when searching an object with URL: "+urlSearchObject+"\nResponse data: "+JSON.stringify(response.data)));
+                } else {
+                    var allModelItfs : any = new Array();
+
+                    if(response.count > 0) {
+                        for (var i = 0; i < response.data.length; i++) {
+                            var obj = response.data[i];
+                            if (obj.id === undefined) {
+                                failCallback(new DataException("One data does not have any ID when searching objects with URL: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response.data)));
+                                return;
+                            } else {
+                                allModelItfs.push(modelClass.fromJSONObject(obj));
+                            }
+                        }
+                    }
+
+                    successCallback(allModelItfs);
+                }
+            } else {
+                failCallback(new ResponseException("The request failed on the server when trying to find an object with URL:"+urlSearchObject+".\nMessage : "+JSON.stringify(response)));
+            }
+        };
+
+        var fail : Function = function(result) {
+            failCallback(new RequestException("The request failed when trying to find an object with URL:"+urlSearchObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
+        };
+
+        var urlSearchObject = DatabaseConnection.getBaseURL() + DatabaseConnection.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
+
+        RestClient.get(urlSearchObject, success, fail);
+    }
+
+    /**
+     * Retrieve model description from database by search and create model instance.
+     * Fail if there is more than one.
+     *
+     * @method findOneBy
+     * @static
+     * @param {ModelItf Class} modelClass - The model to retrieve.
+     * @param {number} id - The model instance's id.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    static findOneBy(modelClass : any, paramName : string, paramValue : string, successCallback : Function = null, failCallback : Function = null) {
+        if (!modelClass || !paramName || !paramValue) {
+            failCallback(new ModelException("To find an object the modelClass, the paramName and the paramValue must be given."));
+            return;
+        }
+
+        var success : Function = function(result) {
+            var response = result.data();
+            if(response.status == "success") {
+                if(response.data === undefined || Object.keys(response.data).length == 0 || response.count === undefined || !(response.data instanceof Array) ) {
+                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when searching an object with URL: "+urlSearchObject+"\nResponse data: "+JSON.stringify(response.data)));
+                } else {
+                    if(response.count > 0) {
+                        if(response.count == 1) {
+                            var obj = response.data[0];
+                            if (obj.id === undefined) {
+                                failCallback(new DataException("Found data does not have any ID when searching objects with URL: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response.data)));
+                                return;
+                            } else {
+                                successCallback(modelClass.fromJSONObject(obj));
+                            }
+                        } else {
+                            failCallback(new DataException("More than one object was found: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response.data)));
+                        }
+                    } else {
+                        failCallback(new DataException("No object was found with URL: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response.data)));
+                    }
+                }
+            } else {
+                failCallback(new ResponseException("The request failed on the server when trying to find an object with URL:"+urlSearchObject+".\nMessage : "+JSON.stringify(response)));
+            }
+        };
+
+        var fail : Function = function(result) {
+            failCallback(new RequestException("The request failed when trying to find an object with URL:"+urlSearchObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
+        };
+
+        var urlSearchObject = DatabaseConnection.getBaseURL() + DatabaseConnection.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
+
+        RestClient.get(urlSearchObject, success, fail);
+    }
+
+    /**
      * Update model object in database.
      *
      * @method updateObject
@@ -244,16 +350,18 @@ class ModelItf {
             var response = result.data();
             if(response.status == "success") {
                 var allModelItfs : any = new Array();
-                if(response.data === undefined || !(response.data instanceof Array)) {
+                if(response.data === undefined || response.count === undefined || !(response.data instanceof Array)) {
                     failCallback(new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAll+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
                 } else {
-                    for(var i = 0; i < response.data.length; i++) {
-                        var obj = response.data[i];
-                        if (obj.id === undefined) {
-                            failCallback(new DataException("One data does not have any ID when retrieving all objects with URL: "+urlAll+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
-                            return;
-                        } else {
-                            allModelItfs.push(modelClass.fromJSONObject(obj));
+                    if(response.count > 0) {
+                        for (var i = 0; i < response.data.length; i++) {
+                            var obj = response.data[i];
+                            if (obj.id === undefined) {
+                                failCallback(new DataException("One data does not have any ID when retrieving all objects with URL: " + urlAll + "\nResponse data: " + JSON.stringify(response.data)), attemptNumber);
+                                return;
+                            } else {
+                                allModelItfs.push(modelClass.fromJSONObject(obj));
+                            }
                         }
                     }
                     successCallback(allModelItfs);

@@ -321,6 +321,7 @@ class User extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"username": this.username(),
+            "email": this.email(),
             "token": this.token(),
             "lastIp": this.lastIp()
 		};
@@ -675,6 +676,42 @@ class User extends ModelItf {
      */
     static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
         return this.allObjects(User, successCallback, failCallback, attemptNumber);
+    }
+
+    /**
+     * Find One User by username.
+     *
+     * @method findOneByUsername
+     * @param {string} username - The User's username
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    static findOneByUsername(username : string, successCallback : Function = null, failCallback : Function = null) {
+        return this.findOneBy(User, "username", username, successCallback, failCallback);
+    }
+
+    /**
+     * Find One User by email.
+     *
+     * @method findOneByEmail
+     * @param {string} email - The User's email
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    static findOneByEmail(email : string, successCallback : Function = null, failCallback : Function = null) {
+        return this.findOneBy(User, "email", email, successCallback, failCallback);
+    }
+
+    /**
+     * Find One User by token.
+     *
+     * @method findOneByToken
+     * @param {string} token - The User's token
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    static findOneByToken(token : string, successCallback : Function = null, failCallback : Function = null) {
+        return this.findOneBy(User, "token", token, successCallback, failCallback);
     }
 
 	/**

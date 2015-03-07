@@ -77,10 +77,10 @@ class The6thScreenBackend extends Server {
                     res.status(500).send({ 'error': JSON.stringify(error) });
                 }
 
-                User.findByEmail(req.body.usernameOrEmail, success, fail2);
+                User.findOneByEmail(req.body.usernameOrEmail, success, fail2);
             };
 
-            User.findByUsername(req.body.usernameOrEmail, success, fail);
+            User.findOneByUsername(req.body.usernameOrEmail, success, fail);
         });
 
 
@@ -119,7 +119,7 @@ class The6thScreenBackend extends Server {
                 next(error);
             };
 
-            User.findByToken(handshakeData._query.token, success, fail);
+            User.findOneByToken(handshakeData._query.token, success, fail);
             // make sure the handshake data looks good as before
             // if error do this:
             // next(new Error('not authorized');

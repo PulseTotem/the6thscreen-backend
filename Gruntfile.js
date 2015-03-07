@@ -72,7 +72,7 @@ module.exports = function (grunt) {
                 files: 	[{'dist/js/backend_config.json': 'scripts/core/backend_config.json'}]
             },
             testBackendConfigInfosFile: {
-                files: 	[{'build/tests/backend_config.json': 'scripts/core/backend_config-sample.json'}]
+                files: 	[{'build/tests/backend_config.json': 'scripts/core/backend_config.json'}]
             },
 
             dbInitFiles : {
@@ -243,7 +243,7 @@ module.exports = function (grunt) {
     grunt.registerTask('dbinit', function () {
         grunt.task.run(['clean:package', 'clean:build']);
 
-        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'copy:dbInitFiles', 'typescript:dbinit', 'clean:package']);
+        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'copy:buildBackendConfigInfosFile', 'copy:dbInitFiles', 'typescript:dbinit', 'clean:package']);
     });
 
     grunt.registerTask('dist', function () {
