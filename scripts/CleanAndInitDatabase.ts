@@ -25,6 +25,8 @@
 /// <reference path="./model/User.ts" />
 /// <reference path="./model/Behaviour.ts" />
 
+var crypto : any = require('crypto');
+
 /**
  * Class to clean and Initialise Database with some data.
  *
@@ -534,15 +536,23 @@ class CleanAndInitDatabase {
                 failCallback(err);
             };
 
-            var user = new User(userDesc.username);
+            var user = new User(userDesc.username, userDesc.email);
 
-            var successUserCreate = function() {
-                Logger.info("User create successfully.");
+            var successSetPassword = function() {
+                Logger.info("User set password successfully.");
                 usersNb = usersNb + 1;
 
                 if(usersNb == users.length) {
                     successCallback();
                 }
+            };
+
+            var successUserCreate = function() {
+                Logger.info("User create successfully.");
+
+                var encryptedPwd = crypto.createHash('sha256').update(userDesc.password).digest("hex");
+
+                user.setPassword(encryptedPwd, successSetPassword, fail);
             };
 
             user.create(successUserCreate, fail);
