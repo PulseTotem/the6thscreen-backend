@@ -19,85 +19,62 @@ class AdminsNamespaceManager extends NamespaceManager {
         var self = this;
 
         //Authentication
-        this.addListenerToSocket('SignIn', function(userDescription) { self.checkUserAuthentication(userDescription); });
+        this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
     }
 
-    ////////////////////// Begin: Manage SendProfilDescription //////////////////////
+    ////////////////////// Begin: Manage SendUserDescriptionFromToken //////////////////////
 
     /**
-     * Check User authentication and send authentication token to Customizer.
+     * Retrieve User instance description from token and send it to client.
      *
-     * @method checkUserAuthentication
-     * @param {any} userDescription - The User Description.
+     * @method sendUserDescriptionFromToken
+     * @param {any} tokenDescription - The Token Description.
      * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
      */
-    checkUserAuthentication(userDescription : any, self : AdminsNamespaceManager = null) {
-        // userDescription : ???
-        //TODO
+    sendUserDescriptionFromToken(tokenDescription : any, self : AdminsNamespaceManager = null) {
+        // tokenDescription : {"token" : string}
         if(self == null) {
             self = this;
         }
-        Logger.debug("SocketId: " + self.socket.id + " - checkUserAuthentication");
+        Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken");
 
-        self.socket.emit("SingInStatus", {"SingInStatus" : "OK!"});
+        var token = tokenDescription.token;
 
-        //TODO
+        Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken : token " + token);
 
-        /*var profilId = profilDescription.profilId;
+        Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken : retrieveUser");
 
-        Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : profilId " + profilId.toString());
-
-        Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : retrieveProfil");
-
-        Profil.read(parseInt(profilId), function(profil) { self.retrieveProfilSuccess(profil); }, function(error) { self.retrieveProfilFail(error, profilId); });*/
+        User.findOneByToken(token, function(user) { self.retrieveUserFromTokenSuccess(user); }, function(error) { self.retrieveUserFromTokenFail(error, token); });
     }
 
     /**
-     * Retrieve Profil instance success, so send it to client.
+     * Retrieve User From Token instance success, so send it to client.
      *
-     * @method retrieveProfilSuccess
-     * @param {Profil} profil - The Profil Description.
+     * @method retrieveUserFromTokenSuccess
+     * @param {User} user - The User Description.
+     * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
      */
-    checkUserAuthenticationSuccess(profil : Profil) {
-        /*var self = this;
+    retrieveUserFromTokenSuccess(user : User, self : AdminsNamespaceManager = null) {
+        var self = this;
 
-        var success : Function = function(completeJSONObject) {
-            Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : completeJSON done.");
-
-            self.socket.emit("ProfilDescription", completeJSONObject);
-
-            Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : send done.");
-        };
-
-        var fail : Function = function(error) {
-            Logger.debug("SocketId: " + self.socket.id + " - sendProfilDescription : completeJSON fail.");
-            Logger.error(JSON.stringify(error));
-            //self.socket.emit("ProfilDescriptionError", ???);
-        };
-
-        profil.toCompleteJSONObject(success, fail);
-        */
+        self.socket.emit("UserDescriptionFromToken", user.toJSONObject());
     }
 
     /**
-     * Retrieve Profil instance fail, so retry or send an error.
+     * Retrieve User From Token instance fail, so send an error.
      *
-     * @method retrieveProfilFail
+     * @method retrieveUserFromTokenFail
      * @param {Error} error - The Error reason of fail.
-     * @param {number} profilId - The Profil Id.
-     * @param {number} attemptNumber - The attempt number.
+     * @param {string} token - The User Token.
      */
-    checkUserAuthenticationFail(error : Error, profilId : number, attemptNumber : number = 0) {
-        /*if(attemptNumber >= 3) {
-            Logger.debug("SocketId: " + this.socket.id + " - sendProfilDescription : error");
-            Logger.error(JSON.stringify(error));
-            //self.socket.emit("ProfilDescriptionError", ???);
-        } else {
-            Logger.debug("SocketId: " + this.socket.id + " - sendProfilDescription : attemptNumber " + attemptNumber);
-            Profil.read(profilId, this.retrieveProfilSuccess, this.retrieveProfilFail, attemptNumber+1);
-        }*/
+    retrieveUserFromTokenFail(error : Error, token : string) {
+        Logger.debug("SocketId: " + this.socket.id + " - sendUserDescriptionFromToken : error");
+        Logger.error(JSON.stringify(error));
+        //self.socket.emit("UserDescriptionError", ???);
     }
+
+    ////////////////////// End: Manage SendUserDescriptionFromToken //////////////////////
 
 	/**
 	 * Retrieve User instance description and send it to client.
