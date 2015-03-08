@@ -233,7 +233,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		var self = this;
 		if (!!!sourceInfo.paramType) {
 			Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - No param types return success");
-			self.socket.emit("sourceSaved", {"status": "success", "msg": source.toJSONObject()});
+			self.socket.emit("sourceSaved", self.formatResponse(true, source.toJSONObject()));
 		} else {
 			if (!!sourceInfo.paramType && sourceInfo.paramType.length > 0) {
 				self.paramTypeLength = sourceInfo.paramType.length;
@@ -261,12 +261,13 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.paramTypeLength--;
 
 		if (this.paramTypeLength == 0) {
-			self.socket.emit("sourceSaved", {"status": "success", "msg": source.toJSONObject()});
+			self.socket.emit("sourceSaved", self.formatResponse(true, source.toJSONObject()));
 		}
 	}
 
 	createSourceCallbackFail(error : Error, attemptNumber : number = 0) {
-		this.socket.emit("sourceSaved", {'status': 'error', 'msg': error});
+        var self = this;
+		this.socket.emit("sourceSaved", self.formatResponse(false, error));
 	}
 
 ////////////////////// End: Manage saveSourceDescription //////////////////////
