@@ -81,7 +81,7 @@ class Call extends ModelItf {
      * @param {string} name - The Call's name.
      * @param {number} id - The Call's ID.
      */
-    constructor(name : string, id : number = ModelItf.NULLID) {
+    constructor(name : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -111,10 +111,6 @@ class Call extends ModelItf {
      * @method setName
      */
     setName(name : string) {
-        if(!name) {
-            throw new ModelException("A name must be given for Call.");
-        }
-
         this._name = name;
     }
 

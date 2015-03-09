@@ -18,8 +18,6 @@
  */
 class ModelItf {
 
-	static NULLID = null;
-
     /**
      * ID property.
      *
@@ -34,7 +32,7 @@ class ModelItf {
      * @param {number} id - The model ID.
      */
     constructor(id : number) {
-	    if (!id && id !== ModelItf.NULLID) {
+	    if (!id && id !== null) {
 		    throw new ModelException("The ID cannot be undefined");
 	    }
         this._id = id;

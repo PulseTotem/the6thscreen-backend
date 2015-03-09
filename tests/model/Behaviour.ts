@@ -22,13 +22,13 @@ describe('Behaviour', function() {
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Behaviour("titi", desc);
+			var c = new Behaviour("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Behaviour("tutu", "", id);
+			var c = new Behaviour("", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});

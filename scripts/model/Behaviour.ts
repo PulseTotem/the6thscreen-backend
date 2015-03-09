@@ -52,10 +52,6 @@ class Behaviour extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A name is mandatory for Behaviour.");
-		}
-
 		this._name = name;
 	}
 

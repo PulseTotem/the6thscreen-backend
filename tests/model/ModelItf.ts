@@ -550,8 +550,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#updateObject()', function() {
-		it('should throw an error if the object has an id ' + ModelItf.NULLID, function(done) {
-			var model = new ModelItf(ModelItf.NULLID);
+		it('should throw an error if the object has an id ' + null, function(done) {
+			var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -835,8 +835,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#deleteObject()', function() {
-		it('should throw an error if the object has an id '+ModelItf.NULLID, function(done) {
-			var model = new ModelItf(ModelItf.NULLID);
+		it('should throw an error if the object has an id '+null, function(done) {
+			var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1215,9 +1215,9 @@ describe('ModelItf', function() {
 	});
 
 	describe('#associateObject()', function() {
-		it('should throw an error if the object has an id '+ ModelItf.NULLID, function(done) {
+		it('should throw an error if the object has an id '+ null, function(done) {
 
-            var model = new ModelItf(ModelItf.NULLID);
+            var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1409,8 +1409,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#deleteObjectAssociation()', function() {
-		it('should throw an error if the object has an id '+ModelItf.NULLID, function(done) {
-			var model = new ModelItf(ModelItf.NULLID);
+		it('should throw an error if the object has an id '+null, function(done) {
+			var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1604,8 +1604,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#getAssociatedObjects()', function() {
-		it('should throw an error if the object has an id '+ModelItf.NULLID, function(done) {
-			var model = new ModelItf(ModelItf.NULLID);
+		it('should throw an error if the object has an id '+null, function(done) {
+			var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1886,8 +1886,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#getUniquelyAssociatedObject()', function() {
-		it('should throw an error if the object has an id '+ModelItf.NULLID, function(done) {
-			var model = new ModelItf(ModelItf.NULLID);
+		it('should throw an error if the object has an id '+null, function(done) {
+			var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
