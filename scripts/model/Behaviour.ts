@@ -39,7 +39,7 @@ class Behaviour extends ModelItf {
 	 * @param {string} description - The Behaviour's description.
 	 * @param {number} id - The Behaviour's ID.
 	 */
-	constructor(name : string, description : string = "", id : number = null) {
+	constructor(name : string = "", description : string = "", id : number = null) {
 		super(id);
 
 		this.setName(name);
@@ -187,12 +187,7 @@ class Behaviour extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A Behaviour object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A Behaviour object should have a name.");
-		}
-		if(!jsonObject.description) {
-			throw new ModelException("A Behaviour object should have a description.");
-		}
+
 		return new Behaviour(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 
