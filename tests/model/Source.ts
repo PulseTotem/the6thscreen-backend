@@ -97,6 +97,271 @@ describe('Source', function() {
 		})
 	});
 
+	describe('#setService', function () {
+		it('should set the given service', function (done) {
+			var c = new Source("machin", "desc", "method", 28);
+			var s = new Service("toto", "machin", "blabla", 42);
+			var spy = sinon.spy(s, "desynchronize");
+
+			var response1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var service = c.service();
+				assert.equal(service, null, "The service is not a null value: " + JSON.stringify(service));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+
+				var response2:SequelizeRestfulResponse = {
+					"status": "success",
+					"data": {}
+				};
+
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+					.put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(response2));
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the setInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the service in database.");
+
+					service = c.service();
+					assert.deepEqual(service, s, "The service() does not return the exact service we give: " + JSON.stringify(service));
+					assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.setService(s, success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadService(success, fail);
+		});
+
+		it('should not allow to add a null object', function (done) {
+			nock.disableNetConnect();
+			var c = new Source("machin", "desc", "method", 28);
+
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The ModelException has not been thrown.");
+				done();
+			};
+
+			c.setService(null, success, fail);
+		});
+
+		it('should not allow to add an undefined object', function (done) {
+			nock.disableNetConnect();
+			var c = new Source("machin", "desc", "method", 28);
+
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The ModelException has not been thrown.");
+				done();
+			};
+
+			c.setService(undefined, success, fail);
+		});
+
+		it('should not allow to add a object which is not yet created', function (done) {
+			nock.disableNetConnect();
+			var c = new Source("machin", "desc", "method", 28);
+			var s = new Service("toto", "machin", "blabla");
+
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The ModelException has not been thrown.");
+				done();
+			};
+
+			c.setService(s, success, fail);
+		});
+
+		it('should not allow to set a infoType if there is already one', function (done) {
+			var c = new Source("machin", "desc", "method", 28);
+			var s = new Service("toto", "machin", "blabla", 42);
+			var s2 = new Service("toto", "machin", "blabla", 89);
+
+
+			var response1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s2.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var service = c.service();
+
+				assert.ok(!!service, "The service has false value.");
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+
+				var success2 = function() {
+					done(new Error("Test failed."));
+				};
+
+				var fail2 = function(err) {
+					assert.throws(function() {
+							if(err) {
+								throw err;
+							}
+						},
+						ModelException, "The ModelException has not been thrown.");
+					done();
+				};
+
+				c.setService(s, success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadService(success, fail);
+		});
+
+	});
+
+	describe('#unsetService', function () {
+		it('should unset the Service', function (done) {
+			var c = new Source("machin", "desc", "method", 28);
+			var s = new Service("toto", "machin", "blabla", 42);
+
+			var response1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var service = c.service();
+				assert.deepEqual(service, s, "The service is not the expected value");
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+				var spy = sinon.spy(service, "desynchronize");
+
+				var response2:SequelizeRestfulResponse = {
+					"status": "success",
+					"data": {}
+				};
+
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+					.delete(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(response2));
+
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the unsetInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+
+					service = c.service();
+					assert.deepEqual(service, null, "The service() does not return a null value after unsetting");
+					assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.unsetService(success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadService(success, fail);
+		});
+
+		it('should not allow to unset a service if there is none', function (done) {
+			var c = new Source("machin", "desc", "method", 28);
+			var s = new Service("toto", "machin", "blabla", 42);
+
+			var response1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var service = c.service();
+
+				assert.equal(service, null, "The service has a value not null: " + JSON.stringify(service));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done");
+
+				var success2 = function() {
+					done(new Error("Test failed."));
+				};
+
+				var fail2 = function(err) {
+					assert.throws(function() {
+							if(err) {
+								throw err;
+							}
+						},
+						ModelException, "The ModelException has not been thrown.");
+					done();
+				};
+
+				c.unsetService(success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadService(success, fail);
+		});
+
+	});
+
 	describe('#setInfoType', function () {
 		it('should set the given infoType', function (done) {
 			var c = new Source("machin", "desc", "method", 28);
