@@ -7,6 +7,7 @@
 /// <reference path="../../libsdef/sinon.d.ts" />
 
 /// <reference path="../../scripts/model/CallType.ts" />
+/// <reference path="../../scripts/core/DatabaseConnection.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");
@@ -170,7 +171,7 @@ describe('CallType', function(){
 	describe('#setSource', function() {
 		it('should set the given source', function(done) {
 			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi","tata", 12, 42);
+			var s = new Source("toto", "machin","titi", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
 			var response1 : SequelizeRestfulResponse = {
@@ -268,7 +269,7 @@ describe('CallType', function(){
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
 			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi","tata", 12);
+			var s = new Source("toto", "machin","titi", 42);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -289,8 +290,8 @@ describe('CallType', function(){
 
 		it('should not allow to set a source if there is already one', function(done) {
 			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi","tata", 12, 42);
-			var s2 = new Source("tutu", "blop","truc","much", 19, 89);
+			var s = new Source("toto", "machin","titi", 42);
+			var s2 = new Source("toto", "machin","titi", 89);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
@@ -337,7 +338,7 @@ describe('CallType', function(){
 	describe('#unsetSource', function() {
 		it('should unset the Source', function(done) {
 			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi","tata", 12, 42);
+			var s = new Source("toto", "machin","titi", 42);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
@@ -390,7 +391,7 @@ describe('CallType', function(){
 
 		it('should not allow to unset a Source if there is none', function(done) {
 			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi","tata", 12, 42);
+			var s = new Source("toto", "machin","titi", 42);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",

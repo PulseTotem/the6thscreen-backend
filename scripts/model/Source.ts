@@ -26,14 +26,6 @@ class Source extends ModelItf {
     private _name : string;
 
     /**
-     * Service property.
-     *
-     * @property _service
-     * @type string
-     */
-    private _service : string;
-
-    /**
      * Description property.
      *
      * @property _description
@@ -41,21 +33,13 @@ class Source extends ModelItf {
      */
     private _description : string;
 
-    /**
-     * Host property.
-     *
-     * @property _host
-     * @type string
-     */
-    private _host : string;
-
-    /**
-     * Port property.
-     *
-     * @property _port
-     * @type number
-     */
-    private _port : number;
+	/**
+	 * Methode property.
+	 *
+	 * @property _method
+	 * @type string
+	 */
+	private _method : string;
 
     /**
      * InfoType property.
@@ -116,14 +100,11 @@ class Source extends ModelItf {
      * @param {number} port - The Source's port.
      * @param {number} id - The Source's ID.
      */
-    constructor(name : string, service : string, description : string, host : string, port : number, id : number = null) {
+    constructor(name : string = "", description : string = "", method : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
-	    this.setService(service);
 	    this.setDescription(description);
-	    this.setHost(host);
-	    this.setPort(port);
 
         this._info_type = null;
         this._info_type_loaded = false;
@@ -141,24 +122,7 @@ class Source extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("The name is mandatory for a Source");
-		}
-
 		this._name = name;
-	}
-
-	/**
-	 * Set the Source's service.
-	 *
-	 * @method setService
-	 */
-	setService(service : string) {
-		if(!service) {
-			throw new ModelException("The service is mandatory for a Source");
-		}
-
-		this._service = service;
 	}
 
 	/**
@@ -171,29 +135,12 @@ class Source extends ModelItf {
 	}
 
 	/**
-	 * Set the Source's host.
+	 * Set the Source's method.
 	 *
-	 * @method setHost
+	 * @method setMethod
 	 */
-	setHost(host : string) {
-		if(!host) {
-			throw new ModelException("The host is mandatory for a Source");
-		}
-
-		this._host = host;
-	}
-
-	/**
-	 * Set the Source's port.
-	 *
-	 * @method setPort
-	 */
-	setPort(port : number) {
-		if(!port) {
-			throw new ModelException("The port is mandatory for a Source");
-		}
-
-		this._port = port;
+	setMethod(method : string) {
+		this._method = method;
 	}
 
 	/**
@@ -206,15 +153,6 @@ class Source extends ModelItf {
     }
 
     /**
-     * Return the Source's service.
-     *
-     * @method service
-     */
-    service() {
-        return this._service;
-    }
-
-    /**
      * Return the Source's description.
      *
      * @method description
@@ -223,23 +161,14 @@ class Source extends ModelItf {
         return this._description;
     }
 
-    /**
-     * Return the Source's host.
-     *
-     * @method host
-     */
-    host() {
-        return this._host;
-    }
-
-    /**
-     * Return the Source's port.
-     *
-     * @method port
-     */
-    port() {
-        return this._port;
-    }
+	/**
+	 * Return the Source's method.
+	 *
+	 * @method method
+	 */
+	method() {
+		return this._method;
+	}
 
     /**
      * Return the Source's infoType.
@@ -422,10 +351,8 @@ class Source extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"service": this.service(),
 			"description": this.description(),
-			"host": this.host(),
-			"port": this.port()
+			"method": this.method()
 		};
 		return data;
 	}
@@ -752,25 +679,7 @@ class Source extends ModelItf {
 	 * @return {Source} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Source {
-		if (!jsonObject.id) {
-			throw new ModelException("A Source object should have an ID.");
-		}
-		if(!jsonObject.name) {
-			throw new ModelException("A Source object should have a name.");
-		}
-		if(!jsonObject.service) {
-			throw new ModelException("A Source object should have a service.");
-		}
-		if(!jsonObject.description) {
-			throw new ModelException("A Source object should have a description.");
-		}
-		if(!jsonObject.host) {
-			throw new ModelException("A Source object should have a host.");
-		}
-		if(!jsonObject.port) {
-			throw new ModelException("A Source object should have a port.");
-		}
-		return new Source(jsonObject.name, jsonObject.service, jsonObject.description, jsonObject.host, jsonObject.port, jsonObject.id);
+		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.id);
 	}
 
     /**
