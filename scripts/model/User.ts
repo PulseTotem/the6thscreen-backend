@@ -93,7 +93,7 @@ class User extends ModelItf {
      * @param {string} username - The User's username.
      * @param {number} id - The User's ID.
      */
-    constructor(username : string, email : string, id : number = null) {
+    constructor(username : string = "", email : string = "", id : number = null) {
         super(id);
 
         this.setUsername(username);

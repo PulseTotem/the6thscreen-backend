@@ -6,6 +6,7 @@
 /// <reference path="./InfoType.ts" />
 /// <reference path="./ParamType.ts" />
 /// <reference path="./ParamValue.ts" />
+/// <reference path="./Service.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -40,6 +41,22 @@ class Source extends ModelItf {
 	 * @type string
 	 */
 	private _method : string;
+
+	/**
+	 * Service property
+	 *
+	 * @property _service
+	 * @type Service
+	 */
+	private _service : Service;
+
+	/**
+	 * Lazy loading for service property
+	 *
+	 * @property _service_loaded
+	 * @type boolean
+	 */
+	private _service_loaded : boolean;
 
     /**
      * InfoType property.
@@ -105,6 +122,10 @@ class Source extends ModelItf {
 
         this.setName(name);
 	    this.setDescription(description);
+	    this.setMethod(method);
+
+	    this._service = null;
+	    this._service_loaded = false;
 
         this._info_type = null;
         this._info_type_loaded = false;
@@ -168,6 +189,49 @@ class Source extends ModelItf {
 	 */
 	method() {
 		return this._method;
+	}
+
+	/**
+	 * Return the Source's service.
+	 *
+	 * @method service
+	 */
+	service() {
+		return this._service;
+	}
+
+	/**
+	 * Load the Source's service.
+	 *
+	 * @method loadService
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadService(successCallback : Function = null, failCallback : Function = null) {
+		if(! this._service_loaded) {
+			var self = this;
+			var success : Function = function(service) {
+				if(!!service) {
+					self._service = service;
+				}
+				self._service_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Source, Service, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
 	}
 
     /**
@@ -309,7 +373,7 @@ class Source extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._param_types_loaded && self._param_values_loaded && self._info_type_loaded) {
+            if(self._param_types_loaded && self._param_values_loaded && self._info_type_loaded && self._service_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -328,6 +392,7 @@ class Source extends ModelItf {
         this.loadParamTypes(success, fail);
         this.loadParamValues(success, fail);
         this.loadInfoType(success, fail);
+	    this.loadService(success, fail);
     }
 
 	/**
@@ -339,6 +404,7 @@ class Source extends ModelItf {
 		this._info_type_loaded = false;
 		this._param_types_loaded = false;
 		this._param_values_loaded = false;
+		this._service_loaded = false;
 	}
 
 	/**
@@ -370,6 +436,7 @@ class Source extends ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
+	        data["service"] = (self.service() !== null) ? self.service().toJSONObject() : null;
             data["infoType"] = (self.infoType() !== null) ? self.infoType().toJSONObject() : null;
             data["paramTypes"] = self.serializeArray(self.paramTypes());
             data["paramValues"] = self.serializeArray(self.paramValues());
@@ -383,6 +450,75 @@ class Source extends ModelItf {
 
         this.loadAssociations(success, fail);
     }
+
+	/**
+	 * Set the Service of the Source.
+	 * As a Source can only have one Service, if the value is already set, this method throws an exception: you need first to unset the Service.
+	 * Moreover the given type must be created in database.
+	 *
+	 * @method setService
+	 * @param {Service} it The Service to associate with the Source.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	setService(service : Service, successCallback : Function = null, failCallback : Function = null) {
+		if (!service || !service.getId()) {
+			failCallback(new ModelException("The service must be an existing object to be associated."));
+			return;
+		}
+
+		if (this.service() !== null) {
+			failCallback(new ModelException("The service is already set for this Source."));
+			return;
+		}
+
+		var self = this;
+
+		var success : Function = function() {
+			service.desynchronize();
+			self._service = service;
+			self._service_loaded = true;
+
+			successCallback();
+		};
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		this.associateObject(Source, Service, service.getId(), success, fail);
+	}
+
+	/**
+	 * Unset the current Service from the Source.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * An Service must have been set before using it, else an exception is thrown.
+	 *
+	 * @method unsetService
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unsetService(successCallback : Function = null, failCallback : Function = null) {
+		if (this.service() === null) {
+			failCallback(new ModelException("No Service has been set for this Source."));
+			return;
+		}
+
+		var self = this;
+
+		var success : Function = function() {
+			self.service().desynchronize();
+			self._service = null;
+
+			successCallback();
+		};
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		this.deleteObjectAssociation(Source, Service, this.service().getId(), success, fail);
+	}
 
 	/**
 	 * Set the InfoType of the Source.

@@ -7,6 +7,7 @@
 /// <reference path="../../libsdef/sinon.d.ts" />
 
 /// <reference path="../../scripts/model/SDI.ts" />
+/// <reference path="../../scripts/model/User.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");
@@ -211,7 +212,7 @@ describe('SDI', function() {
 	describe('#addUser', function() {
 		it('should put the new User inside the array', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("mavaleur",12);
+			var pv = new User("mavaleur", "", 12);
 			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : SequelizeRestfulResponse = {
@@ -331,7 +332,7 @@ describe('SDI', function() {
 
 		it('should not allow to put an already existing object', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("toto",13);
+			var pv = new User("toto", "", 13);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
@@ -385,7 +386,7 @@ describe('SDI', function() {
 	describe('#removeUser', function() {
 		it('should remove the User from the array', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("mavaleur",12);
+			var pv = new User("mavaleur", "", 12);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
@@ -488,7 +489,7 @@ describe('SDI', function() {
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var p = new User("bidule");
+			var p = new User("bidule", "");
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -509,7 +510,7 @@ describe('SDI', function() {
 
 		it('should not allow to remove an object which is not linked', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("toto",12);
+			var pv = new User("toto", "", 12);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
