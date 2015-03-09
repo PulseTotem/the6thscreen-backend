@@ -14,36 +14,6 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Renderer', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new Renderer(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new Renderer(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new Renderer("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new Renderer(name, "");
@@ -52,13 +22,13 @@ describe('Renderer', function() {
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Renderer("titi", desc);
+			var c = new Renderer("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Renderer("tutu", "", id);
+			var c = new Renderer("", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
@@ -94,56 +64,6 @@ describe('Renderer', function() {
 				"name": "toto",
 				"description": "blabla",
 				"id": null
-			};
-
-			assert.throws(function () {
-					Renderer.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is undefined', function () {
-			var json = {
-				"id": 52,
-				"description": "blabla"
-			};
-
-			assert.throws(function () {
-					Renderer.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function () {
-			var json = {
-				"name": null,
-				"description": "blabla",
-				"id": 42
-			};
-
-			assert.throws(function () {
-					Renderer.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is undefined', function () {
-			var json = {
-				"id": 52,
-				"name": "blabla"
-			};
-
-			assert.throws(function () {
-					Renderer.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is null', function () {
-			var json = {
-				"description": null,
-				"name": "blabla",
-				"id": 42
 			};
 
 			assert.throws(function () {

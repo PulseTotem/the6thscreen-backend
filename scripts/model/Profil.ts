@@ -56,7 +56,7 @@ class Profil extends ModelItf {
      * @param {string} description - The Profil's description.
      * @param {number} id - The Profil's ID.
      */
-    constructor(name : string, description : string = "", id : number = null) {
+    constructor(name : string = "", description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -82,10 +82,6 @@ class Profil extends ModelItf {
      * @method setName
      */
     setName(name : string) {
-        if(!name) {
-            throw new ModelException("A profil needs a name.")
-        }
-
         this._name = name;
     }
 
@@ -387,12 +383,6 @@ class Profil extends ModelItf {
     static fromJSONObject(jsonObject : any) : Profil {
 	    if(!jsonObject.id) {
 		    throw new ModelException("A Profil object should have an ID.");
-	    }
-	    if(!jsonObject.name) {
-		    throw new ModelException("A Profil object should have a name.");
-	    }
-	    if(!jsonObject.description) {
-		    throw new ModelException("A Profil object should have a description.");
 	    }
 	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id);
     }

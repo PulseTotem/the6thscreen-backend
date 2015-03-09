@@ -55,7 +55,7 @@ class Renderer extends ModelItf {
      * @param {string} description - The Renderer's description.
      * @param {number} id - The Renderer's ID.
      */
-    constructor(name : string, description : string = "", id : number = null) {
+    constructor(name : string = "", description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -71,10 +71,6 @@ class Renderer extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A name is mandatory for Renderer.");
-		}
-
 		this._name = name;
 	}
 
@@ -382,12 +378,6 @@ class Renderer extends ModelItf {
 	static fromJSONObject(jsonObject : any) : Renderer {
 		if(!jsonObject.id) {
 			throw new ModelException("A Renderer object should have an ID.");
-		}
-		if(!jsonObject.name) {
-			throw new ModelException("A Renderer object should have a name.");
-		}
-		if(!jsonObject.description) {
-			throw new ModelException("A Renderer object should have a description.");
 		}
 		return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id);
 	}

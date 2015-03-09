@@ -14,36 +14,6 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Profil', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new Profil(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new Profil(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new Profil("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new Profil(name, "");
@@ -52,13 +22,13 @@ describe('Profil', function() {
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Profil("blup", desc);
+			var c = new Profil("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Profil("titi", "", id);
+			var c = new Profil("", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
@@ -102,55 +72,6 @@ describe('Profil', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function () {
-			var json = {
-				"id": 52,
-				"description": "blabla"
-			};
-
-			assert.throws(function () {
-					Profil.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function () {
-			var json = {
-				"name": null,
-				"description": "blabla",
-				"id": 42
-			};
-
-			assert.throws(function () {
-					Profil.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is undefined', function () {
-			var json = {
-				"id": 52,
-				"name": "blabla"
-			};
-
-			assert.throws(function () {
-					Profil.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is null', function () {
-			var json = {
-				"description": null,
-				"name": "blabla",
-				"id": 42
-			};
-
-			assert.throws(function () {
-					Profil.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function () {

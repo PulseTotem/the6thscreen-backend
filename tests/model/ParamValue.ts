@@ -14,36 +14,6 @@ var sinon : SinonStatic = require("sinon");
 
 describe('ParamValue', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new ParamValue(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new ParamValue(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new ParamValue("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the value', function () {
 			var value = "false";
 			var c = new ParamValue(value);
@@ -52,7 +22,7 @@ describe('ParamValue', function() {
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new ParamValue("bidule", 52);
+			var c = new ParamValue("", 52);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
@@ -91,27 +61,6 @@ describe('ParamValue', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the value is undefined', function () {
-			var json = {"id": 52
-			};
-
-			assert.throws(function () {
-					ParamValue.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the value is null', function () {
-			var json = {
-				"value": null,
-				"id": 42
-			};
-
-			assert.throws(function () {
-					ParamValue.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function () {

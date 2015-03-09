@@ -46,7 +46,7 @@ class ParamValue extends ModelItf {
      * @param {string} value - The ParamValue's value.
      * @param {number} id - The ParamValue's ID.
      */
-    constructor(value : string, id : number = null) {
+    constructor(value : string = "", id : number = null) {
         super(id);
 
         this.setValue(value);
@@ -62,10 +62,6 @@ class ParamValue extends ModelItf {
 	 * @method setValue
 	 */
 	setValue(value : string) {
-		if(!value) {
-			throw new ModelException("A ParamValue needs a proper value.")
-		}
-
 		this._value = value;
 	}
 
@@ -355,9 +351,6 @@ class ParamValue extends ModelItf {
 	static fromJSONObject(jsonObject : any) : ParamValue {
 		if (!jsonObject.id) {
 			throw new ModelException("A ParamValue object should have an ID.");
-		}
-		if(!jsonObject.value) {
-			throw new ModelException("A ParamValue object should have a value.");
 		}
 		return new ParamValue(jsonObject.value, jsonObject.id);
 	}

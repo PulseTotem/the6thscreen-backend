@@ -29,7 +29,7 @@ class ReceivePolicy extends ModelItf {
      * @param {string} name - The ReceivePolicy's name.
      * @param {number} id - The ReceivePolicy's ID.
      */
-    constructor(name : string, id : number = null) {
+    constructor(name : string = "", id : number = null) {
         super(id);
 	    this.setName(name);
     }
@@ -40,10 +40,6 @@ class ReceivePolicy extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A ReceivePolicy needs to have a name.");
-		}
-
 		this._name = name;
 	}
 
@@ -157,9 +153,6 @@ class ReceivePolicy extends ModelItf {
 	static fromJSONObject(jsonObject : any) : ReceivePolicy {
 		if (!jsonObject.id) {
 			throw new ModelException("A ReceivePolicy object should have an ID.");
-		}
-		if(!jsonObject.name) {
-			throw new ModelException("A ReceivePolicy object should have a name.");
 		}
 		return new ReceivePolicy(jsonObject.name, jsonObject.id);
 	}

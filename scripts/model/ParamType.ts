@@ -92,7 +92,7 @@ class ParamType extends ModelItf {
      * @param {string} description - The ParamType's description.
      * @param {number} id - The ParamType's ID.
      */
-    constructor(name : string, description : string = "", id : number = null) {
+    constructor(name : string = "", description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -114,10 +114,6 @@ class ParamType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A ParamType needs to have a name.");
-		}
-
 		this._name = name;
 	}
 
@@ -656,12 +652,6 @@ class ParamType extends ModelItf {
 	static fromJSONObject(jsonObject : any) : ParamType {
 		if(!jsonObject.id) {
 			throw new ModelException("A ParamType object should have an ID.");
-		}
-		if(!jsonObject.name) {
-			throw new ModelException("A ParamType object should have a name.");
-		}
-		if(!jsonObject.description) {
-			throw new ModelException("A ParamType object should have a description.");
 		}
 		return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
