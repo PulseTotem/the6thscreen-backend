@@ -196,7 +196,7 @@ class Service extends ModelItf {
 	 * @param {string} json - The JSON string
 	 * @return {Source} The model instance.
 	 */
-	static parseJSON(jsonString : string) : Source {
+	static parseJSON(jsonString : string) : Service {
 		return Service.fromJSONObject(JSON.parse(jsonString));
 	}
 
@@ -206,9 +206,9 @@ class Service extends ModelItf {
 	 * @method fromJSONObject
 	 * @static
 	 * @param {JSONObject} json - The JSON Object
-	 * @return {Source} The model instance.
+	 * @return {Service} The model instance.
 	 */
-	static fromJSONObject(jsonObject : any) : Source {
+	static fromJSONObject(jsonObject : any) : Service {
 		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.id);
 	}
 

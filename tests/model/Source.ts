@@ -13,39 +13,28 @@ var nock : any = require("nock");
 var sinon : SinonStatic = require("sinon");
 
 describe('Source', function() {
+	describe('constructor', function () {
 		it('should store the name', function () {
 			var name = "machin";
-			var c = new Source(name, "ser", "desc", "host", 4242, 12);
+			var c = new Source(name, "desc", "meth");
 			assert.equal(c.name(), name, "The name is not stored correctly.");
-		});
-
-		it('should store the service', function () {
-			var service = "machin";
-			var c = new Source("machin", service, "desc", "host", 4242, 12);
-			assert.equal(c.service(), service, "The service is not stored correctly.");
 		});
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Source("machin", "ser", desc, "host", 4242, 12);
+			var c = new Source("machin", desc, "meth");
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
-		it('should store the host', function () {
-			var host = "machin";
-			var c = new Source("machin", "ser", "desc", host, 4242, 12);
-			assert.equal(c.host(), host, "The host is not stored correctly.");
-		});
-
-		it('should store the port', function () {
-			var port = 12;
-			var c = new Source("machin", "ser", "desc", "host", port, 12);
-			assert.equal(c.port(), port, "The port is not stored correctly.");
+		it('should store the method', function () {
+			var method = "machin";
+			var c = new Source("machin", "desc", method);
+			assert.equal(c.method(), method, "The method is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Source("machin", "ser", "desc", "host", 4242, id);
+			var c = new Source("machin", "desc", "meth", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
@@ -55,14 +44,12 @@ describe('Source', function() {
 			var json = {
 				"id": 28,
 				"name": "machin",
-				"service": "ser",
 				"description": "desc",
-				"host": "host",
-				"port": 4242
+				"method": "method"
 			};
 
 			var userRetrieve = Source.fromJSONObject(json);
-			var userExpected = new Source("machin", "ser", "desc", "host", 4242, 28);
+			var userExpected = new Source("machin", "desc", "method", 28);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
@@ -70,10 +57,8 @@ describe('Source', function() {
 		it('should throw an exception if the ID is undefined', function () {
 			var json = {
 				"name": "machin",
-				"service": "ser",
 				"description": "desc",
-				"host": "host",
-				"port": 4242
+				"method": "method"
 			};
 
 			assert.throws(function () {
@@ -86,165 +71,8 @@ describe('Source', function() {
 			var json = {
 				"id": null,
 				"name": "machin",
-				"service": "ser",
 				"description": "desc",
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is undefined', function () {
-			var json = {
-				"id": 28,
-				"service": "ser",
-				"description": "desc",
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function () {
-			var json = {
-				"id": 28,
-				"name": null,
-				"service": "ser",
-				"description": "desc",
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the service is undefined', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"description": "desc",
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the service is null', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": null,
-				"description": "desc",
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is undefined', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is null', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"description": null,
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the host is undefined', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"description": "desc",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the host is null', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"description": "desc",
-				"host": null,
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the port is undefined', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"description": "desc",
-				"host": "machin"
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the port is null', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"description": "desc",
-				"host": "machin",
-				"port": null
+				"method": "method"
 			};
 
 			assert.throws(function () {
@@ -256,14 +84,12 @@ describe('Source', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Source("machin", "ser", "desc", "host", 4242, 28);
+			var c = new Source("machin", "desc", "method", 28);
 			var expected = {
 				"id": 28,
 				"name": "machin",
-				"service": "ser",
 				"description": "desc",
-				"host": "host",
-				"port": 4242
+				"method": "method"
 			};
 			var json = c.toJSONObject();
 
@@ -273,7 +99,7 @@ describe('Source', function() {
 
 	describe('#setInfoType', function () {
 		it('should set the given infoType', function (done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
@@ -327,7 +153,7 @@ describe('Source', function() {
 
 		it('should not allow to add a null object', function (done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -348,7 +174,7 @@ describe('Source', function() {
 
 		it('should not allow to add an undefined object', function (done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -369,7 +195,7 @@ describe('Source', function() {
 
 		it('should not allow to add a object which is not yet created', function (done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto");
 
             var success = function() {
@@ -390,7 +216,7 @@ describe('Source', function() {
 		});
 
 		it('should not allow to set a infoType if there is already one', function (done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto", 42);
 			var s2 = new InfoType("tutu", 89);
 
@@ -438,7 +264,7 @@ describe('Source', function() {
 
 	describe('#unsetInfoType', function () {
 		it('should unset the InfoType', function (done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto", 42);
 
 			var response1:SequelizeRestfulResponse = {
@@ -492,7 +318,7 @@ describe('Source', function() {
 		});
 
 		it('should not allow to unset a profil if there is none', function (done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto", 42);
 
 			var response1:SequelizeRestfulResponse = {
@@ -538,7 +364,7 @@ describe('Source', function() {
 
 	describe('#addParamType', function() {
 		it('should put the new ParamType inside the array', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamType("mavaleur", "toto", 12);
 			var spy = sinon.spy(pv, "desynchronize");
 
@@ -595,7 +421,7 @@ describe('Source', function() {
 
 		it('should not allow to add a null object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -616,7 +442,7 @@ describe('Source', function() {
 
 		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -637,7 +463,7 @@ describe('Source', function() {
 
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var p = new ParamType("bidule","machin");
 
             var success = function() {
@@ -658,7 +484,7 @@ describe('Source', function() {
 		});
 
 		it('should not allow to put an already existing object', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamType("toto", "machin", 13);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -714,7 +540,7 @@ describe('Source', function() {
 
 	describe('#removeParamType', function() {
 		it('should remove the ParamType from the array', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamType("mavaleur", "machin", 12);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -776,7 +602,7 @@ describe('Source', function() {
 
 		it('should not allow to remove a null object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -797,7 +623,7 @@ describe('Source', function() {
 
 		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -818,7 +644,7 @@ describe('Source', function() {
 
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var p = new ParamType("bidule","la");
 
             var success = function() {
@@ -839,7 +665,7 @@ describe('Source', function() {
 		});
 
 		it('should not allow to remove an object which is not linked', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamType("toto", "machn", 12);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -884,7 +710,7 @@ describe('Source', function() {
 
     describe('#addParamValue', function() {
         it('should put the new ParamValue inside the array', function(done) {
-            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+	        var c = new Source("machin", "desc", "method", 28);
             var pv = new ParamValue("mavaleur",12);
             var spy = sinon.spy(pv, "desynchronize");
 
@@ -939,7 +765,7 @@ describe('Source', function() {
 
         it('should not allow to add a null object', function(done) {
             nock.disableNetConnect();
-            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+	        var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -960,7 +786,7 @@ describe('Source', function() {
 
         it('should not allow to add an undefined object', function(done) {
             nock.disableNetConnect();
-            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+	        var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -982,7 +808,7 @@ describe('Source', function() {
 
         it('should not allow to add a object which is not yet created', function(done) {
             nock.disableNetConnect();
-            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+	        var c = new Source("machin", "desc", "method", 28);
             var p = new ParamValue("bidule");
 
             var success = function() {
@@ -1003,7 +829,7 @@ describe('Source', function() {
         });
 
         it('should not allow to put an already existing object', function(done) {
-            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+	        var c = new Source("machin", "desc", "method", 28);
             var pv = new ParamValue("toto",13);
 
             var response1 : SequelizeRestfulResponse = {
@@ -1057,7 +883,7 @@ describe('Source', function() {
 
 	describe('#removeParamValue', function() {
 		it('should remove the ParamValue from the array', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamValue("mavaleur", 12);
 
 			var reponse1 : SequelizeRestfulResponse = {
@@ -1118,7 +944,7 @@ describe('Source', function() {
 
 		it('should not allow to remove a null object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1139,7 +965,7 @@ describe('Source', function() {
 
 		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1160,7 +986,7 @@ describe('Source', function() {
 
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var p = new ParamValue("bidule");
 
             var success = function() {
@@ -1181,7 +1007,7 @@ describe('Source', function() {
 		});
 
 		it('should not allow to remove an object which is not linked', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamValue("toto", 12);
 
 			var reponse1 : SequelizeRestfulResponse = {

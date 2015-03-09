@@ -12,63 +12,43 @@ var nock : any = require("nock");
 
 describe('User', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the username is undefined', function(){
-			assert.throws(
-				function() {
-					new User(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the username is null', function(){
-			assert.throws(
-				function() {
-					new User(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the username is empty', function(){
-			assert.throws(
-				function() {
-					new User("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the username', function () {
 			var username = "machin";
-			var c = new User(username);
+			var c = new User(username, "");
 			assert.equal(c.username(), username, "The username is not stored correctly.");
+		});
+
+		it('should store the email', function () {
+			var email = "machin@toto.fr";
+			var c = new User("", email);
+			assert.equal(c.email(), email, "The email is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new User("bidule", 52);
+			var c = new User("bidule", "", 52);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
 
 	describe('#fromJSONobject', function () {
 		it('should create the right object', function () {
-			var json = {"id": 42,
-				"username": "toto"
+			var json = {
+				"id": 42,
+				"username": "toto",
+				"email": "blabla"
 			};
 
 			var userRetrieve = User.fromJSONObject(json);
-			var userExpected = new User("toto", 42);
+			var userExpected = new User("toto", "blabla", 42);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve user (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
 
 		it('should throw an exception if the ID is undefined', function () {
-			var json = {"username": "toto"
+			var json = {
+				"username": "toto",
+				"email": "blabla"
 			};
 
 			assert.throws(function () {
@@ -80,29 +60,8 @@ describe('User', function() {
 		it('should throw an exception if the ID is null', function () {
 			var json = {
 				"username": "toto",
+				"email": "blabla",
 				"id": null
-			};
-
-			assert.throws(function () {
-					User.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the username is undefined', function () {
-			var json = {"id": 52
-			};
-
-			assert.throws(function () {
-					User.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the username is null', function () {
-			var json = {
-				"username": null,
-				"id": 42
 			};
 
 			assert.throws(function () {
@@ -114,9 +73,10 @@ describe('User', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var expected = {
 				"username": "toto",
+				"email": "bla",
 				"id": 52
 			};
 			var json = c.toJSONObject();
@@ -127,7 +87,7 @@ describe('User', function() {
 
 	describe('#addRole', function() {
 		it('should put the new Role inside the array', function(done) {
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var pv = new Role("mavaleur",12);
 			var spy = sinon.spy(pv, "desynchronize");
 
@@ -184,7 +144,7 @@ describe('User', function() {
 
 		it('should not allow to add a null object', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -205,7 +165,7 @@ describe('User', function() {
 
 		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -226,7 +186,7 @@ describe('User', function() {
 
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var p = new Role("bidule");
 
             var success = function() {
@@ -247,7 +207,7 @@ describe('User', function() {
 		});
 
 		it('should not allow to put an already existing object', function(done) {
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var pv = new Role("toto",13);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -299,7 +259,7 @@ describe('User', function() {
 
 	describe('#removeRole', function() {
 		it('should remove the Role from the array', function(done) {
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var pv = new Role("mavaleur",12);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -359,9 +319,9 @@ describe('User', function() {
 
 		it('should not allow to remove a null object', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 
-            var success = function() {
+			var success = function() {
                 done(new Error("Test failed."));
             };
 
@@ -380,9 +340,9 @@ describe('User', function() {
 
 		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 
-            var success = function() {
+			var success = function() {
                 done(new Error("Test failed."));
             };
 
@@ -401,7 +361,7 @@ describe('User', function() {
 
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var p = new Role("bidule");
 
             var success = function() {
@@ -422,7 +382,7 @@ describe('User', function() {
 		});
 
 		it('should not allow to remove an object which is not linked', function(done) {
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var pv = new Role("toto",12);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -465,7 +425,7 @@ describe('User', function() {
 
 	describe('#addSDI', function() {
 		it('should put the new SDI inside the array', function(done) {
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var pv = new SDI("mavaleur", "bidule", "host", 12);
 			var spy = sinon.spy(pv, "desynchronize");
 
@@ -521,9 +481,9 @@ describe('User', function() {
 
 		it('should not allow to add a null object', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 
-            var success = function() {
+			var success = function() {
                 done(new Error("Test failed."));
             };
 
@@ -542,9 +502,9 @@ describe('User', function() {
 
 		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 
-            var success = function() {
+			var success = function() {
                 done(new Error("Test failed."));
             };
 
@@ -563,7 +523,7 @@ describe('User', function() {
 
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var p = new SDI("bidule", "machin", "otot");
 
             var success = function() {
@@ -584,7 +544,7 @@ describe('User', function() {
 		});
 
 		it('should not allow to put an already existing object', function(done) {
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var pv = new SDI("toto", "machin", "host", 13);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -640,7 +600,7 @@ describe('User', function() {
 
 	describe('#removeSDI', function() {
 		it('should remove the SDI from the array', function(done) {
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var pv = new SDI("mavaleur", "blup", "truc", 12);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -702,9 +662,9 @@ describe('User', function() {
 
 		it('should not allow to remove a null object', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 
-            var success = function() {
+			var success = function() {
                 done(new Error("Test failed."));
             };
 
@@ -723,9 +683,9 @@ describe('User', function() {
 
 		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 
-            var success = function() {
+			var success = function() {
                 done(new Error("Test failed."));
             };
 
@@ -744,7 +704,7 @@ describe('User', function() {
 
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var p = new SDI("bidule","truc","tata");
 
             var success = function() {
@@ -765,7 +725,7 @@ describe('User', function() {
 		});
 
 		it('should not allow to remove an object which is not linked', function(done) {
-			var c = new User("toto", 52);
+			var c = new User("toto", "bla", 52);
 			var pv = new SDI("toto", "bidule", "blabla",12);
 
 			var response1 : SequelizeRestfulResponse = {
