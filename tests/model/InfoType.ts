@@ -14,36 +14,6 @@ var nock = require("nock");
 
 describe('InfoType', function(){
 	describe('#constructor', function() {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new InfoType(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new InfoType(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new InfoType("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function(){
 			var name = "machin";
 			var c = new InfoType(name);
@@ -52,7 +22,7 @@ describe('InfoType', function(){
 
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new InfoType("bidule",52);
+			var c = new InfoType("",52);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
@@ -83,28 +53,6 @@ describe('InfoType', function(){
 			var json = {
 				"name": "toto",
 				"id": null
-			};
-
-			assert.throws(function() {
-					InfoType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is undefined', function() {
-			var json = {"id": 52
-			};
-
-			assert.throws(function() {
-					InfoType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function() {
-			var json = {
-				"name": null,
-				"id": 42
 			};
 
 			assert.throws(function() {

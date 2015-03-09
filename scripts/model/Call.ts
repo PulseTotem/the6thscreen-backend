@@ -618,10 +618,7 @@ class Call extends ModelItf {
 	    if (!jsonObject.id) {
 		    throw new ModelException("A Call object should have an ID.");
 	    }
-        if(!jsonObject.name) {
-	        throw new ModelException("A Call object should have a name.");
-        }
-	    return new Call(jsonObject.name, jsonObject.id);
+        return new Call(jsonObject.name, jsonObject.id);
     }
 
     /**

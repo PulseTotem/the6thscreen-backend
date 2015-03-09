@@ -15,37 +15,7 @@ var sinon : SinonStatic = require("sinon");
 
 describe('CallType', function(){
 	describe('#constructor', function() {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new CallType(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new CallType(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new CallType("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should store the name', function(){
+				it('should store the name', function(){
 			var name = "machin";
 			var c = new CallType(name,"");
 			assert.equal(c.name(), name, "The name is not stored correctly.");
@@ -53,13 +23,13 @@ describe('CallType', function(){
 
 		it('should store the description', function(){
 			var desc = "machin";
-			var c = new CallType("name",desc);
+			var c = new CallType("",desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new CallType("name","",id);
+			var c = new CallType("","",id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
@@ -103,55 +73,6 @@ describe('CallType', function(){
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function() {
-			var json = {
-				"id": 52,
-				"description": "blabla"
-			};
-
-			assert.throws(function() {
-					CallType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function() {
-			var json = {
-				"name": null,
-				"description": "blabla",
-				"id": 42
-			};
-
-			assert.throws(function() {
-					CallType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is undefined', function() {
-			var json = {
-				"id": 52,
-				"name": "blabla"
-			};
-
-			assert.throws(function() {
-					CallType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is null', function() {
-			var json = {
-				"description": null,
-				"name": "blabla",
-				"id": 42
-			};
-
-			assert.throws(function() {
-					CallType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function() {

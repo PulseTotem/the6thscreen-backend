@@ -123,7 +123,7 @@ class CallType extends ModelItf {
      * @param {string} description - The CallType's description.
      * @param {number} id - The CallType's ID.
      */
-    constructor(name : string, description : string = "", id : number = null) {
+    constructor(name : string = "", description : string = "", id : number = null) {
         super(id);
 
 		this.setName(name);
@@ -151,10 +151,6 @@ class CallType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A CallType need a proper name.");
-		}
-
 		this._name = name;
 	}
 
@@ -924,12 +920,7 @@ class CallType extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A CallType object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A CallType object should have a name.");
-		}
-		if(!jsonObject.description) {
-			throw new ModelException("A CallType object should have a description.");
-		}
+
 		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
 

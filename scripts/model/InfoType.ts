@@ -29,7 +29,7 @@ class InfoType extends ModelItf {
      * @param {string} name - The InfoType's name.
      * @param {number} id - The InfoType's ID.
      */
-    constructor(name : string, id : number = null) {
+    constructor(name : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -41,10 +41,6 @@ class InfoType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("An instance of InfoType needs to have a name")
-		}
-
 		this._name = name;
 	}
 
@@ -158,9 +154,6 @@ class InfoType extends ModelItf {
 	static fromJSONObject(jsonObject : any) : InfoType {
 		if (!jsonObject.id) {
 			throw new ModelException("A InfoType object should have an ID.");
-		}
-		if(!jsonObject.name) {
-			throw new ModelException("A InfoType object should have a name.");
 		}
 		return new InfoType(jsonObject.name, jsonObject.id);
 	}

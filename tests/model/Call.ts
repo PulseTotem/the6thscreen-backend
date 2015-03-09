@@ -61,28 +61,6 @@ describe('Call', function(){
 				},
 				ModelException, "The exception has not been thrown.");
 		});
-
-		it('should throw an exception if the name is undefined', function() {
-			var json = {"id": 52
-			};
-
-			assert.throws(function() {
-					Call.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function() {
-			var json = {
-				"name": null,
-				"id": 42
-			};
-
-			assert.throws(function() {
-					Call.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function() {
