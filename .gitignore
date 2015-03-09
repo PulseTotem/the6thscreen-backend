@@ -11,3 +11,5 @@ coverage.html
 t6s-core/*
 core-repos-config.json
 scripts/core/backend_config.json
+package-bak.json
+package-tmp.json

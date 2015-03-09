@@ -1006,6 +1006,7 @@ describe('ModelItf', function() {
 
 			var reponse : SequelizeRestfulResponse = {
 				"status": "success",
+				"count": 4,
 				"data": data
 			};
 

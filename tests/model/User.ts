@@ -75,9 +75,11 @@ describe('User', function() {
 		it('should create the expected JSON Object', function () {
 			var c = new User("toto", "bla", 52);
 			var expected = {
+				"id": 52,
 				"username": "toto",
 				"email": "bla",
-				"id": 52
+				"token": null,
+				"lastIp": null
 			};
 			var json = c.toJSONObject();
 

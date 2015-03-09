@@ -99,6 +99,9 @@ class User extends ModelItf {
         this.setUsername(username);
         this.setEmail(email);
 
+	    this._token = null;
+	    this._lastIp = null;
+
         this._roles = new Array<Role>();
         this._roles_loaded = false;
 
@@ -112,10 +115,6 @@ class User extends ModelItf {
 	 * @method setUsername
 	 */
 	setUsername(username : string) {
-		if(!username) {
-			throw new ModelException("The username is mandatory for a User.");
-		}
-
 		this._username = username;
 	}
 
@@ -134,11 +133,7 @@ class User extends ModelItf {
      * @method setEmail
      */
     setEmail(email : string) {
-        if(!email) {
-            throw new ModelException("The email is mandatory for a User.");
-        }
-
-        this._email = email;
+       this._email = email;
     }
 
     /**
@@ -738,14 +733,6 @@ class User extends ModelItf {
 		if (!jsonObject.id) {
 			throw new ModelException("A User object should have an ID.");
 		}
-
-		if(!jsonObject.username) {
-			throw new ModelException("A User object should have a name.");
-		}
-
-        if(!jsonObject.email) {
-            throw new ModelException("A User object should have an email.");
-        }
 
 		var user = new User(jsonObject.username, jsonObject.email, jsonObject.id);
 

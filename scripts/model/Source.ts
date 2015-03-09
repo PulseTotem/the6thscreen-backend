@@ -815,6 +815,9 @@ class Source extends ModelItf {
 	 * @return {Source} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Source {
+		if(!jsonObject.id) {
+			throw new ModelException("A Source object should have an ID.");
+		}
 		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.id);
 	}
 

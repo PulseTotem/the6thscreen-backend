@@ -269,7 +269,7 @@ describe('CallType', function(){
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
 			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi", 42);
+			var s = new Source("toto", "machin","titi");
 
             var success = function() {
                 done(new Error("Test failed."));
