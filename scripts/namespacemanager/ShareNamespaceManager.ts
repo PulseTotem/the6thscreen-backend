@@ -17,20 +17,6 @@ class ShareNamespaceManager extends NamespaceManager {
         super(socket);
     }
 
-    /**
-     * Format response before emit to SocketIo Socket.
-     *
-     * @method formatResponse
-     * @param {boolean} successStatus - The success status.
-     * @param {any} response - The response
-     */
-    formatResponse(successStatus : boolean, response : any) {
-        return {
-            "success" : successStatus,
-            "response" : response
-        };
-    }
-
 ////////////////////// Begin: Manage sendObjectDescriptionFromId //////////////////////
 
     /**
