@@ -15,51 +15,21 @@ var sinon : SinonStatic = require("sinon");
 
 describe('SDI', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new SDI(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new SDI(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new SDI("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function () {
 			var name = "machin";
-			var c = new SDI(name, "c", "a");
+			var c = new SDI(name);
 			assert.equal(c.name(), name, "The name is not stored correctly.");
 		});
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new SDI("df", desc, "dfd");
+			var c = new SDI("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the allowedHost', function () {
 			var allowedHost = "machin";
-			var c = new SDI("ad", "dfd", allowedHost);
+			var c = new SDI("", "", allowedHost);
 			assert.equal(c.allowedHost(), allowedHost, "The allowedHost is not stored correctly.");
 		});
 
@@ -112,86 +82,6 @@ describe('SDI', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function () {
-			var json = {
-				"id": 52,
-				"description": "blabla",
-				"allowedHost": "toto"
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function () {
-			var json = {
-				"name": null,
-				"description": "blabla",
-				"id": 42,
-				"allowedHost": "toto"
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is undefined', function () {
-			var json = {
-				"id": 52,
-				"name": "blabla",
-				"allowedHost": "toto"
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is null', function () {
-			var json = {
-				"description": null,
-				"name": "blabla",
-				"id": 42,
-				"allowedHost": "toto"
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the allowedHost is undefined', function () {
-			var json = {
-				"id": 52,
-				"name": "blabla",
-				"description": "toto"
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the allowedHost is null', function () {
-			var json = {
-				"allowedHost": null,
-				"name": "blabla",
-				"id": 42,
-				"description": "toto"
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function () {

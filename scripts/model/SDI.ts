@@ -115,7 +115,7 @@ class SDI extends ModelItf {
      * @param {string} allowedHost - The SDI's allowedHost.
      * @param {number} id - The SDI's ID.
      */
-    constructor(name : string, description : string = "", allowedHost : string = "*", id : number = null) {
+    constructor(name : string = "", description : string = "", allowedHost : string = "*", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -141,10 +141,6 @@ class SDI extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A name is mandatory for a SDI.");
-		}
-
 		this._name = name;
 	}
 
@@ -821,15 +817,6 @@ class SDI extends ModelItf {
 	static fromJSONObject(jsonObject : any) : SDI {
 		if(!jsonObject.id) {
 			throw new ModelException("A SDI object should have an ID.");
-		}
-		if(!jsonObject.name) {
-			throw new ModelException("A SDI object should have a name.");
-		}
-		if(!jsonObject.description) {
-			throw new ModelException("A SDI object should have a description.");
-		}
-		if(!jsonObject.allowedHost) {
-			throw new ModelException("A SDI object should have an allowedHost.");
 		}
 		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id);
 	}

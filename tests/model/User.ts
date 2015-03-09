@@ -14,7 +14,7 @@ describe('User', function() {
 	describe('#constructor', function () {
 		it('should store the username', function () {
 			var username = "machin";
-			var c = new User(username, "");
+			var c = new User(username);
 			assert.equal(c.username(), username, "The username is not stored correctly.");
 		});
 
@@ -26,7 +26,7 @@ describe('User', function() {
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new User("bidule", "", 52);
+			var c = new User("", "", 52);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});

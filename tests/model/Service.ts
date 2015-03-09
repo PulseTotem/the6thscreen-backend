@@ -16,25 +16,25 @@ describe('Service', function(){
 	describe('#constructor', function() {
 		it('should store the name', function(){
 			var name = "machin";
-			var c = new Service(name, "desc", "host", 42);
+			var c = new Service(name);
 			assert.equal(c.name(), name, "The name is not stored correctly.");
 		});
 
 		it('should store the description', function(){
 			var description = "machin";
-			var c = new Service("name", description, "host", 42);
+			var c = new Service("", description);
 			assert.equal(c.description(), description, "The description is not stored correctly.");
 		});
 
 		it('should store the host', function(){
 			var host = "machin";
-			var c = new Service("name", "desc", host, 42);
+			var c = new Service("", "", host);
 			assert.equal(c.host(), host, "The host is not stored correctly.");
 		});
 
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new Service("name", "desc", "host", id);
+			var c = new Service("", "", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
@@ -62,7 +62,7 @@ describe('Service', function(){
 			};
 
 			assert.throws(function() {
-					InfoType.fromJSONObject(json);
+					Service.fromJSONObject(json);
 				},
 				ModelException, "The exception has not been thrown.");
 		});
@@ -76,7 +76,7 @@ describe('Service', function(){
 			};
 
 			assert.throws(function() {
-					InfoType.fromJSONObject(json);
+					Service.fromJSONObject(json);
 				},
 				ModelException, "The exception has not been thrown.");
 		});

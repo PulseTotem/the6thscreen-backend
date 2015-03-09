@@ -29,7 +29,7 @@ class Role extends ModelItf {
      * @param {string} name - The Role's name.
      * @param {number} id - The Role's ID.
      */
-    constructor(name : string, id : number = null) {
+    constructor(name : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -41,10 +41,6 @@ class Role extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A name is mandatory for Role.");
-		}
-
 		this._name = name;
 	}
 
@@ -158,9 +154,6 @@ class Role extends ModelItf {
 	static fromJSONObject(jsonObject : any) : Role {
 		if (!jsonObject.id) {
 			throw new ModelException("A Role object should have an ID.");
-		}
-		if(!jsonObject.name) {
-			throw new ModelException("A Role object should have a name.");
 		}
 		return new Role(jsonObject.name, jsonObject.id);
 	}

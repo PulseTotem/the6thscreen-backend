@@ -12,36 +12,6 @@ var nock : any = require("nock");
 
 describe('Role', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new Role(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new Role(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new Role("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new Role(name);
@@ -50,7 +20,7 @@ describe('Role', function() {
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Role("bidule", 52);
+			var c = new Role("", 52);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
@@ -89,27 +59,6 @@ describe('Role', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function () {
-			var json = {"id": 52
-			};
-
-			assert.throws(function () {
-					Role.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function () {
-			var json = {
-				"name": null,
-				"id": 42
-			};
-
-			assert.throws(function () {
-					Role.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function () {

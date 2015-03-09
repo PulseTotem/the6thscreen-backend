@@ -16,25 +16,25 @@ describe('Source', function() {
 	describe('constructor', function () {
 		it('should store the name', function () {
 			var name = "machin";
-			var c = new Source(name, "desc", "meth");
+			var c = new Source(name);
 			assert.equal(c.name(), name, "The name is not stored correctly.");
 		});
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Source("machin", desc, "meth");
+			var c = new Source("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the method', function () {
 			var method = "machin";
-			var c = new Source("machin", "desc", method);
+			var c = new Source("", "", method);
 			assert.equal(c.method(), method, "The method is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Source("machin", "desc", "meth", id);
+			var c = new Source("", "", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});

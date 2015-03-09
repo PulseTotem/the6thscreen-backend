@@ -29,7 +29,7 @@ class TypeParamType extends ModelItf {
 	 * @param {string} name - The TypeParamType's name.
 	 * @param {number} id - The TypeParamType's ID.
 	 */
-	constructor(name : string, id : number = null) {
+	constructor(name : string = "", id : number = null) {
 		super(id);
 
 		this.setName(name);
@@ -41,10 +41,6 @@ class TypeParamType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("The name is mandatory for a TypeParamType");
-		}
-
 		this._name = name;
 	}
 
@@ -158,9 +154,6 @@ class TypeParamType extends ModelItf {
 	static fromJSONObject(jsonObject : any) : TypeParamType {
 		if (!jsonObject.id) {
 			throw new ModelException("A TypeParamType object should have an ID.");
-		}
-		if(!jsonObject.name) {
-			throw new ModelException("A TypeParamType object should have a name.");
 		}
 		return new TypeParamType(jsonObject.name, jsonObject.id);
 	}

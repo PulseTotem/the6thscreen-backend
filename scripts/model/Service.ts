@@ -209,6 +209,9 @@ class Service extends ModelItf {
 	 * @return {Service} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Service {
+		if (!jsonObject.id) {
+			throw new ModelException("A Service object should have an ID.");
+		}
 		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.id);
 	}
 

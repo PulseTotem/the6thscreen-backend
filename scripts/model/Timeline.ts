@@ -55,7 +55,7 @@ class Timeline extends ModelItf {
      * @param {string} description - The Timeline's description.
      * @param {number} id - The Timeline's ID.
      */
-    constructor(name : string, description : string = "", id : number = null) {
+    constructor(name : string = "", description : string = "", id : number = null) {
         super(id);
 
         this.setName(name);
@@ -71,10 +71,6 @@ class Timeline extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("The name is mandatory for a Timeline");
-		}
-
 		this._name = name;
 	}
 
@@ -384,12 +380,6 @@ class Timeline extends ModelItf {
 	static fromJSONObject(jsonObject : any) : Timeline {
 		if(!jsonObject.id) {
 			throw new ModelException("A Timeline object should have an ID.");
-		}
-		if(!jsonObject.name) {
-			throw new ModelException("A Timeline object should have a name.");
-		}
-		if(!jsonObject.description) {
-			throw new ModelException("A Timeline object should have a description.");
 		}
 		return new Timeline(jsonObject.name, jsonObject.description, jsonObject.id);
 	}
