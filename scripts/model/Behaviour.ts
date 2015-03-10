@@ -82,6 +82,11 @@ class Behaviour extends ModelItf {
 		return this._description;
 	}
 
+	checkCompleteness() {
+		super.checkCompleteness();
+		this._complete = (this._complete && !!this.name());
+	}
+
 	/**
 	 * Return a Behaviour instance as a JSON Object
 	 *
@@ -91,6 +96,7 @@ class Behaviour extends ModelItf {
 	toJSONObject() : Object {
 		var data = {
 			"id": this.getId(),
+			"complete": this.isComplete(),
 			"name": this.name(),
 			"description": this.description()
 		};
