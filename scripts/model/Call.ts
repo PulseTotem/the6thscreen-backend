@@ -81,8 +81,8 @@ class Call extends ModelItf {
      * @param {string} name - The Call's name.
      * @param {number} id - The Call's ID.
      */
-    constructor(name : string = "", id : number = null) {
-        super(id);
+    constructor(name : string = "", id : number = null, complete : boolean = false) {
+        super(id,complete);
 
         this.setName(name);
 
@@ -316,7 +316,8 @@ class Call extends ModelItf {
 	toJSONObject() : Object {
 		var data = {
 			"id": this.getId(),
-			"name": this.name()
+			"name": this.name(),
+			"complete": this.isComplete()
 		};
 		return data;
 	}
@@ -358,8 +359,8 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	addParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
-		if (!p || !p.getId()) {
-            failCallback(new ModelException("The ParamValue must be an existing object to be associated."));
+		if (!p || !p.isComplete()) {
+            failCallback(new ModelException("The ParamValue must be an existing complete object to be associated."));
             return;
 		}
 
@@ -430,8 +431,8 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	setProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
-		if (!p || !p.getId()) {
-            failCallback(new ModelException("The Profil must be an existing object to be associated."));
+		if (!p || !p.isComplete()) {
+            failCallback(new ModelException("The Profil must be an existing complete object to be associated."));
             return;
 		}
 
@@ -499,8 +500,8 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	setCallType(ct : CallType, successCallback : Function = null, failCallback : Function = null) {
-		if (!ct || !ct.getId()) {
-            failCallback(new ModelException("The CallType must be an existing object to be associated."));
+		if (!ct || !ct.isComplete()) {
+            failCallback(new ModelException("The CallType must be an existing complete object to be associated."));
             return;
 		}
 
@@ -643,7 +644,10 @@ class Call extends ModelItf {
 	    if (!jsonObject.id) {
 		    throw new ModelException("A Call object should have an ID.");
 	    }
-        return new Call(jsonObject.name, jsonObject.id);
+	    if (jsonObject.complete == null || jsonObject.complete == undefined) {
+		    throw new ModelException("A Call object should have a complete attribute.");
+	    }
+        return new Call(jsonObject.name, jsonObject.id, jsonObject.complete);
     }
 
     /**

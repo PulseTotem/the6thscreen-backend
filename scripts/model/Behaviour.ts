@@ -193,7 +193,7 @@ class Behaviour extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A Behaviour object should have an ID.");
 		}
-		if(!jsonObject.complete) {
+		if(jsonObject.complete == null || jsonObject.complete == undefined) {
 			throw new ModelException("A Behaviour object should have a complete attribute.");
 		}
 

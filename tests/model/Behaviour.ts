@@ -67,6 +67,20 @@ describe('Behaviour', function() {
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve renderer (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
 
+		it('should create the right object even if it is not complete', function () {
+			var json = {
+				"id": 42,
+				"name": "toto",
+				"description": null,
+				"complete":false
+			};
+
+			var callRetrieve = Behaviour.fromJSONObject(json);
+			var callExpected = new Behaviour("toto", null, 42);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve renderer (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+		});
+
 		it('should throw an exception if the ID is undefined', function () {
 			var json = {
 				"name": "toto",

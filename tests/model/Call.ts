@@ -15,7 +15,7 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Call', function(){
 	describe('#constructor', function() {
-				it('should store the name', function(){
+		it('should store the name', function(){
 			var name = "machin";
 			var c = new Call(name);
 			assert.equal(c.name(), name, "The name is not stored correctly.");
@@ -26,16 +26,53 @@ describe('Call', function(){
 			var c = new Call("",52);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
+
+		it('should store the complete attribute', function() {
+			var c = new Call("",52,true);
+			assert.equal(c.isComplete(), true, "The complete attribute is not stored.");
+		});
+
+		it('should assign false to the complete attribute by default', function() {
+			var c = new Call();
+			assert.equal(c.isComplete(), false, "The complete attribute is not stored.");
+		});
 	});
+
+	// TODO : Finish this test !
+	/**describe('#checkCompleteness', function() {
+		it('should assign true if the Call has a name, a CallType, a Profil and at least one ParamValue', function() {
+			var call = new Call("titi",42,true);
+			var callType = new CallType("toto","machin",23,true);
+			var profil = new Profil("bla","",10,true);
+			var param = new ParamValue("12",3,true);
+
+
+		});
+	});*/
 
 	describe('#fromJSONobject', function() {
 		it('should create the right object', function() {
-			var json = {"id": 42,
-				"name": "toto"
+			var json = {
+				"id": 42,
+				"name": "toto",
+				"complete": true
 			};
 
 			var callRetrieve = Call.fromJSONObject(json);
-			var callExpected = new Call("toto",42);
+			var callExpected = new Call("toto",42,true);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve call ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
+		});
+
+		it('should create the right object even if it is not complete', function() {
+			var json = {
+				"id": 42,
+				"name": "",
+				"complete": false
+			};
+
+			var callRetrieve = Call.fromJSONObject(json);
+			var callExpected = new Call("",42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve call ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -68,7 +105,8 @@ describe('Call', function(){
 			var c = new Call("toto", 52);
 			var expected = {
 				"name": "toto",
-				"id": 52
+				"id": 52,
+				"complete": false
 			};
 			var json = c.toJSONObject();
 
