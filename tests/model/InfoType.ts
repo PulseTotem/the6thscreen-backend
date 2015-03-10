@@ -61,6 +61,12 @@ describe('InfoType', function(){
 			i.checkCompleteness();
 			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
 		});
+
+		it('should not specify the object is complete if the object is empty', function() {
+			var i = new InfoType();
+			i.checkCompleteness();
+			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+		});
 	});
 
 	describe('#fromJSONobject', function() {
@@ -91,7 +97,9 @@ describe('InfoType', function(){
 		});
 
 		it('should throw an exception if the ID is undefined', function() {
-			var json = {"name": "toto"
+			var json = {
+				"name": "toto",
+				"complete": false
 			};
 
 			assert.throws(function() {
@@ -103,7 +111,33 @@ describe('InfoType', function(){
 		it('should throw an exception if the ID is null', function() {
 			var json = {
 				"name": "toto",
+				"complete": false,
 				"id": null
+			};
+
+			assert.throws(function() {
+					InfoType.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete is undefined', function() {
+			var json = {
+				"name": "toto",
+				"id": 12
+			};
+
+			assert.throws(function() {
+					InfoType.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the ID is null', function() {
+			var json = {
+				"name": "toto",
+				"id": 43,
+				"complete": null
 			};
 
 			assert.throws(function() {

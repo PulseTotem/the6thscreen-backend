@@ -29,8 +29,8 @@ class Role extends ModelItf {
      * @param {string} name - The Role's name.
      * @param {number} id - The Role's ID.
      */
-    constructor(name : string = "", id : number = null) {
-        super(id);
+    constructor(name : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setName(name);
     }
@@ -64,9 +64,19 @@ class Role extends ModelItf {
 	toJSONObject() : Object {
 		var data = {
 			"id": this.getId(),
-			"name": this.name()
+			"name": this.name(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Compute the completeness of a Role.
+	 * The completeness is given by the presence of an ID and a name.
+	 */
+	checkCompleteness() : void {
+		super.checkCompleteness();
+		this._complete = (this._complete && !!this.name());
 	}
 
     /**
@@ -155,7 +165,10 @@ class Role extends ModelItf {
 		if (!jsonObject.id) {
 			throw new ModelException("A Role object should have an ID.");
 		}
-		return new Role(jsonObject.name, jsonObject.id);
+		if (jsonObject.complete == null || jsonObject.complete == undefined) {
+			throw new ModelException("A Role object should have a complete attribute.");
+		}
+		return new Role(jsonObject.name, jsonObject.id, jsonObject.complete);
 	}
 
     /**
