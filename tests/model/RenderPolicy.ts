@@ -53,13 +53,13 @@ describe('RenderPolicy', function() {
 				"id": 42,
 				"name": "",
 				"description": "",
-				"complete": true
+				"complete": false
 			};
 
 			var callRetrieve = RenderPolicy.fromJSONObject(json);
 			var callExpected = new RenderPolicy("","",42);
 
-			assert.deepEqual(callRetrieve, callExpected, "The retrieve callType ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve RenderPolicy ("+JSON.stringify(callRetrieve)+") does not match with the expected one ("+JSON.stringify(callExpected)+")");
 		});
 
 		it('should throw an exception if the ID is undefined', function() {
@@ -124,7 +124,8 @@ describe('RenderPolicy', function() {
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
-				"id": 52
+				"id": 52,
+				"complete": false
 			};
 			var json = c.toJSONObject();
 

@@ -21,8 +21,13 @@ describe('TypeParamType', function() {
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new TypeParamType("", 52);
+			var c = new TypeParamType("", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
+		});
+
+		it('should store the complete value', function () {
+			var c = new TypeParamType("", 52, true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
 		});
 	});
 
