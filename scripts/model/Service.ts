@@ -46,8 +46,8 @@ class Service extends ModelItf {
 	 * @param host The host to reach the service
 	 * @param id The DB id of the service
 	 */
-	constructor(name : string = "", description : string = "", host : string = "", id : number = null) {
-		super(id);
+	constructor(name : string = "", description : string = "", host : string = "", id : number = null, complete : boolean = false) {
+		super(id, complete);
 		this.setName(name);
 		this.setDescription(description);
 		this.setHost(host);
@@ -121,9 +121,21 @@ class Service extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"host": this.host()
+			"host": this.host(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check if the object is complete or not.
+	 *
+	 * For a Service, it means it has an ID, a name and a host.
+	 */
+	checkCompleteness() : void {
+		super.checkCompleteness();
+
+		this._complete = (this._complete && !!this.name() && !!this.host());
 	}
 
 	/**
@@ -212,7 +224,10 @@ class Service extends ModelItf {
 		if (!jsonObject.id) {
 			throw new ModelException("A Service object should have an ID.");
 		}
-		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.id);
+		if (jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A Service object should have a complete attribute.");
+		}
+		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.id, jsonObject.complete);
 	}
 
 	/**
