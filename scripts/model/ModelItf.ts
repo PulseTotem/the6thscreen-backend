@@ -54,6 +54,7 @@ class ModelItf {
         this._id = id;
 	    this._complete_loading = false;
 	    this._complete = false;
+	    this.checkCompleteness();
     }
 
     /**

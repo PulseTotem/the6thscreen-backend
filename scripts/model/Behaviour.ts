@@ -44,6 +44,7 @@ class Behaviour extends ModelItf {
 
 		this.setName(name);
 		this.setDescription(description);
+		this.checkCompleteness();
 	}
 
 	/**

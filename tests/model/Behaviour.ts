@@ -33,6 +33,18 @@ describe('Behaviour', function() {
 		});
 	});
 
+	describe('#isComplete', function() {
+		it('should return false if the object is empty', function() {
+			var b =  new Behaviour();
+			assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+		});
+
+		it('should return true if the object has a name and an ID but no description', function() {
+			var b = new Behaviour('toto', null, 12);
+			assert.equal(b.isComplete(), true, "The behaviour should be complete.");
+		});
+	});
+
 	describe('#fromJSONobject', function () {
 		it('should create the right object', function () {
 			var json = {
@@ -80,6 +92,7 @@ describe('Behaviour', function() {
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
+				"complete": true,
 				"id": 52
 			};
 			var json = c.toJSONObject();
