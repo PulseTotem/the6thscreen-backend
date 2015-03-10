@@ -54,7 +54,6 @@ class ModelItf {
         this._id = id;
 	    this._complete_loading = false;
 	    this._complete = false;
-	    this.checkCompleteness();
     }
 
     /**
@@ -746,8 +745,7 @@ class ModelItf {
 	 */
 	toJSONObject() : Object {
 		var data = {
-			"id": this.getId(),
-			"complete": this.isComplete()
+			"id": this.getId()
 		};
 		return data;
 	}
@@ -765,7 +763,7 @@ class ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
-
+	        data["complete"] = self.isComplete();
             successCallback(data);
         };
 

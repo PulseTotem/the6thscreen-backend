@@ -92,7 +92,6 @@ describe('Behaviour', function() {
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
-				"complete": true,
 				"id": 52
 			};
 			var json = c.toJSONObject();

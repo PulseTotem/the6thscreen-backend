@@ -83,7 +83,11 @@ class Behaviour extends ModelItf {
 		return this._description;
 	}
 
-	checkCompleteness() {
+	/**
+	 * Check completeness of a behaviour.
+	 * The completeness is determined by the presence of a name and an id.
+	 */
+	checkCompleteness() : void {
 		super.checkCompleteness();
 		this._complete = (this._complete && !!this.name());
 	}
@@ -97,7 +101,6 @@ class Behaviour extends ModelItf {
 	toJSONObject() : Object {
 		var data = {
 			"id": this.getId(),
-			"complete": this.isComplete(),
 			"name": this.name(),
 			"description": this.description()
 		};

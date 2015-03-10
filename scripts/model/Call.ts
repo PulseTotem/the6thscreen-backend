@@ -277,9 +277,34 @@ class Call extends ModelItf {
      * @method desynchronize
 	 */
 	desynchronize() : void {
+		super.desynchronize();
 		this._call_type_loaded = false;
 		this._param_values_loaded = false;
 		this._profil_loaded = false;
+	}
+
+	/**
+	 * Check completeness of a call.
+	 * A Call is complete if it has a name, a CallType, a Profil and a ParamValue.
+	 */
+	checkCompleteness() : void {
+		super.checkCompleteness();
+		this._complete = (this._complete && !!this.name());
+
+		if (!this._complete) {
+			return;
+		} else {
+			var self = this;
+			var success = function() {
+				self._complete = (self._complete && !!self.callType() && !!self.profil() && !!self.paramValues());
+			};
+
+			var fail = function(err) {
+				throw err;
+			};
+
+			this.loadAssociations(success, fail);
+		}
 	}
 
 	/**
@@ -306,9 +331,9 @@ class Call extends ModelItf {
      */
     toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
         var self = this;
+	    var data = super.toCompleteJSONObject();
 
         var success : Function = function() {
-            var data = self.toJSONObject();
             data["callType"] = (self.callType() !== null) ? self.callType().toJSONObject() : null;
             data["profil"] = (self.profil() !== null) ? self.profil().toJSONObject() : null;
             data["paramValues"] = self.serializeArray(self.paramValues());
