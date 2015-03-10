@@ -39,12 +39,11 @@ class Behaviour extends ModelItf {
 	 * @param {string} description - The Behaviour's description.
 	 * @param {number} id - The Behaviour's ID.
 	 */
-	constructor(name : string = "", description : string = "", id : number = null) {
-		super(id);
+	constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+		super(id,complete);
 
 		this.setName(name);
 		this.setDescription(description);
-		this.checkCompleteness();
 	}
 
 	/**
@@ -102,7 +101,8 @@ class Behaviour extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"complete": this.isComplete()
 		};
 		return data;
 	}
@@ -142,7 +142,7 @@ class Behaviour extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
-		return this.updateObject(Behaviour, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+	    return this.updateObject(Behaviour, this.toJSONObject(), successCallback, failCallback, attemptNumber);
 	}
 
     /**
@@ -193,8 +193,11 @@ class Behaviour extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A Behaviour object should have an ID.");
 		}
+		if(!jsonObject.complete) {
+			throw new ModelException("A Behaviour object should have a complete attribute.");
+		}
 
-		return new Behaviour(jsonObject.name, jsonObject.description, jsonObject.id);
+		return new Behaviour(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
 	/**

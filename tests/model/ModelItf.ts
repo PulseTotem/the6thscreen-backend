@@ -17,23 +17,36 @@ describe('ModelItf', function() {
 			var id = 12;
 			var model = new ModelItf(id);
 
-			assert.equal(model.getId(), id, "The id is correctly stored.");
+			assert.equal(model.getId(), id, "The id is not correctly stored.");
 		});
 
 		it('should give a null id if an undefined argument is given', function() {
 			var model = new ModelItf(undefined);
 			assert.equal(model.getId(), null, "The id is not null");
 		});
+
+		it('should store the given complete attribute', function() {
+			var model = new ModelItf(12,true);
+
+			assert.equal(model.isComplete(), true, "The boolean complete is not correctly stored.");
+		});
+
+		it('should assign a false value if complete is not given ', function() {
+			var model = new ModelItf();
+			assert.equal(model.isComplete(), false, "The complete is not false");
+		});
 	});
 
-	describe('#isComplete()', function() {
-		it('should return true if an id is given', function() {
+	describe('#checkCompleteness()', function() {
+		it('should compute true if an id is given', function() {
 			var model = new ModelItf(24);
+			model.checkCompleteness();
 			assert.equal(model.isComplete(), true, "The object is not considered as complete but it should be.");
 		});
 
 		it('should return false if an id is not given', function() {
 			var model = new ModelItf();
+			model.checkCompleteness();
 			assert.equal(model.isComplete(), false, "The object is considered as complete but it should not be.");
 		})
 	});

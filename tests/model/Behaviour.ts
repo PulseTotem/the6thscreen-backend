@@ -31,16 +31,23 @@ describe('Behaviour', function() {
 			var c = new Behaviour("", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
+
+		it('should store the complete attribute', function () {
+			var c = new Behaviour("", "", 12, true);
+			assert.equal(c.isComplete(), true, "The complete attribute is not stored.");
+		});
 	});
 
-	describe('#isComplete', function() {
+	describe('#checkCompleteness()', function() {
 		it('should return false if the object is empty', function() {
 			var b =  new Behaviour();
+			b.checkCompleteness();
 			assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
 		});
 
 		it('should return true if the object has a name and an ID but no description', function() {
 			var b = new Behaviour('toto', null, 12);
+			b.checkCompleteness();
 			assert.equal(b.isComplete(), true, "The behaviour should be complete.");
 		});
 	});
@@ -50,11 +57,12 @@ describe('Behaviour', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete":true
 			};
 
 			var callRetrieve = Behaviour.fromJSONObject(json);
-			var callExpected = new Behaviour("toto", "blabla", 42);
+			var callExpected = new Behaviour("toto", "blabla", 42,true);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve renderer (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
@@ -92,7 +100,8 @@ describe('Behaviour', function() {
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
-				"id": 52
+				"id": 52,
+				"complete": false
 			};
 			var json = c.toJSONObject();
 
