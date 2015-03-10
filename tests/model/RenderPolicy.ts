@@ -38,11 +38,26 @@ describe('RenderPolicy', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": true
 			};
 
 			var callRetrieve = RenderPolicy.fromJSONObject(json);
-			var callExpected = new RenderPolicy("toto","blabla",42);
+			var callExpected = new RenderPolicy("toto","blabla",42,true);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve callType ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
+		});
+
+		it('should create the right object even if it is partial', function() {
+			var json = {
+				"id": 42,
+				"name": "",
+				"description": "",
+				"complete": true
+			};
+
+			var callRetrieve = RenderPolicy.fromJSONObject(json);
+			var callExpected = new RenderPolicy("","",42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve callType ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -50,7 +65,8 @@ describe('RenderPolicy', function() {
 		it('should throw an exception if the ID is undefined', function() {
 			var json = {
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": false
 			};
 
 			assert.throws(function() {
@@ -63,7 +79,35 @@ describe('RenderPolicy', function() {
 			var json = {
 				"name": "toto",
 				"description": "blabla",
-				"id": null
+				"id": null,
+				"complete": false
+			};
+
+			assert.throws(function() {
+					RenderPolicy.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete is undefined', function() {
+			var json = {
+				"name": "toto",
+				"description": "blabla",
+				"id": 12
+			};
+
+			assert.throws(function() {
+					RenderPolicy.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete is null', function() {
+			var json = {
+				"name": "toto",
+				"description": "blabla",
+				"id": 12,
+				"complete": null
 			};
 
 			assert.throws(function() {

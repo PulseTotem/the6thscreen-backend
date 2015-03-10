@@ -38,8 +38,8 @@ class RenderPolicy extends ModelItf {
      * @param {string} description - The RenderPolicy's description.
      * @param {number} id - The RenderPolicy's ID.
      */
-    constructor(name : string = "", description : string = "", id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -93,9 +93,20 @@ class RenderPolicy extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"complete": false
 		};
 		return data;
+	}
+
+	/**
+	 * Check if the object is complete.
+	 *
+	 * A RendererPolicy is complete if it has an ID and a name.
+	 */
+	checkCompleteness() : void {
+		super.checkCompleteness();
+		this._complete = (this._complete && !!this.name());
 	}
 
     /**
@@ -184,7 +195,10 @@ class RenderPolicy extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A RenderPolicy object should have an ID.");
 		}
-		return new RenderPolicy(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A RenderPolicy object should have a complete attribute.");
+		}
+		return new RenderPolicy(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
     /**
