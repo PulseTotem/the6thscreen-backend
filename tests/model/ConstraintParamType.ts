@@ -46,8 +46,8 @@ describe('ConstraintParamType', function() {
 	});
 
 	describe('#checkCompleteness', function() {
-		it('should consider the object as complete if it has an ID, a name and a type', function(done) {
-			var cpt = new ConstraintParamType("bidule", "Description de bidule", 52);
+		it('should consider the object as complete if it has an ID, a name and a complete type', function(done) {
+			var cpt = new ConstraintParamType("bidule", null, 52);
 
 			var response : SequelizeRestfulResponse = {
 				"status": "success",
@@ -75,7 +75,7 @@ describe('ConstraintParamType', function() {
 			cpt.checkCompleteness(success, fail);
 		});
 
-		it('should not consider the object as complete if it has an ID, a name but no type', function(done) {
+		it('should not consider the object as complete if it has an ID, a name and a type which is not complete itself', function(done) {
 			var cpt = new ConstraintParamType("bidule", "Description de bidule", 52);
 
 			var response : SequelizeRestfulResponse = {
@@ -83,7 +83,7 @@ describe('ConstraintParamType', function() {
 				"data": {
 					"id":12,
 					"name": "type",
-					"complete": true
+					"complete": false
 				}
 			};
 
@@ -93,7 +93,75 @@ describe('ConstraintParamType', function() {
 
 			var success = function() {
 				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
-				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has no id', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ConstraintParamType("bidule", "Description de bidule");
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ConstraintParamType("", "Description de bidule",24);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ConstraintParamType(null, "Description de bidule",24);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it is empty', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ConstraintParamType();
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
 				done();
 			};
 

@@ -208,11 +208,11 @@ class ConstraintParamType extends ModelItf {
 	checkCompleteness(successCallback : Function = null, failCallback : Function = null) : void {
 		super.checkCompleteness();
 
-		if (this.isComplete()) {
+		if (this.isComplete() && !!this.name()) {
 			var self = this;
 
 			var success:Function = function () {
-				self._complete = (self._complete && !!self.name() && (self.type() !== undefined && self.type().isComplete()));
+				self._complete = (self.type() !== undefined && self.type().isComplete());
 				successCallback();
 			};
 
@@ -221,6 +221,9 @@ class ConstraintParamType extends ModelItf {
 			};
 
 			this.loadAssociations(success, fail);
+		} else {
+			this._complete = false;
+			successCallback();
 		}
 	}
 
