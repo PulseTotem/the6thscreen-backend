@@ -6,6 +6,7 @@
 /// <reference path="./InfoType.ts" />
 /// <reference path="./ParamType.ts" />
 /// <reference path="./ParamValue.ts" />
+/// <reference path="./Service.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -26,14 +27,6 @@ class Source extends ModelItf {
     private _name : string;
 
     /**
-     * Service property.
-     *
-     * @property _service
-     * @type string
-     */
-    private _service : string;
-
-    /**
      * Description property.
      *
      * @property _description
@@ -41,21 +34,29 @@ class Source extends ModelItf {
      */
     private _description : string;
 
-    /**
-     * Host property.
-     *
-     * @property _host
-     * @type string
-     */
-    private _host : string;
+	/**
+	 * Methode property.
+	 *
+	 * @property _method
+	 * @type string
+	 */
+	private _method : string;
 
-    /**
-     * Port property.
-     *
-     * @property _port
-     * @type number
-     */
-    private _port : number;
+	/**
+	 * Service property
+	 *
+	 * @property _service
+	 * @type Service
+	 */
+	private _service : Service;
+
+	/**
+	 * Lazy loading for service property
+	 *
+	 * @property _service_loaded
+	 * @type boolean
+	 */
+	private _service_loaded : boolean;
 
     /**
      * InfoType property.
@@ -116,14 +117,15 @@ class Source extends ModelItf {
      * @param {number} port - The Source's port.
      * @param {number} id - The Source's ID.
      */
-    constructor(name : string, service : string, description : string, host : string, port : number, id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", method : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setName(name);
-	    this.setService(service);
 	    this.setDescription(description);
-	    this.setHost(host);
-	    this.setPort(port);
+	    this.setMethod(method);
+
+	    this._service = null;
+	    this._service_loaded = false;
 
         this._info_type = null;
         this._info_type_loaded = false;
@@ -141,24 +143,7 @@ class Source extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("The name is mandatory for a Source");
-		}
-
 		this._name = name;
-	}
-
-	/**
-	 * Set the Source's service.
-	 *
-	 * @method setService
-	 */
-	setService(service : string) {
-		if(!service) {
-			throw new ModelException("The service is mandatory for a Source");
-		}
-
-		this._service = service;
 	}
 
 	/**
@@ -171,29 +156,12 @@ class Source extends ModelItf {
 	}
 
 	/**
-	 * Set the Source's host.
+	 * Set the Source's method.
 	 *
-	 * @method setHost
+	 * @method setMethod
 	 */
-	setHost(host : string) {
-		if(!host) {
-			throw new ModelException("The host is mandatory for a Source");
-		}
-
-		this._host = host;
-	}
-
-	/**
-	 * Set the Source's port.
-	 *
-	 * @method setPort
-	 */
-	setPort(port : number) {
-		if(!port) {
-			throw new ModelException("The port is mandatory for a Source");
-		}
-
-		this._port = port;
+	setMethod(method : string) {
+		this._method = method;
 	}
 
 	/**
@@ -206,15 +174,6 @@ class Source extends ModelItf {
     }
 
     /**
-     * Return the Source's service.
-     *
-     * @method service
-     */
-    service() {
-        return this._service;
-    }
-
-    /**
      * Return the Source's description.
      *
      * @method description
@@ -223,23 +182,57 @@ class Source extends ModelItf {
         return this._description;
     }
 
-    /**
-     * Return the Source's host.
-     *
-     * @method host
-     */
-    host() {
-        return this._host;
-    }
+	/**
+	 * Return the Source's method.
+	 *
+	 * @method method
+	 */
+	method() {
+		return this._method;
+	}
 
-    /**
-     * Return the Source's port.
-     *
-     * @method port
-     */
-    port() {
-        return this._port;
-    }
+	/**
+	 * Return the Source's service.
+	 *
+	 * @method service
+	 */
+	service() {
+		return this._service;
+	}
+
+	/**
+	 * Load the Source's service.
+	 *
+	 * @method loadService
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadService(successCallback : Function = null, failCallback : Function = null) {
+		if(! this._service_loaded) {
+			var self = this;
+			var success : Function = function(service) {
+				if(!!service) {
+					self._service = service;
+				}
+				self._service_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Source, Service, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
 
     /**
      * Return the Source's infoType.
@@ -380,7 +373,7 @@ class Source extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._param_types_loaded && self._param_values_loaded && self._info_type_loaded) {
+            if(self._param_types_loaded && self._param_values_loaded && self._info_type_loaded && self._service_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -399,6 +392,7 @@ class Source extends ModelItf {
         this.loadParamTypes(success, fail);
         this.loadParamValues(success, fail);
         this.loadInfoType(success, fail);
+	    this.loadService(success, fail);
     }
 
 	/**
@@ -410,6 +404,7 @@ class Source extends ModelItf {
 		this._info_type_loaded = false;
 		this._param_types_loaded = false;
 		this._param_values_loaded = false;
+		this._service_loaded = false;
 	}
 
 	/**
@@ -422,15 +417,47 @@ class Source extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"service": this.service(),
 			"description": this.description(),
-			"host": this.host(),
-			"port": this.port()
+			"method": this.method(),
+			"complete": this.isComplete()
 		};
 		return data;
 	}
 
-    /**
+	/**
+	 * Check whether the object is complete or not
+	 *
+	 * A Source is complete if it has an ID, a name, a method, a service and an infotype.
+	 *
+	 * @param successCallback The function to call in case of success.
+	 * @param failCallback The function to call in case of failure.
+	 */
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
+		super.checkCompleteness();
+
+		if (this.isComplete() && !!this.name() && !!this.method()) {
+			var self = this;
+
+			var success : Function = function () {
+				if (self._info_type_loaded && self._service_loaded) {
+					self._complete = (!!self.infoType() && self.infoType().isComplete() && !!self.service() && self.service().isComplete());
+					successCallback();
+				}
+			};
+
+			var fail : Function = function (error) {
+				failCallback(error);
+			};
+
+			this.loadInfoType(success,fail);
+			this.loadService(success,fail);
+		} else {
+			this._complete = false;
+			successCallback();
+		}
+	}
+
+	/**
      * Return a Source instance as a JSON Object including associated object.
      * However the method should not be recursive due to cycle in the model.
      *
@@ -443,6 +470,7 @@ class Source extends ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
+	        data["service"] = (self.service() !== null) ? self.service().toJSONObject() : null;
             data["infoType"] = (self.infoType() !== null) ? self.infoType().toJSONObject() : null;
             data["paramTypes"] = self.serializeArray(self.paramTypes());
             data["paramValues"] = self.serializeArray(self.paramValues());
@@ -456,6 +484,75 @@ class Source extends ModelItf {
 
         this.loadAssociations(success, fail);
     }
+
+	/**
+	 * Set the Service of the Source.
+	 * As a Source can only have one Service, if the value is already set, this method throws an exception: you need first to unset the Service.
+	 * Moreover the given type must be created in database.
+	 *
+	 * @method setService
+	 * @param {Service} it The Service to associate with the Source.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	setService(service : Service, successCallback : Function = null, failCallback : Function = null) {
+		if (!service || !service.getId()) {
+			failCallback(new ModelException("The service must be an existing object to be associated."));
+			return;
+		}
+
+		if (this.service() !== null) {
+			failCallback(new ModelException("The service is already set for this Source."));
+			return;
+		}
+
+		var self = this;
+
+		var success : Function = function() {
+			service.desynchronize();
+			self._service = service;
+			self._service_loaded = true;
+
+			successCallback();
+		};
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		this.associateObject(Source, Service, service.getId(), success, fail);
+	}
+
+	/**
+	 * Unset the current Service from the Source.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * An Service must have been set before using it, else an exception is thrown.
+	 *
+	 * @method unsetService
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unsetService(successCallback : Function = null, failCallback : Function = null) {
+		if (this.service() === null) {
+			failCallback(new ModelException("No Service has been set for this Source."));
+			return;
+		}
+
+		var self = this;
+
+		var success : Function = function() {
+			self.service().desynchronize();
+			self._service = null;
+
+			successCallback();
+		};
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		this.deleteObjectAssociation(Source, Service, this.service().getId(), success, fail);
+	}
 
 	/**
 	 * Set the InfoType of the Source.
@@ -752,25 +849,13 @@ class Source extends ModelItf {
 	 * @return {Source} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Source {
-		if (!jsonObject.id) {
+		if(!jsonObject.id) {
 			throw new ModelException("A Source object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A Source object should have a name.");
+		if(jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A Source object should have a complete attribute.");
 		}
-		if(!jsonObject.service) {
-			throw new ModelException("A Source object should have a service.");
-		}
-		if(!jsonObject.description) {
-			throw new ModelException("A Source object should have a description.");
-		}
-		if(!jsonObject.host) {
-			throw new ModelException("A Source object should have a host.");
-		}
-		if(!jsonObject.port) {
-			throw new ModelException("A Source object should have a port.");
-		}
-		return new Source(jsonObject.name, jsonObject.service, jsonObject.description, jsonObject.host, jsonObject.port, jsonObject.id);
+		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.id, jsonObject.complete);
 	}
 
     /**

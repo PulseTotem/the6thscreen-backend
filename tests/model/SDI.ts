@@ -7,6 +7,7 @@
 /// <reference path="../../libsdef/sinon.d.ts" />
 
 /// <reference path="../../scripts/model/SDI.ts" />
+/// <reference path="../../scripts/model/User.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");
@@ -14,51 +15,21 @@ var sinon : SinonStatic = require("sinon");
 
 describe('SDI', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new SDI(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new SDI(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new SDI("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function () {
 			var name = "machin";
-			var c = new SDI(name, "c", "a");
+			var c = new SDI(name);
 			assert.equal(c.name(), name, "The name is not stored correctly.");
 		});
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new SDI("df", desc, "dfd");
+			var c = new SDI("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the allowedHost', function () {
 			var allowedHost = "machin";
-			var c = new SDI("ad", "dfd", allowedHost);
+			var c = new SDI("", "", allowedHost);
 			assert.equal(c.allowedHost(), allowedHost, "The allowedHost is not stored correctly.");
 		});
 
@@ -66,6 +37,36 @@ describe('SDI', function() {
 			var id = 52;
 			var c = new SDI("afd", "adfd", "afdd", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
+		});
+
+		it('should store the complete value', function () {
+			var c = new SDI("afd", "adfd", "afdd", 34, true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a default complete value', function () {
+			var c = new SDI();
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
+		});
+	});
+
+	describe('#checkCompleteness()', function() {
+		it('should return false if the object is empty', function() {
+			var b =  new SDI();
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The SDI should not be complete.");
+		});
+
+		it('should return true if the object has a name and an ID but no description', function() {
+			var b = new SDI("tret", "adfd", "afdd", 34);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), true, "The SDI should be complete.");
+		});
+
+		it('should return false if the object has an empty name and an ID but no description', function() {
+			var b = new SDI("", null, "afdd", 34);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The SDI should not be complete.");
 		});
 	});
 
@@ -75,11 +76,27 @@ describe('SDI', function() {
 				"id": 42,
 				"name": "toto",
 				"description": "blabla",
-				"allowedHost": "localhost"
+				"allowedHost": "localhost",
+				"complete": true
 			};
 
 			var userRetrieve = SDI.fromJSONObject(json);
-			var userExpected = new SDI("toto", "blabla", "localhost", 42);
+			var userExpected = new SDI("toto", "blabla", "localhost", 42, true);
+
+			assert.deepEqual(userRetrieve, userExpected, "The retrieve SDI (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
+		});
+
+		it('should create the right object even if it is partial', function () {
+			var json = {
+				"id": 42,
+				"name": null,
+				"description": "blabla",
+				"allowedHost": "",
+				"complete": false
+			};
+
+			var userRetrieve = SDI.fromJSONObject(json);
+			var userExpected = new SDI(null, "blabla", "", 42);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve SDI (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
@@ -88,7 +105,8 @@ describe('SDI', function() {
 			var json = {
 				"name": "toto",
 				"description": "blabla",
-				"allowedHost": "toto"
+				"allowedHost": "toto",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -102,7 +120,8 @@ describe('SDI', function() {
 				"name": "toto",
 				"description": "blabla",
 				"id": null,
-				"allowedHost": "toto"
+				"allowedHost": "toto",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -111,11 +130,12 @@ describe('SDI', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function () {
+		it('should throw an exception if the complete attribute is undefined', function () {
 			var json = {
-				"id": 52,
+				"name": "toto",
 				"description": "blabla",
-				"allowedHost": "toto"
+				"allowedHost": "toto",
+				"id": 33
 			};
 
 			assert.throws(function () {
@@ -124,12 +144,13 @@ describe('SDI', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is null', function () {
+		it('should throw an exception if the complete attribute is null', function () {
 			var json = {
-				"name": null,
+				"name": "toto",
 				"description": "blabla",
-				"id": 42,
-				"allowedHost": "toto"
+				"id": 34,
+				"allowedHost": "toto",
+				"complete": null
 			};
 
 			assert.throws(function () {
@@ -138,69 +159,17 @@ describe('SDI', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the description is undefined', function () {
-			var json = {
-				"id": 52,
-				"name": "blabla",
-				"allowedHost": "toto"
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is null', function () {
-			var json = {
-				"description": null,
-				"name": "blabla",
-				"id": 42,
-				"allowedHost": "toto"
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the allowedHost is undefined', function () {
-			var json = {
-				"id": 52,
-				"name": "blabla",
-				"description": "toto"
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the allowedHost is null', function () {
-			var json = {
-				"allowedHost": null,
-				"name": "blabla",
-				"id": 42,
-				"description": "toto"
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new SDI("toto", "blabla", "tata", 52);
+			var c = new SDI("toto", "blabla", "tata", 52, true);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
 				"allowedHost": "tata",
-				"id": 52
+				"id": 52,
+				"complete": true
 			};
 			var json = c.toJSONObject();
 
@@ -211,7 +180,7 @@ describe('SDI', function() {
 	describe('#addUser', function() {
 		it('should put the new User inside the array', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("mavaleur",12);
+			var pv = new User("mavaleur", "", 12);
 			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : SequelizeRestfulResponse = {
@@ -331,18 +300,20 @@ describe('SDI', function() {
 
 		it('should not allow to put an already existing object', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("toto",13);
+			var pv = new User("toto", "", 13);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": [
 					{
 						"id":13,
-						"username": "toto"
+						"username": "toto",
+						"complete": false
 					},
 					{
 						"id": 14,
-						"username": "titi"
+						"username": "titi",
+						"complete": false
 					}
 				]
 			};
@@ -385,14 +356,15 @@ describe('SDI', function() {
 	describe('#removeUser', function() {
 		it('should remove the User from the array', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("mavaleur",12);
+			var pv = new User("mavaleur", "", 12);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": [
 					{
 						"username": "mavaleur",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};
@@ -488,7 +460,7 @@ describe('SDI', function() {
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var p = new User("bidule");
+			var p = new User("bidule", "");
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -509,7 +481,7 @@ describe('SDI', function() {
 
 		it('should not allow to remove an object which is not linked', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("toto",12);
+			var pv = new User("toto", "", 12);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
@@ -685,7 +657,8 @@ describe('SDI', function() {
 						"width": 2,
 						"height": 3,
 						"positionFromTop": 4,
-						"positionFromLeft": 5
+						"positionFromLeft": 5,
+						"complete": false
 					},
 					{
 						"id":43,
@@ -694,7 +667,8 @@ describe('SDI', function() {
 						"width": 2,
 						"height": 3,
 						"positionFromTop": 4,
-						"positionFromLeft": 5
+						"positionFromLeft": 5,
+						"complete": false
 					}
 				]
 			};
@@ -749,7 +723,8 @@ describe('SDI', function() {
 						"width": 2,
 						"height": 3,
 						"positionFromTop": 4,
-						"positionFromLeft": 5
+						"positionFromLeft": 5,
+						"complete": false
 					}
 				]
 			};
@@ -1039,12 +1014,14 @@ describe('SDI', function() {
 					{
 						"id":13,
 						"name": "toto",
-						"description": "bidule"
+						"description": "bidule",
+						"complete": false
 					},
 					{
 						"id": 14,
 						"name": "titi",
-						"description": "machin"
+						"description": "machin",
+						"complete": false
 					}
 				]
 			};
@@ -1095,7 +1072,8 @@ describe('SDI', function() {
 					{
 						"name": "mavaleur",
 						"description": "uneautre",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};
@@ -1385,12 +1363,14 @@ describe('SDI', function() {
 					{
 						"id":13,
 						"name": "toto",
-						"description": "bidule"
+						"description": "bidule",
+						"complete": false
 					},
 					{
 						"id": 14,
 						"name": "titi",
-						"description": "machin"
+						"description": "machin",
+						"complete": false
 					}
 				]
 			};
@@ -1441,7 +1421,8 @@ describe('SDI', function() {
 					{
 						"name": "mavaleur",
 						"description": "uneautre",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};

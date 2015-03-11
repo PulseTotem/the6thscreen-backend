@@ -54,8 +54,8 @@ class ConstraintParamType extends ModelItf {
 	 * @param {string} name - The ConstraintParamType's name.
 	 * @param {number} id - The ConstraintParamType's ID.
 	 */
-	constructor(name : string, description : string = "", id : number = null) {
-		super(id);
+	constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+		super(id, complete);
 
 		this.setName(name);
 		this.setDescription(description);
@@ -70,10 +70,6 @@ class ConstraintParamType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A ConstraintParamType needs to have a name.");
-		}
-
 		this._name = name;
 	}
 
@@ -198,9 +194,37 @@ class ConstraintParamType extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check completeness of a ConstraintParamType.
+	 *
+	 * A ConstraintParamType is considered as complete if it has an ID, a name and a type.
+	 */
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) : void {
+		super.checkCompleteness();
+
+		if (this.isComplete() && !!this.name()) {
+			var self = this;
+
+			var success:Function = function () {
+				self._complete = (self.type() !== undefined && self.type().isComplete());
+				successCallback();
+			};
+
+			var fail:Function = function (error) {
+				failCallback(error);
+			};
+
+			this.loadAssociations(success, fail);
+		} else {
+			this._complete = false;
+			successCallback();
+		}
 	}
 
     /**
@@ -383,13 +407,11 @@ class ConstraintParamType extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A CallType object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A CallType object should have a name.");
+		if(jsonObject.complete == null || jsonObject.complete == undefined) {
+			throw new ModelException("A CallType object should have a complete attribute.");
 		}
-		if(!jsonObject.description) {
-			throw new ModelException("A CallType object should have a description.");
-		}
-		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.id);
+
+		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
 	/**

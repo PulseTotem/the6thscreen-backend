@@ -14,36 +14,6 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Profil', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new Profil(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new Profil(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new Profil("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new Profil(name, "");
@@ -52,14 +22,24 @@ describe('Profil', function() {
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Profil("blup", desc);
+			var c = new Profil("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Profil("titi", "", id);
+			var c = new Profil("", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
+		});
+
+		it('should store the complete attribute', function () {
+			var c = new Profil("test", "t", 34, true);
+			assert.equal(c.isComplete(), true, "The complete attribute is not stored.");
+		});
+
+		it('should assign a false value by default to complete', function () {
+			var c = new Profil();
+			assert.equal(c.isComplete(), false, "The complete attribute is not stored.");
 		});
 	});
 
@@ -68,11 +48,26 @@ describe('Profil', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": true
 			};
 
 			var callRetrieve = Profil.fromJSONObject(json);
-			var callExpected = new Profil("toto", "blabla", 42);
+			var callExpected = new Profil("toto", "blabla", 42, true);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve profil (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+		});
+
+		it('should create the right object even if it is partial', function () {
+			var json = {
+				"id": 42,
+				"name": null,
+				"description": "blabla",
+				"complete": false
+			};
+
+			var callRetrieve = Profil.fromJSONObject(json);
+			var callExpected = new Profil(null, "blabla", 42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve profil (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
@@ -80,7 +75,8 @@ describe('Profil', function() {
 		it('should throw an exception if the ID is undefined', function () {
 			var json = {
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -93,7 +89,8 @@ describe('Profil', function() {
 			var json = {
 				"name": "toto",
 				"description": "blabla",
-				"id": null
+				"id": null,
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -102,23 +99,11 @@ describe('Profil', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function () {
+		it('should throw an exception if the complete attribute is undefined', function () {
 			var json = {
-				"id": 52,
-				"description": "blabla"
-			};
-
-			assert.throws(function () {
-					Profil.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function () {
-			var json = {
-				"name": null,
+				"name": "toto",
 				"description": "blabla",
-				"id": 42
+				"id": 34
 			};
 
 			assert.throws(function () {
@@ -127,10 +112,12 @@ describe('Profil', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the description is undefined', function () {
+		it('should throw an exception if the complete value is null', function () {
 			var json = {
-				"id": 52,
-				"name": "blabla"
+				"name": "toto",
+				"description": "blabla",
+				"id": 34,
+				"complete": null
 			};
 
 			assert.throws(function () {
@@ -139,32 +126,41 @@ describe('Profil', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the description is null', function () {
-			var json = {
-				"description": null,
-				"name": "blabla",
-				"id": 42
-			};
-
-			assert.throws(function () {
-					Profil.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Profil("toto", "blabla", 52);
+			var c = new Profil("toto", "blabla", 52, true);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
-				"id": 52
+				"id": 52,
+				"complete": true
 			};
 			var json = c.toJSONObject();
 
 			assert.deepEqual(json, expected, "The JSON object (" + JSON.stringify(json) + ") and the expected JSON (" + JSON.stringify(expected) + ") do not match.");
 		})
+	});
+
+	describe('#checkCompleteness()', function() {
+		it('should return false if the object is empty', function() {
+			var b =  new Profil();
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The Profil should not be complete.");
+		});
+
+		it('should return true if the object has a name and an ID but no description', function() {
+			var b = new Profil("toto", null, 52);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), true, "The Profil should be complete.");
+		});
+
+		it('should return false if the object has an empty name and an ID but no description', function() {
+			var b = new Profil("", "blabla", 52);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The Profil should not be complete.");
+		});
 	});
 
 	describe('#addCall', function() {
@@ -296,11 +292,13 @@ describe('Profil', function() {
 				"data": [
 					{
 						"id":13,
-						"name": "toto"
+						"name": "toto",
+						"complete": false
 					},
 					{
 						"id": 14,
-						"name": "titi"
+						"name": "titi",
+						"complete": false
 					}
 				]
 			};
@@ -350,7 +348,8 @@ describe('Profil', function() {
 				"data": [
 					{
 						"name": "mavaleur",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};

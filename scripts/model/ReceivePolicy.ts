@@ -29,8 +29,8 @@ class ReceivePolicy extends ModelItf {
      * @param {string} name - The ReceivePolicy's name.
      * @param {number} id - The ReceivePolicy's ID.
      */
-    constructor(name : string, id : number = null) {
-        super(id);
+    constructor(name : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 	    this.setName(name);
     }
 
@@ -40,10 +40,6 @@ class ReceivePolicy extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A ReceivePolicy needs to have a name.");
-		}
-
 		this._name = name;
 	}
 
@@ -67,9 +63,21 @@ class ReceivePolicy extends ModelItf {
 	toJSONObject() : Object {
 		var data = {
 			"id": this.getId(),
-			"name": this.name()
+			"name": this.name(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check if the ReceivePolicy is complete or not.
+	 *
+	 * A ReceivePolicy is complete if it has an ID and a name.
+	 */
+	checkCompleteness() : void  {
+		super.checkCompleteness();
+
+		this._complete = (this._complete && !!this.name());
 	}
 
     /**
@@ -158,10 +166,10 @@ class ReceivePolicy extends ModelItf {
 		if (!jsonObject.id) {
 			throw new ModelException("A ReceivePolicy object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A ReceivePolicy object should have a name.");
+		if (jsonObject.complete == null || jsonObject.complete == undefined) {
+			throw new ModelException("A ReceivePolicy object should have a complete.");
 		}
-		return new ReceivePolicy(jsonObject.name, jsonObject.id);
+		return new ReceivePolicy(jsonObject.name, jsonObject.id, jsonObject.complete);
 	}
 
     /**

@@ -115,8 +115,8 @@ class SDI extends ModelItf {
      * @param {string} allowedHost - The SDI's allowedHost.
      * @param {number} id - The SDI's ID.
      */
-    constructor(name : string, description : string = "", allowedHost : string = "*", id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", allowedHost : string = "*", id : number = null, complete: boolean = false) {
+        super(id, complete);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -141,10 +141,6 @@ class SDI extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A name is mandatory for a SDI.");
-		}
-
 		this._name = name;
 	}
 
@@ -415,9 +411,22 @@ class SDI extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"allowedHost": this.allowedHost()
+			"allowedHost": this.allowedHost(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check completeness of a SDI.
+	 * The completeness is determined by the presence of a name and an id.
+	 */
+	checkCompleteness(successCallback : Function = null) : void {
+		super.checkCompleteness();
+		this._complete = (this._complete && !!this.name());
+		if (successCallback) {
+			successCallback();
+		}
 	}
 
     /**
@@ -822,16 +831,11 @@ class SDI extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A SDI object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A SDI object should have a name.");
+		if(jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A SDI object should have a complete attribute.");
 		}
-		if(!jsonObject.description) {
-			throw new ModelException("A SDI object should have a description.");
-		}
-		if(!jsonObject.allowedHost) {
-			throw new ModelException("A SDI object should have an allowedHost.");
-		}
-		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id);
+
+		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id, jsonObject.complete);
 	}
 
 	/**

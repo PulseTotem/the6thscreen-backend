@@ -93,11 +93,14 @@ class User extends ModelItf {
      * @param {string} username - The User's username.
      * @param {number} id - The User's ID.
      */
-    constructor(username : string, email : string, id : number = null) {
-        super(id);
+    constructor(username : string = "", email : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setUsername(username);
         this.setEmail(email);
+
+	    this._token = null;
+	    this._lastIp = null;
 
         this._roles = new Array<Role>();
         this._roles_loaded = false;
@@ -112,10 +115,6 @@ class User extends ModelItf {
 	 * @method setUsername
 	 */
 	setUsername(username : string) {
-		if(!username) {
-			throw new ModelException("The username is mandatory for a User.");
-		}
-
 		this._username = username;
 	}
 
@@ -134,11 +133,7 @@ class User extends ModelItf {
      * @method setEmail
      */
     setEmail(email : string) {
-        if(!email) {
-            throw new ModelException("The email is mandatory for a User.");
-        }
-
-        this._email = email;
+       this._email = email;
     }
 
     /**
@@ -312,6 +307,18 @@ class User extends ModelItf {
 	}
 
 	/**
+	 * Check completeness of a user.
+	 * The completeness is determined by the presence of a username, an email and an id.
+	 */
+	checkCompleteness(successCallback : Function = null) : void {
+		super.checkCompleteness();
+		this._complete = (this._complete && !!this.username() && !!this.email());
+		if (successCallback) {
+			successCallback();
+		}
+	}
+
+	/**
 	 * Return a User instance as a JSON Object
 	 *
 	 * @method toJSONObject
@@ -323,7 +330,8 @@ class User extends ModelItf {
 			"username": this.username(),
             "email": this.email(),
             "token": this.token(),
-            "lastIp": this.lastIp()
+            "lastIp": this.lastIp(),
+			"complete": this.isComplete()
 		};
 		return data;
 	}
@@ -336,13 +344,8 @@ class User extends ModelItf {
      * @returns {Object} a JSON Object representing the instance
      */
     private toJSONObjectWithPwd(password : string) : Object {
-        var data = {
-            "id": this.getId(),
-            "username": this.username(),
-            "password": password,
-            "token": this.token(),
-            "lastIp": this.lastIp()
-        };
+        var data = this.toJSONObject();
+	    data["password"] = password;
         return data;
     }
 
@@ -739,15 +742,11 @@ class User extends ModelItf {
 			throw new ModelException("A User object should have an ID.");
 		}
 
-		if(!jsonObject.username) {
-			throw new ModelException("A User object should have a name.");
+		if (jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A User object should have a complete attribute.");
 		}
 
-        if(!jsonObject.email) {
-            throw new ModelException("A User object should have an email.");
-        }
-
-		var user = new User(jsonObject.username, jsonObject.email, jsonObject.id);
+		var user = new User(jsonObject.username, jsonObject.email, jsonObject.id, jsonObject.complete);
 
         if(!!jsonObject.token) {
             user.setToken(jsonObject.token);

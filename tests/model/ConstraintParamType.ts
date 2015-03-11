@@ -16,36 +16,6 @@ var sinon : SinonStatic = require("sinon");
 
 describe('ConstraintParamType', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new ConstraintParamType(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new ConstraintParamType(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new ConstraintParamType("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function(){
 			var name = "machin";
 			var c = new ConstraintParamType(name,"");
@@ -54,14 +24,152 @@ describe('ConstraintParamType', function() {
 
 		it('should store the description', function(){
 			var desc = "machin";
-			var c = new ConstraintParamType("toto",desc);
+			var c = new ConstraintParamType("",desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new ConstraintParamType("titi","",id);
+			var c = new ConstraintParamType("","",id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
+		});
+
+		it('should store the complete value', function() {
+			var c = new ConstraintParamType("tze","tete",42,true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a default false value to complete', function() {
+			var c = new ConstraintParamType();
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
+		});
+	});
+
+	describe('#checkCompleteness', function() {
+		it('should consider the object as complete if it has an ID, a name and a complete type', function(done) {
+			var cpt = new ConstraintParamType("bidule", null, 52);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an ID, a name and a type which is not complete itself', function(done) {
+			var cpt = new ConstraintParamType("bidule", "Description de bidule", 52);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": false
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has no id', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ConstraintParamType("bidule", "Description de bidule");
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ConstraintParamType("", "Description de bidule",24);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ConstraintParamType(null, "Description de bidule",24);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it is empty', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ConstraintParamType();
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
 		});
 	});
 
@@ -100,11 +208,26 @@ describe('ConstraintParamType', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": true
 			};
 
 			var callRetrieve = ConstraintParamType.fromJSONObject(json);
-			var callExpected = new ConstraintParamType("toto","blabla",42);
+			var callExpected = new ConstraintParamType("toto","blabla",42,true);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve constraintParamType ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
+		});
+
+		it('should create the right object even if it is partial', function() {
+			var json = {
+				"id": 42,
+				"name": "",
+				"description": null,
+				"complete": false
+			};
+
+			var callRetrieve = ConstraintParamType.fromJSONObject(json);
+			var callExpected = new ConstraintParamType("",null,42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve constraintParamType ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -112,7 +235,8 @@ describe('ConstraintParamType', function() {
 		it('should throw an exception if the ID is undefined', function() {
 			var json = {
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": false
 			};
 
 			assert.throws(function() {
@@ -125,6 +249,7 @@ describe('ConstraintParamType', function() {
 			var json = {
 				"name": "toto",
 				"description": "blabla",
+				"complete": false,
 				"id": null
 			};
 
@@ -134,23 +259,11 @@ describe('ConstraintParamType', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function() {
+		it('should throw an exception if the complete is undefined', function() {
 			var json = {
-				"id": 52,
-				"description": "blabla"
-			};
-
-			assert.throws(function() {
-					ConstraintParamType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function() {
-			var json = {
-				"name": null,
+				"name": "toto",
 				"description": "blabla",
-				"id": 42
+				"id": 2
 			};
 
 			assert.throws(function() {
@@ -159,23 +272,12 @@ describe('ConstraintParamType', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the description is undefined', function() {
+		it('should throw an exception if the complete is null', function() {
 			var json = {
-				"id": 52,
-				"name": "blabla"
-			};
-
-			assert.throws(function() {
-					ConstraintParamType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is null', function() {
-			var json = {
-				"description": null,
-				"name": "blabla",
-				"id": 42
+				"name": "toto",
+				"description": "blabla",
+				"id": 23,
+				"complete": null
 			};
 
 			assert.throws(function() {
@@ -191,7 +293,8 @@ describe('ConstraintParamType', function() {
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
-				"id": 52
+				"id": 52,
+				"complete": false
 			};
 			var json = c.toJSONObject();
 

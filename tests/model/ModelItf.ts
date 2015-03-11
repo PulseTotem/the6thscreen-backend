@@ -17,16 +17,38 @@ describe('ModelItf', function() {
 			var id = 12;
 			var model = new ModelItf(id);
 
-			assert.equal(model.getId(), id, "The id is correctly stored.");
+			assert.equal(model.getId(), id, "The id is not correctly stored.");
 		});
 
-
-		it('should not authorize to create an object with an undefined ID', function() {
-			assert.throws(function() {
-					new ModelItf(undefined);
-				},
-				ModelException, "The exception has not been thrown.");
+		it('should give a null id if an undefined argument is given', function() {
+			var model = new ModelItf(undefined);
+			assert.equal(model.getId(), null, "The id is not null");
 		});
+
+		it('should store the given complete attribute', function() {
+			var model = new ModelItf(12,true);
+
+			assert.equal(model.isComplete(), true, "The boolean complete is not correctly stored.");
+		});
+
+		it('should assign a false value if complete is not given ', function() {
+			var model = new ModelItf();
+			assert.equal(model.isComplete(), false, "The complete is not false");
+		});
+	});
+
+	describe('#checkCompleteness()', function() {
+		it('should compute true if an id is given', function() {
+			var model = new ModelItf(24);
+			model.checkCompleteness();
+			assert.equal(model.isComplete(), true, "The object is not considered as complete but it should be.");
+		});
+
+		it('should return false if an id is not given', function() {
+			var model = new ModelItf();
+			model.checkCompleteness();
+			assert.equal(model.isComplete(), false, "The object is considered as complete but it should not be.");
+		})
 	});
 
 	describe('#createObject()', function() {
@@ -323,7 +345,7 @@ describe('ModelItf', function() {
 
 			var response : SequelizeRestfulResponse = {
 				"status": "success",
-				"data": model.toJSONObject()
+				"data": {"id": 42, "complete": false}
 			};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
@@ -331,7 +353,7 @@ describe('ModelItf', function() {
 				.reply(200, JSON.stringify(response));
 
             var success = function(model2) {
-                assert.deepEqual(model2, model, "The two models are not the same.");
+                assert.deepEqual(model2, model, "The two models are not the same");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
@@ -550,8 +572,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#updateObject()', function() {
-		it('should throw an error if the object has an id ' + ModelItf.NULLID, function(done) {
-			var model = new ModelItf(ModelItf.NULLID);
+		it('should throw an error if the object has an id ' + null, function(done) {
+			var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -835,8 +857,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#deleteObject()', function() {
-		it('should throw an error if the object has an id '+ModelItf.NULLID, function(done) {
-			var model = new ModelItf(ModelItf.NULLID);
+		it('should throw an error if the object has an id '+null, function(done) {
+			var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -999,13 +1021,14 @@ describe('ModelItf', function() {
 
 			for (var id in ids) {
 				models.push(new ModelItf(id));
-				data.push({"id": id});
+				data.push({"id": id, "complete": false});
 			}
 
 			var modelName = ModelItf;
 
 			var reponse : SequelizeRestfulResponse = {
 				"status": "success",
+				"count": 4,
 				"data": data
 			};
 
@@ -1014,7 +1037,7 @@ describe('ModelItf', function() {
 				.reply(200, JSON.stringify(reponse));
 
             var success = function(allmodels) {
-                assert.deepEqual(allmodels, models, "The array of models is not the same.");
+                assert.deepEqual(allmodels, models, "The array of models is not the same : "+JSON.stringify(allmodels)+ " and "+JSON.stringify(models));
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
@@ -1214,9 +1237,9 @@ describe('ModelItf', function() {
 	});
 
 	describe('#associateObject()', function() {
-		it('should throw an error if the object has an id '+ ModelItf.NULLID, function(done) {
+		it('should throw an error if the object has an id '+ null, function(done) {
 
-            var model = new ModelItf(ModelItf.NULLID);
+            var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1408,8 +1431,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#deleteObjectAssociation()', function() {
-		it('should throw an error if the object has an id '+ModelItf.NULLID, function(done) {
-			var model = new ModelItf(ModelItf.NULLID);
+		it('should throw an error if the object has an id '+null, function(done) {
+			var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1603,8 +1626,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#getAssociatedObjects()', function() {
-		it('should throw an error if the object has an id '+ModelItf.NULLID, function(done) {
-			var model = new ModelItf(ModelItf.NULLID);
+		it('should throw an error if the object has an id '+null, function(done) {
+			var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1885,8 +1908,8 @@ describe('ModelItf', function() {
 	});
 
 	describe('#getUniquelyAssociatedObject()', function() {
-		it('should throw an error if the object has an id '+ModelItf.NULLID, function(done) {
-			var model = new ModelItf(ModelItf.NULLID);
+		it('should throw an error if the object has an id '+null, function(done) {
+			var model = new ModelItf(null);
 
             var success = function() {
                 done(new Error("Test failed."));

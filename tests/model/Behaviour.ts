@@ -14,36 +14,6 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Behaviour', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new Behaviour(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new Behaviour(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new Behaviour("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new Behaviour(name, "");
@@ -52,14 +22,39 @@ describe('Behaviour', function() {
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Behaviour("titi", desc);
+			var c = new Behaviour("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Behaviour("tutu", "", id);
+			var c = new Behaviour("", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
+		});
+
+		it('should store the complete attribute', function () {
+			var c = new Behaviour("", "", 12, true);
+			assert.equal(c.isComplete(), true, "The complete attribute is not stored.");
+		});
+	});
+
+	describe('#checkCompleteness()', function() {
+		it('should return false if the object is empty', function() {
+			var b =  new Behaviour();
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+		});
+
+		it('should return true if the object has a name and an ID but no description', function() {
+			var b = new Behaviour('toto', null, 12);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), true, "The behaviour should be complete.");
+		});
+
+		it('should return false if the object has an empty name and an ID but no description', function() {
+			var b = new Behaviour('', null, 12);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
 		});
 	});
 
@@ -68,11 +63,26 @@ describe('Behaviour', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete":true
 			};
 
 			var callRetrieve = Behaviour.fromJSONObject(json);
-			var callExpected = new Behaviour("toto", "blabla", 42);
+			var callExpected = new Behaviour("toto", "blabla", 42,true);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve renderer (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+		});
+
+		it('should create the right object even if it is not complete', function () {
+			var json = {
+				"id": 42,
+				"name": "toto",
+				"description": null,
+				"complete":false
+			};
+
+			var callRetrieve = Behaviour.fromJSONObject(json);
+			var callExpected = new Behaviour("toto", null, 42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve renderer (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
@@ -80,7 +90,8 @@ describe('Behaviour', function() {
 		it('should throw an exception if the ID is undefined', function () {
 			var json = {
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -93,6 +104,7 @@ describe('Behaviour', function() {
 			var json = {
 				"name": "toto",
 				"description": "blabla",
+				"complete": false,
 				"id": null
 			};
 
@@ -102,23 +114,11 @@ describe('Behaviour', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function () {
+		it('should throw an exception if the complete is undefined', function () {
 			var json = {
-				"id": 52,
-				"description": "blabla"
-			};
-
-			assert.throws(function () {
-					Behaviour.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function () {
-			var json = {
-				"name": null,
+				"name": "toto",
 				"description": "blabla",
-				"id": 42
+				"id": 23
 			};
 
 			assert.throws(function () {
@@ -127,10 +127,12 @@ describe('Behaviour', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the description is undefined', function () {
+		it('should throw an exception if the complete is null', function () {
 			var json = {
-				"id": 52,
-				"name": "blabla"
+				"name": "toto",
+				"description": "blabla",
+				"id": 3,
+				"complete": null
 			};
 
 			assert.throws(function () {
@@ -139,18 +141,6 @@ describe('Behaviour', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the description is null', function () {
-			var json = {
-				"description": null,
-				"name": "blabla",
-				"id": 42
-			};
-
-			assert.throws(function () {
-					Behaviour.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function () {
@@ -159,7 +149,8 @@ describe('Behaviour', function() {
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
-				"id": 52
+				"id": 52,
+				"complete": false
 			};
 			var json = c.toJSONObject();
 

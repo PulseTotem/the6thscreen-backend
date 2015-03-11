@@ -92,8 +92,8 @@ class ParamType extends ModelItf {
      * @param {string} description - The ParamType's description.
      * @param {number} id - The ParamType's ID.
      */
-    constructor(name : string, description : string = "", id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -114,10 +114,6 @@ class ParamType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A ParamType needs to have a name.");
-		}
-
 		this._name = name;
 	}
 
@@ -323,6 +319,36 @@ class ParamType extends ModelItf {
 	}
 
 	/**
+	 * Check if the given object is complete or not.
+	 *
+	 * A ParamType is complete if it has an ID, a name and a type.
+	 *
+	 * @param successCallback The function to call in case of success.
+	 * @param failCallback The function to call in case of fail.
+	 */
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
+		super.checkCompleteness();
+
+		if (this.isComplete() && !!this.name()) {
+			var self = this;
+
+			var success : Function = function () {
+				self._complete = (self.type() !== null && self.type().isComplete());
+				successCallback();
+			};
+
+			var fail : Function = function (error) {
+				failCallback(error);
+			};
+
+			this.loadType(success, fail);
+		} else {
+			this._complete = false;
+			successCallback();
+		}
+	}
+
+	/**
 	 * Return a ParamType instance as a JSON Object
 	 *
 	 * @method toJSONObject
@@ -332,7 +358,8 @@ class ParamType extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"complete": this.isComplete()
 		};
 		return data;
 	}
@@ -657,13 +684,10 @@ class ParamType extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A ParamType object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A ParamType object should have a name.");
+		if(jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A ParamType object should have a complete attribute.");
 		}
-		if(!jsonObject.description) {
-			throw new ModelException("A ParamType object should have a description.");
-		}
-		return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id);
+		return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
     /**

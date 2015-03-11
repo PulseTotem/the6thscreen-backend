@@ -12,36 +12,6 @@ var nock : any = require("nock");
 
 describe('Role', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new Role(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new Role(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new Role("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new Role(name);
@@ -50,25 +20,84 @@ describe('Role', function() {
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Role("bidule", 52);
+			var c = new Role("", 52);
 			assert.equal(c.getId(), id, "The ID is not stored.");
+		});
+
+		it('should store the complete value', function() {
+			var c = new Role("",52,true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a default complete value to false', function() {
+			var c = new Role();
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
+		});
+	});
+
+	describe('#checkCompleteness', function() {
+		it('should specify the object is complete if a name and an ID are given', function() {
+			var i = new Role("vlab",324);
+			i.checkCompleteness();
+			assert.equal(i.isComplete(), true, "The infoType is not considered as complete.");
+		});
+
+		it('should not specify the object is complete if the name is an empty string', function() {
+			var i = new Role("",324);
+			i.checkCompleteness();
+			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+		});
+
+		it('should not specify the object is complete if the name is null', function() {
+			var i = new Role(null,324);
+			i.checkCompleteness();
+			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+		});
+
+		it('should not specify the object is complete if the id is null', function() {
+			var i = new Role("test");
+			i.checkCompleteness();
+			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+		});
+
+		it('should not specify the object is complete if the object is empty', function() {
+			var i = new Role();
+			i.checkCompleteness();
+			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
 		});
 	});
 
 	describe('#fromJSONobject', function () {
 		it('should create the right object', function () {
-			var json = {"id": 42,
-				"name": "toto"
+			var json = {
+				"id": 42,
+				"name": "toto",
+				"complete": true
 			};
 
 			var callRetrieve = Role.fromJSONObject(json);
-			var callExpected = new Role("toto", 42);
+			var callExpected = new Role("toto", 42,true);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve call (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+		});
+
+		it('should create the right object even if it is partial', function () {
+			var json = {
+				"id": 42,
+				"name": "",
+				"complete": false
+			};
+
+			var callRetrieve = Role.fromJSONObject(json);
+			var callExpected = new Role("", 42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve call (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
 
 		it('should throw an exception if the ID is undefined', function () {
-			var json = {"name": "toto"
+			var json = {
+				"name": "toto",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -80,6 +109,7 @@ describe('Role', function() {
 		it('should throw an exception if the ID is null', function () {
 			var json = {
 				"name": "toto",
+				"complete": false,
 				"id": null
 			};
 
@@ -89,20 +119,10 @@ describe('Role', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function () {
-			var json = {"id": 52
-			};
-
-			assert.throws(function () {
-					Role.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function () {
+		it('should throw an exception if the complete is undefined', function () {
 			var json = {
-				"name": null,
-				"id": 42
+				"name": "toto",
+				"id": 12
 			};
 
 			assert.throws(function () {
@@ -110,6 +130,20 @@ describe('Role', function() {
 				},
 				ModelException, "The exception has not been thrown.");
 		});
+
+		it('should throw an exception if the complete is null', function () {
+			var json = {
+				"name": "toto",
+				"id": 12,
+				"complete": null
+			};
+
+			assert.throws(function () {
+					Role.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
 	});
 
 	describe('#toJsonObject', function () {
@@ -117,7 +151,8 @@ describe('Role', function() {
 			var c = new Role("toto", 52);
 			var expected = {
 				"name": "toto",
-				"id": 52
+				"id": 52,
+				"complete": false
 			};
 			var json = c.toJSONObject();
 

@@ -123,8 +123,8 @@ class CallType extends ModelItf {
      * @param {string} description - The CallType's description.
      * @param {number} id - The CallType's ID.
      */
-    constructor(name : string, description : string = "", id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
 		this.setName(name);
 		this.setDescription(description);
@@ -151,10 +151,6 @@ class CallType extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A CallType need a proper name.");
-		}
-
 		this._name = name;
 	}
 
@@ -459,9 +455,44 @@ class CallType extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check whether the object is complete or not
+	 *
+	 * A CallType is complete if it has an ID, a name, a source, a renderer and a zone.
+	 *
+	 * @param successCallback The function to call in case of success.
+	 * @param failCallback The function to call in case of failure.
+	 */
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
+		super.checkCompleteness();
+
+		if (this.isComplete() && !!this.name()) {
+			var self = this;
+
+			var success : Function = function () {
+				if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
+					self._complete = (!!self.renderer() && self.renderer().isComplete()) && (!!self.zone() && self.zone().isComplete()) && (!!self.source() && self.source().isComplete());
+					successCallback();
+				}
+			};
+
+			var fail : Function = function (error) {
+				failCallback(error);
+			};
+
+			this.loadSource(success,fail);
+			this.loadZone(success,fail);
+			this.loadRenderer(success,fail);
+		} else {
+			this._complete = false;
+			successCallback();
+		}
 	}
 
     /**
@@ -924,13 +955,12 @@ class CallType extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A CallType object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A CallType object should have a name.");
+
+		if(jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A CallType object should have a complete attribute.");
 		}
-		if(!jsonObject.description) {
-			throw new ModelException("A CallType object should have a description.");
-		}
-		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id);
+
+		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
     /**

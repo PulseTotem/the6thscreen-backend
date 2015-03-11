@@ -39,8 +39,8 @@ class Behaviour extends ModelItf {
 	 * @param {string} description - The Behaviour's description.
 	 * @param {number} id - The Behaviour's ID.
 	 */
-	constructor(name : string, description : string = "", id : number = null) {
-		super(id);
+	constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+		super(id,complete);
 
 		this.setName(name);
 		this.setDescription(description);
@@ -52,10 +52,6 @@ class Behaviour extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("A name is mandatory for Behaviour.");
-		}
-
 		this._name = name;
 	}
 
@@ -87,6 +83,18 @@ class Behaviour extends ModelItf {
 	}
 
 	/**
+	 * Check completeness of a behaviour.
+	 * The completeness is determined by the presence of a name and an id.
+	 */
+	checkCompleteness(successCallback : Function = null) : void {
+		super.checkCompleteness();
+		this._complete = (this._complete && !!this.name());
+		if (successCallback) {
+			successCallback();
+		}
+	}
+
+	/**
 	 * Return a Behaviour instance as a JSON Object
 	 *
 	 * @method toJSONObject
@@ -96,7 +104,8 @@ class Behaviour extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"complete": this.isComplete()
 		};
 		return data;
 	}
@@ -136,7 +145,7 @@ class Behaviour extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
-		return this.updateObject(Behaviour, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+	    return this.updateObject(Behaviour, this.toJSONObject(), successCallback, failCallback, attemptNumber);
 	}
 
     /**
@@ -187,13 +196,11 @@ class Behaviour extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A Behaviour object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A Behaviour object should have a name.");
+		if(jsonObject.complete == null || jsonObject.complete == undefined) {
+			throw new ModelException("A Behaviour object should have a complete attribute.");
 		}
-		if(!jsonObject.description) {
-			throw new ModelException("A Behaviour object should have a description.");
-		}
-		return new Behaviour(jsonObject.name, jsonObject.description, jsonObject.id);
+
+		return new Behaviour(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
 	/**

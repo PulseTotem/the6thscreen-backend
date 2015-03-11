@@ -18,8 +18,6 @@
  */
 class ModelItf {
 
-	static NULLID = null;
-
     /**
      * ID property.
      *
@@ -28,16 +26,25 @@ class ModelItf {
      */
     _id : number;
 
+	/**
+	 * Complete property : determine if a piece of information is complete or not.
+	 *
+	 * @property complete
+	 * @type boolean
+	 */
+	_complete : boolean;
+
     /**
      * Constructor.
      *
      * @param {number} id - The model ID.
      */
-    constructor(id : number) {
-	    if (!id && id !== ModelItf.NULLID) {
+    constructor(id : number = null, complete : boolean = false) {
+	    if (!id && id !== null) {
 		    throw new ModelException("The ID cannot be undefined");
 	    }
         this._id = id;
+	    this._complete = complete;
     }
 
     /**
@@ -49,6 +56,22 @@ class ModelItf {
     getId() : number {
         return this._id;
     }
+
+	/**
+	 * Return if the model is complete or not.
+	 *
+	 * @returns {boolean}
+	 */
+	isComplete() : boolean {
+		return this._complete;
+	}
+
+	/**
+	 * Check the completeness of an object.
+	 */
+	checkCompleteness() : void {
+		this._complete = (this._id !== null);
+	}
 
     /**
      * Create model object in database.
@@ -74,6 +97,8 @@ class ModelItf {
             failCallback(new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data)), attemptNumber);
             return;
         }
+
+	    this.checkCompleteness();
 
         var success : Function = function(result) {
             var response = result.data();
@@ -264,6 +289,8 @@ class ModelItf {
             failCallback(new ModelException("The object does not exist yet. It can't be update. Datas: "+JSON.stringify(data)), attemptNumber);
             return;
         }
+
+	    this.checkCompleteness();
 
         var success : Function = function(result) {
             var response = result.data();
@@ -706,7 +733,10 @@ class ModelItf {
 	 * @returns {Object} a JSON Object representing the instance
 	 */
 	toJSONObject() : Object {
-		var data = { "id": this.getId() };
+		var data = {
+			"id": this.getId(),
+			"complete": this.isComplete()
+		};
 		return data;
 	}
 
@@ -723,7 +753,6 @@ class ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
-
             successCallback(data);
         };
 
@@ -757,7 +786,8 @@ class ModelItf {
      */
     static fromJSONObject(jsonObject : any) : ModelItf {
         Logger.warn("ModelItf - fromJSONObject : Method need to be implemented.");
-        return new ModelItf(jsonObject.id); // for passing the tests with modelItf
+        var model = new ModelItf(jsonObject.id, jsonObject.complete); // for passing the tests with modelItf
+	    return model;
     }
 
     /**

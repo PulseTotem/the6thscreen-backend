@@ -13,151 +13,39 @@ var nock : any = require("nock");
 var sinon : SinonStatic = require("sinon");
 
 describe('Source', function() {
-	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new Source(undefined, "toto", "", "localhost", 4242);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new Source(null, "toto", "", "localhost", 4242);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new Source("", "toto", "", "localhost", 4242);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the service is undefined', function(){
-			assert.throws(
-				function() {
-					new Source("toto", undefined, "", "localhost", 4242);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the service is null', function(){
-			assert.throws(
-				function() {
-					new Source("toto", null, "", "localhost", 4242);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the service is empty', function(){
-			assert.throws(
-				function() {
-					new Source("toto", "", "", "localhost", 4242);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the host is undefined', function(){
-			assert.throws(
-				function() {
-					new Source("toto", "machin", "", undefined, 4242);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the host is null', function(){
-			assert.throws(
-				function() {
-					new Source("toto", "machin", "", null, 4242);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the host is empty', function(){
-			assert.throws(
-				function() {
-					new Source("toto", "machin", "", "", 4242);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the port is undefined', function(){
-			assert.throws(
-				function() {
-					new Source("toto", "machin", "", "localhost", undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the port is null', function(){
-			assert.throws(
-				function() {
-					new Source("toto", "machin", "", "localhost", null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
+	describe('constructor', function () {
 		it('should store the name', function () {
 			var name = "machin";
-			var c = new Source(name, "ser", "desc", "host", 4242, 12);
+			var c = new Source(name);
 			assert.equal(c.name(), name, "The name is not stored correctly.");
-		});
-
-		it('should store the service', function () {
-			var service = "machin";
-			var c = new Source("machin", service, "desc", "host", 4242, 12);
-			assert.equal(c.service(), service, "The service is not stored correctly.");
 		});
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Source("machin", "ser", desc, "host", 4242, 12);
+			var c = new Source("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
-		it('should store the host', function () {
-			var host = "machin";
-			var c = new Source("machin", "ser", "desc", host, 4242, 12);
-			assert.equal(c.host(), host, "The host is not stored correctly.");
-		});
-
-		it('should store the port', function () {
-			var port = 12;
-			var c = new Source("machin", "ser", "desc", "host", port, 12);
-			assert.equal(c.port(), port, "The port is not stored correctly.");
+		it('should store the method', function () {
+			var method = "machin";
+			var c = new Source("", "", method);
+			assert.equal(c.method(), method, "The method is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Source("machin", "ser", "desc", "host", 4242, id);
+			var c = new Source("", "", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
+		});
+
+		it('should store the complete value', function () {
+			var c = new Source("a", "v", "c", 234, true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a default false complete value', function () {
+			var c = new Source();
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
 		});
 	});
 
@@ -166,14 +54,28 @@ describe('Source', function() {
 			var json = {
 				"id": 28,
 				"name": "machin",
-				"service": "ser",
 				"description": "desc",
-				"host": "host",
-				"port": 4242
+				"method": "method",
+				"complete": true
 			};
 
 			var userRetrieve = Source.fromJSONObject(json);
-			var userExpected = new Source("machin", "ser", "desc", "host", 4242, 28);
+			var userExpected = new Source("machin", "desc", "method", 28, true);
+
+			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
+		});
+
+		it('should create the right object even if it is partial', function () {
+			var json = {
+				"id": 28,
+				"name": null,
+				"description": "desc",
+				"method": "",
+				"complete": false
+			};
+
+			var userRetrieve = Source.fromJSONObject(json);
+			var userExpected = new Source(null, "desc", "", 28, false);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
@@ -181,10 +83,9 @@ describe('Source', function() {
 		it('should throw an exception if the ID is undefined', function () {
 			var json = {
 				"name": "machin",
-				"service": "ser",
 				"description": "desc",
-				"host": "host",
-				"port": 4242
+				"method": "method",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -197,10 +98,9 @@ describe('Source', function() {
 			var json = {
 				"id": null,
 				"name": "machin",
-				"service": "ser",
 				"description": "desc",
-				"host": "host",
-				"port": 4242
+				"method": "method",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -209,44 +109,12 @@ describe('Source', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function () {
+		it('should throw an exception if the complete value is undefined', function () {
 			var json = {
-				"id": 28,
-				"service": "ser",
-				"description": "desc",
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function () {
-			var json = {
-				"id": 28,
-				"name": null,
-				"service": "ser",
-				"description": "desc",
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the service is undefined', function () {
-			var json = {
-				"id": 28,
 				"name": "machin",
 				"description": "desc",
-				"host": "host",
-				"port": 4242
+				"method": "method",
+				"id": 34
 			};
 
 			assert.throws(function () {
@@ -255,107 +123,13 @@ describe('Source', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the service is null', function () {
+		it('should throw an exception if the complete attribute is null', function () {
 			var json = {
-				"id": 28,
+				"id": 34,
 				"name": "machin",
-				"service": null,
 				"description": "desc",
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is undefined', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is null', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"description": null,
-				"host": "host",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the host is undefined', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"description": "desc",
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the host is null', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"description": "desc",
-				"host": null,
-				"port": 4242
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the port is undefined', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"description": "desc",
-				"host": "machin"
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the port is null', function () {
-			var json = {
-				"id": 28,
-				"name": "machin",
-				"service": "ser",
-				"description": "desc",
-				"host": "machin",
-				"port": null
+				"method": "method",
+				"complete": null
 			};
 
 			assert.throws(function () {
@@ -367,14 +141,13 @@ describe('Source', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Source("machin", "ser", "desc", "host", 4242, 28);
+			var c = new Source("machin", "desc", "method", 28, true);
 			var expected = {
 				"id": 28,
 				"name": "machin",
-				"service": "ser",
 				"description": "desc",
-				"host": "host",
-				"port": 4242
+				"method": "method",
+				"complete": true
 			};
 			var json = c.toJSONObject();
 
@@ -382,9 +155,498 @@ describe('Source', function() {
 		})
 	});
 
+	describe('#checkCompleteness', function() {
+		it('should consider the object as complete if it has an ID, a name, a method, a complete infotype and a complete service', function(done) {
+			var cpt = new Source("machin", null, "method", 28);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMock2.isDone(), "The mock2 request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an ID, a name, a method, a complete service and an infotype which is not complete itself', function(done) {
+			var cpt = new Source("machin", null, "method", 28);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": false
+				}
+			};
+
+			var response2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "service",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response2));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMock2.isDone(), "The mock2 request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an ID, a name, a method, a complete infotype and a service which is not complete itself', function(done) {
+			var cpt = new Source("machin", null, "method", 28);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var response2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "service",
+					"complete": false
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response2));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMock2.isDone(), "The mock2 request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has no id', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source("machin", null, "method");
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source("", null, "method", 28);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source(null, null, "method", 28);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty method', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source("test", null, "", 28);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null method', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source("test", null, null, 28);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it is empty', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source();
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+	});
+
+	describe('#setService', function () {
+		it('should set the given service', function (done) {
+			var c = new Source("machin", "desc", "method", 28);
+			var s = new Service("toto", "machin", "blabla", 42);
+			var spy = sinon.spy(s, "desynchronize");
+
+			var response1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var service = c.service();
+				assert.equal(service, null, "The service is not a null value: " + JSON.stringify(service));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+
+				var response2:SequelizeRestfulResponse = {
+					"status": "success",
+					"data": {}
+				};
+
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+					.put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(response2));
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the setInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the service in database.");
+
+					service = c.service();
+					assert.deepEqual(service, s, "The service() does not return the exact service we give: " + JSON.stringify(service));
+					assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.setService(s, success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadService(success, fail);
+		});
+
+		it('should not allow to add a null object', function (done) {
+			nock.disableNetConnect();
+			var c = new Source("machin", "desc", "method", 28);
+
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The ModelException has not been thrown.");
+				done();
+			};
+
+			c.setService(null, success, fail);
+		});
+
+		it('should not allow to add an undefined object', function (done) {
+			nock.disableNetConnect();
+			var c = new Source("machin", "desc", "method", 28);
+
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The ModelException has not been thrown.");
+				done();
+			};
+
+			c.setService(undefined, success, fail);
+		});
+
+		it('should not allow to add a object which is not yet created', function (done) {
+			nock.disableNetConnect();
+			var c = new Source("machin", "desc", "method", 28);
+			var s = new Service("toto", "machin", "blabla");
+
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The ModelException has not been thrown.");
+				done();
+			};
+
+			c.setService(s, success, fail);
+		});
+
+		it('should not allow to set a infoType if there is already one', function (done) {
+			var c = new Source("machin", "desc", "method", 28);
+			var s = new Service("toto", "machin", "blabla", 42);
+			var s2 = new Service("toto", "machin", "blabla", 89);
+
+
+			var response1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s2.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var service = c.service();
+
+				assert.ok(!!service, "The service has false value.");
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+
+				var success2 = function() {
+					done(new Error("Test failed."));
+				};
+
+				var fail2 = function(err) {
+					assert.throws(function() {
+							if(err) {
+								throw err;
+							}
+						},
+						ModelException, "The ModelException has not been thrown.");
+					done();
+				};
+
+				c.setService(s, success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadService(success, fail);
+		});
+
+	});
+
+	describe('#unsetService', function () {
+		it('should unset the Service', function (done) {
+			var c = new Source("machin", "desc", "method", 28);
+			var s = new Service("toto", "machin", "blabla", 42);
+
+			var response1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var service = c.service();
+				assert.deepEqual(service, s, "The service is not the expected value");
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+				var spy = sinon.spy(service, "desynchronize");
+
+				var response2:SequelizeRestfulResponse = {
+					"status": "success",
+					"data": {}
+				};
+
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+					.delete(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(response2));
+
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the unsetInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+
+					service = c.service();
+					assert.deepEqual(service, null, "The service() does not return a null value after unsetting");
+					assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
+
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.unsetService(success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadService(success, fail);
+		});
+
+		it('should not allow to unset a service if there is none', function (done) {
+			var c = new Source("machin", "desc", "method", 28);
+			var s = new Service("toto", "machin", "blabla", 42);
+
+			var response1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var service = c.service();
+
+				assert.equal(service, null, "The service has a value not null: " + JSON.stringify(service));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done");
+
+				var success2 = function() {
+					done(new Error("Test failed."));
+				};
+
+				var fail2 = function(err) {
+					assert.throws(function() {
+							if(err) {
+								throw err;
+							}
+						},
+						ModelException, "The ModelException has not been thrown.");
+					done();
+				};
+
+				c.unsetService(success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadService(success, fail);
+		});
+
+	});
+
 	describe('#setInfoType', function () {
 		it('should set the given infoType', function (done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
@@ -438,7 +700,7 @@ describe('Source', function() {
 
 		it('should not allow to add a null object', function (done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -459,7 +721,7 @@ describe('Source', function() {
 
 		it('should not allow to add an undefined object', function (done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -480,7 +742,7 @@ describe('Source', function() {
 
 		it('should not allow to add a object which is not yet created', function (done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto");
 
             var success = function() {
@@ -501,7 +763,7 @@ describe('Source', function() {
 		});
 
 		it('should not allow to set a infoType if there is already one', function (done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto", 42);
 			var s2 = new InfoType("tutu", 89);
 
@@ -549,7 +811,7 @@ describe('Source', function() {
 
 	describe('#unsetInfoType', function () {
 		it('should unset the InfoType', function (done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto", 42);
 
 			var response1:SequelizeRestfulResponse = {
@@ -603,7 +865,7 @@ describe('Source', function() {
 		});
 
 		it('should not allow to unset a profil if there is none', function (done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto", 42);
 
 			var response1:SequelizeRestfulResponse = {
@@ -649,7 +911,7 @@ describe('Source', function() {
 
 	describe('#addParamType', function() {
 		it('should put the new ParamType inside the array', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamType("mavaleur", "toto", 12);
 			var spy = sinon.spy(pv, "desynchronize");
 
@@ -706,7 +968,7 @@ describe('Source', function() {
 
 		it('should not allow to add a null object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -727,7 +989,7 @@ describe('Source', function() {
 
 		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -748,7 +1010,7 @@ describe('Source', function() {
 
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var p = new ParamType("bidule","machin");
 
             var success = function() {
@@ -769,7 +1031,7 @@ describe('Source', function() {
 		});
 
 		it('should not allow to put an already existing object', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamType("toto", "machin", 13);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -778,12 +1040,14 @@ describe('Source', function() {
 					{
 						"id":13,
 						"name": "toto",
-						"description": "machin"
+						"description": "machin",
+						"complete": false
 					},
 					{
 						"id": 14,
 						"name": "titi",
-						"description": "blop"
+						"description": "blop",
+						"complete": false
 					}
 				]
 			};
@@ -825,7 +1089,7 @@ describe('Source', function() {
 
 	describe('#removeParamType', function() {
 		it('should remove the ParamType from the array', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamType("mavaleur", "machin", 12);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -834,7 +1098,8 @@ describe('Source', function() {
 					{
 						"name": "mavaleur",
 						"description": "machin",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};
@@ -887,7 +1152,7 @@ describe('Source', function() {
 
 		it('should not allow to remove a null object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -908,7 +1173,7 @@ describe('Source', function() {
 
 		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -929,7 +1194,7 @@ describe('Source', function() {
 
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var p = new ParamType("bidule","la");
 
             var success = function() {
@@ -950,7 +1215,7 @@ describe('Source', function() {
 		});
 
 		it('should not allow to remove an object which is not linked', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamType("toto", "machn", 12);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -995,7 +1260,7 @@ describe('Source', function() {
 
     describe('#addParamValue', function() {
         it('should put the new ParamValue inside the array', function(done) {
-            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+	        var c = new Source("machin", "desc", "method", 28);
             var pv = new ParamValue("mavaleur",12);
             var spy = sinon.spy(pv, "desynchronize");
 
@@ -1050,7 +1315,7 @@ describe('Source', function() {
 
         it('should not allow to add a null object', function(done) {
             nock.disableNetConnect();
-            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+	        var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1071,7 +1336,7 @@ describe('Source', function() {
 
         it('should not allow to add an undefined object', function(done) {
             nock.disableNetConnect();
-            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+	        var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1093,7 +1358,7 @@ describe('Source', function() {
 
         it('should not allow to add a object which is not yet created', function(done) {
             nock.disableNetConnect();
-            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+	        var c = new Source("machin", "desc", "method", 28);
             var p = new ParamValue("bidule");
 
             var success = function() {
@@ -1114,7 +1379,7 @@ describe('Source', function() {
         });
 
         it('should not allow to put an already existing object', function(done) {
-            var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+	        var c = new Source("machin", "desc", "method", 28);
             var pv = new ParamValue("toto",13);
 
             var response1 : SequelizeRestfulResponse = {
@@ -1122,11 +1387,13 @@ describe('Source', function() {
                 "data": [
                     {
                         "id":13,
-                        "value": "toto"
+                        "value": "toto",
+	                    "complete": false
                     },
                     {
                         "id": 14,
-                        "value": "titi"
+                        "value": "titi",
+	                    "complete": false
                     }
                 ]
             };
@@ -1168,7 +1435,7 @@ describe('Source', function() {
 
 	describe('#removeParamValue', function() {
 		it('should remove the ParamValue from the array', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamValue("mavaleur", 12);
 
 			var reponse1 : SequelizeRestfulResponse = {
@@ -1176,7 +1443,8 @@ describe('Source', function() {
 				"data": [
 					{
 						"value": "mavaleur",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};
@@ -1229,7 +1497,7 @@ describe('Source', function() {
 
 		it('should not allow to remove a null object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1250,7 +1518,7 @@ describe('Source', function() {
 
 		it('should not allow to add an undefined object', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 
             var success = function() {
                 done(new Error("Test failed."));
@@ -1271,7 +1539,7 @@ describe('Source', function() {
 
 		it('should not allow to add a object which is not yet created', function(done) {
 			nock.disableNetConnect();
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var p = new ParamValue("bidule");
 
             var success = function() {
@@ -1292,7 +1560,7 @@ describe('Source', function() {
 		});
 
 		it('should not allow to remove an object which is not linked', function(done) {
-			var c = new Source("bidule", "ser", "desc", "host", 4242, 12);
+			var c = new Source("machin", "desc", "method", 28);
 			var pv = new ParamValue("toto", 12);
 
 			var reponse1 : SequelizeRestfulResponse = {

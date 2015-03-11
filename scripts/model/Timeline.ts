@@ -55,8 +55,8 @@ class Timeline extends ModelItf {
      * @param {string} description - The Timeline's description.
      * @param {number} id - The Timeline's ID.
      */
-    constructor(name : string, description : string = "", id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -71,10 +71,6 @@ class Timeline extends ModelItf {
 	 * @method setName
 	 */
 	setName(name : string) {
-		if(!name) {
-			throw new ModelException("The name is mandatory for a Timeline");
-		}
-
 		this._name = name;
 	}
 
@@ -197,9 +193,22 @@ class Timeline extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check completeness of a Timeline.
+	 * The completeness is determined by the presence of a name and an id.
+	 */
+	checkCompleteness(successCallback : Function = null) : void {
+		super.checkCompleteness();
+		this._complete = (this._complete && !!this.name());
+		if (successCallback) {
+			successCallback();
+		}
 	}
 
     /**
@@ -385,13 +394,10 @@ class Timeline extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A Timeline object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A Timeline object should have a name.");
+		if(jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A Timeline object should have a complete attribute.");
 		}
-		if(!jsonObject.description) {
-			throw new ModelException("A Timeline object should have a description.");
-		}
-		return new Timeline(jsonObject.name, jsonObject.description, jsonObject.id);
+		return new Timeline(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
     /**

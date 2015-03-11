@@ -14,36 +14,6 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Renderer', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new Renderer(undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new Renderer(null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new Renderer("");
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
 		it('should store the name', function () {
 			var name = "machin";
 			var c = new Renderer(name, "");
@@ -52,14 +22,24 @@ describe('Renderer', function() {
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Renderer("titi", desc);
+			var c = new Renderer("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Renderer("tutu", "", id);
+			var c = new Renderer("", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
+		});
+
+		it('should store the complete value', function () {
+			var c = new Renderer("test", "ba", 34, true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a default false complete value', function () {
+			var c = new Renderer("test", "ba", 34);
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
 		});
 	});
 
@@ -68,11 +48,26 @@ describe('Renderer', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": true
 			};
 
 			var callRetrieve = Renderer.fromJSONObject(json);
-			var callExpected = new Renderer("toto", "blabla", 42);
+			var callExpected = new Renderer("toto", "blabla", 42, true);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve renderer (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+		});
+
+		it('should create the right object even if it is partial', function () {
+			var json = {
+				"id": 42,
+				"name": "",
+				"description": null,
+				"complete": false
+			};
+
+			var callRetrieve = Renderer.fromJSONObject(json);
+			var callExpected = new Renderer("", null, 42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve renderer (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
@@ -80,7 +75,8 @@ describe('Renderer', function() {
 		it('should throw an exception if the ID is undefined', function () {
 			var json = {
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -93,6 +89,7 @@ describe('Renderer', function() {
 			var json = {
 				"name": "toto",
 				"description": "blabla",
+				"complete": false,
 				"id": null
 			};
 
@@ -102,23 +99,11 @@ describe('Renderer', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function () {
+		it('should throw an exception if the complete attribute is undefined', function () {
 			var json = {
-				"id": 52,
-				"description": "blabla"
-			};
-
-			assert.throws(function () {
-					Renderer.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the name is null', function () {
-			var json = {
-				"name": null,
+				"name": "toto",
 				"description": "blabla",
-				"id": 42
+				"id": 24
 			};
 
 			assert.throws(function () {
@@ -127,23 +112,12 @@ describe('Renderer', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the description is undefined', function () {
+		it('should throw an exception if the complete attribute is null', function () {
 			var json = {
-				"id": 52,
-				"name": "blabla"
-			};
-
-			assert.throws(function () {
-					Renderer.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is null', function () {
-			var json = {
-				"description": null,
-				"name": "blabla",
-				"id": 42
+				"name": "toto",
+				"description": "blabla",
+				"id": 24,
+				"complete": null
 			};
 
 			assert.throws(function () {
@@ -155,16 +129,145 @@ describe('Renderer', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Renderer("toto", "blabla", 52);
+			var c = new Renderer("toto", "blabla", 52, true);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
-				"id": 52
+				"id": 52,
+				"complete": true
 			};
 			var json = c.toJSONObject();
 
 			assert.deepEqual(json, expected, "The JSON object (" + JSON.stringify(json) + ") and the expected JSON (" + JSON.stringify(expected) + ") do not match.");
 		})
+	});
+
+	describe('#checkCompleteness', function() {
+		it('should consider the object as complete if it has an ID, a name and a complete infotype', function(done) {
+			var cpt = new Renderer("test","", 52);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Renderer.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an ID, a name and an infotype which is not complete itself', function(done) {
+			var cpt = new Renderer("test","", 52);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": false
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Renderer.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has no id', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Renderer("test","");
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Renderer("","", 52);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Renderer(null,"", 52);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it is empty', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Renderer();
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
 	});
 
 	describe('#setInfoType', function () {

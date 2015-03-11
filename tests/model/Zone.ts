@@ -16,189 +16,39 @@ var sinon : SinonStatic = require("sinon");
 
 describe('Zone', function() {
 	describe('#constructor', function () {
-		it('should throw an error if the name is undefined', function(){
-			assert.throws(
-				function() {
-					new Zone(undefined, "", 1, 2, 3, 4);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is null', function(){
-			assert.throws(
-				function() {
-					new Zone(null, "", 1, 2, 3, 4);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the name is empty', function(){
-			assert.throws(
-				function() {
-					new Zone("", "", 1, 2, 3, 4);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the width is undefined', function(){
-			assert.throws(
-				function() {
-					new Zone("toto", "", undefined, 2, 3, 4);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the width is null', function(){
-			assert.throws(
-				function() {
-					new Zone("toto", "", null, 2, 3, 4);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the height is undefined', function(){
-			assert.throws(
-				function() {
-					new Zone("toto", "", 1, undefined, 3, 4);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the height is null', function(){
-			assert.throws(
-				function() {
-					new Zone("toto", "", 1, null, 3, 4);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the positionFromTop is undefined', function(){
-			assert.throws(
-				function() {
-					new Zone("toto", "", 1,2, undefined, 4);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the positionFromTop is null', function(){
-			assert.throws(
-				function() {
-					new Zone("toto", "", 1,2, null, 4);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-        it('should throw an error if the positionFromTop is < 0', function(){
-            assert.throws(
-                function() {
-                    new Zone("toto", "", 1,2, -10, 4);
-                },
-                ModelException,
-                "The exception has not been thrown."
-            );
-        });
-
-        it('should not throw an error if the positionFromTop is 0', function(){
-            assert.doesNotThrow(
-                function() {
-                    new Zone("toto", "", 1,2, 0, 4);
-                },
-                ModelException,
-                "The exception has been thrown."
-            );
-        });
-
-		it('should throw an error if the positionFromLeft is undefined', function(){
-			assert.throws(
-				function() {
-					new Zone("toto", "", 1,2,3, undefined);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-		it('should throw an error if the positionFromLeft is null', function(){
-			assert.throws(
-				function() {
-					new Zone("toto", "", 1,2,3, null);
-				},
-				ModelException,
-				"The exception has not been thrown."
-			);
-		});
-
-        it('should throw an error if the positionFromLeft is < 0', function(){
-            assert.throws(
-                function() {
-                    new Zone("toto", "", 1,2,3, -10);
-                },
-                ModelException,
-                "The exception has not been thrown."
-            );
-        });
-
-        it('should not throw an error if the positionFromLeft is 0', function(){
-            assert.doesNotThrow(
-                function() {
-                    new Zone("toto", "", 1,2, 3, 0);
-                },
-                ModelException,
-                "The exception has been thrown."
-            );
-        });
-
 		it('should store the name', function () {
 			var name = "machin";
-			var c = new Zone(name, "description", 10, 20, 30, 40);
+			var c = new Zone(name);
 			assert.equal(c.name(), name, "The name is not stored correctly.");
 		});
 
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Zone("blurf", desc, 10, 20, 30, 40);
+			var c = new Zone("", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the width', function () {
 			var width = 10;
-			var c = new Zone("blurf", "description", width, 20, 30, 40);
+			var c = new Zone("", "", width);
 			assert.equal(c.width(), width, "The width is not stored correctly.");
 		});
 
 		it('should store the height', function () {
 			var height = 20;
-			var c = new Zone("blurf", "description", 10, height, 30, 40);
+			var c = new Zone("", "", 10, height);
 			assert.equal(c.height(), height, "The height is not stored correctly.");
 		});
 
 		it('should store the positionFromTop', function () {
 			var positionFromTop = 30;
-			var c = new Zone("blurf", "description", 10, 20, positionFromTop, 40);
+			var c = new Zone("", "", 10, 20, positionFromTop);
 			assert.equal(c.positionFromTop(), positionFromTop, "The positionFromTop is not stored correctly.");
 		});
 
 		it('should store the positionFromLeft', function () {
 			var positionFromLeft = 20;
-			var c = new Zone("blurf", "description", 10, 20, 30, positionFromLeft);
+			var c = new Zone("", "", 10, 20, 30, positionFromLeft);
 			assert.equal(c.positionFromLeft(), positionFromLeft, "The positionFromLeft is not stored correctly.");
 		});
 
@@ -206,6 +56,144 @@ describe('Zone', function() {
 			var id = 52;
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
+		});
+
+		it('should store the complete value', function () {
+			var c = new Zone("bidule", "description", 10, 20, 30, 40, 34, true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a default false value for complete attribute', function () {
+			var c = new Zone();
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
+		});
+	});
+
+	describe('#checkCompleteness', function() {
+		it('should consider the object as complete if it has an ID, a name and a complete behaviour', function(done) {
+			var cpt = new Zone("bidule", "description", 10, 20, 30, 40, 43);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), cpt.getId().toString(), Behaviour.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an ID, a name and a behaviour which is not complete itself', function(done) {
+			var cpt = new Zone("bidule", "description", 10, 20, 30, 40, 43);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": false
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), cpt.getId().toString(), Behaviour.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has no id', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Zone("bidule", "description", 10, 20, 30, 40);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Zone("", "description", 10, 20, 30, 40, 43);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Zone(null, "description", 10, 20, 30, 40, 43);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it is empty', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Zone();
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
 		});
 	});
 
@@ -218,11 +206,30 @@ describe('Zone', function() {
 				"width": 10,
 				"height": 20,
 				"positionFromTop": 30,
-				"positionFromLeft": 40
+				"positionFromLeft": 40,
+				"complete": true
 			};
 
 			var callRetrieve = Zone.fromJSONObject(json);
-			var callExpected = new Zone("toto", "blabla", 10, 20, 30, 40, 42);
+			var callExpected = new Zone("toto", "blabla", 10, 20, 30, 40, 42, true);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve zone (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+		});
+
+		it('should create the right object even if it is partial', function () {
+			var json = {
+				"id": 42,
+				"name": "",
+				"description": "blabla",
+				"width": 10,
+				"height": 0,
+				"positionFromTop": 0,
+				"positionFromLeft": 40,
+				"complete": false
+			};
+
+			var callRetrieve = Zone.fromJSONObject(json);
+			var callExpected = new Zone("", "blabla", 10, 0, 0, 40, 42, false);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve zone (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
@@ -234,7 +241,8 @@ describe('Zone', function() {
 				"width": 10,
 				"height": 20,
 				"positionFromTop": 30,
-				"positionFromLeft": 40
+				"positionFromLeft": 40,
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -251,7 +259,8 @@ describe('Zone', function() {
 				"width": 10,
 				"height": 20,
 				"positionFromTop": 30,
-				"positionFromLeft": 40
+				"positionFromLeft": 40,
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -260,9 +269,10 @@ describe('Zone', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is undefined', function () {
+		it('should throw an exception if the complete attribute is undefined', function () {
 			var json = {
-				"id": 42,
+				"id": 443,
+				"name": "toto",
 				"description": "blabla",
 				"width": 10,
 				"height": 20,
@@ -276,15 +286,16 @@ describe('Zone', function() {
 				ModelException, "The exception has not been thrown.");
 		});
 
-		it('should throw an exception if the name is null', function () {
+		it('should throw an exception if the complete attribute is null', function () {
 			var json = {
-				"id": 42,
-				"name": null,
+				"id": 34,
+				"name": "toto",
 				"description": "blabla",
 				"width": 10,
 				"height": 20,
 				"positionFromTop": 30,
-				"positionFromLeft": 40
+				"positionFromLeft": 40,
+				"complete": null
 			};
 
 			assert.throws(function () {
@@ -292,210 +303,11 @@ describe('Zone', function() {
 				},
 				ModelException, "The exception has not been thrown.");
 		});
-
-		it('should throw an exception if the description is undefined', function () {
-			var json = {
-				"id": 42,
-				"name": "toto",
-				"width": 10,
-				"height": 20,
-				"positionFromTop": 30,
-				"positionFromLeft": 40
-			};
-
-			assert.throws(function () {
-					Zone.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the description is null', function () {
-			var json = {
-				"id": 42,
-				"name": "toto",
-				"description": null,
-				"width": 10,
-				"height": 20,
-				"positionFromTop": 30,
-				"positionFromLeft": 40
-			};
-
-			assert.throws(function () {
-					Zone.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the width is undefined', function () {
-			var json = {
-				"id": 42,
-				"name": "toto",
-				"description": "machin",
-				"height": 20,
-				"positionFromTop": 30,
-				"positionFromLeft": 40
-			};
-
-			assert.throws(function () {
-					Zone.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the width is null', function () {
-			var json = {
-				"id": 42,
-				"name": "toto",
-				"description": "machin",
-				"width": null,
-				"height": 20,
-				"positionFromTop": 30,
-				"positionFromLeft": 40
-			};
-
-			assert.throws(function () {
-					Zone.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the height is undefined', function () {
-			var json = {
-				"id": 42,
-				"name": "toto",
-				"description": "machin",
-				"width": 10,
-				"positionFromTop": 30,
-				"positionFromLeft": 40
-			};
-
-			assert.throws(function () {
-					Zone.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the height is null', function () {
-			var json = {
-				"id": 42,
-				"name": "toto",
-				"description": "machin",
-				"width": 10,
-				"height": null,
-				"positionFromTop": 30,
-				"positionFromLeft": 40
-			};
-
-			assert.throws(function () {
-					Zone.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the positionFromTop is undefined', function () {
-			var json = {
-				"id": 42,
-				"name": "toto",
-				"description": "machin",
-				"width": 10,
-				"height": 30,
-				"positionFromLeft": 40
-			};
-
-			assert.throws(function () {
-					Zone.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the positionFromTop is null', function () {
-			var json = {
-				"id": 42,
-				"name": "toto",
-				"description": "machin",
-				"width": 10,
-				"height": 20,
-				"positionFromTop": null,
-				"positionFromLeft": 40
-			};
-
-			assert.throws(function () {
-					Zone.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-        it('should throw an exception if the positionFromTop is < 0', function () {
-            var json = {
-                "id": 42,
-                "name": "toto",
-                "description": "machin",
-                "width": 10,
-                "height": 20,
-                "positionFromTop": -10,
-                "positionFromLeft": 40
-            };
-
-            assert.throws(function () {
-                    Zone.fromJSONObject(json);
-                },
-                ModelException, "The exception has not been thrown.");
-        });
-
-		it('should throw an exception if the positionFromLeft is undefined', function () {
-			var json = {
-				"id": 42,
-				"name": "toto",
-				"description": "machin",
-				"width": 10,
-				"height": 30,
-				"positionFromTop": 40
-			};
-
-			assert.throws(function () {
-					Zone.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the positionFromLeft is null', function () {
-			var json = {
-				"id": 42,
-				"name": "toto",
-				"description": "machin",
-				"width": 10,
-				"height": 20,
-				"positionFromTop": 30,
-				"positionFromLeft": null
-			};
-
-			assert.throws(function () {
-					Zone.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-        it('should throw an exception if the positionFromLeft is < 0', function () {
-            var json = {
-                "id": 42,
-                "name": "toto",
-                "description": "machin",
-                "width": 10,
-                "height": 20,
-                "positionFromTop": 30,
-                "positionFromLeft": -10
-            };
-
-            assert.throws(function () {
-                    Zone.fromJSONObject(json);
-                },
-                ModelException, "The exception has not been thrown.");
-        });
 	});
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Zone("toto", "blabla", 10, 20, 30, 40, 42);
+			var c = new Zone("toto", "blabla", 10, 20, 30, 40, 42, true);
 			var expected = {
 				"id": 42,
 				"name": "toto",
@@ -503,7 +315,8 @@ describe('Zone', function() {
 				"width": 10,
 				"height": 20,
 				"positionFromTop": 30,
-				"positionFromLeft": 40
+				"positionFromLeft": 40,
+				"complete": true
 			};
 			var json = c.toJSONObject();
 
@@ -909,12 +722,14 @@ describe('Zone', function() {
 					{
 						"id":12,
 						"name": "mavaleur",
-						"description": "madescription"
+						"description": "madescription",
+						"complete": false
 					},
 					{
 						"id": 14,
 						"name": "titi",
-						"description": "bidule"
+						"description": "bidule",
+						"complete": false
 					}
 				]
 			};
@@ -963,7 +778,8 @@ describe('Zone', function() {
 					{
 						"name": "mavaleur",
 						"description": "madescription",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};

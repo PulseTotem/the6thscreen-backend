@@ -106,8 +106,8 @@ class Zone extends ModelItf {
      * @param {string} position - The Zone's position.
      * @param {number} id - The Zone's ID.
      */
-    constructor(name : string, description : string, width : number, height : number, positionFromTop : number, positionFromLeft : number, id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", width : number = 0, height : number = 0, positionFromTop : number = 0, positionFromLeft : number = 0, id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -130,10 +130,6 @@ class Zone extends ModelItf {
 	 * @param name A new name
 	 */
 	setName(name : string) : void {
-		if(!name) {
-			throw new ModelException("A name is mandatory for a Zone.");
-		}
-
 		this._name = name;
 	}
 
@@ -154,10 +150,6 @@ class Zone extends ModelItf {
 	 * @param width a new width
 	 */
 	setWidth(width : number) : void {
-		if(!width) {
-			throw new ModelException("A width is mandatory for a Zone.");
-		}
-
 		this._width = new Percentage(width);
 	}
 
@@ -168,10 +160,6 @@ class Zone extends ModelItf {
 	 * @param height a new height
 	 */
 	setHeight(height : number) : void {
-		if(!height) {
-			throw new ModelException("A height is mandatory for a Zone.");
-		}
-
 		this._height = new Percentage(height);
 	}
 
@@ -182,10 +170,6 @@ class Zone extends ModelItf {
 	 * @param positionFromTop a new positionFromTop
 	 */
 	setPositionFromTop(positionFromTop : number) : void {
-		if(!positionFromTop && positionFromTop != 0) {
-			throw new ModelException("The positionFromTop attribute is mandatory for a Zone.");
-		}
-
 		this._position_from_top = new Percentage(positionFromTop);
 	}
 
@@ -196,10 +180,6 @@ class Zone extends ModelItf {
 	 * @param positionFromTop a new positionFromTop
 	 */
 	setPositionFromLeft(positionFromLeft : number) : void {
-		if(!positionFromLeft && positionFromLeft != 0) {
-			throw new ModelException("The positionFromTop attribute is mandatory for a Zone.");
-		}
-
 		this._position_from_left = new Percentage(positionFromLeft);
 	}
 
@@ -399,9 +379,41 @@ class Zone extends ModelItf {
 			"width": this.width(),
 			"height": this.height(),
 			"positionFromTop": this.positionFromTop(),
-			"positionFromLeft": this.positionFromLeft()
+			"positionFromLeft": this.positionFromLeft(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check whether the object is complete or not
+	 *
+	 * // TODO: check that with user POV
+	 * A Zone is complete if it has an ID, a name, and a behaviour (we assume that it always has a width, height, positionFromTop / positionFromLeft as they are Percentage).
+	 *
+	 * @param successCallback The function to call in case of success.
+	 * @param failCallback The function to call in case of failure.
+	 */
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
+		super.checkCompleteness();
+
+		if (this.isComplete() && !!this.name()) {
+			var self = this;
+
+			var success : Function = function () {
+				self._complete = (!!self.behaviour() && self.behaviour().isComplete());
+				successCallback();
+			};
+
+			var fail : Function = function (error) {
+				failCallback(error);
+			};
+
+			this.loadBehaviour(success,fail);
+		} else {
+			this._complete = false;
+			successCallback();
+		}
 	}
 
     /**
@@ -658,25 +670,12 @@ class Zone extends ModelItf {
 		if (!jsonObject.id) {
 			throw new ModelException("A Zone object should have an ID.");
 		}
-		if(!jsonObject.name) {
-			throw new ModelException("A Zone object should have a name.");
+
+		if (jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A Zone object should have a complete attribute.");
 		}
-		if(!jsonObject.description) {
-			throw new ModelException("A Zone object should have a description.");
-		}
-		if(!jsonObject.width) {
-			throw new ModelException("A Zone object should have a width.");
-		}
-		if(!jsonObject.height) {
-			throw new ModelException("A Zone object should have a height.");
-		}
-		if(!jsonObject.positionFromTop && jsonObject.positionFromTop != 0) {
-			throw new ModelException("A Zone object should have a positionFromTop.");
-		}
-		if(!jsonObject.positionFromLeft && jsonObject.positionFromLeft != 0) {
-			throw new ModelException("A Zone object should have a positionFromLeft.");
-		}
-		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id);
+
+		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id, jsonObject.complete);
 	}
 
     /**
