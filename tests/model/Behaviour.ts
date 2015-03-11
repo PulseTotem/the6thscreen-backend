@@ -50,6 +50,12 @@ describe('Behaviour', function() {
 			b.checkCompleteness();
 			assert.equal(b.isComplete(), true, "The behaviour should be complete.");
 		});
+
+		it('should return false if the object has an empty name and an ID but no description', function() {
+			var b = new Behaviour('', null, 12);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+		});
 	});
 
 	describe('#fromJSONobject', function () {

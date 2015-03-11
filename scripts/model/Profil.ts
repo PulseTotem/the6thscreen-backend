@@ -56,8 +56,8 @@ class Profil extends ModelItf {
      * @param {string} description - The Profil's description.
      * @param {number} id - The Profil's ID.
      */
-    constructor(name : string = "", description : string = "", id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setName(name);
         this.setDescription(description);
@@ -197,9 +197,22 @@ class Profil extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check completeness of a Profil.
+	 * The completeness is determined by the presence of a name and an id.
+	 */
+	checkCompleteness(successCallback : Function = null) : void {
+		super.checkCompleteness();
+		this._complete = (this._complete && !!this.name());
+		if (successCallback) {
+			successCallback();
+		}
 	}
 
     /**
@@ -381,10 +394,13 @@ class Profil extends ModelItf {
      * @return {Profil} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Profil {
-	    if(!jsonObject.id) {
+	    if (!jsonObject.id) {
 		    throw new ModelException("A Profil object should have an ID.");
 	    }
-	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id);
+	    if (jsonObject.complete == undefined || jsonObject.complete == null) {
+		    throw new ModelException("A Profil object should have a complete attribute.");
+	    }
+	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
     }
 
     /**
