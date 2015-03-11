@@ -31,18 +31,172 @@ describe('ParamType', function() {
 			var c = new ParamType("", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
+
+		it('should store the complete value', function () {
+			var c = new ParamType("tets", "test", 23, true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a false default complete value', function () {
+			var c = new ParamType();
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
+		});
 	});
+
+	describe('#checkCompleteness', function() {
+		it('should consider the object as complete if it has an ID, a name and a complete type', function(done) {
+			var cpt = new ParamType("test","", 52);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an ID, a name and a type which is not complete itself', function(done) {
+			var cpt = new ParamType("test","", 52);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": false
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has no id', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ParamType("test","");
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ParamType("","", 52);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ParamType(null,"", 52);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it is empty', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new ParamType();
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+	});
+
 
 	describe('#fromJSONobject', function () {
 		it('should create the right object', function () {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": true
 			};
 
 			var callRetrieve = ParamType.fromJSONObject(json);
-			var callExpected = new ParamType("toto", "blabla", 42);
+			var callExpected = new ParamType("toto", "blabla", 42, true);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve paramType (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+		});
+
+		it('should create the right object even if it is partial', function () {
+			var json = {
+				"id": 42,
+				"name": "",
+				"description": null,
+				"complete": false
+			};
+
+			var callRetrieve = ParamType.fromJSONObject(json);
+			var callExpected = new ParamType("", null, 42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve paramType (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
@@ -50,7 +204,8 @@ describe('ParamType', function() {
 		it('should throw an exception if the ID is undefined', function () {
 			var json = {
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -63,7 +218,35 @@ describe('ParamType', function() {
 			var json = {
 				"name": "toto",
 				"description": "blabla",
+				"complete": false,
 				"id": null
+			};
+
+			assert.throws(function () {
+					ParamType.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete value is undefined', function () {
+			var json = {
+				"name": "toto",
+				"description": "blabla",
+				"id": 12
+			};
+
+			assert.throws(function () {
+					ParamType.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete value is null', function () {
+			var json = {
+				"name": "toto",
+				"description": "blabla",
+				"complete": null,
+				"id": 12
 			};
 
 			assert.throws(function () {
@@ -75,11 +258,12 @@ describe('ParamType', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new ParamType("toto", "blabla", 52);
+			var c = new ParamType("toto", "blabla", 52,true);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
-				"id": 52
+				"id": 52,
+				"complete": true
 			};
 			var json = c.toJSONObject();
 

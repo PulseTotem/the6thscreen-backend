@@ -46,8 +46,8 @@ class ParamValue extends ModelItf {
      * @param {string} value - The ParamValue's value.
      * @param {number} id - The ParamValue's ID.
      */
-    constructor(value : string = "", id : number = null) {
-        super(id);
+    constructor(value : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setValue(value);
 
@@ -167,9 +167,39 @@ class ParamValue extends ModelItf {
 	toJSONObject() : Object {
 		var data = {
 			"id": this.getId(),
-			"value": this.value()
+			"value": this.value(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check if the object is complete or not.
+	 * A ParamValue is complete if it has an ID, a value and a type.
+	 *
+	 * @param successCallback The function to call when success.
+	 * @param failCallback The function to call when fail.
+	 */
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) : void {
+		super.checkCompleteness();
+
+		if (this.isComplete() && !!this.value()) {
+			var self = this;
+
+			var success : Function = function() {
+				self._complete = (self.paramType() !== undefined && self.paramType().isComplete());
+				successCallback();
+			};
+
+			var fail : Function = function (error) {
+				failCallback(error);
+			};
+
+			this.loadAssociations(success, fail);
+		} else {
+			this._complete = false;
+			successCallback();
+		}
 	}
 
     /**
@@ -352,7 +382,10 @@ class ParamValue extends ModelItf {
 		if (!jsonObject.id) {
 			throw new ModelException("A ParamValue object should have an ID.");
 		}
-		return new ParamValue(jsonObject.value, jsonObject.id);
+		if (jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A ParamValue object should have a complete attribute.");
+		}
+		return new ParamValue(jsonObject.value, jsonObject.id, jsonObject.complete);
 	}
 
     /**

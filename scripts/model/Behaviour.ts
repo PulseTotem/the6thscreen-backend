@@ -86,9 +86,12 @@ class Behaviour extends ModelItf {
 	 * Check completeness of a behaviour.
 	 * The completeness is determined by the presence of a name and an id.
 	 */
-	checkCompleteness() : void {
+	checkCompleteness(successCallback : Function = null) : void {
 		super.checkCompleteness();
 		this._complete = (this._complete && !!this.name());
+		if (successCallback) {
+			successCallback();
+		}
 	}
 
 	/**
