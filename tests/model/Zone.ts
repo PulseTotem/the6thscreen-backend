@@ -57,6 +57,144 @@ describe('Zone', function() {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
+
+		it('should store the complete value', function () {
+			var c = new Zone("bidule", "description", 10, 20, 30, 40, 34, true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a default false value for complete attribute', function () {
+			var c = new Zone();
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
+		});
+	});
+
+	describe('#checkCompleteness', function() {
+		it('should consider the object as complete if it has an ID, a name and a complete behaviour', function(done) {
+			var cpt = new Zone("bidule", "description", 10, 20, 30, 40, 43);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), cpt.getId().toString(), Behaviour.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an ID, a name and a behaviour which is not complete itself', function(done) {
+			var cpt = new Zone("bidule", "description", 10, 20, 30, 40, 43);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": false
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), cpt.getId().toString(), Behaviour.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has no id', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Zone("bidule", "description", 10, 20, 30, 40);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Zone("", "description", 10, 20, 30, 40, 43);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Zone(null, "description", 10, 20, 30, 40, 43);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it is empty', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Zone();
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
 	});
 
 	describe('#fromJSONobject', function () {
@@ -68,11 +206,30 @@ describe('Zone', function() {
 				"width": 10,
 				"height": 20,
 				"positionFromTop": 30,
-				"positionFromLeft": 40
+				"positionFromLeft": 40,
+				"complete": true
 			};
 
 			var callRetrieve = Zone.fromJSONObject(json);
-			var callExpected = new Zone("toto", "blabla", 10, 20, 30, 40, 42);
+			var callExpected = new Zone("toto", "blabla", 10, 20, 30, 40, 42, true);
+
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve zone (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+		});
+
+		it('should create the right object even if it is partial', function () {
+			var json = {
+				"id": 42,
+				"name": "",
+				"description": "blabla",
+				"width": 10,
+				"height": 0,
+				"positionFromTop": 0,
+				"positionFromLeft": 40,
+				"complete": false
+			};
+
+			var callRetrieve = Zone.fromJSONObject(json);
+			var callExpected = new Zone("", "blabla", 10, 0, 0, 40, 42, false);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve zone (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
@@ -84,7 +241,8 @@ describe('Zone', function() {
 				"width": 10,
 				"height": 20,
 				"positionFromTop": 30,
-				"positionFromLeft": 40
+				"positionFromLeft": 40,
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -101,7 +259,43 @@ describe('Zone', function() {
 				"width": 10,
 				"height": 20,
 				"positionFromTop": 30,
+				"positionFromLeft": 40,
+				"complete": false
+			};
+
+			assert.throws(function () {
+					Zone.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete attribute is undefined', function () {
+			var json = {
+				"id": 443,
+				"name": "toto",
+				"description": "blabla",
+				"width": 10,
+				"height": 20,
+				"positionFromTop": 30,
 				"positionFromLeft": 40
+			};
+
+			assert.throws(function () {
+					Zone.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete attribute is null', function () {
+			var json = {
+				"id": 34,
+				"name": "toto",
+				"description": "blabla",
+				"width": 10,
+				"height": 20,
+				"positionFromTop": 30,
+				"positionFromLeft": 40,
+				"complete": null
 			};
 
 			assert.throws(function () {
@@ -113,7 +307,7 @@ describe('Zone', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Zone("toto", "blabla", 10, 20, 30, 40, 42);
+			var c = new Zone("toto", "blabla", 10, 20, 30, 40, 42, true);
 			var expected = {
 				"id": 42,
 				"name": "toto",
@@ -121,7 +315,8 @@ describe('Zone', function() {
 				"width": 10,
 				"height": 20,
 				"positionFromTop": 30,
-				"positionFromLeft": 40
+				"positionFromLeft": 40,
+				"complete": true
 			};
 			var json = c.toJSONObject();
 

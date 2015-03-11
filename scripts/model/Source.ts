@@ -117,8 +117,8 @@ class Source extends ModelItf {
      * @param {number} port - The Source's port.
      * @param {number} id - The Source's ID.
      */
-    constructor(name : string = "", description : string = "", method : string = "", id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", method : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -418,12 +418,46 @@ class Source extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"method": this.method()
+			"method": this.method(),
+			"complete": this.isComplete()
 		};
 		return data;
 	}
 
-    /**
+	/**
+	 * Check whether the object is complete or not
+	 *
+	 * A Source is complete if it has an ID, a name, a method, a service and an infotype.
+	 *
+	 * @param successCallback The function to call in case of success.
+	 * @param failCallback The function to call in case of failure.
+	 */
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
+		super.checkCompleteness();
+
+		if (this.isComplete() && !!this.name() && !!this.method()) {
+			var self = this;
+
+			var success : Function = function () {
+				if (self._info_type_loaded && self._service_loaded) {
+					self._complete = (!!self.infoType() && self.infoType().isComplete() && !!self.service() && self.service().isComplete());
+					successCallback();
+				}
+			};
+
+			var fail : Function = function (error) {
+				failCallback(error);
+			};
+
+			this.loadInfoType(success,fail);
+			this.loadService(success,fail);
+		} else {
+			this._complete = false;
+			successCallback();
+		}
+	}
+
+	/**
      * Return a Source instance as a JSON Object including associated object.
      * However the method should not be recursive due to cycle in the model.
      *
@@ -818,7 +852,10 @@ class Source extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A Source object should have an ID.");
 		}
-		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.id);
+		if(jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A Source object should have a complete attribute.");
+		}
+		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.id, jsonObject.complete);
 	}
 
     /**

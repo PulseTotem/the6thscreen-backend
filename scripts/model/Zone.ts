@@ -106,8 +106,8 @@ class Zone extends ModelItf {
      * @param {string} position - The Zone's position.
      * @param {number} id - The Zone's ID.
      */
-    constructor(name : string = "", description : string = "", width : number = 0, height : number = 0, positionFromTop : number = 0, positionFromLeft : number = 0, id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", width : number = 0, height : number = 0, positionFromTop : number = 0, positionFromLeft : number = 0, id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -379,9 +379,41 @@ class Zone extends ModelItf {
 			"width": this.width(),
 			"height": this.height(),
 			"positionFromTop": this.positionFromTop(),
-			"positionFromLeft": this.positionFromLeft()
+			"positionFromLeft": this.positionFromLeft(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check whether the object is complete or not
+	 *
+	 * // TODO: check that with user POV
+	 * A Zone is complete if it has an ID, a name, and a behaviour (we assume that it always has a width, height, positionFromTop / positionFromLeft as they are Percentage).
+	 *
+	 * @param successCallback The function to call in case of success.
+	 * @param failCallback The function to call in case of failure.
+	 */
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
+		super.checkCompleteness();
+
+		if (this.isComplete() && !!this.name()) {
+			var self = this;
+
+			var success : Function = function () {
+				self._complete = (!!self.behaviour() && self.behaviour().isComplete());
+				successCallback();
+			};
+
+			var fail : Function = function (error) {
+				failCallback(error);
+			};
+
+			this.loadBehaviour(success,fail);
+		} else {
+			this._complete = false;
+			successCallback();
+		}
 	}
 
     /**
@@ -638,7 +670,12 @@ class Zone extends ModelItf {
 		if (!jsonObject.id) {
 			throw new ModelException("A Zone object should have an ID.");
 		}
-		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id);
+
+		if (jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A Zone object should have a complete attribute.");
+		}
+
+		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id, jsonObject.complete);
 	}
 
     /**

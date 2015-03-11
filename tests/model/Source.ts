@@ -37,6 +37,16 @@ describe('Source', function() {
 			var c = new Source("", "", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
+
+		it('should store the complete value', function () {
+			var c = new Source("a", "v", "c", 234, true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a default false complete value', function () {
+			var c = new Source();
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
+		});
 	});
 
 	describe('#fromJSONobject', function () {
@@ -45,11 +55,27 @@ describe('Source', function() {
 				"id": 28,
 				"name": "machin",
 				"description": "desc",
-				"method": "method"
+				"method": "method",
+				"complete": true
 			};
 
 			var userRetrieve = Source.fromJSONObject(json);
-			var userExpected = new Source("machin", "desc", "method", 28);
+			var userExpected = new Source("machin", "desc", "method", 28, true);
+
+			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
+		});
+
+		it('should create the right object even if it is partial', function () {
+			var json = {
+				"id": 28,
+				"name": null,
+				"description": "desc",
+				"method": "",
+				"complete": false
+			};
+
+			var userRetrieve = Source.fromJSONObject(json);
+			var userExpected = new Source(null, "desc", "", 28, false);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
@@ -58,7 +84,8 @@ describe('Source', function() {
 			var json = {
 				"name": "machin",
 				"description": "desc",
-				"method": "method"
+				"method": "method",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -72,7 +99,37 @@ describe('Source', function() {
 				"id": null,
 				"name": "machin",
 				"description": "desc",
-				"method": "method"
+				"method": "method",
+				"complete": false
+			};
+
+			assert.throws(function () {
+					Source.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete value is undefined', function () {
+			var json = {
+				"name": "machin",
+				"description": "desc",
+				"method": "method",
+				"id": 34
+			};
+
+			assert.throws(function () {
+					Source.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete attribute is null', function () {
+			var json = {
+				"id": 34,
+				"name": "machin",
+				"description": "desc",
+				"method": "method",
+				"complete": null
 			};
 
 			assert.throws(function () {
@@ -84,17 +141,242 @@ describe('Source', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 28, true);
 			var expected = {
 				"id": 28,
 				"name": "machin",
 				"description": "desc",
-				"method": "method"
+				"method": "method",
+				"complete": true
 			};
 			var json = c.toJSONObject();
 
 			assert.deepEqual(json, expected, "The JSON object (" + JSON.stringify(json) + ") and the expected JSON (" + JSON.stringify(expected) + ") do not match.");
 		})
+	});
+
+	describe('#checkCompleteness', function() {
+		it('should consider the object as complete if it has an ID, a name, a method, a complete infotype and a complete service', function(done) {
+			var cpt = new Source("machin", null, "method", 28);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMock2.isDone(), "The mock2 request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an ID, a name, a method, a complete service and an infotype which is not complete itself', function(done) {
+			var cpt = new Source("machin", null, "method", 28);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": false
+				}
+			};
+
+			var response2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "service",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response2));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMock2.isDone(), "The mock2 request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an ID, a name, a method, a complete infotype and a service which is not complete itself', function(done) {
+			var cpt = new Source("machin", null, "method", 28);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var response2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "service",
+					"complete": false
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response2));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMock2.isDone(), "The mock2 request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has no id', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source("machin", null, "method");
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source("", null, "method", 28);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source(null, null, "method", 28);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty method', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source("test", null, "", 28);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null method', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source("test", null, null, 28);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it is empty', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Source();
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
 	});
 
 	describe('#setService', function () {
