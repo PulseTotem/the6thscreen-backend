@@ -30,7 +30,7 @@ class TypeParamType extends ModelItf {
 	 * @param {number} id - The TypeParamType's ID.
 	 */
 	constructor(name : string = "", id : number = null, complete : boolean = false) {
-		super(id);
+		super(id, complete);
 
 		this.setName(name);
 	}

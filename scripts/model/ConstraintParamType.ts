@@ -54,8 +54,8 @@ class ConstraintParamType extends ModelItf {
 	 * @param {string} name - The ConstraintParamType's name.
 	 * @param {number} id - The ConstraintParamType's ID.
 	 */
-	constructor(name : string, description : string = "", id : number = null) {
-		super(id);
+	constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+		super(id, complete);
 
 		this.setName(name);
 		this.setDescription(description);
@@ -194,9 +194,34 @@ class ConstraintParamType extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check completeness of a ConstraintParamType.
+	 *
+	 * A ConstraintParamType is considered as complete if it has an ID, a name and a type.
+	 */
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) : void {
+		super.checkCompleteness();
+
+		if (this.isComplete()) {
+			var self = this;
+
+			var success:Function = function () {
+				self._complete = (self._complete && !!self.name() && (self.type() !== undefined && self.type().isComplete()));
+				successCallback();
+			};
+
+			var fail:Function = function (error) {
+				failCallback(error);
+			};
+
+			this.loadAssociations(success, fail);
+		}
 	}
 
     /**
@@ -379,7 +404,11 @@ class ConstraintParamType extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A CallType object should have an ID.");
 		}
-		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(jsonObject.complete == null || jsonObject.complete == undefined) {
+			throw new ModelException("A CallType object should have a complete attribute.");
+		}
+
+		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
 	/**
