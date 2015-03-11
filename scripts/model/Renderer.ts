@@ -55,8 +55,8 @@ class Renderer extends ModelItf {
      * @param {string} description - The Renderer's description.
      * @param {number} id - The Renderer's ID.
      */
-    constructor(name : string = "", description : string = "", id : number = null) {
-        super(id);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -195,9 +195,40 @@ class Renderer extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description()
+			"description": this.description(),
+			"complete": this.isComplete()
 		};
 		return data;
+	}
+
+	/**
+	 * Check whether the object is complete or not
+	 *
+	 * A Renderer is complete if it has an ID, a name and an infotype.
+	 *
+	 * @param successCallback The function to call in case of success.
+	 * @param failCallback The function to call in case of failure.
+	 */
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
+		super.checkCompleteness();
+
+		if (this.isComplete() && !!this.name()) {
+			var self = this;
+
+			var success : Function = function () {
+				self._complete = (!!self.infoType() && self.infoType().isComplete());
+				successCallback();
+			};
+
+			var fail : Function = function (error) {
+				failCallback(error);
+			};
+
+			this.loadInfoType(success,fail);
+		} else {
+			this._complete = false;
+			successCallback();
+		}
 	}
 
     /**
@@ -379,7 +410,10 @@ class Renderer extends ModelItf {
 		if(!jsonObject.id) {
 			throw new ModelException("A Renderer object should have an ID.");
 		}
-		return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id);
+		if(jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A Renderer object should have a complete attribute.");
+		}
+		return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
     /**
