@@ -387,7 +387,8 @@ describe('ParamValue', function() {
 				"data": {
 					"id": 1,
 					"name": "toto",
-					"description": "truc"
+					"description": "truc",
+					"complete": false
 				}
 			};
 

@@ -292,11 +292,13 @@ describe('Profil', function() {
 				"data": [
 					{
 						"id":13,
-						"name": "toto"
+						"name": "toto",
+						"complete": false
 					},
 					{
 						"id": 14,
-						"name": "titi"
+						"name": "titi",
+						"complete": false
 					}
 				]
 			};
@@ -346,7 +348,8 @@ describe('Profil', function() {
 				"data": [
 					{
 						"name": "mavaleur",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};

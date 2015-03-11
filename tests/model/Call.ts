@@ -38,17 +38,204 @@ describe('Call', function(){
 		});
 	});
 
-	// TODO : Finish this test !
-	/**describe('#checkCompleteness', function() {
-		it('should assign true if the Call has a name, a CallType, a Profil and at least one ParamValue', function() {
-			var call = new Call("titi",42,true);
-			var callType = new CallType("toto","machin",23,true);
-			var profil = new Profil("bla","",10,true);
-			var param = new ParamValue("12",3,true);
+	describe('#checkCompleteness', function() {
+		it('should consider the object as complete if it has an ID, a name, a complete callType, and a complete profil', function(done) {
+			var cpt = new Call("tete",52);
 
+			var responseCallType : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "calltype",
+					"complete": true
+				}
+			};
 
+			var responseProfil : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "profil",
+					"complete": true
+				}
+			};
+
+			var restClientMockCT = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), CallType.getTableName()))
+				.reply(200, JSON.stringify(responseCallType));
+
+			var restClientMockP = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), Profil.getTableName()))
+				.reply(200, JSON.stringify(responseProfil));
+
+			var success = function() {
+				assert.ok(restClientMockCT.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMockP.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
 		});
-	});*/
+
+		it('should not consider the object as complete if it has an ID, a name, a complete profil and an incomplete calltype', function(done) {
+			var cpt = new Call("tete",52);
+
+			var responseCallType : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "calltype",
+					"complete": false
+				}
+			};
+
+			var responseProfil : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "profil",
+					"complete": true
+				}
+			};
+
+			var restClientMockCT = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), CallType.getTableName()))
+				.reply(200, JSON.stringify(responseCallType));
+
+			var restClientMockP = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), Profil.getTableName()))
+				.reply(200, JSON.stringify(responseProfil));
+
+			var success = function() {
+				assert.ok(restClientMockCT.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMockP.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an ID, a name, a complete calltype and an incomplete profil', function(done) {
+			var cpt = new Call("tete",52);
+
+			var responseCallType : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "calltype",
+					"complete": true
+				}
+			};
+
+			var responseProfil : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "profil",
+					"complete": false
+				}
+			};
+
+			var restClientMockCT = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), CallType.getTableName()))
+				.reply(200, JSON.stringify(responseCallType));
+
+			var restClientMockP = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), Profil.getTableName()))
+				.reply(200, JSON.stringify(responseProfil));
+
+			var success = function() {
+				assert.ok(restClientMockCT.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMockP.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has no id', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Call("tete");
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has an empty name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Call("",52);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it has a null name', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Call(null,52);
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+		it('should not consider the object as complete if it is empty', function(done) {
+			nock.disableNetConnect();
+
+			var cpt = new Call();
+
+			var success = function() {
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+	});
 
 	describe('#fromJSONobject', function() {
 		it('should create the right object', function() {
@@ -243,11 +430,13 @@ describe('Call', function(){
 				"data": [
 					{
 						"id":13,
-						"value": "toto"
+						"value": "toto",
+						"complete": false
 					},
 					{
 						"id": 14,
-						"value": "titi"
+						"value": "titi",
+						"complete": false
 					}
 				]
 			};
@@ -297,7 +486,8 @@ describe('Call', function(){
 				"data": [
 					{
 						"value": "mavaleur",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};
@@ -587,7 +777,8 @@ describe('Call', function(){
 				"data": {
 					"id": 1,
 					"name": "toto",
-					"description": "truc"
+					"description": "truc",
+					"complete": false
 				}
 			};
 
@@ -858,7 +1049,8 @@ describe('Call', function(){
 				"data": {
 					"id": 1,
 					"name": "toto",
-					"description": "truc"
+					"description": "truc",
+					"complete": false
 				}
 			};
 

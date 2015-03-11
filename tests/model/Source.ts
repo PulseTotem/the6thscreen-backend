@@ -1040,12 +1040,14 @@ describe('Source', function() {
 					{
 						"id":13,
 						"name": "toto",
-						"description": "machin"
+						"description": "machin",
+						"complete": false
 					},
 					{
 						"id": 14,
 						"name": "titi",
-						"description": "blop"
+						"description": "blop",
+						"complete": false
 					}
 				]
 			};
@@ -1096,7 +1098,8 @@ describe('Source', function() {
 					{
 						"name": "mavaleur",
 						"description": "machin",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};
@@ -1384,11 +1387,13 @@ describe('Source', function() {
                 "data": [
                     {
                         "id":13,
-                        "value": "toto"
+                        "value": "toto",
+	                    "complete": false
                     },
                     {
                         "id": 14,
-                        "value": "titi"
+                        "value": "titi",
+	                    "complete": false
                     }
                 ]
             };
@@ -1438,7 +1443,8 @@ describe('Source', function() {
 				"data": [
 					{
 						"value": "mavaleur",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};

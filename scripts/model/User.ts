@@ -93,8 +93,8 @@ class User extends ModelItf {
      * @param {string} username - The User's username.
      * @param {number} id - The User's ID.
      */
-    constructor(username : string = "", email : string = "", id : number = null) {
-        super(id);
+    constructor(username : string = "", email : string = "", id : number = null, complete : boolean = false) {
+        super(id, complete);
 
         this.setUsername(username);
         this.setEmail(email);
@@ -307,6 +307,18 @@ class User extends ModelItf {
 	}
 
 	/**
+	 * Check completeness of a user.
+	 * The completeness is determined by the presence of a username, an email and an id.
+	 */
+	checkCompleteness(successCallback : Function = null) : void {
+		super.checkCompleteness();
+		this._complete = (this._complete && !!this.username() && !!this.email());
+		if (successCallback) {
+			successCallback();
+		}
+	}
+
+	/**
 	 * Return a User instance as a JSON Object
 	 *
 	 * @method toJSONObject
@@ -318,7 +330,8 @@ class User extends ModelItf {
 			"username": this.username(),
             "email": this.email(),
             "token": this.token(),
-            "lastIp": this.lastIp()
+            "lastIp": this.lastIp(),
+			"complete": this.isComplete()
 		};
 		return data;
 	}
@@ -331,13 +344,8 @@ class User extends ModelItf {
      * @returns {Object} a JSON Object representing the instance
      */
     private toJSONObjectWithPwd(password : string) : Object {
-        var data = {
-            "id": this.getId(),
-            "username": this.username(),
-            "password": password,
-            "token": this.token(),
-            "lastIp": this.lastIp()
-        };
+        var data = this.toJSONObject();
+	    data["password"] = password;
         return data;
     }
 
@@ -734,7 +742,11 @@ class User extends ModelItf {
 			throw new ModelException("A User object should have an ID.");
 		}
 
-		var user = new User(jsonObject.username, jsonObject.email, jsonObject.id);
+		if (jsonObject.complete == undefined || jsonObject.complete == null) {
+			throw new ModelException("A User object should have a complete attribute.");
+		}
+
+		var user = new User(jsonObject.username, jsonObject.email, jsonObject.id, jsonObject.complete);
 
         if(!!jsonObject.token) {
             user.setToken(jsonObject.token);

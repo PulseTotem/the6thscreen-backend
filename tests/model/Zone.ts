@@ -722,12 +722,14 @@ describe('Zone', function() {
 					{
 						"id":12,
 						"name": "mavaleur",
-						"description": "madescription"
+						"description": "madescription",
+						"complete": false
 					},
 					{
 						"id": 14,
 						"name": "titi",
-						"description": "bidule"
+						"description": "bidule",
+						"complete": false
 					}
 				]
 			};
@@ -776,7 +778,8 @@ describe('Zone', function() {
 					{
 						"name": "mavaleur",
 						"description": "madescription",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};

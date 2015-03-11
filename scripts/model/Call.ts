@@ -284,26 +284,35 @@ class Call extends ModelItf {
 	}
 
 	/**
-	 * Check completeness of a call.
-	 * A Call is complete if it has a name, a CallType, a Profil and a ParamValue.
+	 * Check whether the object is complete or not
+	 *
+	 * A Call is complete if it has an ID, a name, a calltype and a profil.
+	 *
+	 * @param successCallback The function to call in case of success.
+	 * @param failCallback The function to call in case of failure.
 	 */
-	checkCompleteness() : void {
+	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
 		super.checkCompleteness();
-		this._complete = (this._complete && !!this.name());
 
-		if (!this._complete) {
-			return;
-		} else {
+		if (this.isComplete() && !!this.name()) {
 			var self = this;
-			var success = function() {
-				self._complete = (self._complete && !!self.callType() && !!self.profil() && !!self.paramValues());
+
+			var success : Function = function () {
+				if (self._call_type_loaded && self._profil_loaded) {
+					self._complete = (!!self.callType() && self.callType().isComplete()) && (!!self.profil() && self.profil().isComplete());
+					successCallback();
+				}
 			};
 
-			var fail = function(err) {
-				throw err;
+			var fail : Function = function (error) {
+				failCallback(error);
 			};
 
-			this.loadAssociations(success, fail);
+			this.loadCallType(success,fail);
+			this.loadProfil(success,fail);
+		} else {
+			this._complete = false;
+			successCallback();
 		}
 	}
 
@@ -359,8 +368,8 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	addParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
-		if (!p || !p.isComplete()) {
-            failCallback(new ModelException("The ParamValue must be an existing complete object to be associated."));
+		if (!p) {
+            failCallback(new ModelException("The ParamValue must be an existing object to be associated."));
             return;
 		}
 
@@ -431,8 +440,8 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	setProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
-		if (!p || !p.isComplete()) {
-            failCallback(new ModelException("The Profil must be an existing complete object to be associated."));
+		if (!p) {
+            failCallback(new ModelException("The Profil must be an existing object to be associated."));
             return;
 		}
 
@@ -500,8 +509,8 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	setCallType(ct : CallType, successCallback : Function = null, failCallback : Function = null) {
-		if (!ct || !ct.isComplete()) {
-            failCallback(new ModelException("The CallType must be an existing complete object to be associated."));
+		if (!ct) {
+            failCallback(new ModelException("The CallType must be an existing object to be associated."));
             return;
 		}
 

@@ -464,7 +464,7 @@ class CallType extends ModelItf {
 	/**
 	 * Check whether the object is complete or not
 	 *
-	 * A Renderer is complete if it has an ID, a name, a source, a renderer and a zone.
+	 * A CallType is complete if it has an ID, a name, a source, a renderer and a zone.
 	 *
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of failure.

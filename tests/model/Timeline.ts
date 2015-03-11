@@ -31,6 +31,16 @@ describe('Timeline', function() {
 			var c = new Timeline("", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
+
+		it('should store the complete value', function () {
+			var c = new Timeline("tet", "tet", 343, true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a default false value for complete attribute', function () {
+			var c = new Timeline("tet", "tet", 343);
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
+		});
 	});
 
 	describe('#fromJSONobject', function () {
@@ -38,11 +48,12 @@ describe('Timeline', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": true
 			};
 
 			var profilRetrieve = Timeline.fromJSONObject(json);
-			var profilExpected = new Timeline("toto", "blabla", 42);
+			var profilExpected = new Timeline("toto", "blabla", 42, true);
 
 			assert.deepEqual(profilRetrieve, profilExpected, "The retrieve timeline (" + profilRetrieve + ") does not match with the expected one (" + profilExpected + ")");
 		});
@@ -50,7 +61,8 @@ describe('Timeline', function() {
 		it('should throw an exception if the ID is undefined', function () {
 			var json = {
 				"name": "toto",
-				"description": "blabla"
+				"description": "blabla",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -63,7 +75,35 @@ describe('Timeline', function() {
 			var json = {
 				"name": "toto",
 				"description": "blabla",
-				"id": null
+				"id": null,
+				"complete": false
+			};
+
+			assert.throws(function () {
+					Timeline.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete attribute is undefined', function () {
+			var json = {
+				"name": "toto",
+				"description": "blabla",
+				"id": 343
+			};
+
+			assert.throws(function () {
+					Timeline.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete attribute is null', function () {
+			var json = {
+				"name": "toto",
+				"description": "blabla",
+				"id": 343,
+				"complete": null
 			};
 
 			assert.throws(function () {
@@ -80,12 +120,33 @@ describe('Timeline', function() {
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
-				"id": 52
+				"id": 52,
+				"complete": false
 			};
 			var json = c.toJSONObject();
 
 			assert.deepEqual(json, expected, "The JSON object (" + JSON.stringify(json) + ") and the expected JSON (" + JSON.stringify(expected) + ") do not match.");
 		})
+	});
+
+	describe('#checkCompleteness()', function() {
+		it('should return false if the object is empty', function() {
+			var b =  new Timeline();
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The Timeline should not be complete.");
+		});
+
+		it('should return true if the object has a name and an ID but no description', function() {
+			var b = new Timeline('toto', null, 12);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), true, "The Timeline should be complete.");
+		});
+
+		it('should return false if the object has an empty name and an ID but no description', function() {
+			var b = new Timeline('', null, 12);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The Timeline should not be complete.");
+		});
 	});
 
 	describe('#addProfil', function() {
@@ -219,12 +280,14 @@ describe('Timeline', function() {
 					{
 						"id":13,
 						"name": "toto",
-						"description": "titi"
+						"description": "titi",
+						"complete": false
 					},
 					{
 						"id": 14,
 						"name": "titi",
-						"description": "blabla"
+						"description": "blabla",
+						"complete": false
 					}
 				]
 			};
@@ -273,7 +336,8 @@ describe('Timeline', function() {
 					{
 						"name": "mavaleur",
 						"description": "blabla",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};

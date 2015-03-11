@@ -38,6 +38,36 @@ describe('SDI', function() {
 			var c = new SDI("afd", "adfd", "afdd", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
+
+		it('should store the complete value', function () {
+			var c = new SDI("afd", "adfd", "afdd", 34, true);
+			assert.equal(c.isComplete(), true, "The complete value is not stored.");
+		});
+
+		it('should assign a default complete value', function () {
+			var c = new SDI();
+			assert.equal(c.isComplete(), false, "The complete value is not stored.");
+		});
+	});
+
+	describe('#checkCompleteness()', function() {
+		it('should return false if the object is empty', function() {
+			var b =  new SDI();
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The SDI should not be complete.");
+		});
+
+		it('should return true if the object has a name and an ID but no description', function() {
+			var b = new SDI("tret", "adfd", "afdd", 34);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), true, "The SDI should be complete.");
+		});
+
+		it('should return false if the object has an empty name and an ID but no description', function() {
+			var b = new SDI("", null, "afdd", 34);
+			b.checkCompleteness();
+			assert.equal(b.isComplete(), false, "The SDI should not be complete.");
+		});
 	});
 
 	describe('#fromJSONobject', function () {
@@ -46,11 +76,27 @@ describe('SDI', function() {
 				"id": 42,
 				"name": "toto",
 				"description": "blabla",
-				"allowedHost": "localhost"
+				"allowedHost": "localhost",
+				"complete": true
 			};
 
 			var userRetrieve = SDI.fromJSONObject(json);
-			var userExpected = new SDI("toto", "blabla", "localhost", 42);
+			var userExpected = new SDI("toto", "blabla", "localhost", 42, true);
+
+			assert.deepEqual(userRetrieve, userExpected, "The retrieve SDI (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
+		});
+
+		it('should create the right object even if it is partial', function () {
+			var json = {
+				"id": 42,
+				"name": null,
+				"description": "blabla",
+				"allowedHost": "",
+				"complete": false
+			};
+
+			var userRetrieve = SDI.fromJSONObject(json);
+			var userExpected = new SDI(null, "blabla", "", 42);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve SDI (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
@@ -59,7 +105,8 @@ describe('SDI', function() {
 			var json = {
 				"name": "toto",
 				"description": "blabla",
-				"allowedHost": "toto"
+				"allowedHost": "toto",
+				"complete": false
 			};
 
 			assert.throws(function () {
@@ -73,7 +120,37 @@ describe('SDI', function() {
 				"name": "toto",
 				"description": "blabla",
 				"id": null,
-				"allowedHost": "toto"
+				"allowedHost": "toto",
+				"complete": false
+			};
+
+			assert.throws(function () {
+					SDI.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete attribute is undefined', function () {
+			var json = {
+				"name": "toto",
+				"description": "blabla",
+				"allowedHost": "toto",
+				"id": 33
+			};
+
+			assert.throws(function () {
+					SDI.fromJSONObject(json);
+				},
+				ModelException, "The exception has not been thrown.");
+		});
+
+		it('should throw an exception if the complete attribute is null', function () {
+			var json = {
+				"name": "toto",
+				"description": "blabla",
+				"id": 34,
+				"allowedHost": "toto",
+				"complete": null
 			};
 
 			assert.throws(function () {
@@ -86,12 +163,13 @@ describe('SDI', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new SDI("toto", "blabla", "tata", 52);
+			var c = new SDI("toto", "blabla", "tata", 52, true);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
 				"allowedHost": "tata",
-				"id": 52
+				"id": 52,
+				"complete": true
 			};
 			var json = c.toJSONObject();
 
@@ -229,11 +307,13 @@ describe('SDI', function() {
 				"data": [
 					{
 						"id":13,
-						"username": "toto"
+						"username": "toto",
+						"complete": false
 					},
 					{
 						"id": 14,
-						"username": "titi"
+						"username": "titi",
+						"complete": false
 					}
 				]
 			};
@@ -283,7 +363,8 @@ describe('SDI', function() {
 				"data": [
 					{
 						"username": "mavaleur",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};
@@ -576,7 +657,8 @@ describe('SDI', function() {
 						"width": 2,
 						"height": 3,
 						"positionFromTop": 4,
-						"positionFromLeft": 5
+						"positionFromLeft": 5,
+						"complete": false
 					},
 					{
 						"id":43,
@@ -585,7 +667,8 @@ describe('SDI', function() {
 						"width": 2,
 						"height": 3,
 						"positionFromTop": 4,
-						"positionFromLeft": 5
+						"positionFromLeft": 5,
+						"complete": false
 					}
 				]
 			};
@@ -640,7 +723,8 @@ describe('SDI', function() {
 						"width": 2,
 						"height": 3,
 						"positionFromTop": 4,
-						"positionFromLeft": 5
+						"positionFromLeft": 5,
+						"complete": false
 					}
 				]
 			};
@@ -930,12 +1014,14 @@ describe('SDI', function() {
 					{
 						"id":13,
 						"name": "toto",
-						"description": "bidule"
+						"description": "bidule",
+						"complete": false
 					},
 					{
 						"id": 14,
 						"name": "titi",
-						"description": "machin"
+						"description": "machin",
+						"complete": false
 					}
 				]
 			};
@@ -986,7 +1072,8 @@ describe('SDI', function() {
 					{
 						"name": "mavaleur",
 						"description": "uneautre",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};
@@ -1276,12 +1363,14 @@ describe('SDI', function() {
 					{
 						"id":13,
 						"name": "toto",
-						"description": "bidule"
+						"description": "bidule",
+						"complete": false
 					},
 					{
 						"id": 14,
 						"name": "titi",
-						"description": "machin"
+						"description": "machin",
+						"complete": false
 					}
 				]
 			};
@@ -1332,7 +1421,8 @@ describe('SDI', function() {
 					{
 						"name": "mavaleur",
 						"description": "uneautre",
-						"id": 12
+						"id": 12,
+						"complete": false
 					}
 				]
 			};
