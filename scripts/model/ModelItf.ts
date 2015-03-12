@@ -98,8 +98,6 @@ class ModelItf {
             return;
         }
 
-	    this.checkCompleteness();
-
         var success : Function = function(result) {
             var response = result.data();
             if(response.status == "success") {
@@ -289,8 +287,6 @@ class ModelItf {
             failCallback(new ModelException("The object does not exist yet. It can't be update. Datas: "+JSON.stringify(data)), attemptNumber);
             return;
         }
-
-	    this.checkCompleteness();
 
         var success : Function = function(result) {
             var response = result.data();
