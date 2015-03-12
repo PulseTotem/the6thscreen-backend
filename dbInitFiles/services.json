@@ -1,0 +1,14 @@
+[
+    {
+        "name" : "RSSFeedReader",
+        "description" : "Lecteur de flux RSS",
+        "host" : "http://localhost:6002/RSSFeedReader",
+        "port" : 6002
+    },
+    {
+        "name" : "SmartShopping",
+        "description" : "API du projet SmartShopping",
+        "host" : "http://localhost:6003/SmartShopping",
+        "port" : 6003
+    }
+]
