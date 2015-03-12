@@ -270,7 +270,7 @@ describe('Renderer', function() {
 		});
 	});
 
-	describe('#setInfoType', function () {
+	describe('#linkInfoType', function () {
 		it('should set the given infoType', function (done) {
 			var c = new Renderer("toto", "machin", 52);
 			var s = new InfoType("toto", 42);
@@ -300,7 +300,7 @@ describe('Renderer', function() {
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setInfoType is false.");
+                    //assert.ok(retour, "The return of the linkInfoType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the infoType in database.");
 
                     infoType = c.infoType();
@@ -314,7 +314,7 @@ describe('Renderer', function() {
                     done(err);
                 };
 
-                c.setInfoType(s, success2, fail2);
+                c.linkInfoType(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -342,7 +342,7 @@ describe('Renderer', function() {
                 done();
             };
 
-            c.setInfoType(null, success, fail);
+            c.linkInfoType(null, success, fail);
 		});
 
 		it('should not allow to add an undefined object', function (done) {
@@ -363,7 +363,7 @@ describe('Renderer', function() {
                 done();
             };
 
-            c.setInfoType(undefined, success, fail);
+            c.linkInfoType(undefined, success, fail);
 		});
 
 		it('should not allow to add a object which is not yet created', function (done) {
@@ -385,7 +385,7 @@ describe('Renderer', function() {
                 done();
             };
 
-            c.setInfoType(s, success, fail);
+            c.linkInfoType(s, success, fail);
 		});
 
 		it('should not allow to set a infoType if there is already one', function (done) {
@@ -423,7 +423,7 @@ describe('Renderer', function() {
                     done();
                 };
 
-                c.setInfoType(s, success2, fail2);
+                c.linkInfoType(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -435,7 +435,7 @@ describe('Renderer', function() {
 
 	});
 
-	describe('#unsetInfoType', function () {
+	describe('#unlinkInfoType', function () {
 		it('should unset the InfoType', function (done) {
 			var c = new Renderer("toto", "machin", 52);
 			var s = new InfoType("toto", 42);
@@ -466,7 +466,7 @@ describe('Renderer', function() {
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetInfoType is false.");
+                    //assert.ok(retour, "The return of the unlinkInfoType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
 
                     infoType = c.infoType();
@@ -480,7 +480,7 @@ describe('Renderer', function() {
                     done(err);
                 };
 
-                c.unsetInfoType(success2, fail2);
+                c.unlinkInfoType(success2, fail2);
             };
 
             var fail = function(err) {
@@ -523,7 +523,7 @@ describe('Renderer', function() {
                     done();
                 };
 
-                c.unsetInfoType(success2, fail2);
+                c.unlinkInfoType(success2, fail2);
             };
 
             var fail = function(err) {

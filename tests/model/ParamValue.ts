@@ -258,7 +258,7 @@ describe('ParamValue', function() {
 		})
 	});
 
-	describe('#setParamType', function() {
+	describe('#linkParamType', function() {
 		it('should set the given ParamType', function(done) {
 			var c = new ParamValue("toto", 52);
 			var p = new ParamType("toto", "machin", 42);
@@ -290,7 +290,7 @@ describe('ParamValue', function() {
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setParamType is false.");
+                    //assert.ok(retour, "The return of the linkParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
                     paramType = c.paramType();
@@ -304,7 +304,7 @@ describe('ParamValue', function() {
                     done(err);
                 };
 
-                c.setParamType(p, success2, fail2);
+                c.linkParamType(p, success2, fail2);
             };
 
             var fail = function(err) {
@@ -332,7 +332,7 @@ describe('ParamValue', function() {
                 done();
             };
 
-            c.setParamType(null, success, fail);
+            c.linkParamType(null, success, fail);
 		});
 
 		it('should not allow to add an undefined object', function(done) {
@@ -353,7 +353,7 @@ describe('ParamValue', function() {
                 done();
             };
 
-            c.setParamType(undefined, success, fail);
+            c.linkParamType(undefined, success, fail);
 		});
 
 		it('should not allow to add a object which is not yet created', function(done) {
@@ -375,7 +375,7 @@ describe('ParamValue', function() {
                 done();
             };
 
-            c.setParamType(p, success, fail);
+            c.linkParamType(p, success, fail);
 		});
 
 		it('should not allow to set a paramType if there is already one', function(done) {
@@ -416,7 +416,7 @@ describe('ParamValue', function() {
                     done();
                 };
 
-                c.setParamType(p, success2, fail2);
+                c.linkParamType(p, success2, fail2);
             };
 
             var fail = function(err) {
@@ -428,7 +428,7 @@ describe('ParamValue', function() {
 
 	});
 
-	describe('#unsetParamType', function() {
+	describe('#unlinkParamType', function() {
 		it('should unset the ParamType', function(done) {
 			var c = new ParamValue("toto", 52);
 			var p = new ParamType("toto", "machin", 42);
@@ -460,7 +460,7 @@ describe('ParamValue', function() {
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetParamType is false.");
+                    //assert.ok(retour, "The return of the unlinkParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
                     paramType = c.paramType();
@@ -474,7 +474,7 @@ describe('ParamValue', function() {
                     done(err);
                 };
 
-                c.unsetParamType(success2, fail2);
+                c.unlinkParamType(success2, fail2);
             };
 
             var fail = function(err) {
@@ -516,7 +516,7 @@ describe('ParamValue', function() {
                     done();
                 };
 
-                c.unsetParamType(success2, fail2);
+                c.unlinkParamType(success2, fail2);
 
             };
 

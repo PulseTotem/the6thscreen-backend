@@ -260,12 +260,12 @@ class Renderer extends ModelItf {
 	 * As a Renderer can only have one InfoType, if the value is already set, this method throws an exception: you need first to unset the InfoType.
 	 * Moreover the given type must be created in database.
 	 *
-     * @method setInfoType
+     * @method linkInfoType
 	 * @param {InfoType} it The InfoType to associate with the Renderer.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setInfoType(it : InfoType, successCallback : Function = null, failCallback : Function = null) {
+	linkInfoType(it : InfoType, successCallback : Function = null, failCallback : Function = null) {
 		if (!it || !it.getId()) {
             failCallback(new ModelException("The InfoType must be an existing object to be associated."));
             return;
@@ -298,11 +298,11 @@ class Renderer extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * An InfoType must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetInfoType
+     * @method unlinkInfoType
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetInfoType(successCallback : Function = null, failCallback : Function = null) {
+	unlinkInfoType(successCallback : Function = null, failCallback : Function = null) {
 		if (this.infoType() === null) {
             failCallback(new ModelException("No InfoType has been set for this Renderer."));
             return;

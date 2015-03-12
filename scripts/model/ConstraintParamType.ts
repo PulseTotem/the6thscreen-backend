@@ -257,12 +257,12 @@ class ConstraintParamType extends ModelItf {
 	 * As a ConstraintParamType can only have one type, if the value is already set, this method throws an exception: you need first to unset the type.
 	 * Moreover the given type must be created in database.
 	 *
-     * @method setType
+     * @method linkType
 	 * @param {TypeParamType} t The type to associate with the ConstraintParamType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setType(t : TypeParamType, successCallback : Function = null, failCallback : Function = null) {
+	linkType(t : TypeParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!t || !t.getId()) {
             failCallback(new ModelException("The type must be an existing object to be associated."));
             return;
@@ -299,7 +299,7 @@ class ConstraintParamType extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetType(successCallback : Function = null, failCallback : Function = null) {
+	unlinkType(successCallback : Function = null, failCallback : Function = null) {
 		if (this.type() === null) {
             failCallback(new ModelException("No type has been set for this constraintParamType."));
             return;

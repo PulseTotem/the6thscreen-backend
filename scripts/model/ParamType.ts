@@ -396,12 +396,12 @@ class ParamType extends ModelItf {
 	 * As a ParamType can only have one Type, if the value is already set, this method throws an exception: you need first to unset the Type.
 	 * Moreover the given Type must be created in database.
 	 *
-     * @method setType
+     * @method linkType
 	 * @param {TypeParamType} t The Type to associate with the ParamType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-    setType(t : TypeParamType, successCallback : Function = null, failCallback : Function = null) {
+    linkType(t : TypeParamType, successCallback : Function = null, failCallback : Function = null) {
         if (!t || !t.getId()) {
             failCallback(new ModelException("The type must be an existing object to be associated."));
             return;
@@ -434,11 +434,11 @@ class ParamType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Type must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetType
+     * @method unlinkType
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    unsetType(successCallback : Function = null, failCallback : Function = null) {
+    unlinkType(successCallback : Function = null, failCallback : Function = null) {
         if (this.type() === null) {
             failCallback(new ModelException("No type has been set for this ParamType."));
             return;
@@ -465,12 +465,12 @@ class ParamType extends ModelItf {
 	 * As a ParamType can only have one Constraint, if the value is already set, this method throws an exception: you need first to unset the Constraint.
 	 * Moreover the given Constraint must be created in database.
 	 *
-     * @method setConstraint
+     * @method linkConstraint
 	 * @param {ConstraintParamType} t The Constraint to associate with the ParamType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setConstraint(c : ConstraintParamType, successCallback : Function = null, failCallback : Function = null) {
+	linkConstraint(c : ConstraintParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!c || !c.getId()) {
             failCallback(new ModelException("The constraint must be an existing object to be associated."));
             return;
@@ -503,11 +503,11 @@ class ParamType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Constraint must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetConstraint
+     * @method unlinkConstraint
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetConstraint(successCallback : Function = null, failCallback : Function = null) {
+	unlinkConstraint(successCallback : Function = null, failCallback : Function = null) {
 		if (this.constraint() === null) {
             failCallback(new ModelException("No constraint has been set for this ParamType."));
             return;
@@ -534,12 +534,12 @@ class ParamType extends ModelItf {
 	 * As a ParamType can only have one DefaultValue, if the value is already set, this method throws an exception: you need first to unset the DefaultValue.
 	 * Moreover the given DefaultValue must be created in database.
 	 *
-     * @method setDefaultValue
+     * @method linkDefaultValue
 	 * @param {ParamValue} t The DefaultValue to associate with the ParamType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setDefaultValue(d : ParamValue, successCallback : Function = null, failCallback : Function = null) {
+	linkDefaultValue(d : ParamValue, successCallback : Function = null, failCallback : Function = null) {
 		if (!d || !d.getId()) {
             failCallback(new ModelException("The defaultValue must be an existing object to be associated."));
             return;
@@ -572,11 +572,11 @@ class ParamType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A DefaultValue must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetDefaultValue
+     * @method unlinkDefaultValue
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetDefaultValue(successCallback : Function = null, failCallback : Function = null) {
+	unlinkDefaultValue(successCallback : Function = null, failCallback : Function = null) {
 		if (this.defaultValue() === null) {
             failCallback(new ModelException("No defaultValue has been set for this ParamType."));
             return;

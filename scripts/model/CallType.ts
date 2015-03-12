@@ -529,12 +529,12 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one Source, if the value is already set, this method throws an exception: you need first to unset the Source.
 	 * Moreover the given Source must be created in database.
 	 *
-     * @method setSource
+     * @method linkSource
 	 * @param {Source} s The Source to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setSource(s : Source, successCallback : Function = null, failCallback : Function = null) {
+	linkSource(s : Source, successCallback : Function = null, failCallback : Function = null) {
 		if (!s || !s.getId()) {
             failCallback(new ModelException("The source must be an existing object to be associated."));
             return;
@@ -567,11 +567,11 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Source must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetSource
+     * @method unlinkSource
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetSource(successCallback : Function = null, failCallback : Function = null) {
+	unlinkSource(successCallback : Function = null, failCallback : Function = null) {
 		if (this.source() === null) {
             failCallback(new ModelException("No source has been set for this callType."));
             return;
@@ -598,12 +598,12 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one Renderer, if the value is already set, this method throws an exception: you need first to unset the Renderer.
 	 * Moreover the given Renderer must be created in database.
 	 *
-     * @method setRenderer
+     * @method linkRenderer
 	 * @param {Renderer} r The Renderer to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setRenderer(r : Renderer, successCallback : Function = null, failCallback : Function = null) {
+	linkRenderer(r : Renderer, successCallback : Function = null, failCallback : Function = null) {
 		if (!r || !r.getId()) {
             failCallback(new ModelException("The renderer must be an existing object to be associated."));
             return;
@@ -636,11 +636,11 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Renderer must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetRenderer
+     * @method unlinkRenderer
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetRenderer(successCallback : Function = null, failCallback : Function = null) {
+	unlinkRenderer(successCallback : Function = null, failCallback : Function = null) {
 		if (this.renderer() === null) {
             failCallback(new ModelException("No renderer has been set for this callType."));
             return;
@@ -667,12 +667,12 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one ReceivePolicy, if the value is already set, this method throws an exception: you need first to unset the ReceivePolicy.
 	 * Moreover the given ReceivePolicy must be created in database.
 	 *
-     * @method setReceivePolicy
+     * @method linkReceivePolicy
 	 * @param {ReceivePolicy} rp The ReceivePolicy to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setReceivePolicy(rp : ReceivePolicy, successCallback : Function = null, failCallback : Function = null) {
+	linkReceivePolicy(rp : ReceivePolicy, successCallback : Function = null, failCallback : Function = null) {
 		if (!rp || !rp.getId()) {
             failCallback(new ModelException("The receivePolicy must be an existing object to be associated."));
             return;
@@ -705,11 +705,11 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A ReceivePolicy must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetReceivePolicy
+     * @method unlinkReceivePolicy
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetReceivePolicy(successCallback : Function = null, failCallback : Function = null) {
+	unlinkReceivePolicy(successCallback : Function = null, failCallback : Function = null) {
 		if (this.receivePolicy() === null) {
             failCallback(new ModelException("No receivePolicy has been set for this callType."));
             return;
@@ -736,12 +736,12 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one RenderPolicy, if the value is already set, this method throws an exception: you need first to unset the RenderPolicy.
 	 * Moreover the given RenderPolicy must be created in database.
 	 *
-     * @method setRenderPolicy
+     * @method linkRenderPolicy
 	 * @param {RenderPolicy} rp The RenderPolicy to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setRenderPolicy(rp : RenderPolicy, successCallback : Function = null, failCallback : Function = null) {
+	linkRenderPolicy(rp : RenderPolicy, successCallback : Function = null, failCallback : Function = null) {
 		if (!rp || !rp.getId()) {
             failCallback(new ModelException("The renderPolicy must be an existing object to be associated."));
             return;
@@ -774,11 +774,11 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A RenderPolicy must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetRenderPolicy
+     * @method unlinkRenderPolicy
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetRenderPolicy(successCallback : Function = null, failCallback : Function = null) {
+	unlinkRenderPolicy(successCallback : Function = null, failCallback : Function = null) {
 		if (this.renderPolicy() === null) {
             failCallback(new ModelException("No RenderPolicy has been set for this callType."));
             return;
@@ -805,12 +805,12 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one Zone, if the value is already set, this method throws an exception: you need first to unset the Zone.
 	 * Moreover the given Zone must be created in database.
 	 *
-     * @method setZone
+     * @method linkZone
 	 * @param {Zone} z The Zone to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setZone(z : Zone, successCallback : Function = null, failCallback : Function = null) {
+	linkZone(z : Zone, successCallback : Function = null, failCallback : Function = null) {
 		if (!z || !z.getId()) {
             failCallback(new ModelException("The zone must be an existing object to be associated."));
             return;
@@ -843,11 +843,11 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Zone must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetZone
+     * @method unlinkZone
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetZone(successCallback : Function = null, failCallback : Function = null) {
+	unlinkZone(successCallback : Function = null, failCallback : Function = null) {
 		if (this.zone() === null) {
             failCallback(new ModelException("No Zone has been set for this callType."));
             return;

@@ -648,7 +648,7 @@ describe('Call', function(){
 
 	});
 
-	describe('#setProfil', function() {
+	describe('#linkProfil', function() {
 		it('should set the given Profil', function(done) {
 			var c = new Call("toto", 52);
 			var p = new Profil("toto", "machin", 42);
@@ -678,7 +678,7 @@ describe('Call', function(){
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setProfil is false.");
+                    //assert.ok(retour, "The return of the linkProfil is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
                     // normalement le lazy_loading est true : plus besoin de mock pour la requête
@@ -692,7 +692,7 @@ describe('Call', function(){
                     done(err);
                 };
 
-                c.setProfil(p, success2, fail2);
+                c.linkProfil(p, success2, fail2);
 
             };
 
@@ -722,7 +722,7 @@ describe('Call', function(){
                 done();
             };
 
-            c.setProfil(null, success, fail);
+            c.linkProfil(null, success, fail);
 		});
 
 		it('should not allow to add an undefined object', function(done) {
@@ -743,7 +743,7 @@ describe('Call', function(){
                 done();
             };
 
-            c.setProfil(undefined, success, fail);
+            c.linkProfil(undefined, success, fail);
 		});
 
 		it('should not allow to add a object which is not yet created', function(done) {
@@ -765,7 +765,7 @@ describe('Call', function(){
                 done();
             };
 
-            c.setProfil(p, success, fail);
+            c.linkProfil(p, success, fail);
 		});
 
 		it('should not allow to set a profil if there is already one', function(done) {
@@ -807,7 +807,7 @@ describe('Call', function(){
                     done();
                 };
 
-                c.setProfil(p, success2, fail2);
+                c.linkProfil(p, success2, fail2);
             };
 
             var fail = function(err) {
@@ -819,7 +819,7 @@ describe('Call', function(){
 
 	});
 
-	describe('#unsetProfil', function() {
+	describe('#unlinkProfil', function() {
 		it('should unset the Profil', function(done) {
 			var c = new Call("toto", 52);
 			var p = new Profil("toto", "machin", 42);
@@ -852,7 +852,7 @@ describe('Call', function(){
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetProfil is false.");
+                    //assert.ok(retour, "The return of the unlinkProfil is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
                     profil = c.profil();
@@ -866,7 +866,7 @@ describe('Call', function(){
                     done(err);
                 };
 
-                c.unsetProfil(success2, fail2);
+                c.unlinkProfil(success2, fail2);
             };
 
             var fail = function(err) {
@@ -910,7 +910,7 @@ describe('Call', function(){
                     done();
                 };
 
-                c.unsetProfil(success2, fail2);
+                c.unlinkProfil(success2, fail2);
             };
 
             var fail = function(err) {
@@ -922,7 +922,7 @@ describe('Call', function(){
 
 	});
 
-	describe('#setCallType', function() {
+	describe('#linkCallType', function() {
 		it('should set the given CallType', function(done) {
 			var c = new Call("toto", 52);
 			var ct = new CallType("tptp", "blabla",12)
@@ -952,7 +952,7 @@ describe('Call', function(){
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setCallType is false.");
+                    //assert.ok(retour, "The return of the linkCallType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
                     calltype = c.callType();
@@ -966,7 +966,7 @@ describe('Call', function(){
                     done(err);
                 };
 
-                c.setCallType(ct, success2, fail2);
+                c.linkCallType(ct, success2, fail2);
             };
 
             var fail = function(err) {
@@ -994,7 +994,7 @@ describe('Call', function(){
                 done();
             };
 
-            c.setCallType(null, success, fail);
+            c.linkCallType(null, success, fail);
 		});
 
 		it('should not allow to add an undefined object', function(done) {
@@ -1015,7 +1015,7 @@ describe('Call', function(){
                 done();
             };
 
-            c.setCallType(undefined, success, fail);
+            c.linkCallType(undefined, success, fail);
 		});
 
 		it('should not allow to add a object which is not yet created', function(done) {
@@ -1037,7 +1037,7 @@ describe('Call', function(){
                 done();
             };
 
-            c.setCallType(ct, success, fail);
+            c.linkCallType(ct, success, fail);
 		});
 
 		it('should not allow to set a callType if there is already one', function(done) {
@@ -1079,7 +1079,7 @@ describe('Call', function(){
                     done();
                 };
 
-                c.setCallType(ct, success2, fail2);
+                c.linkCallType(ct, success2, fail2);
             };
 
             var fail = function(err) {
@@ -1091,7 +1091,7 @@ describe('Call', function(){
 
 	});
 
-	describe('#unsetCallType', function() {
+	describe('#unlinkCallType', function() {
 		it('should unset the calltype', function(done) {
 			var c = new Call("toto", 52);
 			var ct = new CallType("toto", "machin", 42);
@@ -1121,7 +1121,7 @@ describe('Call', function(){
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetCallType is false.");
+                    //assert.ok(retour, "The return of the unlinkCallType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
 
                     calltype = c.callType();
@@ -1135,7 +1135,7 @@ describe('Call', function(){
                     done(err);
                 };
 
-                c.unsetCallType(success2, fail2);
+                c.unlinkCallType(success2, fail2);
 
             };
 
@@ -1178,7 +1178,7 @@ describe('Call', function(){
                     done();
                 };
 
-                c.unsetCallType(success2, fail2);
+                c.unlinkCallType(success2, fail2);
             };
 
             var fail = function(err) {

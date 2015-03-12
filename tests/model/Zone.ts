@@ -324,7 +324,7 @@ describe('Zone', function() {
 		})
 	});
 
-	describe('#setBehaviour', function () {
+	describe('#linkBehaviour', function () {
 		it('should set the given behaviour', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto", "machin", 42);
@@ -355,7 +355,7 @@ describe('Zone', function() {
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setBehaviour is false.");
+                    //assert.ok(retour, "The return of the linkBehaviour is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the behaviour in database.");
 
                     // normalement le lazy_loading est true : plus besoin de mock pour la requête
@@ -370,7 +370,7 @@ describe('Zone', function() {
                     done(err);
                 };
 
-                c.setBehaviour(s, success2, fail2);
+                c.linkBehaviour(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -398,7 +398,7 @@ describe('Zone', function() {
                 done();
             };
 
-            c.setBehaviour(null, success, fail);
+            c.linkBehaviour(null, success, fail);
 		});
 
 		it('should not allow to add an undefined object', function (done) {
@@ -419,7 +419,7 @@ describe('Zone', function() {
                 done();
             };
 
-            c.setBehaviour(undefined, success, fail);
+            c.linkBehaviour(undefined, success, fail);
 		});
 
 		it('should not allow to add a object which is not yet created', function (done) {
@@ -441,7 +441,7 @@ describe('Zone', function() {
                 done();
             };
 
-            c.setBehaviour(s, success, fail);
+            c.linkBehaviour(s, success, fail);
 		});
 
 		it('should not allow to set a behaviour if there is already one', function (done) {
@@ -479,7 +479,7 @@ describe('Zone', function() {
                     done();
                 };
 
-                c.setBehaviour(s, success2, fail2);
+                c.linkBehaviour(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -491,7 +491,7 @@ describe('Zone', function() {
 
 	});
 
-	describe('#unsetBehaviour', function () {
+	describe('#unlinkBehaviour', function () {
 		it('should unset the Behaviour', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto", "machin", 42);
@@ -522,7 +522,7 @@ describe('Zone', function() {
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetBehaviour is false.");
+                    //assert.ok(retour, "The return of the unlinkBehaviour is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
 
                     behaviour = c.behaviour();
@@ -536,7 +536,7 @@ describe('Zone', function() {
                     done(err);
                 };
 
-                c.unsetBehaviour(success2, fail2);
+                c.unlinkBehaviour(success2, fail2);
             };
 
             var fail = function(err) {
@@ -579,7 +579,7 @@ describe('Zone', function() {
                     done();
                 };
 
-                c.unsetBehaviour(success2, fail2);
+                c.unlinkBehaviour(success2, fail2);
             };
 
             var fail = function(err) {

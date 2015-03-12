@@ -271,7 +271,7 @@ describe('ParamType', function() {
 		})
 	});
 
-    describe('#setType', function() {
+    describe('#linkType', function() {
         it('should set the given type', function(done) {
             var c = new ParamType("toto","machin", 52);
             var s = new TypeParamType("toto", 42);
@@ -301,7 +301,7 @@ describe('ParamType', function() {
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setTypeParamType is false.");
+                    //assert.ok(retour, "The return of the linkTypeParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the type in database.");
 
                     type = c.type();
@@ -315,7 +315,7 @@ describe('ParamType', function() {
                     done(err);
                 };
 
-                c.setType(s, success2, fail2);
+                c.linkType(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -343,7 +343,7 @@ describe('ParamType', function() {
                 done();
             };
 
-            c.setType(null, success, fail);
+            c.linkType(null, success, fail);
         });
 
         it('should not allow to add an undefined object', function(done) {
@@ -364,7 +364,7 @@ describe('ParamType', function() {
                 done();
             };
 
-            c.setType(undefined, success, fail);
+            c.linkType(undefined, success, fail);
         });
 
         it('should not allow to add a object which is not yet created', function(done) {
@@ -386,7 +386,7 @@ describe('ParamType', function() {
                 done();
             };
 
-            c.setType(s, success, fail);
+            c.linkType(s, success, fail);
         });
 
         it('should not allow to set a type if there is already one', function(done) {
@@ -424,7 +424,7 @@ describe('ParamType', function() {
                     done();
                 };
 
-                c.setType(s, success2, fail2);
+                c.linkType(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -436,7 +436,7 @@ describe('ParamType', function() {
 
     });
 
-    describe('#unsetType', function() {
+    describe('#unlinkType', function() {
         it('should unset the TypeParamType', function(done) {
             var c = new ParamType("toto","machin", 52);
             var s = new TypeParamType("toto", 42);
@@ -466,7 +466,7 @@ describe('ParamType', function() {
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetTypeParamType is false.");
+                    //assert.ok(retour, "The return of the unlinkTypeParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
 
                     type = c.type();
@@ -480,7 +480,7 @@ describe('ParamType', function() {
                     done(err);
                 };
 
-                c.unsetType(success2, fail2);
+                c.unlinkType(success2, fail2);
             };
 
             var fail = function(err) {
@@ -523,7 +523,7 @@ describe('ParamType', function() {
                     done();
                 };
 
-                c.unsetType(success2, fail2);
+                c.unlinkType(success2, fail2);
             };
 
             var fail = function(err) {
@@ -535,7 +535,7 @@ describe('ParamType', function() {
 
     });
 
-	describe('#setConstraint', function() {
+	describe('#linkConstraint', function() {
 		it('should set the given constraint', function(done) {
 			var c = new ParamType("toto","machin", 52);
 			var s = new ConstraintParamType("toto","tata" ,42);
@@ -566,7 +566,7 @@ describe('ParamType', function() {
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setConstraintParamType is false.");
+                    //assert.ok(retour, "The return of the linkConstraintParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the constraint in database.");
 
                     constraint = c.constraint();
@@ -580,7 +580,7 @@ describe('ParamType', function() {
                     done(err);
                 };
 
-                c.setConstraint(s, success2, fail2);
+                c.linkConstraint(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -608,7 +608,7 @@ describe('ParamType', function() {
                 done();
             };
 
-            c.setConstraint(null, success, fail);
+            c.linkConstraint(null, success, fail);
 		});
 
 		it('should not allow to add an undefined object', function(done) {
@@ -629,7 +629,7 @@ describe('ParamType', function() {
                 done();
             };
 
-            c.setConstraint(undefined, success, fail);
+            c.linkConstraint(undefined, success, fail);
 		});
 
 		it('should not allow to add a object which is not yet created', function(done) {
@@ -651,7 +651,7 @@ describe('ParamType', function() {
                 done();
             };
 
-            c.setConstraint(s, success, fail);
+            c.linkConstraint(s, success, fail);
 		});
 
 		it('should not allow to set a constraint if there is already one', function(done) {
@@ -689,7 +689,7 @@ describe('ParamType', function() {
                     done();
                 };
 
-                c.setConstraint(s, success2, fail2);
+                c.linkConstraint(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -701,7 +701,7 @@ describe('ParamType', function() {
 
 	});
 
-	describe('#unsetConstraint', function() {
+	describe('#unlinkConstraint', function() {
 		it('should unset the ConstraintParamType', function(done) {
 			var c = new ParamType("toto","machin", 52);
 			var s = new ConstraintParamType("toto","tata", 42);
@@ -732,7 +732,7 @@ describe('ParamType', function() {
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetConstraintParamType is false.");
+                    //assert.ok(retour, "The return of the unlinkConstraintParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
 
                     constraint = c.constraint();
@@ -746,7 +746,7 @@ describe('ParamType', function() {
                     done(err);
                 };
 
-                c.unsetConstraint(success2, fail2);
+                c.unlinkConstraint(success2, fail2);
             };
 
             var fail = function(err) {
@@ -788,7 +788,7 @@ describe('ParamType', function() {
                     done();
                 };
 
-                c.unsetConstraint(success2, fail2);
+                c.unlinkConstraint(success2, fail2);
             };
 
             var fail = function(err) {
@@ -800,7 +800,7 @@ describe('ParamType', function() {
 
 	});
 
-	describe('#setDefaultValue', function() {
+	describe('#linkDefaultValue', function() {
 		it('should set the given defaultValue', function(done) {
 			var c = new ParamType("toto","machin", 52);
 			var s = new ParamValue("toto" ,42);
@@ -844,7 +844,7 @@ describe('ParamType', function() {
                     done(err);
                 };
 
-                c.setDefaultValue(s, success2, fail2);
+                c.linkDefaultValue(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -872,7 +872,7 @@ describe('ParamType', function() {
                 done();
             };
 
-            c.setDefaultValue(null, success, fail);
+            c.linkDefaultValue(null, success, fail);
 		});
 
 		it('should not allow to add an undefined object', function(done) {
@@ -893,7 +893,7 @@ describe('ParamType', function() {
                 done();
             };
 
-            c.setDefaultValue(undefined, success, fail);
+            c.linkDefaultValue(undefined, success, fail);
 		});
 
 		it('should not allow to add a object which is not yet created', function(done) {
@@ -915,7 +915,7 @@ describe('ParamType', function() {
                 done();
             };
 
-            c.setDefaultValue(s, success, fail);
+            c.linkDefaultValue(s, success, fail);
 		});
 
 		it('should not allow to set a defaultValue if there is already one', function(done) {
@@ -952,7 +952,7 @@ describe('ParamType', function() {
                     done();
                 };
 
-                c.setDefaultValue(s, success2, fail2);
+                c.linkDefaultValue(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -964,7 +964,7 @@ describe('ParamType', function() {
 
 	});
 
-	describe('#unsetDefaultValue', function() {
+	describe('#unlinkDefaultValue', function() {
 		it('should unset the defaultValue', function(done) {
 			var c = new ParamType("toto","machin", 52);
 			var s = new ParamValue("toto",42);
@@ -1016,7 +1016,7 @@ describe('ParamType', function() {
                     done();
                 };
 
-                c.unsetDefaultValue(success2, fail2);
+                c.unlinkDefaultValue(success2, fail2);
             };
 
             var fail = function(err) {
@@ -1058,7 +1058,7 @@ describe('ParamType', function() {
                     done();
                 };
 
-                c.unsetDefaultValue(success2, fail2);
+                c.unlinkDefaultValue(success2, fail2);
             };
 
             var fail = function(err) {

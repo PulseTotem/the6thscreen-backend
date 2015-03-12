@@ -434,12 +434,12 @@ class Call extends ModelItf {
 	 * As a Call can only have one Profil, if the value is already set, this method throws an exception: you need first to unset the profil.
 	 * Moreover the given Profil must be created in database.
 	 *
-     * @method setProfil
+     * @method linkProfil
 	 * @param {Profil} p The Profil to associate with the Call.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
+	linkProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
 		if (!p) {
             failCallback(new ModelException("The Profil must be an existing object to be associated."));
             return;
@@ -472,11 +472,11 @@ class Call extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Profil must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetProfil
+     * @method unlinkProfil
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetProfil(successCallback : Function = null, failCallback : Function = null) {
+	unlinkProfil(successCallback : Function = null, failCallback : Function = null) {
 		if (this.profil() === null) {
             failCallback(new ModelException("No profil has been set for this call."));
             return;
@@ -503,12 +503,12 @@ class Call extends ModelItf {
 	 * As a Call can only have one CallType, if the value is already set, this method throws an exception: you need first to unset the CallType.
 	 * Moreover the given CallType must be created in database.
 	 *
-     * @method setCallType
+     * @method linkCallType
 	 * @param {CallType} ct The CallType to associate with the Call.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setCallType(ct : CallType, successCallback : Function = null, failCallback : Function = null) {
+	linkCallType(ct : CallType, successCallback : Function = null, failCallback : Function = null) {
 		if (!ct) {
             failCallback(new ModelException("The CallType must be an existing object to be associated."));
             return;
@@ -541,11 +541,11 @@ class Call extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A CallType must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetCallType
+     * @method unlinkCallType
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetCallType(successCallback : Function = null, failCallback : Function = null) : boolean {
+	unlinkCallType(successCallback : Function = null, failCallback : Function = null) : boolean {
 		if (this.callType() === null) {
             failCallback(new ModelException("No CallType has been set for this call."));
             return;

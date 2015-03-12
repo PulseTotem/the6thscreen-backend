@@ -447,12 +447,12 @@ class Zone extends ModelItf {
 	 * As a Zone can only have one Behaviour, if the value is already set, this method throws an exception: you need first to unset the Behaviour.
 	 * Moreover the given type must be created in database.
 	 *
-	 * @method setBehaviour
+	 * @method linkBehaviour
 	 * @param {Behaviour} beha The Behaviour to associate with the Zone.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setBehaviour(beha : Behaviour, successCallback : Function = null, failCallback : Function = null) {
+	linkBehaviour(beha : Behaviour, successCallback : Function = null, failCallback : Function = null) {
 		if (!beha || !beha.getId()) {
             failCallback(new ModelException("The Behaviour must be an existing object to be associated."));
             return;
@@ -485,11 +485,11 @@ class Zone extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Behaviour must have been set before using it, else an exception is thrown.
 	 *
-	 * @method unsetBehaviour
+	 * @method unlinkBehaviour
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetBehaviour(successCallback : Function = null, failCallback : Function = null) {
+	unlinkBehaviour(successCallback : Function = null, failCallback : Function = null) {
 		if (this.behaviour() === null) {
             failCallback(new ModelException("No Behaviour has been set for this Source."));
             return;

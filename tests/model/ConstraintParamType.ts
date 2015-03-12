@@ -302,7 +302,7 @@ describe('ConstraintParamType', function() {
 		})
 	});
 
-	describe('#setType', function() {
+	describe('#linkType', function() {
 		it('should set the given type', function(done) {
 			var c = new ConstraintParamType("toto","machin", 52);
 			var s = new TypeParamType("toto", 42);
@@ -332,7 +332,7 @@ describe('ConstraintParamType', function() {
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setTypeParamType is false.");
+                    //assert.ok(retour, "The return of the linkTypeParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the type in database.");
 
                     type = c.type();
@@ -346,7 +346,7 @@ describe('ConstraintParamType', function() {
                     done(err);
                 };
 
-                c.setType(s, success2, fail2);
+                c.linkType(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -374,7 +374,7 @@ describe('ConstraintParamType', function() {
                 done();
             };
 
-            c.setType(null, success, fail);
+            c.linkType(null, success, fail);
 		});
 
 		it('should not allow to add an undefined object', function(done) {
@@ -395,7 +395,7 @@ describe('ConstraintParamType', function() {
                 done();
             };
 
-            c.setType(undefined, success, fail);
+            c.linkType(undefined, success, fail);
 		});
 
 		it('should not allow to add a object which is not yet created', function(done) {
@@ -417,7 +417,7 @@ describe('ConstraintParamType', function() {
                 done();
             };
 
-            c.setType(s, success, fail);
+            c.linkType(s, success, fail);
 		});
 
 		it('should not allow to set a type if there is already one', function(done) {
@@ -455,7 +455,7 @@ describe('ConstraintParamType', function() {
                     done();
                 };
 
-                c.setType(s, success2, fail2);
+                c.linkType(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -467,7 +467,7 @@ describe('ConstraintParamType', function() {
 
 	});
 
-	describe('#unsetType', function() {
+	describe('#unlinkType', function() {
 		it('should unset the TypeParamType', function(done) {
 			var c = new ConstraintParamType("toto","machin", 52);
 			var s = new TypeParamType("toto", 42);
@@ -497,7 +497,7 @@ describe('ConstraintParamType', function() {
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetTypeParamType is false.");
+                    //assert.ok(retour, "The return of the unlinkTypeParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
 
                     type = c.type();
@@ -511,7 +511,7 @@ describe('ConstraintParamType', function() {
                     done(err);
                 };
 
-                c.unsetType(success2, fail2);
+                c.unlinkType(success2, fail2);
             };
 
             var fail = function(err) {
@@ -554,7 +554,7 @@ describe('ConstraintParamType', function() {
                     done();
                 };
 
-                c.unsetType(success2, fail2);
+                c.unlinkType(success2, fail2);
             };
 
             var fail = function(err) {

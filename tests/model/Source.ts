@@ -379,7 +379,7 @@ describe('Source', function() {
 		});
 	});
 
-	describe('#setService', function () {
+	describe('#linkService', function () {
 		it('should set the given service', function (done) {
 			var c = new Source("machin", "desc", "method", 28);
 			var s = new Service("toto", "machin", "blabla", 42);
@@ -423,7 +423,7 @@ describe('Source', function() {
 					done(err);
 				};
 
-				c.setService(s, success2, fail2);
+				c.linkService(s, success2, fail2);
 			};
 
 			var fail = function(err) {
@@ -451,7 +451,7 @@ describe('Source', function() {
 				done();
 			};
 
-			c.setService(null, success, fail);
+			c.linkService(null, success, fail);
 		});
 
 		it('should not allow to add an undefined object', function (done) {
@@ -472,7 +472,7 @@ describe('Source', function() {
 				done();
 			};
 
-			c.setService(undefined, success, fail);
+			c.linkService(undefined, success, fail);
 		});
 
 		it('should not allow to add a object which is not yet created', function (done) {
@@ -494,7 +494,7 @@ describe('Source', function() {
 				done();
 			};
 
-			c.setService(s, success, fail);
+			c.linkService(s, success, fail);
 		});
 
 		it('should not allow to set a infoType if there is already one', function (done) {
@@ -532,7 +532,7 @@ describe('Source', function() {
 					done();
 				};
 
-				c.setService(s, success2, fail2);
+				c.linkService(s, success2, fail2);
 			};
 
 			var fail = function(err) {
@@ -544,7 +544,7 @@ describe('Source', function() {
 
 	});
 
-	describe('#unsetService', function () {
+	describe('#unlinkService', function () {
 		it('should unset the Service', function (done) {
 			var c = new Source("machin", "desc", "method", 28);
 			var s = new Service("toto", "machin", "blabla", 42);
@@ -589,7 +589,7 @@ describe('Source', function() {
 					done(err);
 				};
 
-				c.unsetService(success2, fail2);
+				c.unlinkService(success2, fail2);
 			};
 
 			var fail = function(err) {
@@ -632,7 +632,7 @@ describe('Source', function() {
 					done();
 				};
 
-				c.unsetService(success2, fail2);
+				c.unlinkService(success2, fail2);
 			};
 
 			var fail = function(err) {
@@ -644,7 +644,7 @@ describe('Source', function() {
 
 	});
 
-	describe('#setInfoType', function () {
+	describe('#linkInfoType', function () {
 		it('should set the given infoType', function (done) {
 			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto", 42);
@@ -674,7 +674,7 @@ describe('Source', function() {
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setInfoType is false.");
+                    //assert.ok(retour, "The return of the linkInfoType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the infoType in database.");
 
                     infoType = c.infoType();
@@ -688,7 +688,7 @@ describe('Source', function() {
                     done(err);
                 };
 
-                c.setInfoType(s, success2, fail2);
+                c.linkInfoType(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -716,7 +716,7 @@ describe('Source', function() {
                 done();
             };
 
-            c.setInfoType(null, success, fail);
+            c.linkInfoType(null, success, fail);
 		});
 
 		it('should not allow to add an undefined object', function (done) {
@@ -737,7 +737,7 @@ describe('Source', function() {
                 done();
             };
 
-            c.setInfoType(undefined, success, fail);
+            c.linkInfoType(undefined, success, fail);
 		});
 
 		it('should not allow to add a object which is not yet created', function (done) {
@@ -759,7 +759,7 @@ describe('Source', function() {
                 done();
             };
 
-            c.setInfoType(s, success, fail);
+            c.linkInfoType(s, success, fail);
 		});
 
 		it('should not allow to set a infoType if there is already one', function (done) {
@@ -797,7 +797,7 @@ describe('Source', function() {
                     done();
                 };
 
-                c.setInfoType(s, success2, fail2);
+                c.linkInfoType(s, success2, fail2);
             };
 
             var fail = function(err) {
@@ -809,7 +809,7 @@ describe('Source', function() {
 
 	});
 
-	describe('#unsetInfoType', function () {
+	describe('#unlinkInfoType', function () {
 		it('should unset the InfoType', function (done) {
 			var c = new Source("machin", "desc", "method", 28);
 			var s = new InfoType("toto", 42);
@@ -840,7 +840,7 @@ describe('Source', function() {
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetInfoType is false.");
+                    //assert.ok(retour, "The return of the unlinkInfoType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
 
                     infoType = c.infoType();
@@ -854,7 +854,7 @@ describe('Source', function() {
                     done(err);
                 };
 
-                c.unsetInfoType(success2, fail2);
+                c.unlinkInfoType(success2, fail2);
             };
 
             var fail = function(err) {
@@ -897,7 +897,7 @@ describe('Source', function() {
                     done();
                 };
 
-                c.unsetInfoType(success2, fail2);
+                c.unlinkInfoType(success2, fail2);
             };
 
             var fail = function(err) {
@@ -1603,4 +1603,47 @@ describe('Source', function() {
 		});
 
 	});
+
+	/*
+	describe('#updateAttribute', function () {
+		it('should update the infoType when asking', function (done) {
+			var model = new Source("toto", "bla", 12);
+
+			var responseRead : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": model.toJSONObject()
+			};
+
+			var restClientMockRead = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()))
+				.reply(200, JSON.stringify(responseRead));
+
+			var newInfo = {
+				'id' : model.getId(),
+				'method': 'setInfoType',
+				'value': modelUpdated.name()
+			};
+
+			var responseUpdate : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": modelUpdated.toJSONObject()
+			};
+
+			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
+				.reply(200, JSON.stringify(responseUpdate));
+
+			var success : Function = function () {
+				assert.ok(restClientMockRead.isDone(), "The object is not read.");
+				assert.ok(restClientMockUpdate.isDone(), "The request update has not been done.");
+				done();
+			};
+
+			var fail : Function = function (error) {
+				done(error);
+			};
+
+			ModelItf.updateAttribute(Behaviour, newInfo, success, fail);
+		});
+	});*/
 });

@@ -232,12 +232,12 @@ class ParamValue extends ModelItf {
 	 * As a ParamValue can only have one type, if the value is already set, this method throws an exception: you need first to unset the ParamType.
 	 * Moreover the given ParamType must be created in database.
 	 *
-     * @method setParamType
+     * @method linkParamType
 	 * @param {ParamType} t The ParamType to associate with the ParamValue.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setParamType(p : ParamType, successCallback : Function = null, failCallback : Function = null) {
+	linkParamType(p : ParamType, successCallback : Function = null, failCallback : Function = null) {
 		if (!p || !p.getId()) {
             failCallback(new ModelException("The ParamType must be an existing object to be associated."));
             return;
@@ -270,11 +270,11 @@ class ParamValue extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A ParamType must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetParamType
+     * @method unlinkParamType
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetParamType(successCallback : Function = null, failCallback : Function = null) {
+	unlinkParamType(successCallback : Function = null, failCallback : Function = null) {
 		if (this.paramType() === null) {
             failCallback(new ModelException("No ParamType has been set for this ParamValue."));
             return;
