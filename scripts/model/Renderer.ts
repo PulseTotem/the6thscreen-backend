@@ -215,7 +215,7 @@ class Renderer extends ModelItf {
 		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 
-				var success:Function = function () {
+				var successAsso : Function = function () {
 					self._complete = (!!self.infoType() && self.infoType().isComplete());
 					successCallback();
 				};
@@ -224,7 +224,7 @@ class Renderer extends ModelItf {
 					failCallback(error);
 				};
 
-				this.loadInfoType(success, fail);
+				self.loadInfoType(successAsso, fail);
 			} else {
 				self._complete = false;
 				successCallback();

@@ -211,7 +211,7 @@ class Profil extends ModelItf {
 		var self = this;
 
 		var success : Function = function () {
-			this._complete = (this._complete && !!this.name());
+			self._complete = (self._complete && !!self.name());
 			successCallback();
 		};
 		super.checkCompleteness(success, failCallback);

@@ -70,7 +70,7 @@ describe('Call', function(){
 
 			var success = function() {
 				assert.ok(restClientMockCT.isDone(), "The mock request has not been done to get the type");
-				assert.ok(restClientMockP.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMockP.isDone(), "The mock request has not been done to get the profil");
 				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
 				done();
 			};
@@ -113,7 +113,7 @@ describe('Call', function(){
 
 			var success = function() {
 				assert.ok(restClientMockCT.isDone(), "The mock request has not been done to get the type");
-				assert.ok(restClientMockP.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMockP.isDone(), "The mock request has not been done to get the profil");
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
 				done();
 			};

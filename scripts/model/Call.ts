@@ -292,28 +292,30 @@ class Call extends ModelItf {
 	 * @param failCallback The function to call in case of failure.
 	 */
 	checkCompleteness(successCallback : Function, failCallback : Function) {
-		super.checkCompleteness(successCallback, failCallback);
 
-		if (this.isComplete() && !!this.name()) {
-			var self = this;
+		var self = this;
+		var success = function () {
+			if (self.isComplete() && !!self.name()) {
+				var success : Function = function () {
+					if (self._call_type_loaded && self._profil_loaded) {
+						self._complete = (!!self.callType() && self.callType().isComplete()) && (!!self.profil() && self.profil().isComplete());
+						successCallback();
+					}
+				};
 
-			var success : Function = function () {
-				if (self._call_type_loaded && self._profil_loaded) {
-					self._complete = (!!self.callType() && self.callType().isComplete()) && (!!self.profil() && self.profil().isComplete());
-					successCallback();
-				}
-			};
+				var fail : Function = function (error) {
+					failCallback(error);
+				};
 
-			var fail : Function = function (error) {
-				failCallback(error);
-			};
+				self.loadCallType(success,fail);
+				self.loadProfil(success,fail);
+			} else {
+				self._complete = false;
+				successCallback();
+			}
+		};
 
-			this.loadCallType(success,fail);
-			this.loadProfil(success,fail);
-		} else {
-			this._complete = false;
-			successCallback();
-		}
+		super.checkCompleteness(success, failCallback);
 	}
 
 	/**

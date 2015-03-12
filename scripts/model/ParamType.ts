@@ -333,7 +333,7 @@ class ParamType extends ModelItf {
 		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 
-				var success:Function = function () {
+				var successAsso : Function = function () {
 					self._complete = (self.type() !== null && self.type().isComplete());
 					successCallback();
 				};
@@ -342,7 +342,7 @@ class ParamType extends ModelItf {
 					failCallback(error);
 				};
 
-				this.loadType(success, fail);
+				self.loadType(successAsso, fail);
 			} else {
 				self._complete = false;
 				successCallback();

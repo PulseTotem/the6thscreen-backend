@@ -212,16 +212,16 @@ class ConstraintParamType extends ModelItf {
 		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 
-				var success:Function = function () {
+				var successAsso : Function = function () {
 					self._complete = (self.type() !== undefined && self.type().isComplete());
 					successCallback();
 				};
 
-				var fail:Function = function (error) {
+				var fail : Function = function (error) {
 					failCallback(error);
 				};
 
-				this.loadAssociations(success, fail);
+				self.loadAssociations(successAsso, fail);
 			} else {
 				self._complete = false;
 				successCallback();

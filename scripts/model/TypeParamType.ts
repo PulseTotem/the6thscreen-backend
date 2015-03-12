@@ -79,7 +79,7 @@ class TypeParamType extends ModelItf {
 		var self = this;
 
 		var success : Function = function () {
-			self._complete = (self._complete && !!self.name());
+			self._complete = (self.isComplete() && !!self.name());
 			successCallback();
 		};
 
