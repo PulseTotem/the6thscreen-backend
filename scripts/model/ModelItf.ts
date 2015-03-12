@@ -600,6 +600,14 @@ class ModelItf {
 	 * @param failCallback The function to call in case of failure.
 	 */
 	static updateAttribute(modelClass : any, informations : any, successCallback : Function, failCallback : Function) {
+		if (!modelClass) {
+			failCallback(new ModelException("You must specify the modelClass in order to update one of its attribute."));
+			return;
+		}
+		if (!informations) {
+			failCallback(new ModelException("You must specify a proper piece of information to update attribute."));
+			return;
+		}
 		if (!informations.id) {
 			failCallback(new ModelException("You must specify the object ID in order to update one of its attribute."));
 			return;

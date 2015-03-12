@@ -2271,4 +2271,190 @@ describe('ModelItf', function() {
 
 		});
 	});
+
+	describe('#updateAttribute', function () {
+		it('should launch an exception if the modelClass is undefined.', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(undefined,null, success, fail);
+		});
+
+		it('should launch an exception if the modelClass is null.', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(null, null, success, fail);
+		});
+
+		it('should launch an exception if the JSON information is null', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, null, success, fail);
+		});
+
+		it('should launch an exception if the information is not a JSON', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, "", success, fail);
+		});
+
+		it('should launch an exception if the information does not contain an ID', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var info = {
+				"toto": "tata"
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, info, success, fail);
+		});
+
+		it('should launch an exception if the information does contain a null id', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var info = {
+				"id": null
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, info, success, fail);
+		});
+
+		it('should launch an exception if the information does not contain a method', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var info = {
+				"id": 3
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, info, success, fail);
+		});
+
+		it('should launch an exception if the information does contain a null method', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var info = {
+				"id": 3,
+				"method": null
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, info, success, fail);
+		});
+
+		it('should launch an exception if the information method does not have a proper name', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var info = {
+				"id": 3,
+				"method": "deleteSet"
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, info, success, fail);
+		});
+	});
 });
