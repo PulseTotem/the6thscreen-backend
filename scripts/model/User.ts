@@ -310,12 +310,15 @@ class User extends ModelItf {
 	 * Check completeness of a user.
 	 * The completeness is determined by the presence of a username, an email and an id.
 	 */
-	checkCompleteness(successCallback : Function = null) : void {
-		super.checkCompleteness();
-		this._complete = (this._complete && !!this.username() && !!this.email());
-		if (successCallback) {
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+		var self = this;
+
+		var success : Function = function () {
+			self._complete = (self._complete && !!self.username() && !!self.email());
 			successCallback();
-		}
+		};
+
+		super.checkCompleteness(success, failCallback);
 	}
 
 	/**

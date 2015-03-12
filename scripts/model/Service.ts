@@ -132,10 +132,15 @@ class Service extends ModelItf {
 	 *
 	 * For a Service, it means it has an ID, a name and a host.
 	 */
-	checkCompleteness() : void {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+		var self = this;
 
-		this._complete = (this._complete && !!this.name() && !!this.host());
+		var succces : Function = function () {
+			self._complete = (self._complete && !!self.name() && !!self.host());
+			successCallback();
+		};
+
+		super.checkCompleteness(succces, failCallback);
 	}
 
 	/**

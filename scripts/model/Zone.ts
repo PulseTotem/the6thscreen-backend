@@ -394,26 +394,29 @@ class Zone extends ModelItf {
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of failure.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) {
+		var self = this;
 
-		if (this.isComplete() && !!this.name()) {
-			var self = this;
+		var success : Function = function () {
+			if (self.isComplete() && !!self.name()) {
 
-			var success : Function = function () {
-				self._complete = (!!self.behaviour() && self.behaviour().isComplete());
+				var success:Function = function () {
+					self._complete = (!!self.behaviour() && self.behaviour().isComplete());
+					successCallback();
+				};
+
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
+
+				self.loadBehaviour(success, fail);
+			} else {
+				self._complete = false;
 				successCallback();
-			};
-
-			var fail : Function = function (error) {
-				failCallback(error);
-			};
-
-			this.loadBehaviour(success,fail);
-		} else {
-			this._complete = false;
-			successCallback();
+			}
 		}
+
+		super.checkCompleteness(success, failCallback);
 	}
 
     /**

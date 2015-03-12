@@ -421,12 +421,14 @@ class SDI extends ModelItf {
 	 * Check completeness of a SDI.
 	 * The completeness is determined by the presence of a name and an id.
 	 */
-	checkCompleteness(successCallback : Function = null) : void {
-		super.checkCompleteness();
-		this._complete = (this._complete && !!this.name());
-		if (successCallback) {
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+		var self = this;
+
+		var success : Function = function () {
+			self._complete = (self._complete && !!self.name());
 			successCallback();
 		}
+		super.checkCompleteness(success, failCallback);
 	}
 
     /**

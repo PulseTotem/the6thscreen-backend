@@ -75,9 +75,15 @@ class TypeParamType extends ModelItf {
 	 *
 	 * A TypeParamType is complete if it has an ID and a name.
 	 */
-	checkCompleteness() : void {
-		super.checkCompleteness();
-		this._complete = (this._complete && !!this.name());
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+		var self = this;
+
+		var success : Function = function () {
+			self._complete = (self._complete && !!self.name());
+			successCallback();
+		};
+
+		super.checkCompleteness(success, failCallback);
 	}
 
 	/**

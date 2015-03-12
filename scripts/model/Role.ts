@@ -74,9 +74,15 @@ class Role extends ModelItf {
 	 * Compute the completeness of a Role.
 	 * The completeness is given by the presence of an ID and a name.
 	 */
-	checkCompleteness() : void {
-		super.checkCompleteness();
-		this._complete = (this._complete && !!this.name());
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+		var self = this;
+
+		var success : Function = function () {
+			self._complete = (self._complete && !!self.name());
+			successCallback();
+		}
+
+		super.checkCompleteness(success,failCallback);
 	}
 
     /**

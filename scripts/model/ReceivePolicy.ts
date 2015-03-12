@@ -74,10 +74,17 @@ class ReceivePolicy extends ModelItf {
 	 *
 	 * A ReceivePolicy is complete if it has an ID and a name.
 	 */
-	checkCompleteness() : void  {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) : void  {
+		var self = this;
 
-		this._complete = (this._complete && !!this.name());
+		var success : Function = function () {
+			self._complete = (self._complete && !!self.name());
+			successCallback();
+		};
+
+		super.checkCompleteness(success, failCallback);
+
+
 	}
 
     /**

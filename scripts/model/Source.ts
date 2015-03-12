@@ -433,28 +433,30 @@ class Source extends ModelItf {
 	 * @param failCallback The function to call in case of failure.
 	 */
 	checkCompleteness(successCallback : Function, failCallback : Function) {
-		super.checkCompleteness();
+		var self = this;
 
-		if (this.isComplete() && !!this.name() && !!this.method()) {
-			var self = this;
+		var success : Function = function () {
+			if (self.isComplete() && !!self.name() && !!self.method()) {
 
-			var success : Function = function () {
-				if (self._info_type_loaded && self._service_loaded) {
-					self._complete = (!!self.infoType() && self.infoType().isComplete() && !!self.service() && self.service().isComplete());
-					successCallback();
-				}
-			};
+				var success:Function = function () {
+					if (self._info_type_loaded && self._service_loaded) {
+						self._complete = (!!self.infoType() && self.infoType().isComplete() && !!self.service() && self.service().isComplete());
+						successCallback();
+					}
+				};
 
-			var fail : Function = function (error) {
-				failCallback(error);
-			};
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
 
-			this.loadInfoType(success,fail);
-			this.loadService(success,fail);
-		} else {
-			this._complete = false;
-			successCallback();
-		}
+				self.loadInfoType(success, fail);
+				self.loadService(success, fail);
+			} else {
+				self._complete = false;
+				successCallback();
+			}
+		};
+		super.checkCompleteness(success, failCallback);
 	}
 
 	/**
