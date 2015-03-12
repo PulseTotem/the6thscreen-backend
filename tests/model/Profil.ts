@@ -144,22 +144,43 @@ describe('Profil', function() {
 	});
 
 	describe('#checkCompleteness()', function() {
-		it('should return false if the object is empty', function() {
+		it('should return false if the object is empty', function (done) {
 			var b =  new Profil();
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), false, "The Profil should not be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), false, "The Profil should not be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 
-		it('should return true if the object has a name and an ID but no description', function() {
+		it('should return true if the object has a name and an ID but no description', function(done) {
 			var b = new Profil("toto", null, 52);
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), true, "The Profil should be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), true, "The Profil should be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 
-		it('should return false if the object has an empty name and an ID but no description', function() {
+		it('should return false if the object has an empty name and an ID but no description', function(done) {
 			var b = new Profil("", "blabla", 52);
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), false, "The Profil should not be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), false, "The Profil should not be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 	});
 

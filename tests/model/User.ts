@@ -129,46 +129,95 @@ describe('User', function() {
 	});
 
 	describe('#checkCompleteness()', function() {
-		it('should return false if the object is empty', function() {
+		it('should return false if the object is empty', function(done) {
 			var b =  new User();
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 
-		it('should return true if the object has a name, an email and an ID', function() {
+		it('should return true if the object has a name, an email and an ID', function(done) {
 			var b = new User("toto", "bla", 52);
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), true, "The behaviour should be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), true, "The behaviour should be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 
-		it('should return false if the object has an empty name, an email and an ID', function() {
+		it('should return false if the object has an empty name, an email and an ID', function(done) {
 			var b = new User("", "bla", 52);
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), false, "The behaviour should be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), false, "The behaviour should be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 
-		it('should return false if the object has a null name, an email and an ID', function() {
+		it('should return false if the object has a null name, an email and an ID', function(done) {
 			var b = new User(null, "bla", 52);
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), false, "The behaviour should be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), false, "The behaviour should be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 
-		it('should return false if the object has a name, an empty email and an ID', function() {
+		it('should return false if the object has a name, an empty email and an ID', function(done) {
 			var b = new User("test", "", 52);
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), false, "The behaviour should be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), false, "The behaviour should be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 
-		it('should return false if the object has a name, a null email and an ID', function() {
+		it('should return false if the object has a name, a null email and an ID', function(done) {
 			var b = new User("test", null, 52);
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), false, "The behaviour should be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), false, "The behaviour should be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 
-		it('should return false if the object has a name, an email and no ID', function() {
+		it('should return false if the object has a name, an email and no ID', function(done) {
 			var b = new User("test", "test");
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), false, "The behaviour should be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), false, "The behaviour should be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 	});
 

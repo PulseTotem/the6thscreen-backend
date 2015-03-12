@@ -50,46 +50,95 @@ describe('Service', function(){
 	});
 
 	describe('#checkCompleteness', function() {
-		it('should specify the object is complete if a name, an host and an ID are given', function() {
+		it('should specify the object is complete if a name, an host and an ID are given', function(done) {
 			var i = new Service("name", "", "localhost",324);
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), true, "The Service is not considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), true, "The Service is not considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 
-		it('should not specify the object is complete if the name is an empty string', function() {
+		it('should not specify the object is complete if the name is an empty string', function(done) {
 			var i = new Service("", "", "localhost",324);
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 
-		it('should not specify the object is complete if the name is null', function() {
+		it('should not specify the object is complete if the name is null', function(done) {
 			var i = new Service(null, "", "localhost",324);
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 
-		it('should not specify the object is complete if the id is null', function() {
+		it('should not specify the object is complete if the id is null', function(done) {
 			var i = new Service("name", "", "localhost",null);
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 
-		it('should not specify the object is complete if the object is empty', function() {
+		it('should not specify the object is complete if the object is empty', function(done) {
 			var i = new Service();
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 
-		it('should not specify the object is complete if the host is an empty string', function() {
+		it('should not specify the object is complete if the host is an empty string', function(done) {
 			var i = new Service("test", "", "",324);
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 
-		it('should not specify the object is complete if the host is null', function() {
+		it('should not specify the object is complete if the host is null', function(done) {
 			var i = new Service("test", "", null,324);
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 	});
 
