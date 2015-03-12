@@ -590,6 +590,60 @@ class ModelItf {
         RestClient.get(urlUniqueAssociatedOject, success, fail);
     }
 
+	/**
+	 * Update an attribute, add or remove a link.
+	 * This method always check comleteness and keep update value of it in database.
+	 *
+	 * @param modelClass The modelClass of the object to update.
+	 * @param informations The informations for the update with the following format : {'id': 12, 'method':'setName', 'value':'toto'}. Only method starting by the name 'set', 'add', 'link', 'unlink' or 'remove' are allowed.
+	 * @param successCallback The function to call if the object is successfully updated.
+	 * @param failCallback The function to call in case of failure.
+	 */
+	static updateAttribute(modelClass : any, informations : any, successCallback : Function, failCallback : Function) {
+		if (!informations.id) {
+			failCallback(new ModelException("You must specify the object ID in order to update one of its attribute."));
+			return;
+		}
+		if (!informations.method) {
+			failCallback(new ModelException("You must specify the object method in order to update one of its attribute."));
+			return;
+		}
+		if (!(informations.method.indexOf('set') === 0 || informations.method.indexOf('add') === 0 || informations.method.indexOf('link') === 0 || informations.method.indexOf('unlink') === 0 || informations.method.indexOf('remove') === 0 )) {
+			failCallback(new ModelException("You can only call set, unset, add or remove method in order to update an attribute."));
+			return;
+		}
+
+		var successRead : Function = function (object) {
+			var self = object;
+			var wasComplete = self.isComplete();
+
+			var doUpdate : Function = function () {
+				self.update(successCallback,failCallback);
+			};
+
+			var doUpdateOnlyIfCompleteDifferent : Function = function () {
+				if (self.isComplete() != wasComplete) {
+					self.update(successCallback,failCallback);
+				}
+			};
+
+			var successCheck : Function = function () {
+				self.checkCompleteness(doUpdateOnlyIfCompleteDifferent, failCallback);
+			};
+
+			if (informations.method.indexOf('set') === 0) {
+				self[informations.method](informations.value);
+				self.checkCompleteness(doUpdate, failCallback);
+			} else if (informations.method.indexOf('unlink') !== 0) {
+				self[informations.method](successCheck, failCallback);
+			} else {
+				self[informations.method](informations.value, successCheck, failCallback);
+			}
+		};
+
+		modelClass.read(informations.id, successRead, failCallback);
+	}
+
 
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////

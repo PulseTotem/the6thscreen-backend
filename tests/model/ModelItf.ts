@@ -2270,5 +2270,5 @@ describe('ModelItf', function() {
 			assert.deepEqual(array, expected, "The array has not been modified correcty: "+JSON.stringify(array));
 
 		});
-	})
+	});
 });

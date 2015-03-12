@@ -157,4 +157,47 @@ describe('Behaviour', function() {
 			assert.deepEqual(json, expected, "The JSON object (" + JSON.stringify(json) + ") and the expected JSON (" + JSON.stringify(expected) + ") do not match.");
 		})
 	});
+
+	describe('#updateAttribute', function () {
+		it('should update the name when asking', function (done) {
+			var model = new Behaviour("", "", 12);
+			var modelUpdated = new Behaviour("tata", "", 12, true);
+
+			var responseRead : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": model.toJSONObject()
+			};
+
+			var restClientMockRead = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()))
+				.reply(200, JSON.stringify(responseRead));
+
+			var newInfo = {
+				'id' : model.getId(),
+				'method': 'setName',
+				'value': modelUpdated.name()
+			};
+
+			var responseUpdate : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": modelUpdated.toJSONObject()
+			};
+
+			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
+				.reply(200, JSON.stringify(responseUpdate));
+
+			var success : Function = function () {
+				assert.ok(restClientMockRead.isDone(), "The object is not read.");
+				assert.ok(restClientMockUpdate.isDone(), "The request update has not been done.");
+				done();
+			};
+
+			var fail : Function = function (error) {
+				done(error);
+			};
+
+			ModelItf.updateAttribute(Behaviour, newInfo, success, fail);
+		});
+	});
 });
