@@ -22,6 +22,7 @@
 /// <reference path="./model/RenderPolicy.ts" />
 /// <reference path="./model/Role.ts" />
 /// <reference path="./model/Source.ts" />
+/// <reference path="./model/Service.ts" />
 /// <reference path="./model/User.ts" />
 /// <reference path="./model/Behaviour.ts" />
 
@@ -34,7 +35,7 @@ var crypto : any = require('crypto');
  */
 class CleanAndInitDatabase {
 
-    static toCleanSources : Array<any> = [Source, ParamType, InfoType, TypeParamType, ConstraintParamType];
+    static toCleanSources : Array<any> = [Source, Service, ParamType, InfoType, TypeParamType, ConstraintParamType];
     static toCleanUsers : Array<any> = [User];
     static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, RenderPolicy, ReceivePolicy];
     static toCleanProfils : Array<any> = [ParamValue, Call, Profil];
@@ -130,8 +131,12 @@ class CleanAndInitDatabase {
             self.fulfillSources(success, fail);
         };
 
+        var successFulfillServices = function() {
+            self.fulfillServices(successFulfillInfoTypes, fail);
+        };
+
         var successFulfillParamTypes = function() {
-            self.fulfillInfoTypes(successFulfillInfoTypes, fail);
+            self.fulfillInfoTypes(successFulfillServices, fail);
         };
 
         var successFulfillConstraints = function() {
@@ -262,7 +267,7 @@ class CleanAndInitDatabase {
                 failCallback(err);
             };
 
-            var source = new Source(sourceDesc.name, sourceDesc.service, sourceDesc.description, sourceDesc.host, sourceDesc.port);
+            var source = new Source(sourceDesc.name, sourceDesc.description, sourceDesc.method);
 
             var retrievedParamTypes = new Array();
 
@@ -305,12 +310,64 @@ class CleanAndInitDatabase {
                 source.setInfoType(newInfoType, successInfoTypeAssociation, fail);
             };
 
+            var successServiceRetrieve = function(newService) {
+                Logger.info("Service retrieve successfully.");
+
+                var successServiceAssociation = function() {
+                    Logger.info("Service associated to Source successfully.");
+                    self.retrieveInfoType(sourceDesc.infoType, successInfoTypeRetrieve, fail);
+                };
+
+                source.setService(newService, successServiceAssociation, fail);
+            };
+
             var successSourceCreate = function() {
                 Logger.info("Source create successfully.");
-                self.retrieveInfoType(sourceDesc.infoType, successInfoTypeRetrieve, fail);
+                self.retrieveService(sourceDesc.service, successServiceRetrieve, fail);
             };
 
             source.create(successSourceCreate, fail);
+        });
+    }
+
+    /**
+     * Method to fulfill database with serices.
+     *
+     * @method fulfillServices
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillServices(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var servicesNb = 0;
+
+        var services : any = require("../dbInitFiles/services.json");
+
+        if(services.length == 0) {
+            Logger.info("No Service to create.");
+            successCallback();
+            return;
+        }
+
+        services.forEach(function(serviceDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var service = new Service(serviceDesc.name, serviceDesc.description, serviceDesc.host);
+
+            var successServiceCreation = function() {
+                Logger.info("Service created successfully.");
+                servicesNb = servicesNb + 1;
+
+                if(servicesNb == services.length) {
+                    successCallback();
+                }
+            };
+
+            service.create(successServiceCreation, fail);
+
         });
     }
 
@@ -1422,6 +1479,39 @@ class CleanAndInitDatabase {
         };
 
         Source.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve Service.
+     *
+     * @method retrieveService
+     * @param {JSON Object} serviceDesc - The Service's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveService(serviceDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allServices) {
+            var service = null;
+            allServices.forEach(function(s) {
+                if(s.name() == serviceDesc.name) {
+                    service = s;
+                }
+            });
+
+            if(service == null) {
+                failCallback(new Error("The Service '" + serviceDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(service);
+            }
+        };
+
+        Service.all(successAll, fail);
     }
 
     /**
