@@ -69,8 +69,9 @@ class ModelItf {
 	/**
 	 * Check the completeness of an object.
 	 */
-	checkCompleteness() : void {
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
 		this._complete = (this._id !== null);
+		successCallback();
 	}
 
     /**
@@ -97,8 +98,6 @@ class ModelItf {
             failCallback(new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data)), attemptNumber);
             return;
         }
-
-	    this.checkCompleteness();
 
         var success : Function = function(result) {
             var response = result.data();
@@ -289,8 +288,6 @@ class ModelItf {
             failCallback(new ModelException("The object does not exist yet. It can't be update. Datas: "+JSON.stringify(data)), attemptNumber);
             return;
         }
-
-	    this.checkCompleteness();
 
         var success : Function = function(result) {
             var response = result.data();
@@ -632,6 +629,8 @@ class ModelItf {
 			var doUpdateOnlyIfCompleteDifferent : Function = function () {
 				if (self.isComplete() != wasComplete) {
 					self.update(successCallback,failCallback);
+				} else {
+					successCallback();
 				}
 			};
 
@@ -639,13 +638,23 @@ class ModelItf {
 				self.checkCompleteness(doUpdateOnlyIfCompleteDifferent, failCallback);
 			};
 
-			if (informations.method.indexOf('set') === 0) {
-				self[informations.method](informations.value);
-				self.checkCompleteness(doUpdate, failCallback);
-			} else if (informations.method.indexOf('unlink') !== 0) {
-				self[informations.method](successCheck, failCallback);
-			} else {
-				self[informations.method](informations.value, successCheck, failCallback);
+			try {
+				if (informations.method.indexOf('set') === 0) {
+					self[informations.method](informations.value);
+					self.checkCompleteness(doUpdate, failCallback);
+				} else if (informations.method.indexOf('unlink') === 0) {
+					self[informations.method](successCheck, failCallback);
+				} else {
+					self[informations.method](informations.value, successCheck, failCallback);
+				}
+			} catch (error) {
+				if (error instanceof TypeError) {
+					failCallback(new ModelException("The method you specify ("+informations.method+") has not been recognized for the model "+modelClass.getTableName()+"."));
+					return;
+				} else {
+					failCallback(error);
+					return;
+				}
 			}
 		};
 

@@ -180,26 +180,27 @@ class ParamValue extends ModelItf {
 	 * @param successCallback The function to call when success.
 	 * @param failCallback The function to call when fail.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) : void {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+		var self = this;
 
-		if (this.isComplete() && !!this.value()) {
-			var self = this;
+		var success : Function = function () {
+			if (self.isComplete() && !!self.value()) {
+				var success:Function = function () {
+					self._complete = (self.paramType() !== undefined && self.paramType().isComplete());
+					successCallback();
+				};
 
-			var success : Function = function() {
-				self._complete = (self.paramType() !== undefined && self.paramType().isComplete());
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
+
+				self.loadAssociations(success, fail);
+			} else {
+				self._complete = false;
 				successCallback();
-			};
-
-			var fail : Function = function (error) {
-				failCallback(error);
-			};
-
-			this.loadAssociations(success, fail);
-		} else {
-			this._complete = false;
-			successCallback();
+			}
 		}
+		super.checkCompleteness(success, failCallback);
 	}
 
     /**

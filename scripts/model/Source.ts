@@ -432,7 +432,7 @@ class Source extends ModelItf {
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of failure.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
+	checkCompleteness(successCallback : Function, failCallback : Function) {
 		super.checkCompleteness();
 
 		if (this.isComplete() && !!this.name() && !!this.method()) {
@@ -495,32 +495,14 @@ class Source extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
 	 * @param {Function} failCallback - The callback function when fail.
 	 */
-	linkService(service : Service, successCallback : Function = null, failCallback : Function = null) {
-		if (!service || !service.getId()) {
-			failCallback(new ModelException("The service must be an existing object to be associated."));
-			return;
-		}
+	linkService(serviceID : number, successCallback : Function, failCallback : Function) {
 
 		if (this.service() !== null) {
 			failCallback(new ModelException("The service is already set for this Source."));
 			return;
 		}
 
-		var self = this;
-
-		var success : Function = function() {
-			service.desynchronize();
-			self._service = service;
-			self._service_loaded = true;
-
-			successCallback();
-		};
-
-		var fail : Function = function(error) {
-			failCallback(error);
-		};
-
-		this.associateObject(Source, Service, service.getId(), success, fail);
+		this.associateObject(Source, Service, serviceID, successCallback, failCallback);
 	}
 
 	/**

@@ -205,26 +205,29 @@ class ConstraintParamType extends ModelItf {
 	 *
 	 * A ConstraintParamType is considered as complete if it has an ID, a name and a type.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) : void {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
 
-		if (this.isComplete() && !!this.name()) {
-			var self = this;
+		var self = this;
 
-			var success:Function = function () {
-				self._complete = (self.type() !== undefined && self.type().isComplete());
+		var success : Function = function () {
+			if (self.isComplete() && !!self.name()) {
+
+				var success:Function = function () {
+					self._complete = (self.type() !== undefined && self.type().isComplete());
+					successCallback();
+				};
+
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
+
+				this.loadAssociations(success, fail);
+			} else {
+				self._complete = false;
 				successCallback();
-			};
-
-			var fail:Function = function (error) {
-				failCallback(error);
-			};
-
-			this.loadAssociations(success, fail);
-		} else {
-			this._complete = false;
-			successCallback();
-		}
+			}
+		};
+		super.checkCompleteness(success, failCallback);
 	}
 
     /**

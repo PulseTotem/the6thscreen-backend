@@ -383,7 +383,6 @@ describe('Source', function() {
 		it('should set the given service', function (done) {
 			var c = new Source("machin", "desc", "method", 28);
 			var s = new Service("toto", "machin", "blabla", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
 			var response1:SequelizeRestfulResponse = {
 				"status": "success",
@@ -411,11 +410,6 @@ describe('Source', function() {
 				var success2 = function() {
 					//assert.ok(retour, "The return of the setInfoType is false.");
 					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the service in database.");
-
-					service = c.service();
-					assert.deepEqual(service, s, "The service() does not return the exact service we give: " + JSON.stringify(service));
-					assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
 					done();
 				};
 
@@ -423,7 +417,7 @@ describe('Source', function() {
 					done(err);
 				};
 
-				c.linkService(s, success2, fail2);
+				c.linkService(s.getId(), success2, fail2);
 			};
 
 			var fail = function(err) {
@@ -475,29 +469,7 @@ describe('Source', function() {
 			c.linkService(undefined, success, fail);
 		});
 
-		it('should not allow to add a object which is not yet created', function (done) {
-			nock.disableNetConnect();
-			var c = new Source("machin", "desc", "method", 28);
-			var s = new Service("toto", "machin", "blabla");
-
-			var success = function() {
-				done(new Error("Test failed."));
-			};
-
-			var fail = function(err) {
-				assert.throws(function() {
-						if(err) {
-							throw err;
-						}
-					},
-					ModelException, "The ModelException has not been thrown.");
-				done();
-			};
-
-			c.linkService(s, success, fail);
-		});
-
-		it('should not allow to set a infoType if there is already one', function (done) {
+		it('should not allow to set a service if there is already one', function (done) {
 			var c = new Source("machin", "desc", "method", 28);
 			var s = new Service("toto", "machin", "blabla", 42);
 			var s2 = new Service("toto", "machin", "blabla", 89);
@@ -532,7 +504,7 @@ describe('Source', function() {
 					done();
 				};
 
-				c.linkService(s, success2, fail2);
+				c.linkService(s.getId(), success2, fail2);
 			};
 
 			var fail = function(err) {
@@ -601,7 +573,6 @@ describe('Source', function() {
 
 		it('should not allow to unset a service if there is none', function (done) {
 			var c = new Source("machin", "desc", "method", 28);
-			var s = new Service("toto", "machin", "blabla", 42);
 
 			var response1:SequelizeRestfulResponse = {
 				"status": "success",
@@ -1604,38 +1575,53 @@ describe('Source', function() {
 
 	});
 
-	/*
 	describe('#updateAttribute', function () {
-		it('should update the infoType when asking', function (done) {
-			var model = new Source("toto", "bla", 12);
+		it('should update the service when asking but not the object as it remains not complete', function (done) {
+			var model = new Source("toto", "bla", "method", 12);
+			var s = new Service("toto", "machin", "blabla", 42);
 
-			var responseRead : SequelizeRestfulResponse = {
+			var newInfo = {
+				'id' : model.getId(),
+				'method': 'linkService',
+				'value': s.getId()
+			};
+
+			var responseReadSource : SequelizeRestfulResponse = {
 				"status": "success",
 				"data": model.toJSONObject()
 			};
 
-			var restClientMockRead = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()))
-				.reply(200, JSON.stringify(responseRead));
-
-			var newInfo = {
-				'id' : model.getId(),
-				'method': 'setInfoType',
-				'value': modelUpdated.name()
-			};
+			var restClientMockReadSource = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.objectEndpoint(Source.getTableName(), model.getId().toString()))
+				.reply(200, JSON.stringify(responseReadSource));
 
 			var responseUpdate : SequelizeRestfulResponse = {
 				"status": "success",
-				"data": modelUpdated.toJSONObject()
+				"data": {}
 			};
 
 			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
+				.put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName(), s.getId().toString()))
 				.reply(200, JSON.stringify(responseUpdate));
 
+			var responseCheckAsso : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMockAssoService = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(responseCheckAsso));
+
+			var restClientMockAssoInfoType = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(responseCheckAsso));
+
 			var success : Function = function () {
-				assert.ok(restClientMockRead.isDone(), "The object is not read.");
+				assert.ok(restClientMockReadSource.isDone(), "The source object is not read.");
 				assert.ok(restClientMockUpdate.isDone(), "The request update has not been done.");
+				assert.ok(restClientMockAssoService.isDone(), "The request for checking asso service has not been done.");
+				assert.ok(restClientMockAssoInfoType.isDone(), "The request for checking asso infotype has not been done.");
 				done();
 			};
 
@@ -1643,7 +1629,74 @@ describe('Source', function() {
 				done(error);
 			};
 
-			ModelItf.updateAttribute(Behaviour, newInfo, success, fail);
+			ModelItf.updateAttribute(Source, newInfo, success, fail);
 		});
-	});*/
+
+		it('should update the service when asking and the object if it becomes complete', function (done) {
+			var model = new Source("toto", "bla", "method", 12);
+			var modelUpdated = new Source("toto", "bla", "method", 12, true);
+			var s = new Service("toto", "machin", "blabla", 42);
+
+			var newInfo = {
+				'id' : model.getId(),
+				'method': 'linkService',
+				'value': s.getId()
+			};
+
+			var responseReadSource : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": model.toJSONObject()
+			};
+
+			var restClientMockReadSource = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.objectEndpoint(Source.getTableName(), model.getId().toString()))
+				.reply(200, JSON.stringify(responseReadSource));
+
+			var responseUpdate : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {}
+			};
+
+			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName(), s.getId().toString()))
+				.reply(200, JSON.stringify(responseUpdate));
+
+			var responseCheckAsso : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {"id": 12, "name": "toto", "complete": true}
+			};
+
+			var restClientMockAssoService = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(responseCheckAsso));
+
+			var restClientMockAssoInfoType = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(responseCheckAsso));
+
+			var responseReadSource : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": model.toJSONObject()
+			};
+
+			var restClientMockUpdateSource = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(Source.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
+				.reply(200, JSON.stringify(responseReadSource));
+
+			var success : Function = function () {
+				assert.ok(restClientMockReadSource.isDone(), "The source object is not read.");
+				assert.ok(restClientMockUpdate.isDone(), "The request update has not been done.");
+				assert.ok(restClientMockAssoService.isDone(), "The request for checking asso service has not been done.");
+				assert.ok(restClientMockAssoInfoType.isDone(), "The request for checking asso infotype has not been done.");
+				assert.ok(restClientMockUpdateSource.isDone(), "The request for update source has not been done.");
+				done();
+			};
+
+			var fail : Function = function (error) {
+				done(error);
+			};
+
+			ModelItf.updateAttribute(Source, newInfo, success, fail);
+		});
+	});
 });

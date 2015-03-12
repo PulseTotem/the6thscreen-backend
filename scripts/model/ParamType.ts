@@ -326,26 +326,31 @@ class ParamType extends ModelItf {
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of fail.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) {
 
-		if (this.isComplete() && !!this.name()) {
-			var self = this;
+		var self = this;
 
-			var success : Function = function () {
-				self._complete = (self.type() !== null && self.type().isComplete());
+		var success : Function = function () {
+			if (self.isComplete() && !!self.name()) {
+
+				var success:Function = function () {
+					self._complete = (self.type() !== null && self.type().isComplete());
+					successCallback();
+				};
+
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
+
+				this.loadType(success, fail);
+			} else {
+				self._complete = false;
 				successCallback();
-			};
+			}
+		};
 
-			var fail : Function = function (error) {
-				failCallback(error);
-			};
+		super.checkCompleteness(success, failCallback);
 
-			this.loadType(success, fail);
-		} else {
-			this._complete = false;
-			successCallback();
-		}
 	}
 
 	/**

@@ -469,30 +469,30 @@ class CallType extends ModelItf {
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of failure.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) {
+		var self = this;
+		var success : Function = function () {
+			if (self.isComplete() && !!self.name()) {
+				var success:Function = function () {
+					if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
+						self._complete = (!!self.renderer() && self.renderer().isComplete()) && (!!self.zone() && self.zone().isComplete()) && (!!self.source() && self.source().isComplete());
+						successCallback();
+					}
+				};
 
-		if (this.isComplete() && !!this.name()) {
-			var self = this;
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
 
-			var success : Function = function () {
-				if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
-					self._complete = (!!self.renderer() && self.renderer().isComplete()) && (!!self.zone() && self.zone().isComplete()) && (!!self.source() && self.source().isComplete());
-					successCallback();
-				}
-			};
-
-			var fail : Function = function (error) {
-				failCallback(error);
-			};
-
-			this.loadSource(success,fail);
-			this.loadZone(success,fail);
-			this.loadRenderer(success,fail);
-		} else {
-			this._complete = false;
-			successCallback();
-		}
+				self.loadSource(success, fail);
+				self.loadZone(success, fail);
+				self.loadRenderer(success, fail);
+			} else {
+				self._complete = false;
+				successCallback();
+			}
+		};
+		super.checkCompleteness(success, failCallback);
 	}
 
     /**

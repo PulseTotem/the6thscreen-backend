@@ -291,8 +291,8 @@ class Call extends ModelItf {
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of failure.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) {
+		super.checkCompleteness(successCallback, failCallback);
 
 		if (this.isComplete() && !!this.name()) {
 			var self = this;
