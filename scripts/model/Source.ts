@@ -603,31 +603,8 @@ class Source extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	addParamType(pt : ParamType, successCallback : Function = null, failCallback : Function = null) {
-		if (!pt  || !pt.getId()) {
-			failCallback(new ModelException("The ParamType must be an existing object to be associated."));
-            return;
-		}
-
-		if (ModelItf.isObjectInsideArray(this.paramTypes(), pt)) {
-			failCallback(new ModelException("You cannot add twice a ParamType for a SDI."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            pt.desynchronize();
-            self.paramTypes().push(pt);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(Source, ParamType, pt.getId(), success, fail);
+	addParamType(paramID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Source, ParamType, paramID, successCallback, failCallback);
 	}
 
 	/**
