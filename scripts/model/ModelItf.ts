@@ -485,6 +485,35 @@ class ModelItf {
 		RestClient.delete(deleteAssoURL, success, fail);
 	}
 
+	deleteUniqueObjectAssociation(modelClass1 : any, modelClass2 : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+		if (!this.getId()) {
+			failCallback(new ModelException("An association can't be deleted if the object does not exist."), attemptNumber);
+			return;
+		}
+
+		if (!modelClass1 || !modelClass2) {
+			failCallback(new ModelException("The two modelClasses and the ID of the second objects must be given to delete the association."), attemptNumber);
+			return;
+		}
+
+		var success : Function = function(result) {
+			var response = result.data();
+			if(response.status == "success") {
+				successCallback();
+			} else {
+				failCallback(new ResponseException("The request failed on the server when trying to delete an association between objects with URL:"+deleteAssoURL+".\nMessage : "+JSON.stringify(response)), attemptNumber);
+			}
+		};
+
+		var fail : Function = function(result) {
+			failCallback(new RequestException("The request failed when trying to delete an association between objects with URL:"+deleteAssoURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+		};
+
+		var deleteAssoURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName());
+
+		RestClient.delete(deleteAssoURL, success, fail);
+	}
+
     /**
      * Retrieve all associated objects
      *
@@ -649,7 +678,7 @@ class ModelItf {
 				}
 			} catch (error) {
 				if (error instanceof TypeError) {
-					failCallback(new ModelException("The method you specify ("+informations.method+") has not been recognized for the model "+modelClass.getTableName()+"."));
+					failCallback(new ModelException("The method you specify ("+informations.method+") has not been recognized for the model "+modelClass.getTableName()+". (Original error : "+error+")"));
 					return;
 				} else {
 					failCallback(error);

@@ -489,8 +489,6 @@ class Source extends ModelItf {
 
 	/**
 	 * Set the Service of the Source.
-	 * As a Source can only have one Service, if the value is already set, this method throws an exception: you need first to unset the Service.
-	 * Moreover the given type must be created in database.
 	 *
 	 * @method linkService
 	 * @param {Service} it The Service to associate with the Source.
@@ -498,34 +496,23 @@ class Source extends ModelItf {
 	 * @param {Function} failCallback - The callback function when fail.
 	 */
 	linkService(serviceID : number, successCallback : Function, failCallback : Function) {
-
-		if (this.service() !== null) {
-			failCallback(new ModelException("The service is already set for this Source."));
-			return;
-		}
-
 		this.associateObject(Source, Service, serviceID, successCallback, failCallback);
 	}
 
 	/**
 	 * Unset the current Service from the Source.
-	 * It both sets a null value for the object property and remove the association in database.
-	 * An Service must have been set before using it, else an exception is thrown.
 	 *
 	 * @method unlinkService
 	 * @param {Function} successCallback - The callback function when success.
 	 * @param {Function} failCallback - The callback function when fail.
 	 */
-	unlinkService(successCallback : Function = null, failCallback : Function = null) {
-		if (this.service() === null) {
-			failCallback(new ModelException("No Service has been set for this Source."));
-			return;
-		}
-
+	unlinkService(successCallback : Function, failCallback : Function) {
 		var self = this;
 
 		var success : Function = function() {
-			self.service().desynchronize();
+			if (!!self._service) {
+				self._service.desynchronize();
+			}
 			self._service = null;
 
 			successCallback();
@@ -535,7 +522,7 @@ class Source extends ModelItf {
 			failCallback(error);
 		};
 
-		this.deleteObjectAssociation(Source, Service, this.service().getId(), success, fail);
+		this.deleteUniqueObjectAssociation(Source, Service, success, fail);
 	}
 
 	/**
