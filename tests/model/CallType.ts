@@ -446,8 +446,8 @@ describe('CallType', function(){
 		});
 	});
 
-	describe('#setSource', function() {
-		it('should set the given source', function(done) {
+	describe('#linkSource', function() {
+		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var s = new Source("toto", "machin","titi", 42);
 			var spy = sinon.spy(s, "desynchronize");
@@ -476,13 +476,8 @@ describe('CallType', function(){
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setSource is false.");
+                    //assert.ok(retour, "The return of the linkSource is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the source in database.");
-
-                    source = c.source();
-                    assert.deepEqual(source, s, "The source() does not return the exact source we give: "+JSON.stringify(source));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -490,7 +485,7 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.setSource(s, success2, fail2);
+                c.linkSource(s.getId(), success2, fail2);
 
             };
 
@@ -500,121 +495,10 @@ describe('CallType', function(){
 
 			c.loadSource(success, fail);
 		});
-
-		it('should not allow to add a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setSource(null, success, fail);
-
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setSource(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setSource(s, success, fail);
-		});
-
-		it('should not allow to set a source if there is already one', function(done) {
-			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi", 42);
-			var s2 = new Source("toto", "machin","titi", 89);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s2.toJSONObject()
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-
-                var source = c.source();
-
-                assert.ok(!!source, "The source has false value.");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the source");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.setSource(s, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadSource(success, fail);
-		});
-
 	});
 
-	describe('#unsetSource', function() {
-		it('should unset the Source', function(done) {
+	describe('#unlinkSource', function() {
+		it('should  call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var s = new Source("toto", "machin","titi", 42);
 
@@ -643,13 +527,8 @@ describe('CallType', function(){
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetSource is false.");
+                    //assert.ok(retour, "The return of the unlinkSource is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
-
-                    source = c.source();
-                    assert.deepEqual(source, null, "The source() does not return a null value after unsetting");
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -657,7 +536,7 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.unsetSource(success2, fail2);
+                c.unlinkSource(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -666,54 +545,10 @@ describe('CallType', function(){
 
 			c.loadSource(success, fail);
 		});
-
-		it('should not allow to unset a Source if there is none', function(done) {
-			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi", 42);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var source = c.source();
-
-                assert.equal(source, null, "The source has a value not null: "+JSON.stringify(source));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.unsetSource(success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadSource(success, fail);
-		});
-
 	});
 
-	describe('#setRenderer', function() {
-		it('should set the given renderer', function(done) {
+	describe('#linkRenderer', function() {
+		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var r = new Renderer("renderer","blop",12);
 			var spy = sinon.spy(r, "desynchronize");
@@ -744,12 +579,8 @@ describe('CallType', function(){
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setRenderer is false.");
+                    //assert.ok(retour, "The return of the linkRenderer is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the renderer in database.");
-                    renderer = c.renderer();
-                    assert.deepEqual(renderer, r, "The renderer() does not return the exact renderer we give: "+JSON.stringify(renderer));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -757,7 +588,7 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.setRenderer(r, success2, fail2);
+                c.linkRenderer(r.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -768,119 +599,10 @@ describe('CallType', function(){
 
 		});
 
-		it('should not allow to add a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setRenderer(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setRenderer(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-			var s = new Renderer("toto", "machin");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setRenderer(s, success, fail);
-		});
-
-		it('should not allow to set a renderer if there is already one', function(done) {
-			var c = new CallType("toto","machin", 52);
-			var s = new Renderer("toto", "machin", 42);
-			var s2 = new Renderer("tutu", "blop", 89);
-
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s2.toJSONObject()
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var renderer = c.renderer();
-
-                assert.ok(!!renderer, "The renderer has false value.");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the renderer");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.setRenderer(s, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadRenderer(success, fail);
-		});
-
 	});
 
-	describe('#unsetRenderer', function() {
-		it('should unset the Renderer', function(done) {
+	describe('#unlinkRenderer', function() {
+		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var s = new Renderer("toto", "machin", 42);
 
@@ -909,13 +631,8 @@ describe('CallType', function(){
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetRenderer is false.");
+                    //assert.ok(retour, "The return of the unlinkRenderer is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
-
-                    renderer = c.renderer();
-                    assert.deepEqual(renderer, null, "The renderer() does not return a null value after unsetting");
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -923,7 +640,7 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.unsetRenderer(success2, fail2);
+                c.unlinkRenderer(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -933,60 +650,10 @@ describe('CallType', function(){
 			c.loadRenderer(success, fail);
 		});
 
-		it('should not allow to unset a Renderer if there is none', function(done) {
-			var c = new CallType("toto","machin", 52);
-			var s = new Renderer("toto", "machin",42);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var renderer = c.renderer();
-
-                assert.equal(renderer, null, "The renderer has a value not null: "+JSON.stringify(renderer));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.unsetRenderer(success2, fail2);
-
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.loadRenderer(success, fail);
-		});
-
 	});
 
-	describe('#setReceivePolicy', function() {
-		it('should set the given receivePolicy', function(done) {
+	describe('#linkReceivePolicy', function() {
+		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var r = new ReceivePolicy("receivePolicy",12);
 			var spy = sinon.spy(r, "desynchronize");
@@ -1015,15 +682,8 @@ describe('CallType', function(){
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setReceivePolicy is false.");
+                    //assert.ok(retour, "The return of the linkReceivePolicy is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the receivePolicy in database.");
-
-
-                    // normalement le lazy_loading est true : plus besoin de mock pour la requête
-                    receivePolicy = c.receivePolicy();
-                    assert.deepEqual(receivePolicy, r, "The receivePolicy() does not return the exact receivePolicy we give: "+JSON.stringify(receivePolicy));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -1031,7 +691,7 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.setReceivePolicy(r, success2, fail2);
+                c.linkReceivePolicy(r.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -1039,122 +699,12 @@ describe('CallType', function(){
             };
 
             c.loadReceivePolicy(success, fail);
-		});
-
-		it('should not allow to add a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setReceivePolicy(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setReceivePolicy(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-			var s = new ReceivePolicy("toto");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setReceivePolicy(s, success, fail);
-		});
-
-		it('should not allow to set a receivePolicy if there is already one', function(done) {
-			var c = new CallType("toto","machin", 52);
-			var s = new ReceivePolicy("toto", 42);
-			var s2 = new ReceivePolicy("tutu", 89);
-
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s2.toJSONObject()
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var receivePolicy = c.receivePolicy();
-
-                assert.ok(!!receivePolicy, "The receivePolicy has false value.");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the receivePolicy");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.setReceivePolicy(s, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadReceivePolicy(success, fail);
-
 		});
 
 	});
 
-	describe('#unsetReceivePolicy', function() {
-		it('should unset the ReceivePolicy', function(done) {
+	describe('#unlinkReceivePolicy', function() {
+		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var s = new ReceivePolicy("toto", 42);
 
@@ -1183,13 +733,8 @@ describe('CallType', function(){
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetReceivePolicy is false.");
+                    //assert.ok(retour, "The return of the unlinkReceivePolicy is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
-
-                    receivePolicy = c.receivePolicy();
-                    assert.deepEqual(receivePolicy, null, "The receivePolicy() does not return a null value after unsetting");
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -1197,7 +742,7 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.unsetReceivePolicy(success2, fail2);
+                c.unlinkReceivePolicy(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -1206,54 +751,10 @@ describe('CallType', function(){
 
 			c.loadReceivePolicy(success, fail);
 		});
-
-		it('should not allow to unset a ReceivePolicy if there is none', function(done) {
-			var c = new CallType("toto","machin", 52);
-			var s = new ReceivePolicy("toto",42);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var receivePolicy = c.receivePolicy();
-
-                assert.equal(receivePolicy, null, "The receivePolicy has a value not null: "+JSON.stringify(receivePolicy));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.unsetReceivePolicy(success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadReceivePolicy(success, fail);
-		});
-
 	});
 
-	describe('#setRenderPolicy', function() {
-		it('should set the given renderPolicy', function(done) {
+	describe('#linkRenderPolicy', function() {
+		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var r = new RenderPolicy("renderPolicy","toto",12);
 			var spy = sinon.spy(r, "desynchronize");
@@ -1283,13 +784,8 @@ describe('CallType', function(){
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setRenderPolicy is false.");
+                    //assert.ok(retour, "The return of the linkRenderPolicy is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the renderPolicy in database.");
-
-                    renderPolicy = c.renderPolicy();
-                    assert.deepEqual(renderPolicy, r, "The renderPolicy() does not return the exact renderPolicy we give: "+JSON.stringify(renderPolicy));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -1297,7 +793,7 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.setRenderPolicy(r, success2, fail2);
+                c.linkRenderPolicy(r.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -1307,126 +803,10 @@ describe('CallType', function(){
             c.loadRenderPolicy(success, fail);
 
 		});
-
-		it('should not allow to add a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setRenderPolicy(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setRenderPolicy(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-			var s = new RenderPolicy("toto","t");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setRenderPolicy(s, success, fail);
-		});
-
-		it('should not allow to set a renderPolicy if there is already one', function(done) {
-			var c = new CallType("toto","machin", 52);
-			var s = new RenderPolicy("toto","tata", 42);
-			var s2 = new RenderPolicy("tutu","tata", 89);
-
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s2.toJSONObject()
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), RenderPolicy.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var renderPolicy = c.renderPolicy();
-                assert.ok(!!renderPolicy, "The renderPolicy has false value: "+JSON.stringify(renderPolicy)+" .");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the renderPolicy");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.setRenderPolicy(s, success2, fail2);
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.loadRenderPolicy(success, fail);
-
-		});
-
 	});
 
-	describe('#unsetRenderPolicy', function() {
-		it('should unset the RenderPolicy', function (done) {
+	describe('#unlinkRenderPolicy', function() {
+		it('should call the right request', function (done) {
 			var c = new CallType("toto", "machin", 52);
 			var s = new RenderPolicy("toto","tata", 42);
 
@@ -1456,13 +836,8 @@ describe('CallType', function(){
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetRenderPolicy is false.");
+                    //assert.ok(retour, "The return of the unlinkRenderPolicy is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
-
-                    renderPolicy = c.renderPolicy();
-                    assert.deepEqual(renderPolicy, null, "The renderPolicy() does not return a null value after unsetting");
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -1470,50 +845,7 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.unsetRenderPolicy(success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadRenderPolicy(success, fail);
-		});
-
-		it('should not allow to unset a renderPolicy if there is none', function (done) {
-			var c = new CallType("toto", "machin", 52);
-			var s = new RenderPolicy("toto", "tata", 42);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), RenderPolicy.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var renderPolicy = c.renderPolicy();
-
-                assert.equal(renderPolicy, null, "The renderPolicy has a value not null: " + JSON.stringify(renderPolicy));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.unsetRenderPolicy(success2, fail2);
+                c.unlinkRenderPolicy(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -1524,8 +856,8 @@ describe('CallType', function(){
 		});
 	});
 
-	describe('#setZone', function() {
-		it('should set the given zone', function(done) {
+	describe('#linkZone', function() {
+		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var r = new Zone("zone","toto",2, 3, 4, 5, 12);
 			var spy = sinon.spy(r, "desynchronize");
@@ -1555,13 +887,8 @@ describe('CallType', function(){
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setZone is false.");
+                    //assert.ok(retour, "The return of the linkZone is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the zone in database.");
-
-                    zone = c.zone();
-                    assert.deepEqual(zone, r, "The zone() does not return the exact zone we give: "+JSON.stringify(zone));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -1569,7 +896,7 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.setZone(r, success2, fail2);
+                c.linkZone(r.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -1579,120 +906,10 @@ describe('CallType', function(){
 			c.loadZone(success, fail);
 		});
 
-		it('should not allow to add a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setZone(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setZone(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new CallType("toto","machin", 52);
-			var s = new Zone("toto","t",2,3,4,5);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setZone(s, success, fail);
-		});
-
-		it('should not allow to set a zone if there is already one', function(done) {
-			var c = new CallType("toto","machin", 52);
-			var s = new Zone("toto","tata",2,3,4,5, 42);
-			var s2 = new Zone("tutu","tata",2,3,4,5, 89);
-
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s2.toJSONObject()
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var zone = c.zone();
-
-                assert.ok(!!zone, "The zone has false value: "+JSON.stringify(zone)+" .");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zone");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.setZone(s, success2, fail2);
-
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadZone(success, fail);
-		});
-
 	});
 
-	describe('#unsetZone', function() {
-		it('should unset the Zone', function (done) {
+	describe('#unlinkZone', function() {
+		it('should call the right request', function (done) {
 			var c = new CallType("toto", "machin", 52);
 			var s = new Zone("toto","tata",2,3,4,5, 42);
 
@@ -1722,13 +939,8 @@ describe('CallType', function(){
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetZone is false.");
+                    //assert.ok(retour, "The return of the unlinkZone is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
-
-                    zone = c.zone();
-                    assert.deepEqual(zone, null, "The zone() does not return a null value after unsetting");
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -1736,50 +948,7 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.unsetZone(success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadZone(success, fail);
-		});
-
-		it('should not allow to unset a zone if there is none', function (done) {
-			var c = new CallType("toto", "machin", 52);
-			var s = new Zone("toto", "tata",2,3,4,5, 42);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var zone = c.zone();
-
-                assert.equal(zone, null, "The zone has a value not null: " + JSON.stringify(zone));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.unsetZone(success2, fail2);
+                c.unlinkZone(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {

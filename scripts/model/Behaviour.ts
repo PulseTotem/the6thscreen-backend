@@ -86,12 +86,14 @@ class Behaviour extends ModelItf {
 	 * Check completeness of a behaviour.
 	 * The completeness is determined by the presence of a name and an id.
 	 */
-	checkCompleteness(successCallback : Function = null) : void {
-		super.checkCompleteness();
-		this._complete = (this._complete && !!this.name());
-		if (successCallback) {
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+       	var self = this;
+
+		var success : Function = function () {
+			self._complete = (self._complete && !!self.name());
 			successCallback();
-		}
+		};
+		super.checkCompleteness(success, failCallback);
 	}
 
 	/**
@@ -118,7 +120,7 @@ class Behaviour extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 		this.createObject(Behaviour, this.toJSONObject(), successCallback, failCallback);
 	}
 
@@ -132,7 +134,7 @@ class Behaviour extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(Behaviour, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -144,7 +146,7 @@ class Behaviour extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 	    return this.updateObject(Behaviour, this.toJSONObject(), successCallback, failCallback, attemptNumber);
 	}
 
@@ -156,7 +158,7 @@ class Behaviour extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 		return this.deleteObject(Behaviour, successCallback, failCallback, attemptNumber);
 	}
 
@@ -168,7 +170,7 @@ class Behaviour extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 		return this.allObjects(Behaviour, successCallback, failCallback, attemptNumber);
 	}
 

@@ -253,7 +253,7 @@ class Zone extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadBehaviour(successCallback : Function = null, failCallback : Function = null) {
+    loadBehaviour(successCallback : Function, failCallback : Function) {
         if(! this._behaviour_loaded) {
             var self = this;
             var success : Function = function(behaviour) {
@@ -296,7 +296,7 @@ class Zone extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
 	 * @param {Function} failCallback - The callback function when fail.
 	 */
-	loadCallTypes(successCallback : Function = null, failCallback : Function = null) {
+	loadCallTypes(successCallback : Function, failCallback : Function) {
 		if(! this._callTypes_loaded) {
 			var self = this;
 			var success : Function = function(callTypes) {
@@ -331,7 +331,7 @@ class Zone extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+    loadAssociations(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function(models) {
@@ -394,26 +394,29 @@ class Zone extends ModelItf {
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of failure.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) {
+		var self = this;
 
-		if (this.isComplete() && !!this.name()) {
-			var self = this;
+		var success : Function = function () {
+			if (self.isComplete() && !!self.name()) {
 
-			var success : Function = function () {
-				self._complete = (!!self.behaviour() && self.behaviour().isComplete());
+				var success:Function = function () {
+					self._complete = (!!self.behaviour() && self.behaviour().isComplete());
+					successCallback();
+				};
+
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
+
+				self.loadBehaviour(success, fail);
+			} else {
+				self._complete = false;
 				successCallback();
-			};
-
-			var fail : Function = function (error) {
-				failCallback(error);
-			};
-
-			this.loadBehaviour(success,fail);
-		} else {
-			this._complete = false;
-			successCallback();
+			}
 		}
+
+		super.checkCompleteness(success, failCallback);
 	}
 
     /**
@@ -424,7 +427,7 @@ class Zone extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {
@@ -447,37 +450,13 @@ class Zone extends ModelItf {
 	 * As a Zone can only have one Behaviour, if the value is already set, this method throws an exception: you need first to unset the Behaviour.
 	 * Moreover the given type must be created in database.
 	 *
-	 * @method setBehaviour
+	 * @method linkBehaviour
 	 * @param {Behaviour} beha The Behaviour to associate with the Zone.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setBehaviour(beha : Behaviour, successCallback : Function = null, failCallback : Function = null) {
-		if (!beha || !beha.getId()) {
-            failCallback(new ModelException("The Behaviour must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.behaviour() !== null) {
-            failCallback(new ModelException("The Behaviour is already set for this Zone."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            beha.desynchronize();
-            self._behaviour = beha;
-            self._behaviour_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(Zone, Behaviour, beha.getId(), success, fail);
+	linkBehaviour(behaID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Zone, Behaviour, behaID, successCallback, failCallback);
 	}
 
 	/**
@@ -485,30 +464,12 @@ class Zone extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Behaviour must have been set before using it, else an exception is thrown.
 	 *
-	 * @method unsetBehaviour
+	 * @method unlinkBehaviour
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetBehaviour(successCallback : Function = null, failCallback : Function = null) {
-		if (this.behaviour() === null) {
-            failCallback(new ModelException("No Behaviour has been set for this Source."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.behaviour().desynchronize();
-            self._behaviour = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(Zone, Behaviour, this.behaviour().getId(), success, fail);
+	unlinkBehaviour(behaID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Zone, Behaviour, behaID, successCallback, failCallback);
 	}
 
 	/**
@@ -520,31 +481,8 @@ class Zone extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
 	 * @param {Function} failCallback - The callback function when fail.
 	 */
-	addCallType(ct : CallType, successCallback : Function = null, failCallback : Function = null) {
-		if (!ct || !ct.getId()) {
-			failCallback(new ModelException("The CallType must be an existing object to be associated."));
-			return;
-		}
-
-		if (ModelItf.isObjectInsideArray(this.callTypes(),ct)) {
-			failCallback(new ModelException("You cannot add twice a CallType for a Zone."));
-			return;
-		}
-
-		var self = this;
-
-		var success : Function = function() {
-			ct.desynchronize();
-			self.callTypes().push(ct);
-
-			successCallback();
-		};
-
-		var fail : Function = function(error) {
-			failCallback(error);
-		};
-
-		this.associateObject(Zone, CallType, ct.getId(), success, fail);
+	addCallType(ctID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Zone, CallType, ctID, successCallback, failCallback);
 	}
 
 	/**
@@ -556,31 +494,8 @@ class Zone extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
 	 * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeCallType(ct : CallType, successCallback : Function = null, failCallback : Function = null) {
-		if (!ct || !ct.getId()) {
-			failCallback(new ModelException("The CallType must be an existing object to be removed."));
-			return;
-		}
-
-		if (!ModelItf.isObjectInsideArray(this.callTypes(),ct)) {
-			failCallback(new ModelException("The CallType you try to remove is not yet associated."));
-			return;
-		}
-
-		var self = this;
-
-		var success : Function = function() {
-			ct.desynchronize();
-			ModelItf.removeObjectFromArray(self.callTypes(), ct);
-
-			successCallback();
-		};
-
-		var fail : Function = function(error) {
-			failCallback(error);
-		};
-
-		this.deleteObjectAssociation(Zone, CallType, ct.getId(), success, fail);
+	removeCallType(ctID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Zone, CallType, ctID, successCallback, failCallback);
 	}
 
 
@@ -592,7 +507,7 @@ class Zone extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(Zone, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -606,7 +521,7 @@ class Zone extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(Zone, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -618,7 +533,7 @@ class Zone extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(Zone, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -630,7 +545,7 @@ class Zone extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(Zone, successCallback, failCallback, attemptNumber);
     }
 
@@ -642,7 +557,7 @@ class Zone extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(Zone, successCallback, failCallback, attemptNumber);
     }
 

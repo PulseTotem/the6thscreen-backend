@@ -121,7 +121,7 @@ class Profil extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadCalls(successCallback : Function = null, failCallback : Function = null) {
+    loadCalls(successCallback : Function, failCallback : Function) {
         if(! this._calls_loaded) {
             var self = this;
             var success : Function = function(calls) {
@@ -156,7 +156,7 @@ class Profil extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+	loadAssociations(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function(models) {
@@ -207,12 +207,14 @@ class Profil extends ModelItf {
 	 * Check completeness of a Profil.
 	 * The completeness is determined by the presence of a name and an id.
 	 */
-	checkCompleteness(successCallback : Function = null) : void {
-		super.checkCompleteness();
-		this._complete = (this._complete && !!this.name());
-		if (successCallback) {
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+		var self = this;
+
+		var success : Function = function () {
+			self._complete = (self._complete && !!self.name());
 			successCallback();
-		}
+		};
+		super.checkCompleteness(success, failCallback);
 	}
 
     /**
@@ -223,7 +225,7 @@ class Profil extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {
@@ -248,31 +250,8 @@ class Profil extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	addCall(c : Call, successCallback : Function = null, failCallback : Function = null) {
-		if (!c || !c.getId()) {
-            failCallback(new ModelException("The Call must be an existing object to be associated."));
-            return;
-		}
-
-		if (ModelItf.isObjectInsideArray(this.calls(), c)) {
-            failCallback(new ModelException("You cannot add twice a Call in a Profil."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            c.desynchronize();
-            self.calls().push(c);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(Profil, Call, c.getId(), success, fail);
+	addCall(callID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Profil, Call, callID, successCallback, failCallback);
 	}
 
 	/**
@@ -284,31 +263,8 @@ class Profil extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeCall(c : Call, successCallback : Function = null, failCallback : Function = null) {
-		if (!c || !c.getId()) {
-            failCallback(new ModelException("The Call must be an existing object to be removed."));
-            return;
-		}
-
-		if (!ModelItf.isObjectInsideArray(this.calls(), c)) {
-            failCallback(new ModelException("The Call you try to remove has not been added to the current Profil"));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            c.desynchronize();
-            ModelItf.removeObjectFromArray(self.calls(), c);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(Profil, Call, c.getId(), success, fail);
+	removeCall(callID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Profil, Call, callID, successCallback, failCallback);
 	}
 
     /**
@@ -319,7 +275,7 @@ class Profil extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(Profil, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -333,7 +289,7 @@ class Profil extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(Profil, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -345,7 +301,7 @@ class Profil extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(Profil, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -357,7 +313,7 @@ class Profil extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(Profil, successCallback, failCallback, attemptNumber);
     }
 
@@ -369,7 +325,7 @@ class Profil extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(Profil, successCallback, failCallback, attemptNumber);
     }
 

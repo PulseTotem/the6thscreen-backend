@@ -74,9 +74,15 @@ class Role extends ModelItf {
 	 * Compute the completeness of a Role.
 	 * The completeness is given by the presence of an ID and a name.
 	 */
-	checkCompleteness() : void {
-		super.checkCompleteness();
-		this._complete = (this._complete && !!this.name());
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+		var self = this;
+
+		var success : Function = function () {
+			self._complete = (self._complete && !!self.name());
+			successCallback();
+		}
+
+		super.checkCompleteness(success,failCallback);
 	}
 
     /**
@@ -87,7 +93,7 @@ class Role extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(Role, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -101,7 +107,7 @@ class Role extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(Role, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -113,7 +119,7 @@ class Role extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(Role, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -125,7 +131,7 @@ class Role extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(Role, successCallback, failCallback, attemptNumber);
     }
 
@@ -137,7 +143,7 @@ class Role extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(Role, successCallback, failCallback, attemptNumber);
     }
 

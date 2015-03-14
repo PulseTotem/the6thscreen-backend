@@ -117,7 +117,7 @@ class Renderer extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadInfoType(successCallback : Function = null, failCallback : Function = null) {
+    loadInfoType(successCallback : Function, failCallback : Function) {
         if(! this._info_type_loaded) {
             var self = this;
             var success : Function = function(infoType) {
@@ -154,7 +154,7 @@ class Renderer extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+    loadAssociations(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function(models) {
@@ -209,26 +209,30 @@ class Renderer extends ModelItf {
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of failure.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) {
+		var self = this;
 
-		if (this.isComplete() && !!this.name()) {
-			var self = this;
+		var success : Function = function () {
+			if (self.isComplete() && !!self.name()) {
 
-			var success : Function = function () {
-				self._complete = (!!self.infoType() && self.infoType().isComplete());
+				var successAsso : Function = function () {
+					self._complete = (!!self.infoType() && self.infoType().isComplete());
+					successCallback();
+				};
+
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
+
+				self.loadInfoType(successAsso, fail);
+			} else {
+				self._complete = false;
 				successCallback();
-			};
-
-			var fail : Function = function (error) {
-				failCallback(error);
-			};
-
-			this.loadInfoType(success,fail);
-		} else {
-			this._complete = false;
-			successCallback();
+			}
 		}
+
+		super.checkCompleteness(success, failCallback);
+
 	}
 
     /**
@@ -239,7 +243,7 @@ class Renderer extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {
@@ -260,37 +264,13 @@ class Renderer extends ModelItf {
 	 * As a Renderer can only have one InfoType, if the value is already set, this method throws an exception: you need first to unset the InfoType.
 	 * Moreover the given type must be created in database.
 	 *
-     * @method setInfoType
+     * @method linkInfoType
 	 * @param {InfoType} it The InfoType to associate with the Renderer.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setInfoType(it : InfoType, successCallback : Function = null, failCallback : Function = null) {
-		if (!it || !it.getId()) {
-            failCallback(new ModelException("The InfoType must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.infoType() !== null) {
-            failCallback(new ModelException("The InfoType is already set for this Renderer."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            it.desynchronize();
-            self._info_type = it;
-            self._info_type_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(Renderer, InfoType, it.getId(), success, fail);
+	linkInfoType(typeID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Renderer, InfoType, typeID, successCallback, failCallback);
 	}
 
 	/**
@@ -298,30 +278,12 @@ class Renderer extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * An InfoType must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetInfoType
+     * @method unlinkInfoType
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetInfoType(successCallback : Function = null, failCallback : Function = null) {
-		if (this.infoType() === null) {
-            failCallback(new ModelException("No InfoType has been set for this Renderer."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.infoType().desynchronize();
-            self._info_type = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(Renderer, InfoType, this.infoType().getId(), success, fail);
+	unlinkInfoType(typeID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Renderer, InfoType, typeID, successCallback, failCallback);
 	}
 
     /**
@@ -332,7 +294,7 @@ class Renderer extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(Renderer, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -346,7 +308,7 @@ class Renderer extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(Renderer, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -358,7 +320,7 @@ class Renderer extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(Renderer, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -370,7 +332,7 @@ class Renderer extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(Renderer, successCallback, failCallback, attemptNumber);
     }
 
@@ -382,7 +344,7 @@ class Renderer extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(Renderer, successCallback, failCallback, attemptNumber);
     }
 

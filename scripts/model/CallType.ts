@@ -197,7 +197,7 @@ class CallType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadSource(successCallback : Function = null, failCallback : Function = null) {
+    loadSource(successCallback : Function, failCallback : Function) {
         if(! this._source_loaded) {
             var self = this;
             var success : Function = function(source) {
@@ -240,7 +240,7 @@ class CallType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadRenderer(successCallback : Function = null, failCallback : Function = null) {
+    loadRenderer(successCallback : Function, failCallback : Function) {
         if(! this._renderer_loaded) {
             var self = this;
             var success : Function = function(renderer) {
@@ -283,7 +283,7 @@ class CallType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadReceivePolicy(successCallback : Function = null, failCallback : Function = null) {
+    loadReceivePolicy(successCallback : Function, failCallback : Function) {
         if(! this._receive_policy_loaded) {
             var self = this;
             var success : Function = function(receivePolicy) {
@@ -326,7 +326,7 @@ class CallType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadRenderPolicy(successCallback : Function = null, failCallback : Function = null) {
+    loadRenderPolicy(successCallback : Function, failCallback : Function) {
         if(! this._render_policy_loaded) {
             var self = this;
             var success : Function = function(renderPolicy) {
@@ -369,7 +369,7 @@ class CallType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadZone(successCallback : Function = null, failCallback : Function = null) {
+    loadZone(successCallback : Function, failCallback : Function) {
         if(! this._zone_loaded) {
             var self = this;
             var success : Function = function(zone) {
@@ -406,7 +406,7 @@ class CallType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+    loadAssociations(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function(models) {
@@ -469,30 +469,30 @@ class CallType extends ModelItf {
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of failure.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) {
+		var self = this;
+		var success : Function = function () {
+			if (self.isComplete() && !!self.name()) {
+				var success:Function = function () {
+					if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
+						self._complete = (!!self.renderer() && self.renderer().isComplete()) && (!!self.zone() && self.zone().isComplete()) && (!!self.source() && self.source().isComplete());
+						successCallback();
+					}
+				};
 
-		if (this.isComplete() && !!this.name()) {
-			var self = this;
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
 
-			var success : Function = function () {
-				if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
-					self._complete = (!!self.renderer() && self.renderer().isComplete()) && (!!self.zone() && self.zone().isComplete()) && (!!self.source() && self.source().isComplete());
-					successCallback();
-				}
-			};
-
-			var fail : Function = function (error) {
-				failCallback(error);
-			};
-
-			this.loadSource(success,fail);
-			this.loadZone(success,fail);
-			this.loadRenderer(success,fail);
-		} else {
-			this._complete = false;
-			successCallback();
-		}
+				self.loadSource(success, fail);
+				self.loadZone(success, fail);
+				self.loadRenderer(success, fail);
+			} else {
+				self._complete = false;
+				successCallback();
+			}
+		};
+		super.checkCompleteness(success, failCallback);
 	}
 
     /**
@@ -503,7 +503,7 @@ class CallType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {
@@ -529,37 +529,13 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one Source, if the value is already set, this method throws an exception: you need first to unset the Source.
 	 * Moreover the given Source must be created in database.
 	 *
-     * @method setSource
+     * @method linkSource
 	 * @param {Source} s The Source to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setSource(s : Source, successCallback : Function = null, failCallback : Function = null) {
-		if (!s || !s.getId()) {
-            failCallback(new ModelException("The source must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.source() !== null) {
-            failCallback(new ModelException("The source is already set for this CallType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            s.desynchronize();
-            self._source = s;
-            self._source_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(CallType, Source, s.getId(), success, fail);
+	linkSource(sourceId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(CallType, Source, sourceId, successCallback, failCallback);
 	}
 
 	/**
@@ -567,30 +543,12 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Source must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetSource
+     * @method unlinkSource
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetSource(successCallback : Function = null, failCallback : Function = null) {
-		if (this.source() === null) {
-            failCallback(new ModelException("No source has been set for this callType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.source().desynchronize();
-            self._source = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(CallType, Source, this.source().getId(), success, fail);
+	unlinkSource(sourceID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(CallType, Source, sourceID, successCallback, failCallback);
 	}
 
 	/**
@@ -598,37 +556,13 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one Renderer, if the value is already set, this method throws an exception: you need first to unset the Renderer.
 	 * Moreover the given Renderer must be created in database.
 	 *
-     * @method setRenderer
+     * @method linkRenderer
 	 * @param {Renderer} r The Renderer to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setRenderer(r : Renderer, successCallback : Function = null, failCallback : Function = null) {
-		if (!r || !r.getId()) {
-            failCallback(new ModelException("The renderer must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.renderer() !== null) {
-            failCallback(new ModelException("The renderer is already set for this CallType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            r.desynchronize();
-            self._renderer = r;
-            self._renderer_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(CallType, Renderer, r.getId(), success, fail);
+	linkRenderer(rendererID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(CallType, Renderer, rendererID, successCallback, failCallback);
 	}
 
 	/**
@@ -636,30 +570,12 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Renderer must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetRenderer
+     * @method unlinkRenderer
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetRenderer(successCallback : Function = null, failCallback : Function = null) {
-		if (this.renderer() === null) {
-            failCallback(new ModelException("No renderer has been set for this callType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.renderer().desynchronize();
-            self._renderer = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(CallType, Renderer, this.renderer().getId(), success, fail);
+	unlinkRenderer(rendererID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(CallType, Renderer, rendererID, successCallback, failCallback);
 	}
 
 	/**
@@ -667,37 +583,13 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one ReceivePolicy, if the value is already set, this method throws an exception: you need first to unset the ReceivePolicy.
 	 * Moreover the given ReceivePolicy must be created in database.
 	 *
-     * @method setReceivePolicy
+     * @method linkReceivePolicy
 	 * @param {ReceivePolicy} rp The ReceivePolicy to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setReceivePolicy(rp : ReceivePolicy, successCallback : Function = null, failCallback : Function = null) {
-		if (!rp || !rp.getId()) {
-            failCallback(new ModelException("The receivePolicy must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.receivePolicy() !== null) {
-            failCallback(new ModelException("The receivePolicy is already set for this CallType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            rp.desynchronize();
-            self._receive_policy = rp;
-            self._receive_policy_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(CallType, ReceivePolicy, rp.getId(), success, fail);
+	linkReceivePolicy(rpID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(CallType, ReceivePolicy, rpID, successCallback, failCallback);
 	}
 
 	/**
@@ -705,30 +597,12 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A ReceivePolicy must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetReceivePolicy
+     * @method unlinkReceivePolicy
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetReceivePolicy(successCallback : Function = null, failCallback : Function = null) {
-		if (this.receivePolicy() === null) {
-            failCallback(new ModelException("No receivePolicy has been set for this callType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.receivePolicy().desynchronize();
-            self._receive_policy = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(CallType, ReceivePolicy, this.receivePolicy().getId(), success, fail);
+	unlinkReceivePolicy(rpID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(CallType, ReceivePolicy, rpID, successCallback, failCallback);
 	}
 
 	/**
@@ -736,37 +610,13 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one RenderPolicy, if the value is already set, this method throws an exception: you need first to unset the RenderPolicy.
 	 * Moreover the given RenderPolicy must be created in database.
 	 *
-     * @method setRenderPolicy
+     * @method linkRenderPolicy
 	 * @param {RenderPolicy} rp The RenderPolicy to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setRenderPolicy(rp : RenderPolicy, successCallback : Function = null, failCallback : Function = null) {
-		if (!rp || !rp.getId()) {
-            failCallback(new ModelException("The renderPolicy must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.renderPolicy() !== null) {
-            failCallback(new ModelException("The renderPolicy is already set for this CallType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            rp.desynchronize();
-            self._render_policy = rp;
-            self._render_policy_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(CallType, RenderPolicy, rp.getId(), success, fail);
+	linkRenderPolicy(rpID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(CallType, RenderPolicy, rpID, successCallback, failCallback);
 	}
 
 	/**
@@ -774,30 +624,12 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A RenderPolicy must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetRenderPolicy
+     * @method unlinkRenderPolicy
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetRenderPolicy(successCallback : Function = null, failCallback : Function = null) {
-		if (this.renderPolicy() === null) {
-            failCallback(new ModelException("No RenderPolicy has been set for this callType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.renderPolicy().desynchronize();
-            self._render_policy = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(CallType, RenderPolicy, this.renderPolicy().getId(), success, fail);
+	unlinkRenderPolicy(rpID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(CallType, RenderPolicy, rpID, successCallback, failCallback);
 	}
 
 	/**
@@ -805,37 +637,13 @@ class CallType extends ModelItf {
 	 * As a CallType can only have one Zone, if the value is already set, this method throws an exception: you need first to unset the Zone.
 	 * Moreover the given Zone must be created in database.
 	 *
-     * @method setZone
+     * @method linkZone
 	 * @param {Zone} z The Zone to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setZone(z : Zone, successCallback : Function = null, failCallback : Function = null) {
-		if (!z || !z.getId()) {
-            failCallback(new ModelException("The zone must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.zone() !== null) {
-            failCallback(new ModelException("The zone is already set for this CallType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            z.desynchronize();
-            self._zone = z;
-            self._zone_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(CallType, Zone, z.getId(), success, fail);
+	linkZone(zoneID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(CallType, Zone, zoneID, successCallback, failCallback);
 	}
 
 	/**
@@ -843,30 +651,12 @@ class CallType extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A Zone must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetZone
+     * @method unlinkZone
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetZone(successCallback : Function = null, failCallback : Function = null) {
-		if (this.zone() === null) {
-            failCallback(new ModelException("No Zone has been set for this callType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.zone().desynchronize();
-            self._zone = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(CallType, Zone, this.zone().getId(), success, fail);
+	unlinkZone(zoneID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(CallType, Zone, zoneID, successCallback, failCallback);
 	}
 
     /**
@@ -877,7 +667,7 @@ class CallType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(CallType, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -891,7 +681,7 @@ class CallType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(CallType, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -903,7 +693,7 @@ class CallType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(CallType, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -915,7 +705,7 @@ class CallType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(CallType, successCallback, failCallback, attemptNumber);
     }
 
@@ -927,7 +717,7 @@ class CallType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(CallType, successCallback, failCallback, attemptNumber);
     }
 

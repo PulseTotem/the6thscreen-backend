@@ -302,8 +302,8 @@ describe('ConstraintParamType', function() {
 		})
 	});
 
-	describe('#setType', function() {
-		it('should set the given type', function(done) {
+	describe('#linkType', function() {
+		it('should call the right request', function(done) {
 			var c = new ConstraintParamType("toto","machin", 52);
 			var s = new TypeParamType("toto", 42);
 			var spy = sinon.spy(s, "desynchronize");
@@ -332,130 +332,16 @@ describe('ConstraintParamType', function() {
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setTypeParamType is false.");
+                    //assert.ok(retour, "The return of the linkTypeParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the type in database.");
-
-                    type = c.type();
-                    assert.deepEqual(type, s, "The type() does not return the exact type we give: "+JSON.stringify(type));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
-                    done();
+					done();
                 };
 
                 var fail2 = function(err) {
                     done(err);
                 };
 
-                c.setType(s, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadType(success, fail);
-		});
-
-		it('should not allow to add a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new ConstraintParamType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setType(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new ConstraintParamType("toto","machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setType(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new ConstraintParamType("toto","machin", 52);
-			var s = new TypeParamType("toto");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setType(s, success, fail);
-		});
-
-		it('should not allow to set a type if there is already one', function(done) {
-			var c = new ConstraintParamType("toto","machin", 52);
-			var s = new TypeParamType("toto", 42);
-			var s2 = new TypeParamType("tutu", 89);
-
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s2.toJSONObject()
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var type = c.type();
-
-                assert.ok(!!type, "The type has false value.");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the type");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.setType(s, success2, fail2);
+                c.linkType(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -467,8 +353,8 @@ describe('ConstraintParamType', function() {
 
 	});
 
-	describe('#unsetType', function() {
-		it('should unset the TypeParamType', function(done) {
+	describe('#unlinkType', function() {
+		it('should call the right request', function(done) {
 			var c = new ConstraintParamType("toto","machin", 52);
 			var s = new TypeParamType("toto", 42);
 
@@ -497,13 +383,8 @@ describe('ConstraintParamType', function() {
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetTypeParamType is false.");
+                    //assert.ok(retour, "The return of the unlinkTypeParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
-
-                    type = c.type();
-                    assert.deepEqual(type, null, "The type() does not return a null value after unsetting");
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -511,50 +392,7 @@ describe('ConstraintParamType', function() {
                     done(err);
                 };
 
-                c.unsetType(success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadType(success, fail);
-		});
-
-		it('should not allow to unset a type if there is none', function(done) {
-			var c = new ConstraintParamType("toto","machin", 52);
-			var s = new TypeParamType("toto", 42);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var type = c.type();
-
-                assert.equal(type, null, "The type has a value not null: "+JSON.stringify(type));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.unsetType(success2, fail2);
+                c.unlinkType(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {

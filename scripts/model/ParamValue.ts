@@ -90,7 +90,7 @@ class ParamValue extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadParamType(successCallback : Function = null, failCallback : Function = null) {
+    loadParamType(successCallback : Function, failCallback : Function) {
         if(! this._paramType_loaded) {
             var self = this;
             var success : Function = function(paramType) {
@@ -127,7 +127,7 @@ class ParamValue extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+    loadAssociations(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function(models) {
@@ -180,26 +180,27 @@ class ParamValue extends ModelItf {
 	 * @param successCallback The function to call when success.
 	 * @param failCallback The function to call when fail.
 	 */
-	checkCompleteness(successCallback : Function = null, failCallback : Function = null) : void {
-		super.checkCompleteness();
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+		var self = this;
 
-		if (this.isComplete() && !!this.value()) {
-			var self = this;
+		var success : Function = function () {
+			if (self.isComplete() && !!self.value()) {
+				var success:Function = function () {
+					self._complete = (self.paramType() !== undefined && self.paramType().isComplete());
+					successCallback();
+				};
 
-			var success : Function = function() {
-				self._complete = (self.paramType() !== undefined && self.paramType().isComplete());
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
+
+				self.loadAssociations(success, fail);
+			} else {
+				self._complete = false;
 				successCallback();
-			};
-
-			var fail : Function = function (error) {
-				failCallback(error);
-			};
-
-			this.loadAssociations(success, fail);
-		} else {
-			this._complete = false;
-			successCallback();
+			}
 		}
+		super.checkCompleteness(success, failCallback);
 	}
 
     /**
@@ -210,7 +211,7 @@ class ParamValue extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {
@@ -232,37 +233,13 @@ class ParamValue extends ModelItf {
 	 * As a ParamValue can only have one type, if the value is already set, this method throws an exception: you need first to unset the ParamType.
 	 * Moreover the given ParamType must be created in database.
 	 *
-     * @method setParamType
+     * @method linkParamType
 	 * @param {ParamType} t The ParamType to associate with the ParamValue.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	setParamType(p : ParamType, successCallback : Function = null, failCallback : Function = null) {
-		if (!p || !p.getId()) {
-            failCallback(new ModelException("The ParamType must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.paramType() !== null) {
-            failCallback(new ModelException("The paramType is already set for this ParamValue."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            p.desynchronize();
-            self._paramType = p;
-            self._paramType_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(ParamValue, ParamType, p.getId(), success, fail);
+	linkParamType(typeID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(ParamValue, ParamType, typeID, successCallback, failCallback);
 	}
 
 	/**
@@ -270,30 +247,12 @@ class ParamValue extends ModelItf {
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A ParamType must have been set before using it, else an exception is thrown.
 	 *
-     * @method unsetParamType
+     * @method unlinkParamType
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unsetParamType(successCallback : Function = null, failCallback : Function = null) {
-		if (this.paramType() === null) {
-            failCallback(new ModelException("No ParamType has been set for this ParamValue."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.paramType().desynchronize();
-            self._paramType = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(ParamValue, ParamType, this.paramType().getId(), success, fail);
+	unlinkParamType(typeID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ParamValue, ParamType, typeID, successCallback, failCallback);
 	}
 
     /**
@@ -304,7 +263,7 @@ class ParamValue extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(ParamValue, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -318,7 +277,7 @@ class ParamValue extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(ParamValue, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -330,7 +289,7 @@ class ParamValue extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(ParamValue, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -342,7 +301,7 @@ class ParamValue extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(ParamValue, successCallback, failCallback, attemptNumber);
     }
 
@@ -354,7 +313,7 @@ class ParamValue extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(ParamValue, successCallback, failCallback, attemptNumber);
     }
 

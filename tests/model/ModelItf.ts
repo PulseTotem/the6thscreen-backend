@@ -38,16 +38,30 @@ describe('ModelItf', function() {
 	});
 
 	describe('#checkCompleteness()', function() {
-		it('should compute true if an id is given', function() {
+		it('should compute true if an id is given', function(done) {
 			var model = new ModelItf(24);
-			model.checkCompleteness();
-			assert.equal(model.isComplete(), true, "The object is not considered as complete but it should be.");
+			var success = function () {
+				assert.equal(model.isComplete(), true, "The object is not considered as complete but it should be.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			model.checkCompleteness(success, fail);
 		});
 
-		it('should return false if an id is not given', function() {
+		it('should return false if an id is not given', function(done) {
 			var model = new ModelItf();
-			model.checkCompleteness();
-			assert.equal(model.isComplete(), false, "The object is considered as complete but it should not be.");
+			var success = function () {
+				assert.equal(model.isComplete(), false, "The object is considered as complete but it should not be.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			model.checkCompleteness(success, fail);
 		})
 	});
 
@@ -2270,5 +2284,191 @@ describe('ModelItf', function() {
 			assert.deepEqual(array, expected, "The array has not been modified correcty: "+JSON.stringify(array));
 
 		});
-	})
+	});
+
+	describe('#updateAttribute', function () {
+		it('should launch an exception if the modelClass is undefined.', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(undefined,null, success, fail);
+		});
+
+		it('should launch an exception if the modelClass is null.', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(null, null, success, fail);
+		});
+
+		it('should launch an exception if the JSON information is null', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, null, success, fail);
+		});
+
+		it('should launch an exception if the information is not a JSON', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, "", success, fail);
+		});
+
+		it('should launch an exception if the information does not contain an ID', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var info = {
+				"toto": "tata"
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, info, success, fail);
+		});
+
+		it('should launch an exception if the information does contain a null id', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var info = {
+				"id": null
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, info, success, fail);
+		});
+
+		it('should launch an exception if the information does not contain a method', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var info = {
+				"id": 3
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, info, success, fail);
+		});
+
+		it('should launch an exception if the information does contain a null method', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var info = {
+				"id": 3,
+				"method": null
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, info, success, fail);
+		});
+
+		it('should launch an exception if the information method does not have a proper name', function (done) {
+			var success = function() {
+				done(new Error("Test failed."));
+			};
+
+			var info = {
+				"id": 3,
+				"method": "deleteSet"
+			};
+
+			var fail = function(err) {
+				assert.throws(function() {
+						if(err) {
+							throw err;
+						}
+					},
+					ModelException, "The DataException has not been thrown.");
+				done();
+			};
+
+			ModelItf.updateAttribute(ModelItf, info, success, fail);
+		});
+	});
 });

@@ -69,8 +69,9 @@ class ModelItf {
 	/**
 	 * Check the completeness of an object.
 	 */
-	checkCompleteness() : void {
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
 		this._complete = (this._id !== null);
+		successCallback();
 	}
 
     /**
@@ -83,7 +84,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    createObject(modelClass : any, data : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    createObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 
         var self = this;
 
@@ -132,7 +133,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static readObject(modelClass : any, id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static readObject(modelClass : any, id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         if (!modelClass || !id) {
             failCallback(new ModelException("To read an object the modelClass and the id must be given."), id, attemptNumber);
             return;
@@ -171,7 +172,7 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    static findBy(modelClass : any, paramName : string, paramValue : string, successCallback : Function = null, failCallback : Function = null) {
+    static findBy(modelClass : any, paramName : string, paramValue : string, successCallback : Function, failCallback : Function) {
         if (!modelClass || !paramName || !paramValue) {
             failCallback(new ModelException("To find an object the modelClass, the paramName and the paramValue must be given."));
             return;
@@ -224,7 +225,7 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    static findOneBy(modelClass : any, paramName : string, paramValue : string, successCallback : Function = null, failCallback : Function = null) {
+    static findOneBy(modelClass : any, paramName : string, paramValue : string, successCallback : Function, failCallback : Function) {
         if (!modelClass || !paramName || !paramValue) {
             failCallback(new ModelException("To find an object the modelClass, the paramName and the paramValue must be given."));
             return;
@@ -276,7 +277,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-     updateObject(modelClass : any, data : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+     updateObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         if (!modelClass || !data) {
             failCallback(new ModelException("To update an object, the modelClass and the datas must be given."), attemptNumber);
             return;
@@ -320,7 +321,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    deleteObject(modelClass : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    deleteObject(modelClass : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 	    var self = this;
 
         if (!modelClass) {
@@ -363,7 +364,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
 	 */
-	static allObjects(modelClass : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+	static allObjects(modelClass : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 		if (!modelClass) {
             failCallback(new ModelException("To retrieve all objects, the modelClass must be given."), attemptNumber);
             return;
@@ -415,7 +416,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
 	 */
-	associateObject(modelClass1 : any, modelClass2: any, id2 : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+	associateObject(modelClass1 : any, modelClass2: any, id2 : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 		if (!this.getId()) {
             failCallback(new ModelException("The object to be associated does not exist yet. The association can't be created."), attemptNumber);
             return;
@@ -455,7 +456,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
 	 */
-	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 		if (!this.getId()) {
             failCallback(new ModelException("An association can't be deleted if the object does not exist."), attemptNumber);
             return;
@@ -494,7 +495,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    getAssociatedObjects(modelClass : any, modelClassAssociated : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    getAssociatedObjects(modelClass : any, modelClassAssociated : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         if (!this.getId()) {
             failCallback(new ModelException("You cannot retrieve associated objects if the object does not exist."), attemptNumber);
             return;
@@ -547,7 +548,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         if (!this.getId()) {
             failCallback(new ModelException("You cannot retrieve uniquely associated object if the object does not exist."), attemptNumber);
             return;
@@ -586,6 +587,78 @@ class ModelItf {
         RestClient.get(urlUniqueAssociatedOject, success, fail);
     }
 
+	/**
+	 * Update an attribute, add or remove a link.
+	 * This method always check comleteness and keep update value of it in database.
+	 *
+	 * @param modelClass The modelClass of the object to update.
+	 * @param informations The informations for the update with the following format : {'id': 12, 'method':'setName', 'value':'toto'}. Only method starting by the name 'set', 'add', 'link', 'unlink' or 'remove' are allowed.
+	 * @param successCallback The function to call if the object is successfully updated.
+	 * @param failCallback The function to call in case of failure.
+	 */
+	static updateAttribute(modelClass : any, informations : any, successCallback : Function, failCallback : Function) {
+		if (!modelClass) {
+			failCallback(new ModelException("You must specify the modelClass in order to update one of its attribute."));
+			return;
+		}
+		if (!informations) {
+			failCallback(new ModelException("You must specify a proper piece of information to update attribute."));
+			return;
+		}
+		if (!informations.id) {
+			failCallback(new ModelException("You must specify the object ID in order to update one of its attribute."));
+			return;
+		}
+		if (!informations.method) {
+			failCallback(new ModelException("You must specify the object method in order to update one of its attribute."));
+			return;
+		}
+		if (!(informations.method.indexOf('set') === 0 || informations.method.indexOf('add') === 0 || informations.method.indexOf('link') === 0 || informations.method.indexOf('unlink') === 0 || informations.method.indexOf('remove') === 0 )) {
+			failCallback(new ModelException("You can only call set, unset, add or remove method in order to update an attribute."));
+			return;
+		}
+
+		var successRead : Function = function (object) {
+			var self = object;
+			var wasComplete = self.isComplete();
+
+			var doUpdate : Function = function () {
+				self.update(successCallback,failCallback);
+			};
+
+			var doUpdateOnlyIfCompleteDifferent : Function = function () {
+				if (self.isComplete() != wasComplete) {
+					self.update(successCallback,failCallback);
+				} else {
+					successCallback();
+				}
+			};
+
+			var successCheck : Function = function () {
+				self.checkCompleteness(doUpdateOnlyIfCompleteDifferent, failCallback);
+			};
+
+			try {
+				if (informations.method.indexOf('set') === 0) {
+					self[informations.method](informations.value);
+					self.checkCompleteness(doUpdate, failCallback);
+				} else {
+					self[informations.method](informations.value, successCheck, failCallback);
+				}
+			} catch (error) {
+				if (error instanceof TypeError) {
+					failCallback(new ModelException("The method you specify ("+informations.method+") has not been recognized for the model "+modelClass.getTableName()+". (Original error : "+error+")"));
+					return;
+				} else {
+					failCallback(error);
+					return;
+				}
+			}
+		};
+
+		modelClass.read(informations.id, successRead, failCallback);
+	}
+
 
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
@@ -598,7 +671,7 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+    loadAssociations(successCallback : Function, failCallback : Function) {
 	    successCallback();
     }
 
@@ -617,7 +690,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - create : Method need to be implemented.");
     }
 
@@ -631,7 +704,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - read : Method need to be implemented.");
     }
 
@@ -643,7 +716,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - update : Method need to be implemented.");
     }
 
@@ -655,7 +728,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - delete : Method need to be implemented.");
     }
 
@@ -667,7 +740,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - all : Method need to be implemented.");
     }
 
@@ -696,7 +769,7 @@ class ModelItf {
 	 * @param {Function} successCallback The callback function when success
 	 * @param {Function} failCallback The callback function when fail.
 	 */
-	static completeArraySerialization(tableau : Array<ModelItf>, successCallback : Function = null, failCallback : Function = null) {
+	static completeArraySerialization(tableau : Array<ModelItf>, successCallback : Function, failCallback : Function) {
 		var data = [];
 		var numberProcessedInfo = 0;
 		var totalInfo = tableau.length;
@@ -744,7 +817,7 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {

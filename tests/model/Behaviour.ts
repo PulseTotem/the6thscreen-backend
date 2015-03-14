@@ -39,22 +39,44 @@ describe('Behaviour', function() {
 	});
 
 	describe('#checkCompleteness()', function() {
-		it('should return false if the object is empty', function() {
+		it('should return false if the object is empty', function(done) {
 			var b =  new Behaviour();
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
+
 		});
 
-		it('should return true if the object has a name and an ID but no description', function() {
+		it('should return true if the object has a name and an ID but no description', function(done) {
 			var b = new Behaviour('toto', null, 12);
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), true, "The behaviour should be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), true, "The behaviour should be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 
-		it('should return false if the object has an empty name and an ID but no description', function() {
+		it('should return false if the object has an empty name and an ID but no description', function(done) {
 			var b = new Behaviour('', null, 12);
-			b.checkCompleteness();
-			assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+			var success = function () {
+				assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			b.checkCompleteness(success, fail);
 		});
 	});
 
@@ -156,5 +178,48 @@ describe('Behaviour', function() {
 
 			assert.deepEqual(json, expected, "The JSON object (" + JSON.stringify(json) + ") and the expected JSON (" + JSON.stringify(expected) + ") do not match.");
 		})
+	});
+
+	describe('#updateAttribute', function () {
+		it('should update the name when asking', function (done) {
+			var model = new Behaviour("", "", 12);
+			var modelUpdated = new Behaviour("tata", "", 12, true);
+
+			var responseRead : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": model.toJSONObject()
+			};
+
+			var restClientMockRead = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()))
+				.reply(200, JSON.stringify(responseRead));
+
+			var newInfo = {
+				'id' : model.getId(),
+				'method': 'setName',
+				'value': modelUpdated.name()
+			};
+
+			var responseUpdate : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": modelUpdated.toJSONObject()
+			};
+
+			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
+				.put(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
+				.reply(200, JSON.stringify(responseUpdate));
+
+			var success : Function = function () {
+				assert.ok(restClientMockRead.isDone(), "The object is not read.");
+				assert.ok(restClientMockUpdate.isDone(), "The request update has not been done.");
+				done();
+			};
+
+			var fail : Function = function (error) {
+				done(error);
+			};
+
+			ModelItf.updateAttribute(Behaviour, newInfo, success, fail);
+		});
 	});
 });

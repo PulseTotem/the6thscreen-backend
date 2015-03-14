@@ -291,7 +291,7 @@ class CleanAndInitDatabase {
                     };
 
                     retrievedParamTypes.forEach(function(paramType) {
-                        source.addParamType(paramType, successParamTypeAssociation, fail);
+                        source.addParamType(paramType.getId(), successParamTypeAssociation, fail);
                     });
 
                 }
@@ -307,7 +307,7 @@ class CleanAndInitDatabase {
                     });
                 };
 
-                source.setInfoType(newInfoType, successInfoTypeAssociation, fail);
+                source.linkInfoType(newInfoType.getId(), successInfoTypeAssociation, fail);
             };
 
             var successServiceRetrieve = function(newService) {
@@ -318,7 +318,7 @@ class CleanAndInitDatabase {
                     self.retrieveInfoType(sourceDesc.infoType, successInfoTypeRetrieve, fail);
                 };
 
-                source.setService(newService, successServiceAssociation, fail);
+                source.linkService(newService.getId(), successServiceAssociation, fail);
             };
 
             var successSourceCreate = function() {
@@ -450,7 +450,7 @@ class CleanAndInitDatabase {
 
             var successConstraintRetrieve = function(newConstraint) {
                 Logger.info("Constraint retrieve successfully.");
-                paramType.setConstraint(newConstraint, successConstraintAssociation, fail);
+                paramType.linkConstraint(newConstraint.getId(), successConstraintAssociation, fail);
             }
 
             var successTypeParamTypeAssociation = function() {
@@ -460,7 +460,7 @@ class CleanAndInitDatabase {
 
             var successTypeParamTypeRetrieve = function(newTypeParamType) {
                 Logger.info("TypeParamType retrieve successfully.");
-                paramType.setType(newTypeParamType, successTypeParamTypeAssociation, fail);
+                paramType.linkType(newTypeParamType.getId(), successTypeParamTypeAssociation, fail);
             };
 
             var successParamTypeCreate = function() {
@@ -512,7 +512,7 @@ class CleanAndInitDatabase {
 
             var successTypeParamTypeRetrieve = function(newTypeParamType) {
                 Logger.info("TypeParamType retrieve successfully.");
-                constraint.setType(newTypeParamType, successTypeParamTypeAssociation, fail);
+                constraint.linkType(newTypeParamType.getId(), successTypeParamTypeAssociation, fail);
             };
 
             var successConstraintCreation = function() {
@@ -681,7 +681,7 @@ class CleanAndInitDatabase {
                     };
 
                     createdZones.forEach(function(zone) {
-                        sdi.addZone(zone, successZoneAssociation, fail);
+                        sdi.addZone(zone.getId(), successZoneAssociation, fail);
                     });
                 }
             };
@@ -697,7 +697,7 @@ class CleanAndInitDatabase {
                     });
                 };
 
-                user.addSDI(sdi, successUserAssociation, fail);
+                user.addSDI(sdi.getId(), successUserAssociation, fail);
             };
 
             var successSDICreate = function() {
@@ -791,7 +791,7 @@ class CleanAndInitDatabase {
                     }
                 };
 
-                renderer.setInfoType(newInfotype, successInfoTypeAssociation, fail);
+                renderer.linkInfoType(newInfotype.getId(), successInfoTypeAssociation, fail);
             };
 
             var successRendererCreation = function() {
@@ -928,7 +928,7 @@ class CleanAndInitDatabase {
                     }
                 }
 
-                newSDI.addProfil(profil, successSDIAssociation, fail);
+                newSDI.addProfil(profil.getId(), successSDIAssociation, fail);
             };
 
             var createdCalls = new Array();
@@ -949,7 +949,7 @@ class CleanAndInitDatabase {
                     };
 
                     createdCalls.forEach(function(call) {
-                        profil.addCall(call, successCallAssociation, fail);
+                        profil.addCall(call.getId(), successCallAssociation, fail);
                     });
                 }
             };
@@ -1156,7 +1156,7 @@ class CleanAndInitDatabase {
                 successCallback(zone);
             };
 
-            zone.setBehaviour(newBehaviour, successBehaviourAssociation, fail);
+            zone.linkBehaviour(newBehaviour.getId(), successBehaviourAssociation, fail);
         };
 
         var successZoneCreation = function() {
@@ -1194,7 +1194,7 @@ class CleanAndInitDatabase {
                 successCallback(callType);
             };
 
-            callType.setReceivePolicy(newReceivePolicy, successReceivePolicyAssociation, fail);
+            callType.linkReceivePolicy(newReceivePolicy.getId(), successReceivePolicyAssociation, fail);
         };
 
         var successRenderPolicyRetrieved = function(newRenderPolicy) {
@@ -1205,7 +1205,7 @@ class CleanAndInitDatabase {
                 self.retrieveReceivePolicy(callTypeDesc.receivePolicy, successReceivePolicyRetrieved, fail);
             };
 
-            callType.setRenderPolicy(newRenderPolicy, successRenderPolicyAssociation, fail);
+            callType.linkRenderPolicy(newRenderPolicy.getId(), successRenderPolicyAssociation, fail);
         };
 
         var successRendererRetrieved = function(newRenderer) {
@@ -1216,7 +1216,7 @@ class CleanAndInitDatabase {
                 self.retrieveRenderPolicy(callTypeDesc.renderPolicy, successRenderPolicyRetrieved, fail);
             };
 
-            callType.setRenderer(newRenderer, successRendererAssociation, fail);
+            callType.linkRenderer(newRenderer.getId(), successRendererAssociation, fail);
         };
 
         var successSourceRetrieve = function(newSource) {
@@ -1227,7 +1227,7 @@ class CleanAndInitDatabase {
                 self.retrieveRenderer(callTypeDesc.renderer, successRendererRetrieved, fail);
             };
 
-            callType.setSource(newSource, successSourceAssociation, fail);
+            callType.linkSource(newSource.getId(), successSourceAssociation, fail);
         };
 
         var successZoneRetrieve = function(newZone) {
@@ -1238,7 +1238,7 @@ class CleanAndInitDatabase {
                 self.retrieveSource(callTypeDesc.source, successSourceRetrieve, fail);
             };
 
-            callType.setZone(newZone, successZoneAssociation, fail);
+            callType.linkZone(newZone.getId(), successZoneAssociation, fail);
         };
 
         var successCallTypeCreation = function() {
@@ -1285,7 +1285,7 @@ class CleanAndInitDatabase {
                 };
 
                 createdParamValues.forEach(function(paramValue) {
-                    call.addParamValue(paramValue, successParamValueAssociation, fail);
+                    call.addParamValue(paramValue.getId(), successParamValueAssociation, fail);
                 });
             }
         };
@@ -1300,7 +1300,7 @@ class CleanAndInitDatabase {
                 });
             };
 
-            call.setCallType(newCallType, successCallTypeAssociation, fail);
+            call.linkCallType(newCallType.getId(), successCallTypeAssociation, fail);
         };
 
         var successCallCreation = function() {
@@ -1337,7 +1337,7 @@ class CleanAndInitDatabase {
                 successCallback(paramValue);
             };
 
-            paramValue.setParamType(newParamType, successParamTypeAssociation, fail);
+            paramValue.linkParamType(newParamType.getId(), successParamTypeAssociation, fail);
         };
 
         var successParamValueCreation = function() {

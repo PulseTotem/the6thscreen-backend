@@ -37,34 +37,69 @@ describe('TypeParamType', function() {
 	});
 
 	describe('#checkCompleteness', function() {
-		it('should specify the object is complete if a name and an ID are given', function() {
+		it('should specify the object is complete if a name and an ID are given', function(done) {
 			var i = new TypeParamType("toto", 52);
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), true, "The TypeParamType is not considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), true, "The TypeParamType is not considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 
-		it('should not specify the object is complete if the name is an empty string', function() {
+		it('should not specify the object is complete if the name is an empty string', function(done) {
 			var i = new TypeParamType("", 52);
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), false, "The TypeParamType is considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), false, "The TypeParamType is considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 
-		it('should not specify the object is complete if the name is null', function() {
+		it('should not specify the object is complete if the name is null', function(done) {
 			var i = new TypeParamType(null, 52);
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), false, "The TypeParamType is considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), false, "The TypeParamType is considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 
-		it('should not specify the object is complete if the id is null', function() {
+		it('should not specify the object is complete if the id is null', function(done) {
 			var i = new TypeParamType("toto", null);
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), false, "The TypeParamType is considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), false, "The TypeParamType is considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 
-		it('should not specify the object is complete if the object is empty', function() {
+		it('should not specify the object is complete if the object is empty', function(done) {
 			var i = new TypeParamType();
-			i.checkCompleteness();
-			assert.equal(i.isComplete(), false, "The TypeParamType is considered as complete.");
+			var success = function () {
+				assert.equal(i.isComplete(), false, "The TypeParamType is considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			i.checkCompleteness(success, fail);
 		});
 	});
 

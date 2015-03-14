@@ -270,8 +270,8 @@ describe('Renderer', function() {
 		});
 	});
 
-	describe('#setInfoType', function () {
-		it('should set the given infoType', function (done) {
+	describe('#linkInfoType', function () {
+		it('should call the right request', function (done) {
 			var c = new Renderer("toto", "machin", 52);
 			var s = new InfoType("toto", 42);
 			var spy = sinon.spy(s, "desynchronize");
@@ -300,13 +300,8 @@ describe('Renderer', function() {
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the setInfoType is false.");
+                    //assert.ok(retour, "The return of the linkInfoType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the infoType in database.");
-
-                    infoType = c.infoType();
-                    assert.deepEqual(infoType, s, "The infoType() does not return the exact infoType we give: " + JSON.stringify(infoType));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -314,7 +309,7 @@ describe('Renderer', function() {
                     done(err);
                 };
 
-                c.setInfoType(s, success2, fail2);
+                c.linkInfoType(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -323,120 +318,10 @@ describe('Renderer', function() {
 
 			c.loadInfoType(success, fail);
 		});
-
-		it('should not allow to add a null object', function (done) {
-			nock.disableNetConnect();
-			var c = new Renderer("toto", "machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setInfoType(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function (done) {
-			nock.disableNetConnect();
-			var c = new Renderer("toto", "machin", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setInfoType(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function (done) {
-			nock.disableNetConnect();
-			var c = new Renderer("toto", "machin", 52);
-			var s = new InfoType("toto");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.setInfoType(s, success, fail);
-		});
-
-		it('should not allow to set a infoType if there is already one', function (done) {
-			var c = new Renderer("toto", "machin", 52);
-			var s = new InfoType("toto", 42);
-			var s2 = new InfoType("tutu", 89);
-
-
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s2.toJSONObject()
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Renderer.getTableName(), c.getId().toString(), InfoType.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var infoType = c.infoType();
-
-                assert.ok(!!infoType, "The infoType has false value.");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the infoType");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.setInfoType(s, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadInfoType(success, fail);
-		});
-
 	});
 
-	describe('#unsetInfoType', function () {
-		it('should unset the InfoType', function (done) {
+	describe('#unlinkInfoType', function () {
+		it('should call the right request', function (done) {
 			var c = new Renderer("toto", "machin", 52);
 			var s = new InfoType("toto", 42);
 
@@ -466,13 +351,8 @@ describe('Renderer', function() {
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unsetInfoType is false.");
+                    //assert.ok(retour, "The return of the unlinkInfoType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
-
-                    infoType = c.infoType();
-                    assert.deepEqual(infoType, null, "The infoType() does not return a null value after unsetting");
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -480,7 +360,7 @@ describe('Renderer', function() {
                     done(err);
                 };
 
-                c.unsetInfoType(success2, fail2);
+                c.unlinkInfoType(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -488,49 +368,6 @@ describe('Renderer', function() {
             };
 
             c.loadInfoType(success, fail);
-		});
-
-		it('should not allow to unset a profil if there is none', function (done) {
-			var c = new Renderer("toto", "machin", 52);
-			var s = new InfoType("toto", 42);
-
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Renderer.getTableName(), c.getId().toString(), InfoType.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var infoType = c.infoType();
-
-                assert.equal(infoType, null, "The infoType has a value not null: " + JSON.stringify(infoType));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.unsetInfoType(success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadInfoType(success, fail);
 		});
 
 	});
