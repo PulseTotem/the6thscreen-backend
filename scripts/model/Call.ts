@@ -341,9 +341,9 @@ class Call extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
-	    var data = super.toCompleteJSONObject();
+	    var data = this.toJSONObject();
 
         var success : Function = function() {
             data["callType"] = (self.callType() !== null) ? self.callType().toJSONObject() : null;
@@ -436,7 +436,7 @@ class Call extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unlinkCallType(callTypeId : number, successCallback : Function, failCallback : Function) : boolean {
+	unlinkCallType(callTypeId : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Call, CallType, callTypeId, successCallback, failCallback);
 	}
 

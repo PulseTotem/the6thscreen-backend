@@ -222,7 +222,7 @@ describe('User', function() {
 	});
 
 	describe('#addRole', function() {
-		it('should put the new Role inside the array', function(done) {
+		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", 52);
 			var pv = new Role("mavaleur",12);
 			var spy = sinon.spy(pv, "desynchronize");
@@ -255,12 +255,6 @@ describe('User', function() {
                 var success2 = function() {
                     //assert.ok(retour, "The return of the addRole is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the role in database.");
-
-                    roles = c.roles();
-                    var expected = [pv];
-                    assert.deepEqual(roles, expected, "The roles is not an array containing only the added role: "+JSON.stringify(roles));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not usered once.");
-
                     done();
                 };
 
@@ -268,7 +262,7 @@ describe('User', function() {
                     done(err);
                 };
 
-                c.addRole(pv, success2, fail2);
+                c.addRole(pv.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -277,126 +271,10 @@ describe('User', function() {
 
 			c.loadRoles(success, fail);
 		});
-
-		it('should not allow to add a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.addRole(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.addRole(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-			var p = new Role("bidule");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.addRole(p, success, fail);
-		});
-
-		it('should not allow to put an already existing object', function(done) {
-			var c = new User("toto", "bla", 52);
-			var pv = new Role("toto",13);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
-					{
-						"id":13,
-						"name": "toto",
-						"complete": false
-					},
-					{
-						"id": 14,
-						"name": "titi",
-						"complete": false
-					}
-				]
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), Role.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the roles");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.addRole(pv, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadRoles(success, fail);
-		});
-
 	});
 
 	describe('#removeRole', function() {
-		it('should remove the Role from the array', function(done) {
+		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", 52);
 			var pv = new Role("mavaleur",12);
 
@@ -434,19 +312,14 @@ describe('User', function() {
                 var success2 = function() {
                     //assert.ok(retour, "The return of the removeRole is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the role in database.");
-
-                    roles = c.roles();
-                    assert.deepEqual(roles, [], "The roles is not an empty array: "+JSON.stringify(roles));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not usered once.");
-
-                    done();
+					done();
                 };
 
                 var fail2 = function(err) {
                     done(err);
                 };
 
-                c.removeRole(pv, success2, fail2);
+                c.removeRole(pv.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -455,115 +328,10 @@ describe('User', function() {
 
 			c.loadRoles(success, fail);
 		});
-
-		it('should not allow to remove a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-
-			var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.removeRole(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-
-			var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.removeRole(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-			var p = new Role("bidule");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.removeRole(p, success, fail);
-		});
-
-		it('should not allow to remove an object which is not linked', function(done) {
-			var c = new User("toto", "bla", 52);
-			var pv = new Role("toto",12);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), Role.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the roles");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.removeRole(pv, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadRoles(success, fail);
-		});
-
 	});
 
 	describe('#addSDI', function() {
-		it('should put the new SDI inside the array', function(done) {
+		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", 52);
 			var pv = new SDI("mavaleur", "bidule", "host", 12);
 			var spy = sinon.spy(pv, "desynchronize");
@@ -595,12 +363,6 @@ describe('User', function() {
                 var success2 = function() {
                     //assert.ok(retour, "The return of the addSDI is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the role in database.");
-
-                    sdis = c.sdis();
-                    var expected = [pv];
-                    assert.deepEqual(sdis, expected, "The sdis is not an array containing only the added role: "+JSON.stringify(sdis));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not usered once.");
-
                     done();
                 };
 
@@ -608,126 +370,7 @@ describe('User', function() {
                     done(err);
                 };
 
-                c.addSDI(pv, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadSdis(success, fail);
-		});
-
-		it('should not allow to add a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-
-			var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.addSDI(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-
-			var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.addSDI(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-			var p = new SDI("bidule", "machin", "otot");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.addSDI(p, success, fail);
-		});
-
-		it('should not allow to put an already existing object', function(done) {
-			var c = new User("toto", "bla", 52);
-			var pv = new SDI("toto", "machin", "host", 13);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
-					{
-						"id":13,
-						"name": "toto",
-						"description": "machin",
-						"allowedHost": "host",
-						"complete": false
-					},
-					{
-						"id": 14,
-						"name": "titi",
-						"description": "blop",
-						"allowedHost": "tata",
-						"complete": false
-					}
-				]
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), SDI.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the sdis");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.addSDI(pv, success2, fail2);
+                c.addSDI(pv.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -740,7 +383,7 @@ describe('User', function() {
 	});
 
 	describe('#removeSDI', function() {
-		it('should remove the SDI from the array', function(done) {
+		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", 52);
 			var pv = new SDI("mavaleur", "blup", "truc", 12);
 
@@ -780,11 +423,6 @@ describe('User', function() {
                 var success2 = function() {
                     //assert.ok(retour, "The return of the removeSDI is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the role in database.");
-
-                    sdis = c.sdis();
-                    assert.deepEqual(sdis, [], "The sdis is not an empty array: "+JSON.stringify(sdis));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not usered once.");
-
                     done();
                 };
 
@@ -792,7 +430,7 @@ describe('User', function() {
                     done(err);
                 };
 
-                c.removeSDI(pv, success2, fail2);
+                c.removeSDI(pv.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -801,110 +439,5 @@ describe('User', function() {
 
 			c.loadSdis(success, fail);
 		});
-
-		it('should not allow to remove a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-
-			var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.removeSDI(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-
-			var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.removeSDI(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new User("toto", "bla", 52);
-			var p = new SDI("bidule","truc","tata");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.removeSDI(p, success, fail);
-		});
-
-		it('should not allow to remove an object which is not linked', function(done) {
-			var c = new User("toto", "bla", 52);
-			var pv = new SDI("toto", "bidule", "blabla",12);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), SDI.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the sdis");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.removeSDI(pv, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadSdis(success, fail);
-		});
-
 	});
 });

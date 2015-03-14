@@ -642,8 +642,6 @@ class ModelItf {
 				if (informations.method.indexOf('set') === 0) {
 					self[informations.method](informations.value);
 					self.checkCompleteness(doUpdate, failCallback);
-				} else if (informations.method.indexOf('unlink') === 0) {
-					self[informations.method](successCheck, failCallback);
 				} else {
 					self[informations.method](informations.value, successCheck, failCallback);
 				}

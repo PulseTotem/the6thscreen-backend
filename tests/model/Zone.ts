@@ -325,7 +325,7 @@ describe('Zone', function() {
 	});
 
 	describe('#linkBehaviour', function () {
-		it('should set the given behaviour', function (done) {
+		it('should call the right request', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto", "machin", 42);
 			var spy = sinon.spy(s, "desynchronize");
@@ -357,12 +357,6 @@ describe('Zone', function() {
                 var success2 = function() {
                     //assert.ok(retour, "The return of the linkBehaviour is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the behaviour in database.");
-
-                    // normalement le lazy_loading est true : plus besoin de mock pour la requête
-                    behaviour = c.behaviour();
-                    assert.deepEqual(behaviour, s, "The behaviour() does not return the exact behaviour we give: " + JSON.stringify(behaviour));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -370,7 +364,7 @@ describe('Zone', function() {
                     done(err);
                 };
 
-                c.linkBehaviour(s, success2, fail2);
+                c.linkBehaviour(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -379,120 +373,10 @@ describe('Zone', function() {
 
 			c.loadBehaviour(success, fail);
 		});
-
-		it('should not allow to add a null object', function (done) {
-			nock.disableNetConnect();
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.linkBehaviour(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function (done) {
-			nock.disableNetConnect();
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.linkBehaviour(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function (done) {
-			nock.disableNetConnect();
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-			var s = new Behaviour("toto","machin");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.linkBehaviour(s, success, fail);
-		});
-
-		it('should not allow to set a behaviour if there is already one', function (done) {
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-			var s = new Behaviour("toto","machin", 42);
-			var s2 = new Behaviour("tutu","blabla", 89);
-
-
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s2.toJSONObject()
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var behaviour = c.behaviour();
-
-                assert.ok(!!behaviour, "The behaviour has false value.");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the behaviour");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.linkBehaviour(s, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadBehaviour(success, fail);
-		});
-
 	});
 
 	describe('#unlinkBehaviour', function () {
-		it('should unset the Behaviour', function (done) {
+		it('should call the right request', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto", "machin", 42);
 
@@ -524,11 +408,6 @@ describe('Zone', function() {
                 var success2 = function() {
                     //assert.ok(retour, "The return of the unlinkBehaviour is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
-
-                    behaviour = c.behaviour();
-                    assert.deepEqual(behaviour, null, "The behaviour() does not return a null value after unsetting");
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -536,7 +415,7 @@ describe('Zone', function() {
                     done(err);
                 };
 
-                c.unlinkBehaviour(success2, fail2);
+                c.unlinkBehaviour(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -545,54 +424,10 @@ describe('Zone', function() {
 
 			c.loadBehaviour(success, fail);
 		});
-
-		it('should not allow to unset a profil if there is none', function (done) {
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-			var s = new Behaviour("toto", "blabla", 42);
-
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var behaviour = c.behaviour();
-
-                assert.equal(behaviour, null, "The behaviour has a value not null: " + JSON.stringify(behaviour));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.unlinkBehaviour(success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadBehaviour(success, fail);
-		});
-
 	});
 
 	describe('#addCallType', function() {
-		it('should put the new CallType inside the array', function(done) {
+		it('should call the right request', function(done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var ct = new CallType("mavaleur", "madescription", 12);
 			var spy = sinon.spy(ct, "desynchronize");
@@ -625,12 +460,6 @@ describe('Zone', function() {
 				var success2 = function() {
 					//assert.ok(retour, "The return of the addRole is false.");
 					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the CallType in database.");
-
-					callTypes = c.callTypes();
-					var expected = [ct];
-					assert.deepEqual(callTypes, expected, "The callTypes is not an array containing only the added role: "+JSON.stringify(callTypes));
-					assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
 					done();
 				};
 
@@ -638,124 +467,7 @@ describe('Zone', function() {
 					done(err);
 				};
 
-				c.addCallType(ct, success2, fail2);
-			};
-
-			var fail = function(err) {
-				done(err);
-			};
-
-			c.loadCallTypes(success, fail);
-		});
-
-		it('should not allow to add a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-
-			var success = function() {
-				done(new Error("Test failed."));
-			};
-
-			var fail = function(err) {
-				assert.throws(function() {
-						if(err) {
-							throw err;
-						}
-					},
-					ModelException, "The ModelException has not been thrown.");
-				done();
-			};
-
-			c.addCallType(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-
-			var success = function() {
-				done(new Error("Test failed."));
-			};
-
-			var fail = function(err) {
-				assert.throws(function() {
-						if(err) {
-							throw err;
-						}
-					},
-					ModelException, "The ModelException has not been thrown.");
-				done();
-			};
-
-			c.addCallType(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-			var ct = new CallType("mavaleur", "madescription");
-
-			var success = function() {
-				done(new Error("Test failed."));
-			};
-
-			var fail = function(err) {
-				assert.throws(function() {
-						if(err) {
-							throw err;
-						}
-					},
-					ModelException, "The ModelException has not been thrown.");
-				done();
-			};
-
-			c.addCallType(ct, success, fail);
-		});
-
-		it('should not allow to put an already existing object', function(done) {
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-			var ct = new CallType("mavaleur", "madescription", 12);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
-					{
-						"id":12,
-						"name": "mavaleur",
-						"description": "madescription",
-						"complete": false
-					},
-					{
-						"id": 14,
-						"name": "titi",
-						"description": "bidule",
-						"complete": false
-					}
-				]
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), CallType.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-			var success = function() {
-				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the callTypes");
-
-				var success2 = function() {
-					done(new Error("Test failed."));
-				};
-
-				var fail2 = function(err) {
-					assert.throws(function() {
-							if(err) {
-								throw err;
-							}
-						},
-						ModelException, "The ModelException has not been thrown.");
-					done();
-				};
-
-				c.addCallType(ct, success2, fail2);
+				c.addCallType(ct.getId(), success2, fail2);
 			};
 
 			var fail = function(err) {
@@ -768,7 +480,7 @@ describe('Zone', function() {
 	});
 
 	describe('#removeCallType', function() {
-		it('should remove the CallType from the array', function(done) {
+		it('should call the right request', function(done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var ct = new CallType("mavaleur", "madescription", 12);
 
@@ -807,11 +519,6 @@ describe('Zone', function() {
 				var success2 = function() {
 					//assert.ok(retour, "The return of the removeRole is false.");
 					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the CallType in database.");
-
-					callTypes = c.callTypes();
-					assert.deepEqual(callTypes, [], "The callTypes is not an empty array: "+JSON.stringify(callTypes));
-					assert.ok(spy.calledOnce, "The desynchronize method was not used once.");
-
 					done();
 				};
 
@@ -819,111 +526,7 @@ describe('Zone', function() {
 					done(err);
 				};
 
-				c.removeCallType(ct, success2, fail2);
-			};
-
-			var fail = function(err) {
-				done(err);
-			};
-
-			c.loadCallTypes(success, fail);
-		});
-
-		it('should not allow to remove a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-
-			var success = function() {
-				done(new Error("Test failed."));
-			};
-
-			var fail = function(err) {
-				assert.throws(function() {
-						if(err) {
-							throw err;
-						}
-					},
-					ModelException, "The ModelException has not been thrown.");
-				done();
-			};
-
-			c.removeCallType(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-
-			var success = function() {
-				done(new Error("Test failed."));
-			};
-
-			var fail = function(err) {
-				assert.throws(function() {
-						if(err) {
-							throw err;
-						}
-					},
-					ModelException, "The ModelException has not been thrown.");
-				done();
-			};
-
-			c.removeCallType(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-			var ct = new CallType("mavaleur", "madescription");
-
-			var success = function() {
-				done(new Error("Test failed."));
-			};
-
-			var fail = function(err) {
-				assert.throws(function() {
-						if(err) {
-							throw err;
-						}
-					},
-					ModelException, "The ModelException has not been thrown.");
-				done();
-			};
-
-			c.removeCallType(ct, success, fail);
-		});
-
-		it('should not allow to remove an object which is not linked', function(done) {
-			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-			var ct = new CallType("mavaleur", "madescription", 12);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), CallType.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-			var success = function() {
-				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the callTypes");
-
-				var success2 = function() {
-					done(new Error("Test failed."));
-				};
-
-				var fail2 = function(err) {
-					assert.throws(function() {
-							if(err) {
-								throw err;
-							}
-						},
-						ModelException, "The ModelException has not been thrown.");
-					done();
-				};
-
-				c.removeCallType(ct, success2, fail2);
+				c.removeCallType(ct.getId(), success2, fail2);
 			};
 
 			var fail = function(err) {

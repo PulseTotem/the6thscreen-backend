@@ -259,7 +259,7 @@ describe('ParamValue', function() {
 	});
 
 	describe('#linkParamType', function() {
-		it('should set the given ParamType', function(done) {
+		it('should call the right request', function(done) {
 			var c = new ParamValue("toto", 52);
 			var p = new ParamType("toto", "machin", 42);
 			var spy = sinon.spy(p, "desynchronize");
@@ -292,11 +292,6 @@ describe('ParamValue', function() {
                 var success2 = function() {
                     //assert.ok(retour, "The return of the linkParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
-
-                    paramType = c.paramType();
-                    assert.deepEqual(paramType, p, "The paramType() does not return the exact paramType we give: "+JSON.stringify(paramType));
-                    assert.ok(spy.calledOnce, "The desynchronize method was not called once.");
-
                     done();
                 };
 
@@ -304,7 +299,7 @@ describe('ParamValue', function() {
                     done(err);
                 };
 
-                c.linkParamType(p, success2, fail2);
+                c.linkParamType(p.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -313,123 +308,10 @@ describe('ParamValue', function() {
 
 			c.loadParamType(success, fail);
 		});
-
-		it('should not allow to add a null object', function(done) {
-			nock.disableNetConnect();
-			var c = new ParamValue("toto", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.linkParamType(null, success, fail);
-		});
-
-		it('should not allow to add an undefined object', function(done) {
-			nock.disableNetConnect();
-			var c = new ParamValue("toto", 52);
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.linkParamType(undefined, success, fail);
-		});
-
-		it('should not allow to add a object which is not yet created', function(done) {
-			nock.disableNetConnect();
-			var c = new ParamValue("toto", 52);
-			var p = new ParamType("bidule","machin");
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ModelException, "The ModelException has not been thrown.");
-                done();
-            };
-
-            c.linkParamType(p, success, fail);
-		});
-
-		it('should not allow to set a paramType if there is already one', function(done) {
-			var c = new ParamValue("toto", 52);
-			var p = new ParamType("toto","machin", 13);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
-					"id": 1,
-					"name": "toto",
-					"description": "truc",
-					"complete": false
-				}
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var paramType = c.paramType();
-
-                assert.ok(!!paramType, "The paramType has false value.");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramType");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.linkParamType(p, success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadParamType(success, fail);
-		});
-
 	});
 
 	describe('#unlinkParamType', function() {
-		it('should unset the ParamType', function(done) {
+		it('should call the right request', function(done) {
 			var c = new ParamValue("toto", 52);
 			var p = new ParamType("toto", "machin", 42);
 
@@ -462,11 +344,6 @@ describe('ParamValue', function() {
                 var success2 = function() {
                     //assert.ok(retour, "The return of the unlinkParamType is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
-
-                    paramType = c.paramType();
-                    assert.deepEqual(paramType, null, "The paramType() does not return a null value after unsetting");
-                    assert.ok(spy.calledOnce, "The desynchronize method was not paramValueed once.");
-
                     done();
                 };
 
@@ -474,7 +351,7 @@ describe('ParamValue', function() {
                     done(err);
                 };
 
-                c.unlinkParamType(success2, fail2);
+                c.unlinkParamType(p.getId(), success2, fail2);
             };
 
             var fail = function(err) {
@@ -483,49 +360,5 @@ describe('ParamValue', function() {
 
 			c.loadParamType(success, fail);
 		});
-
-		it('should not allow to unset a paramType if there is none', function(done) {
-			var c = new ParamValue("toto", 52);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var paramType = c.paramType();
-
-                assert.equal(paramType, null, "The paramType has a value not null: "+JSON.stringify(paramType));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramType");
-
-                var success2 = function() {
-                    done(new Error("Test failed."));
-                };
-
-                var fail2 = function(err) {
-                    assert.throws(function() {
-                            if(err) {
-                                throw err;
-                            }
-                        },
-                        ModelException, "The ModelException has not been thrown.");
-                    done();
-                };
-
-                c.unlinkParamType(success2, fail2);
-
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadParamType(success, fail);
-		});
-
 	});
 });
