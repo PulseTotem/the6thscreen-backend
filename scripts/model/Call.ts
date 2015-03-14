@@ -369,31 +369,8 @@ class Call extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	addParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
-		if (!p) {
-            failCallback(new ModelException("The ParamValue must be an existing object to be associated."));
-            return;
-		}
-
-		if (ModelItf.isObjectInsideArray(this.paramValues(), p)) {
-            failCallback(new ModelException("You cannot add twice a parameter in a call."));  // TODO: cannot it be useful sometimes?
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            p.desynchronize();
-            self.paramValues().push(p);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(Call, ParamValue, p.getId(), success, fail);
+	addParamValue(paramValueId : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(Call, ParamValue, paramValueId, successCallback, failCallback);
 	}
 
 	/**
@@ -405,30 +382,8 @@ class Call extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
-		if (!p || !p.getId()) {
-            failCallback(new ModelException("The ParamValue must be an existing object to be removed."));
-            return;
-		}
-		if (!ModelItf.isObjectInsideArray(this.paramValues(), p)) {
-            failCallback(new ModelException("The ParamValue you try to remove has not been added to the current Call"));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            p.desynchronize();
-            ModelItf.removeObjectFromArray(self.paramValues(), p);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(Call, ParamValue, p.getId(), success, fail);
+	removeParamValue(paramValueId : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(Call, ParamValue, paramValueId, successCallback, failCallback);
 	}
 
 	/**
@@ -441,32 +396,8 @@ class Call extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	linkProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
-		if (!p) {
-            failCallback(new ModelException("The Profil must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.profil() !== null) {
-            failCallback(new ModelException("The profil is already set for the call: "+JSON.stringify(this.profil())+"."));
-            return;
-		}
-
-        var self = this;
-
-        var success = function() {
-            p.desynchronize();
-            self._profil = p;
-            self._profil_loaded = true;
-
-            successCallback();
-        };
-
-        var fail = function(err) {
-            failCallback(err);
-        };
-
-        this.associateObject(Call, Profil, p.getId(), success, fail);
+	linkProfil(profilID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Call, Profil, profilID, successCallback, failCallback);
 	}
 
 	/**
@@ -478,26 +409,8 @@ class Call extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unlinkProfil(successCallback : Function = null, failCallback : Function = null) {
-		if (this.profil() === null) {
-            failCallback(new ModelException("No profil has been set for this call."));
-            return;
-		}
-
-        var self = this;
-
-        var success = function() {
-            self.profil().desynchronize();
-            self._profil = null;
-
-            successCallback();
-        };
-
-        var fail = function(err) {
-            failCallback(err);
-        };
-
-        this.deleteObjectAssociation(Call, Profil, this.profil().getId(), success, fail);
+	unlinkProfil(profilID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Call, Profil, profilID, successCallback, failCallback);
 	}
 
 	/**
@@ -510,32 +423,8 @@ class Call extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	linkCallType(ct : CallType, successCallback : Function = null, failCallback : Function = null) {
-		if (!ct) {
-            failCallback(new ModelException("The CallType must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.callType() !== null) {
-            failCallback(new ModelException("The CallType is already set for the call : "+JSON.stringify(this.callType())+"."));
-            return;
-		}
-
-        var self = this;
-
-        var success = function() {
-            ct.desynchronize();
-            self._call_type = ct;
-            self._call_type_loaded = true;
-
-            successCallback();
-        };
-
-        var fail = function(err) {
-            failCallback(err);
-        };
-
-        this.associateObject(Call, CallType, ct.getId(), success, fail);
+	linkCallType(callTypeId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Call, CallType, callTypeId, successCallback, failCallback);
 	}
 
 	/**
@@ -547,26 +436,8 @@ class Call extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unlinkCallType(successCallback : Function = null, failCallback : Function = null) : boolean {
-		if (this.callType() === null) {
-            failCallback(new ModelException("No CallType has been set for this call."));
-            return;
-		}
-
-        var self = this;
-
-        var success = function() {
-            self.callType().desynchronize();
-            self._call_type = null;
-
-            successCallback();
-        };
-
-        var fail = function(err) {
-            failCallback(err);
-        };
-
-        this.deleteObjectAssociation(Call, CallType, this.callType().getId(), success, fail);
+	unlinkCallType(callTypeId : number, successCallback : Function, failCallback : Function) : boolean {
+		this.deleteObjectAssociation(Call, CallType, callTypeId, successCallback, failCallback);
 	}
 
     /**
@@ -577,7 +448,7 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(Call, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -591,7 +462,7 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(Call, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -603,7 +474,7 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(Call, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -615,7 +486,7 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(Call, successCallback, failCallback, attemptNumber);
     }
 
@@ -627,7 +498,7 @@ class Call extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(Call, successCallback, failCallback, attemptNumber);
     }
 

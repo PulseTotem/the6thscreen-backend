@@ -207,7 +207,7 @@ class Source extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
 	 * @param {Function} failCallback - The callback function when fail.
 	 */
-	loadService(successCallback : Function = null, failCallback : Function = null) {
+	loadService(successCallback : Function, failCallback : Function) {
 		if(! this._service_loaded) {
 			var self = this;
 			var success : Function = function(service) {
@@ -250,7 +250,7 @@ class Source extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadInfoType(successCallback : Function = null, failCallback : Function = null) {
+    loadInfoType(successCallback : Function, failCallback : Function) {
         if(! this._info_type_loaded) {
             var self = this;
             var success : Function = function(infoType) {
@@ -293,7 +293,7 @@ class Source extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadParamTypes(successCallback : Function = null, failCallback : Function = null) {
+    loadParamTypes(successCallback : Function, failCallback : Function) {
         if(! this._param_types_loaded) {
             var self = this;
             var success : Function = function(paramTypes) {
@@ -334,7 +334,7 @@ class Source extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadParamValues(successCallback : Function = null, failCallback : Function = null) {
+    loadParamValues(successCallback : Function, failCallback : Function) {
         if(! this._param_values_loaded) {
             var self = this;
             var success : Function = function(paramValues) {
@@ -369,7 +369,7 @@ class Source extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+    loadAssociations(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function(models) {
@@ -467,7 +467,7 @@ class Source extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {
@@ -506,23 +506,8 @@ class Source extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
 	 * @param {Function} failCallback - The callback function when fail.
 	 */
-	unlinkService(successCallback : Function, failCallback : Function) {
-		var self = this;
-
-		var success : Function = function() {
-			if (!!self._service) {
-				self._service.desynchronize();
-			}
-			self._service = null;
-
-			successCallback();
-		};
-
-		var fail : Function = function(error) {
-			failCallback(error);
-		};
-
-		this.deleteUniqueObjectAssociation(Source, Service, success, fail);
+	unlinkService(serviceID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Source, Service, serviceID, successCallback, failCallback);
 	}
 
 	/**
@@ -535,32 +520,8 @@ class Source extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	linkInfoType(it : InfoType, successCallback : Function = null, failCallback : Function = null) {
-		if (!it || !it.getId()) {
-			failCallback(new ModelException("The InfoType must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.infoType() !== null) {
-			failCallback(new ModelException("The InfoType is already set for this Source."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            it.desynchronize();
-            self._info_type = it;
-            self._info_type_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(Source, InfoType, it.getId(), success, fail);
+	linkInfoType(typeID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Source, InfoType, typeID, successCallback, failCallback);
 	}
 
 	/**
@@ -572,26 +533,8 @@ class Source extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unlinkInfoType(successCallback : Function = null, failCallback : Function = null) {
-		if (this.infoType() === null) {
-			failCallback(new ModelException("No InfoType has been set for this Source."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.infoType().desynchronize();
-            self._info_type = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(Source, InfoType, this.infoType().getId(), success, fail);
+	unlinkInfoType(typeID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Source, InfoType, typeID, successCallback, failCallback);
 	}
 
 	/**
@@ -616,31 +559,8 @@ class Source extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeParamType(pt : ParamType, successCallback : Function = null, failCallback : Function = null) {
-		if (!pt  || !pt.getId()) {
-			failCallback(new ModelException("The ParamType must be an existing object to be removed."));
-            return;
-		}
-
-		if (!ModelItf.isObjectInsideArray(this.paramTypes(), pt)) {
-			failCallback(new ModelException("The ParamType you try to remove is not yet associated."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            pt.desynchronize();
-            ModelItf.removeObjectFromArray(self.paramTypes(), pt);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(Source, ParamType, pt.getId(), success, fail);
+	removeParamType(paramID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Source, ParamType, paramID, successCallback, failCallback);
 	}
 
     /**
@@ -652,31 +572,8 @@ class Source extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    addParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
-        if (!p || !p.getId()) {
-            failCallback(new ModelException("The ParamValue must be an existing object to be associated."));
-            return;
-        }
-
-        if (ModelItf.isObjectInsideArray(this.paramValues(), p)) {
-            failCallback(new ModelException("You cannot add twice a parameter in a source."));
-            return;
-        }
-
-        var self = this;
-
-        var success : Function = function() {
-            p.desynchronize();
-            self.paramValues().push(p);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(Source, ParamValue, p.getId(), success, fail);
+    addParamValue(valueID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(Source, ParamValue, valueID, successCallback, failCallback);
     }
 
     /**
@@ -688,30 +585,8 @@ class Source extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    removeParamValue(p : ParamValue, successCallback : Function = null, failCallback : Function = null) {
-        if (!p || !p.getId()) {
-            failCallback(new ModelException("The ParamValue must be an existing object to be removed."));
-            return;
-        }
-        if (!ModelItf.isObjectInsideArray(this.paramValues(), p)) {
-            failCallback(new ModelException("The ParamValue you try to remove has not been added to the current Source"));
-            return;
-        }
-
-        var self = this;
-
-        var success : Function = function() {
-            p.desynchronize();
-            ModelItf.removeObjectFromArray(self.paramValues(), p);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(Source, ParamValue, p.getId(), success, fail);
+    removeParamValue(valueID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(Source, ParamValue, valueID, successCallback, failCallback);
     }
 
     /**
@@ -722,7 +597,7 @@ class Source extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(Source, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -736,7 +611,7 @@ class Source extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(Source, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -748,7 +623,7 @@ class Source extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(Source, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -760,7 +635,7 @@ class Source extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(Source, successCallback, failCallback, attemptNumber);
     }
 
@@ -772,7 +647,7 @@ class Source extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(Source, successCallback, failCallback, attemptNumber);
     }
 

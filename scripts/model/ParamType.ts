@@ -160,7 +160,7 @@ class ParamType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadType(successCallback : Function = null, failCallback : Function = null) {
+    loadType(successCallback : Function, failCallback : Function) {
         if(! this._type_loaded) {
             var self = this;
             var success : Function = function(type) {
@@ -203,7 +203,7 @@ class ParamType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadConstraint(successCallback : Function = null, failCallback : Function = null) {
+    loadConstraint(successCallback : Function, failCallback : Function) {
         if(! this._constraint_loaded) {
             var self = this;
             var success : Function = function(constraint) {
@@ -246,7 +246,7 @@ class ParamType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadDefaultValue(successCallback : Function = null, failCallback : Function = null) {
+    loadDefaultValue(successCallback : Function, failCallback : Function) {
         if(! this._default_value_loaded) {
             var self = this;
             var success : Function = function(defaultValue) {
@@ -283,7 +283,7 @@ class ParamType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+    loadAssociations(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function(models) {
@@ -377,7 +377,7 @@ class ParamType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {
@@ -406,32 +406,8 @@ class ParamType extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-    linkType(t : TypeParamType, successCallback : Function = null, failCallback : Function = null) {
-        if (!t || !t.getId()) {
-            failCallback(new ModelException("The type must be an existing object to be associated."));
-            return;
-        }
-
-        if (this.type() !== null) {
-            failCallback(new ModelException("The type is already set for this ParamType."));
-            return;
-        }
-
-        var self = this;
-
-        var success : Function = function() {
-            t.desynchronize();
-            self._type = t;
-            self._type_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(ParamType, TypeParamType, t.getId(), success, fail);
+    linkType(typeID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(ParamType, TypeParamType, typeID, successCallback, failCallback);
     }
 
 	/**
@@ -443,26 +419,8 @@ class ParamType extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    unlinkType(successCallback : Function = null, failCallback : Function = null) {
-        if (this.type() === null) {
-            failCallback(new ModelException("No type has been set for this ParamType."));
-            return;
-        }
-
-        var self = this;
-
-        var success : Function = function() {
-            self.type().desynchronize();
-            self._type = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(ParamType, TypeParamType, this.type().getId(), success, fail);
+    unlinkType(typeID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(ParamType, TypeParamType, typeID, successCallback, failCallback);
     }
 
 	/**
@@ -475,32 +433,8 @@ class ParamType extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	linkConstraint(c : ConstraintParamType, successCallback : Function = null, failCallback : Function = null) {
-		if (!c || !c.getId()) {
-            failCallback(new ModelException("The constraint must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.constraint() !== null) {
-            failCallback(new ModelException("The constraint is already set for this CallType."))
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            c.desynchronize();
-            self._constraint = c;
-            self._constraint_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(ParamType, ConstraintParamType, c.getId(), success, fail);
+	linkConstraint(constraintID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(ParamType, ConstraintParamType, constraintID, successCallback, failCallback);
 	}
 
 	/**
@@ -512,26 +446,8 @@ class ParamType extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unlinkConstraint(successCallback : Function = null, failCallback : Function = null) {
-		if (this.constraint() === null) {
-            failCallback(new ModelException("No constraint has been set for this ParamType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.constraint().desynchronize();
-            self._constraint = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(ParamType, ConstraintParamType, this.constraint().getId(), success, fail);
+	unlinkConstraint(constraintID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ParamType, ConstraintParamType, constraintID, successCallback, failCallback);
 	}
 
 	/**
@@ -544,32 +460,8 @@ class ParamType extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	linkDefaultValue(d : ParamValue, successCallback : Function = null, failCallback : Function = null) {
-		if (!d || !d.getId()) {
-            failCallback(new ModelException("The defaultValue must be an existing object to be associated."));
-            return;
-		}
-
-		if (this.defaultValue() !== null) {
-            failCallback(new ModelException("The defaultValue is already set for this CallType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            d.desynchronize();
-            self._default_value = d;
-            self._default_value_loaded = true;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(ParamType, ParamValue, d.getId(), success, fail);
+	linkDefaultValue(defaultValueId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(ParamType, ParamValue, defaultValueId, successCallback, failCallback);
 	}
 
 	/**
@@ -581,26 +473,8 @@ class ParamType extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unlinkDefaultValue(successCallback : Function = null, failCallback : Function = null) {
-		if (this.defaultValue() === null) {
-            failCallback(new ModelException("No defaultValue has been set for this ParamType."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            self.defaultValue().desynchronize();
-            self._default_value = null;
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(ParamType, ParamValue, this.defaultValue().getId(), success, fail);
+	unlinkDefaultValue(defaultValueId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ParamType, ParamValue, defaultValueId, successCallback, failCallback);
 	}
 
     /**
@@ -611,7 +485,7 @@ class ParamType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(ParamType, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -625,7 +499,7 @@ class ParamType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(ParamType, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -637,7 +511,7 @@ class ParamType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(ParamType, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -649,7 +523,7 @@ class ParamType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(ParamType, successCallback, failCallback, attemptNumber);
     }
 
@@ -661,7 +535,7 @@ class ParamType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(ParamType, successCallback, failCallback, attemptNumber);
     }
 

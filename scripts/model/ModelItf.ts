@@ -84,7 +84,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    createObject(modelClass : any, data : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    createObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 
         var self = this;
 
@@ -133,7 +133,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static readObject(modelClass : any, id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static readObject(modelClass : any, id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         if (!modelClass || !id) {
             failCallback(new ModelException("To read an object the modelClass and the id must be given."), id, attemptNumber);
             return;
@@ -172,7 +172,7 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    static findBy(modelClass : any, paramName : string, paramValue : string, successCallback : Function = null, failCallback : Function = null) {
+    static findBy(modelClass : any, paramName : string, paramValue : string, successCallback : Function, failCallback : Function) {
         if (!modelClass || !paramName || !paramValue) {
             failCallback(new ModelException("To find an object the modelClass, the paramName and the paramValue must be given."));
             return;
@@ -225,7 +225,7 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    static findOneBy(modelClass : any, paramName : string, paramValue : string, successCallback : Function = null, failCallback : Function = null) {
+    static findOneBy(modelClass : any, paramName : string, paramValue : string, successCallback : Function, failCallback : Function) {
         if (!modelClass || !paramName || !paramValue) {
             failCallback(new ModelException("To find an object the modelClass, the paramName and the paramValue must be given."));
             return;
@@ -277,7 +277,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-     updateObject(modelClass : any, data : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+     updateObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         if (!modelClass || !data) {
             failCallback(new ModelException("To update an object, the modelClass and the datas must be given."), attemptNumber);
             return;
@@ -321,7 +321,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    deleteObject(modelClass : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    deleteObject(modelClass : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 	    var self = this;
 
         if (!modelClass) {
@@ -364,7 +364,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
 	 */
-	static allObjects(modelClass : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+	static allObjects(modelClass : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 		if (!modelClass) {
             failCallback(new ModelException("To retrieve all objects, the modelClass must be given."), attemptNumber);
             return;
@@ -416,7 +416,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
 	 */
-	associateObject(modelClass1 : any, modelClass2: any, id2 : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+	associateObject(modelClass1 : any, modelClass2: any, id2 : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 		if (!this.getId()) {
             failCallback(new ModelException("The object to be associated does not exist yet. The association can't be created."), attemptNumber);
             return;
@@ -456,7 +456,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
 	 */
-	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 		if (!this.getId()) {
             failCallback(new ModelException("An association can't be deleted if the object does not exist."), attemptNumber);
             return;
@@ -485,35 +485,6 @@ class ModelItf {
 		RestClient.delete(deleteAssoURL, success, fail);
 	}
 
-	deleteUniqueObjectAssociation(modelClass1 : any, modelClass2 : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-		if (!this.getId()) {
-			failCallback(new ModelException("An association can't be deleted if the object does not exist."), attemptNumber);
-			return;
-		}
-
-		if (!modelClass1 || !modelClass2) {
-			failCallback(new ModelException("The two modelClasses and the ID of the second objects must be given to delete the association."), attemptNumber);
-			return;
-		}
-
-		var success : Function = function(result) {
-			var response = result.data();
-			if(response.status == "success") {
-				successCallback();
-			} else {
-				failCallback(new ResponseException("The request failed on the server when trying to delete an association between objects with URL:"+deleteAssoURL+".\nMessage : "+JSON.stringify(response)), attemptNumber);
-			}
-		};
-
-		var fail : Function = function(result) {
-			failCallback(new RequestException("The request failed when trying to delete an association between objects with URL:"+deleteAssoURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
-		};
-
-		var deleteAssoURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName());
-
-		RestClient.delete(deleteAssoURL, success, fail);
-	}
-
     /**
      * Retrieve all associated objects
      *
@@ -524,7 +495,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    getAssociatedObjects(modelClass : any, modelClassAssociated : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    getAssociatedObjects(modelClass : any, modelClassAssociated : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         if (!this.getId()) {
             failCallback(new ModelException("You cannot retrieve associated objects if the object does not exist."), attemptNumber);
             return;
@@ -577,7 +548,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         if (!this.getId()) {
             failCallback(new ModelException("You cannot retrieve uniquely associated object if the object does not exist."), attemptNumber);
             return;
@@ -702,7 +673,7 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+    loadAssociations(successCallback : Function, failCallback : Function) {
 	    successCallback();
     }
 
@@ -721,7 +692,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - create : Method need to be implemented.");
     }
 
@@ -735,7 +706,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - read : Method need to be implemented.");
     }
 
@@ -747,7 +718,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - update : Method need to be implemented.");
     }
 
@@ -759,7 +730,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - delete : Method need to be implemented.");
     }
 
@@ -771,7 +742,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - all : Method need to be implemented.");
     }
 
@@ -800,7 +771,7 @@ class ModelItf {
 	 * @param {Function} successCallback The callback function when success
 	 * @param {Function} failCallback The callback function when fail.
 	 */
-	static completeArraySerialization(tableau : Array<ModelItf>, successCallback : Function = null, failCallback : Function = null) {
+	static completeArraySerialization(tableau : Array<ModelItf>, successCallback : Function, failCallback : Function) {
 		var data = [];
 		var numberProcessedInfo = 0;
 		var totalInfo = tableau.length;
@@ -848,7 +819,7 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {

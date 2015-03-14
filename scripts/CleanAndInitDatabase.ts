@@ -291,7 +291,7 @@ class CleanAndInitDatabase {
                     };
 
                     retrievedParamTypes.forEach(function(paramType) {
-                        source.addParamType(paramType, successParamTypeAssociation, fail);
+                        source.addParamType(paramType.getId(), successParamTypeAssociation, fail);
                     });
 
                 }

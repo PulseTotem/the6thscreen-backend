@@ -197,7 +197,7 @@ class User extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadRoles(successCallback : Function = null, failCallback : Function = null) {
+    loadRoles(successCallback : Function, failCallback : Function) {
         if(! this._roles_loaded) {
             var self = this;
             var success : Function = function(roles) {
@@ -238,7 +238,7 @@ class User extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadSdis(successCallback : Function = null, failCallback : Function = null) {
+    loadSdis(successCallback : Function, failCallback : Function) {
         if(! this._sdis_loaded) {
             var self = this;
             var success : Function = function(sdis) {
@@ -273,7 +273,7 @@ class User extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+    loadAssociations(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function(models) {
@@ -360,7 +360,7 @@ class User extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {
@@ -386,7 +386,7 @@ class User extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    setPassword(password : string, successCallback : Function = null, failCallback : Function = null) {
+    setPassword(password : string, successCallback : Function, failCallback : Function) {
         if(! (!!password)) {
             failCallback(new ModelException("The password must not be null or undefined or an empty string."));
             return;
@@ -432,7 +432,7 @@ class User extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    checkPassword(password : string, successCallback : Function = null, failCallback : Function = null) {
+    checkPassword(password : string, successCallback : Function, failCallback : Function) {
         if(! (!!password)) {
             failCallback(new ModelException("The password must not be null or undefined or an empty string."));
             return;
@@ -487,31 +487,8 @@ class User extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	addSDI(s : SDI, successCallback : Function = null, failCallback : Function = null) {
-		if (!s || !s.getId()) {
-            failCallback(new ModelException("The SDI must be an existing object to be associated."));
-            return;
-		}
-
-		if (ModelItf.isObjectInsideArray(this.sdis(),s)) {
-            failCallback(new ModelException("You cannot add twice a SDI for a User."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            s.desynchronize();
-            self.sdis().push(s);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(User, SDI, s.getId(), success, fail);
+	addSDI(sdiID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(User, SDI, sdiID, successCallback, failCallback);
 	}
 
 	/**
@@ -523,31 +500,8 @@ class User extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeSDI(s : SDI, successCallback : Function = null, failCallback : Function = null) {
-		if (!s || !s.getId()) {
-            failCallback(new ModelException("The SDI must be an existing object to be removed."));
-            return;
-		}
-
-		if (!ModelItf.isObjectInsideArray(this.sdis(),s)) {
-            failCallback(new ModelException("The SDI you try to remove is not yet associated."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            s.desynchronize();
-            ModelItf.removeObjectFromArray(self.sdis(), s);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(User, SDI, s.getId(), success, fail);
+	removeSDI(sdiID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(User, SDI, sdiID, successCallback, failCallback);
 	}
 
 	/**
@@ -559,31 +513,8 @@ class User extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	addRole(r : Role, successCallback : Function = null, failCallback : Function = null) {
-		if (!r || !r.getId()) {
-            failCallback(new ModelException("The Role must be an existing object to be associated."));
-            return;
-		}
-
-		if (ModelItf.isObjectInsideArray(this.roles(),r)) {
-            failCallback(new ModelException("You cannot add twice a Role for a User."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            r.desynchronize();
-            self.roles().push(r);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(User, Role, r.getId(), success, fail);
+	addRole(roleID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(User, Role, roleID, successCallback, failCallback);
 	}
 
 	/**
@@ -595,31 +526,8 @@ class User extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeRole(r : Role, successCallback : Function = null, failCallback : Function = null) {
-		if (!r || !r.getId()) {
-            failCallback(new ModelException("The Role must be an existing object to be removed."));
-            return;
-		}
-
-		if (!ModelItf.isObjectInsideArray(this.roles(),r)) {
-            failCallback(new ModelException("The Role you try to remove is not yet associated."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            r.desynchronize();
-            ModelItf.removeObjectFromArray(self.roles(),r);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(User, Role, r.getId(), success, fail);
+	removeRole(roleID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(User, Role, roleID, successCallback, failCallback);
 	}
 
 	/**
@@ -630,7 +538,7 @@ class User extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(User, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -644,7 +552,7 @@ class User extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(User, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -656,7 +564,7 @@ class User extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(User, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -668,7 +576,7 @@ class User extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(User, successCallback, failCallback, attemptNumber);
     }
 
@@ -680,7 +588,7 @@ class User extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(User, successCallback, failCallback, attemptNumber);
     }
 
@@ -692,7 +600,7 @@ class User extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    static findOneByUsername(username : string, successCallback : Function = null, failCallback : Function = null) {
+    static findOneByUsername(username : string, successCallback : Function, failCallback : Function) {
         return this.findOneBy(User, "username", username, successCallback, failCallback);
     }
 
@@ -704,7 +612,7 @@ class User extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    static findOneByEmail(email : string, successCallback : Function = null, failCallback : Function = null) {
+    static findOneByEmail(email : string, successCallback : Function, failCallback : Function) {
         return this.findOneBy(User, "email", email, successCallback, failCallback);
     }
 
@@ -716,7 +624,7 @@ class User extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    static findOneByToken(token : string, successCallback : Function = null, failCallback : Function = null) {
+    static findOneByToken(token : string, successCallback : Function, failCallback : Function) {
         return this.findOneBy(User, "token", token, successCallback, failCallback);
     }
 

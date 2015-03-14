@@ -117,7 +117,7 @@ class Timeline extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadProfils(successCallback : Function = null, failCallback : Function = null) {
+    loadProfils(successCallback : Function, failCallback : Function) {
         if(! this._profils_loaded) {
             var self = this;
             var success : Function = function(profils) {
@@ -152,7 +152,7 @@ class Timeline extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+    loadAssociations(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function(models) {
@@ -222,7 +222,7 @@ class Timeline extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function = null, failCallback : Function = null) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function() {
@@ -248,31 +248,8 @@ class Timeline extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	addProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
-		if (!p || !p.getId()) {
-            failCallback(new ModelException("The Profil must be an existing object to be associated."));
-            return;
-		}
-
-		if (ModelItf.isObjectInsideArray(this.profils(), p)) {
-            failCallback(new ModelException("You cannot add twice a Profil for a Timeline."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            p.desynchronize();
-            self.profils().push(p);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.associateObject(Timeline, Profil, p.getId(), success, fail);
+	addProfil(profilID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Timeline, Profil, profilID, successCallback, failCallback);
 	}
 
 	/**
@@ -284,31 +261,8 @@ class Timeline extends ModelItf {
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeProfil(p : Profil, successCallback : Function = null, failCallback : Function = null) {
-		if (!p || !p.getId()) {
-            failCallback(new ModelException("The Profil must be an existing object to be removed."));
-            return;
-		}
-
-		if (!ModelItf.isObjectInsideArray(this.profils(), p)) {
-            failCallback(new ModelException("The Profil you try to remove is not yet associated."));
-            return;
-		}
-
-        var self = this;
-
-        var success : Function = function() {
-            p.desynchronize();
-            ModelItf.removeObjectFromArray(self.profils(), p);
-
-            successCallback();
-        };
-
-        var fail : Function = function(error) {
-            failCallback(error);
-        };
-
-        this.deleteObjectAssociation(Timeline, Profil, p.getId(), success, fail);
+	removeProfil(profilID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Timeline, Profil, profilID, successCallback, failCallback);
 	}
 
 	/**
@@ -319,7 +273,7 @@ class Timeline extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    create(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         this.createObject(Timeline, this.toJSONObject(), successCallback, failCallback);
     }
 
@@ -333,7 +287,7 @@ class Timeline extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static read(id : number, successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         ModelItf.readObject(Timeline, id, successCallback, failCallback, attemptNumber);
     }
 
@@ -345,7 +299,7 @@ class Timeline extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    update(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.updateObject(Timeline, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
@@ -357,7 +311,7 @@ class Timeline extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.deleteObject(Timeline, successCallback, failCallback, attemptNumber);
     }
 
@@ -369,7 +323,7 @@ class Timeline extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static all(successCallback : Function = null, failCallback : Function = null, attemptNumber : number = 0) {
+    static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(Timeline, successCallback, failCallback, attemptNumber);
     }
 
