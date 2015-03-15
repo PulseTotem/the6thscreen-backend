@@ -130,4 +130,70 @@ class ShareNamespaceManager extends NamespaceManager {
     }
 
 ////////////////////// End: Manage sendAllObjectDescription //////////////////////
+
+////////////////////// Begin: Manage updateObjectAttribute //////////////////////
+
+	/**
+	 * Update an object attribute and send back the object to the client.
+	 *
+	 * @method updateObjectAttribute
+	 * @param {ModelItf Class} modelClass - The model.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	updateObjectAttribute(modelClass : any, informations : any, responseChannel : string) {
+		var self = this;
+
+		Logger.debug("SocketId: " + self.socket.id + " - updateObjectAttribute : updateObject of Model with TableName: " + modelClass.getTableName());
+
+		ModelItf.updateAttribute(modelClass, informations, self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel), function (error) { self.updateObjectAttributeFail(error, responseChannel); });
+	}
+
+	/**
+	 * Update an object attribute fails, send an error.
+	 *
+	 * @method updateObjectAttributeFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	updateObjectAttributeFail(error : Error, responseChannel : string) {
+		var self = this;
+
+		self.socket.emit(responseChannel, self.formatResponse(false, error));
+		Logger.debug("SocketId: " + self.socket.id + " - updateObjectAttributeFail : send done with fail status - Fail during read all.");
+	}
+
+////////////////////// End: Manage updateObjectAttribute //////////////////////
+
+////////////////////// Begin: Manage createObject //////////////////////
+
+	/**
+	 * Update an object attribute and send back the object to the client.
+	 *
+	 * @method updateObjectAttribute
+	 * @param {ModelItf Class} modelClass - The model.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	createObject(modelClass : any, informations : any, responseChannel : string) {
+		var self = this;
+
+		Logger.debug("SocketId: " + self.socket.id + " - createObject : createObject of Model with TableName: " + modelClass.getTableName());
+
+		ModelItf.createObject(modelClass, informations, self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel), function (error) { self.createObjectFail(error, responseChannel); });
+	}
+
+	/**
+	 * Create an object fails, send an error.
+	 *
+	 * @method createObjectFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	createObjectFail(error : Error, responseChannel : string) {
+		var self = this;
+
+		self.socket.emit(responseChannel, self.formatResponse(false, error));
+		Logger.debug("SocketId: " + self.socket.id + " - createObject : send done with fail status.");
+	}
+
+////////////////////// End: Manage updateObjectAttribute //////////////////////
 }

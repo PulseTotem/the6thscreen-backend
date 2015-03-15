@@ -84,20 +84,14 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    createObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+    static createObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 
-        var self = this;
+        //var self = this;
 
 	    if (!modelClass || !data) {
             failCallback(new ModelException("To create an object the modelClass and the data of the object must be given."), attemptNumber);
             return;
 	    }
-
-	    // if the object already exists we throw an error
-        if (!!this.getId()) {
-            failCallback(new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data)), attemptNumber);
-            return;
-        }
 
         var success : Function = function(result) {
             var response = result.data();
@@ -105,7 +99,7 @@ class ModelItf {
                 if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
                     failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when creating an object with URL: "+urlCreateObject+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
                 } else {
-                    self._id = response.data.id;
+                    //self._id = response.data.id;
                     successCallback();
                 }
             } else {
