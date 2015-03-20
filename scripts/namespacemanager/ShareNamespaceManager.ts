@@ -145,7 +145,11 @@ class ShareNamespaceManager extends NamespaceManager {
 
 		Logger.debug("SocketId: " + self.socket.id + " - updateObjectAttribute : updateObject of Model with TableName: " + modelClass.getTableName());
 
-		ModelItf.updateAttribute(modelClass, informations, self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel), function (error) { self.updateObjectAttributeFail(error, responseChannel); });
+		var success = function () {
+			self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel);
+		};
+
+		ModelItf.updateAttribute(modelClass, informations, success, function (error) { self.updateObjectAttributeFail(error, responseChannel); });
 	}
 
 	/**
@@ -178,7 +182,11 @@ class ShareNamespaceManager extends NamespaceManager {
 
 		Logger.debug("SocketId: " + self.socket.id + " - createObject : createObject of Model with TableName: " + modelClass.getTableName());
 
-		ModelItf.createObject(modelClass, informations, self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel), function (error) { self.createObjectFail(error, responseChannel); });
+		var success = function () {
+			self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel);
+		};
+
+		ModelItf.createObject(modelClass, informations, success, function (error) { self.createObjectFail(error, responseChannel); });
 	}
 
 	/**

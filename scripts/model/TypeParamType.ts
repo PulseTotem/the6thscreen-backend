@@ -95,7 +95,7 @@ class TypeParamType extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        this.createObject(TypeParamType, this.toJSONObject(), successCallback, failCallback);
+        ModelItf.createObject(TypeParamType, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
