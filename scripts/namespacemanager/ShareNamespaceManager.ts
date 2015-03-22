@@ -182,11 +182,12 @@ class ShareNamespaceManager extends NamespaceManager {
 
 		Logger.debug("SocketId: " + self.socket.id + " - createObject : createObject of Model with TableName: " + modelClass.getTableName());
 
-		var success = function () {
-			self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel);
+		var success = function (object) {
+			self.sendObjectDescriptionFromId(modelClass, object.id, responseChannel);
 		};
 
-		ModelItf.createObject(modelClass, informations, success, function (error) { self.createObjectFail(error, responseChannel); });
+		var object = modelClass.fromJSONObject(informations);
+		object.create(success, function (error) { self.createObjectFail(error, responseChannel); });
 	}
 
 	/**

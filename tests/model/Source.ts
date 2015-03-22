@@ -80,7 +80,7 @@ describe('Source', function() {
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
 
-		it('should throw an exception if the ID is undefined', function () {
+		/*it('should throw an exception if the ID is undefined', function () {
 			var json = {
 				"name": "machin",
 				"description": "desc",
@@ -136,7 +136,7 @@ describe('Source', function() {
 					Source.fromJSONObject(json);
 				},
 				ModelException, "The exception has not been thrown.");
-		});
+		});*/
 	});
 
 	describe('#toJsonObject', function () {

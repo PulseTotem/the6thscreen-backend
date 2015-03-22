@@ -25,11 +25,12 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
 	    this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
 	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
-	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllSourceDescription(); });
-	    this.addListenerToSocket('RetrieveAllInfoTypeDescription', function() { self.sendAllInfoTypeDescription(); });
-	    this.addListenerToSocket('RetrieveAllParamTypeDescription', function() { self.sendAllParamTypeDescription(); });
-	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.sendCreateSourceDescription(data); });
-	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.sendUpdateSourceDescription(data); });
+	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
+	    this.addListenerToSocket('RetrieveAllInfoTypeDescription', function() { self.sendAllObjectDescription(InfoType, "AllInfoTypeDescription"); });
+	    this.addListenerToSocket('RetrieveAllParamTypeDescription', function() { self.sendAllObjectDescription(ParamType, "AllParamTypeDescription"); });
+	    this.addListenerToSocket('RetrieveAllServiceDescription', function() { self.sendAllObjectDescription(Service, "AllServiceDescription"); });
+	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
+	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
     }
 
 ////////////////////// Begin: Manage SendUserDescriptionFromToken //////////////////////
@@ -146,75 +147,5 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage SendZoneDescription //////////////////////
 
-////////////////////// Begin: Manage SendAllSourceDescription //////////////////////
-
-	/**
-	 * Retrieve all Source instances description and send it to client.
-	 *
-	 * @method sendAllSourceDescription
-	 */
-	sendAllSourceDescription() {
-		var self = this;
-
-		Logger.debug("SocketId: " + self.socket.id + " - sendAllSourceDescription : retrieveAllSource");
-
-        self.sendAllObjectDescription(Source, "AllSourceDescription");
-	}
-
-////////////////////// End: Manage SendAllSourceDescription //////////////////////
-
-////////////////////// Begin: Manage SendAllInfoTypeDescription //////////////////////
-
-	/**
-	 * Retrieve all InfoType instances description and send it to client.
-	 *
-	 * @method sendAllInfoTypeDescription
-	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-	 */
-	sendAllInfoTypeDescription(self : AdminsNamespaceManager = null) {
-		var self = this;
-
-        Logger.debug("SocketId: " + self.socket.id + " - sendAllInfoTypeDescription : retrieveAllInfoType");
-
-        self.sendAllObjectDescription(InfoType, "AllInfoTypeDescription");
-	}
-
-////////////////////// End: Manage SendAllInfoTypeDescription //////////////////////
-
-////////////////////// Begin: Manage SendAllParamTypeDescription //////////////////////
-
-	/**
-	 * Retrieve all ParamType instances description and send it to client.
-	 *
-	 * @method sendAllParamTypeDescription
-	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-	 */
-	sendAllParamTypeDescription(self : AdminsNamespaceManager = null) {
-		var self = this;
-
-        Logger.debug("SocketId: " + self.socket.id + " - sendAllParamTypeDescription : retrieveAllParamType");
-
-        self.sendAllObjectDescription(ParamType, "AllParamTypeDescription");
-	}
-
-////////////////////// End: Manage sendAllParamTypeDescription //////////////////////
-
-////////////////////// Begin: Manage saveSourceDescription //////////////////////
-
-	sendCreateSourceDescription(sourceInfo : any) {
-		var self = this;
-
-		Logger.debug("SocketId: " + self.socket.id + " - sendCreateSourceDescription");
-		self.createObject(Source, sourceInfo, "SourceDescription");
-	}
-
-	sendUpdateSourceDescription(updateInfo : any) {
-		var self = this;
-
-		Logger.debug("SocketId: " + self.socket.id + " - sendUpdateSourceDescription");
-		self.updateObjectAttribute(Source, updateInfo, "SourceDescription");
-	}
-
-////////////////////// End: Manage saveSourceDescription //////////////////////
 
 }

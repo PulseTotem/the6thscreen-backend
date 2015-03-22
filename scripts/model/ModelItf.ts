@@ -84,9 +84,9 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    static createObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+     createObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 
-        //var self = this;
+        var self = this;
 
 	    if (!modelClass || !data) {
             failCallback(new ModelException("To create an object the modelClass and the data of the object must be given."), attemptNumber);
@@ -99,8 +99,8 @@ class ModelItf {
                 if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
                     failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when creating an object with URL: "+urlCreateObject+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
                 } else {
-                    //self._id = response.data.id;
-                    successCallback();
+                    self._id = response.data.id;
+                    successCallback(response.data);
                 }
             } else {
                 failCallback(new ResponseException("The request failed on the server when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nMessage : "+JSON.stringify(response)), attemptNumber);

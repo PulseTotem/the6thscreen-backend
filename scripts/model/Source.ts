@@ -672,12 +672,6 @@ class Source extends ModelItf {
 	 * @return {Source} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Source {
-		if(!jsonObject.id) {
-			throw new ModelException("A Source object should have an ID.");
-		}
-		if(jsonObject.complete == undefined || jsonObject.complete == null) {
-			throw new ModelException("A Source object should have a complete attribute.");
-		}
 		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.id, jsonObject.complete);
 	}
 
