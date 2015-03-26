@@ -467,15 +467,21 @@ class Source extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-	        data["service"] = (self.service() !== null) ? self.service().toJSONObject() : null;
-            data["infoType"] = (self.infoType() !== null) ? self.infoType().toJSONObject() : null;
-            data["paramTypes"] = self.serializeArray(self.paramTypes());
-            data["paramValues"] = self.serializeArray(self.paramValues());
+	        if (onlyId) {
+		        data["service"] = (self.service() !== null) ? self.service().getId() : null;
+		        data["infoType"] = (self.infoType() !== null) ? self.infoType().getId() : null;
+	        } else {
+		        data["service"] = (self.service() !== null) ? self.service().toJSONObject() : null;
+		        data["infoType"] = (self.infoType() !== null) ? self.infoType().toJSONObject() : null;
+	        }
+
+            data["paramTypes"] = self.serializeArray(self.paramTypes(), onlyId);
+            data["paramValues"] = self.serializeArray(self.paramValues(), onlyId);
 
             successCallback(data);
         };

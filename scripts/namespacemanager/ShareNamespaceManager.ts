@@ -27,12 +27,12 @@ class ShareNamespaceManager extends NamespaceManager {
      * @param {number} objectId - The Object's Id to retrieve.
      * @param {string} responseChannel - The channel to send response
      */
-    sendObjectDescriptionFromId(modelClass : any, objectId : number, responseChannel : string) {
+    sendObjectDescriptionFromId(modelClass : any, objectId : number, responseChannel : string, onlyId : boolean = false) {
         var self = this;
 
         Logger.debug("SocketId: " + self.socket.id + " - sendModelDescription - ModelTableName : " + modelClass.getTableName() + " - query ObjectId : " + objectId.toString());
 
-        modelClass.read(objectId, function(obj) { self.retrieveObjectSuccess(obj, responseChannel); }, function(error) { self.retrieveObjectFail(error, responseChannel); });
+        modelClass.read(objectId, function(obj) { self.retrieveObjectSuccess(obj, responseChannel, onlyId); }, function(error) { self.retrieveObjectFail(error, responseChannel); });
     }
 
     /**
@@ -42,7 +42,7 @@ class ShareNamespaceManager extends NamespaceManager {
      * @param {ModelItf} object - The Object Description.
      * @param {string} responseChannel - The channel to send response
      */
-    retrieveObjectSuccess(object : ModelItf, responseChannel : string) {
+    retrieveObjectSuccess(object : ModelItf, responseChannel : string, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function(completeJSONObject) {
@@ -56,7 +56,7 @@ class ShareNamespaceManager extends NamespaceManager {
             Logger.debug("SocketId: " + self.socket.id + " - sendModelDescription : send done with fail status for Object with Id : " + object.getId() + " - Fail during completeJsonObject.");
         };
 
-        object.toCompleteJSONObject(success, fail);
+        object.toCompleteJSONObject(success, fail, onlyId);
     }
 
     /**
@@ -146,7 +146,7 @@ class ShareNamespaceManager extends NamespaceManager {
 		Logger.debug("SocketId: " + self.socket.id + " - updateObjectAttribute : updateObject of Model with TableName: " + modelClass.getTableName());
 
 		var success = function () {
-			self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel);
+			self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel, true);
 		};
 
 		ModelItf.updateAttribute(modelClass, informations, success, function (error) { self.updateObjectAttributeFail(error, responseChannel); });
@@ -183,7 +183,7 @@ class ShareNamespaceManager extends NamespaceManager {
 		Logger.debug("SocketId: " + self.socket.id + " - createObject : createObject of Model with TableName: " + modelClass.getTableName());
 
 		var success = function (object) {
-			self.sendObjectDescriptionFromId(modelClass, object.id, responseChannel);
+			self.sendObjectDescriptionFromId(modelClass, object.id, responseChannel, true);
 		};
 
 		var object = modelClass.fromJSONObject(informations);

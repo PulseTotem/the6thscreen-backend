@@ -93,6 +93,11 @@ class ModelItf {
             return;
 	    }
 
+	    if (this.getId() !== null) {
+		    failCallback(new ModelException("This object already exists."), attemptNumber);
+		    return;
+	    }
+
         var success : Function = function(result) {
             var response = result.data();
             if(response.status == "success") {
@@ -745,10 +750,17 @@ class ModelItf {
 	 * @param {Array<ModelItf>} tableau an array of ModelItf instances
 	 * @returns {Array} an array of JSON Objects
 	 */
-	serializeArray(tableau : Array<ModelItf>) : Object {
+	serializeArray(tableau : Array<ModelItf>, onlyId : boolean = false) : Object {
 		var data = [];
 		for (var i = 0; i < tableau.length; i++) {
-			data.push(tableau[i].toJSONObject());
+			var value : any;
+
+			if (onlyId) {
+				value = tableau[i].getId();
+			} else {
+				value = tableau[i].toJSONObject();
+			}
+			data.push(value);
 		}
 		return data;
 	}
@@ -811,7 +823,7 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
