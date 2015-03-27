@@ -24,11 +24,16 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
         this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
 	    this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
+	    this.addListenerToSocket('RetrieveSourceDescription', function(description) { self.sendSourceDescription(description); });
+	    this.addListenerToSocket('RetrieveSourceDescriptionOnlyId', function(description) { self.sendSourceDescription(description, true); });
 	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
-	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllSourceDescription(); });
-	    this.addListenerToSocket('RetrieveAllInfoTypeDescription', function() { self.sendAllInfoTypeDescription(); });
-	    this.addListenerToSocket('RetrieveAllParamTypeDescription', function() { self.sendAllParamTypeDescription(); });
-	    this.addListenerToSocket('SaveSourceDescription', function(source) { self.saveSourceDescription(source); });
+	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
+	    this.addListenerToSocket('RetrieveAllInfoTypeDescription', function() { self.sendAllObjectDescription(InfoType, "AllInfoTypeDescription"); });
+	    this.addListenerToSocket('RetrieveAllParamTypeDescription', function() { self.sendAllObjectDescription(ParamType, "AllParamTypeDescription"); });
+	    this.addListenerToSocket('RetrieveAllServiceDescription', function() { self.sendAllObjectDescription(Service, "AllServiceDescription"); });
+	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
+	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
+	    this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteSource(idSource); });
     }
 
 ////////////////////// Begin: Manage SendUserDescriptionFromToken //////////////////////
@@ -145,131 +150,44 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage SendZoneDescription //////////////////////
 
-////////////////////// Begin: Manage SendAllSourceDescription //////////////////////
+////////////////////// Begin: Manage SendSourceDescription //////////////////////
 
 	/**
-	 * Retrieve all Source instances description and send it to client.
+	 * Retrieve Source instance description and send it to client.
 	 *
-	 * @method sendAllSourceDescription
+	 * @method SendSourceDescription
+	 * @param {any} sourceDescription - The SDI Description.
 	 */
-	sendAllSourceDescription() {
+	sendSourceDescription(sourceDescription : any, onlyId : boolean = false) {
+		// sourceDescription : {"sourceId" : string}
 		var self = this;
 
-		Logger.debug("SocketId: " + self.socket.id + " - sendAllSourceDescription : retrieveAllSource");
+		var sourceId = sourceDescription.sourceId;
 
-        self.sendAllObjectDescription(Source, "AllSourceDescription");
+		self.sendObjectDescriptionFromId(Source, sourceId, "SourceDescription", onlyId);
 	}
 
-////////////////////// End: Manage SendAllSourceDescription //////////////////////
+////////////////////// End: Manage SendSDIDescription //////////////////////
 
-////////////////////// Begin: Manage SendAllInfoTypeDescription //////////////////////
+////////////////////// Begin: Manage DeleteSource //////////////////////
 
 	/**
-	 * Retrieve all InfoType instances description and send it to client.
+	 * Delete a source of the given id.
 	 *
-	 * @method sendAllInfoTypeDescription
+	 * @method deleteSource
+	 * @param {any} sourceDescription - The information containing ID of the source to delete.
 	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
 	 */
-	sendAllInfoTypeDescription(self : AdminsNamespaceManager = null) {
+	deleteSource(sourceDescription : any, self : AdminsNamespaceManager = null) {
+		// sourceId : {"sourceId" : string}
 		var self = this;
 
-        Logger.debug("SocketId: " + self.socket.id + " - sendAllInfoTypeDescription : retrieveAllInfoType");
+		var sourceId = sourceDescription.sourceId;
 
-        self.sendAllObjectDescription(InfoType, "AllInfoTypeDescription");
+		self.deleteObject(Source, sourceId, "deletedSource");
 	}
 
-////////////////////// End: Manage SendAllInfoTypeDescription //////////////////////
+////////////////////// End: Manage SendZoneDescription //////////////////////
 
-////////////////////// Begin: Manage SendAllParamTypeDescription //////////////////////
-
-	/**
-	 * Retrieve all ParamType instances description and send it to client.
-	 *
-	 * @method sendAllParamTypeDescription
-	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-	 */
-	sendAllParamTypeDescription(self : AdminsNamespaceManager = null) {
-		var self = this;
-
-        Logger.debug("SocketId: " + self.socket.id + " - sendAllParamTypeDescription : retrieveAllParamType");
-
-        self.sendAllObjectDescription(ParamType, "AllParamTypeDescription");
-	}
-
-////////////////////// End: Manage sendAllParamTypeDescription //////////////////////
-
-////////////////////// Begin: Manage saveSourceDescription //////////////////////
-
-	saveSourceDescription(sourceInfo : any) {
-		var self = this;
-		Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription");
-		Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - JSON : "+JSON.stringify(sourceInfo));
-
-		var source : Source = new Source(sourceInfo.name, sourceInfo.service, sourceInfo.description, sourceInfo.host, sourceInfo.port);
-
-		source.create(function () { self.createSourceCallbackSuccess(sourceInfo, source); }, function (error) { self.createSourceCallbackFail(error); })
-	}
-
-	createSourceCallbackSuccess(sourceInfo : any, source : Source) {
-		var self = this;
-		if (!!sourceInfo.infoType) {
-			Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - save infotype : "+sourceInfo.infoType);
-			Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - save infotype - source : "+JSON.stringify(source));
-			var infoTypeId : string = sourceInfo.infoType;
-			InfoType.read(parseInt(infoTypeId), function(infoType) { self.associateInfoTypeAndSource(source, infoType, sourceInfo); }, function(error) { self.createSourceCallbackFail(error); });
-		} else {
-			self.createSourceCallbackFail(new DataException("A source must have a type info."));
-		}
-	}
-
-	associateInfoTypeAndSource(source: Source, infoType : InfoType, sourceInfo: any) {
-		var self = this;
-
-		Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - association infotype and source");
-		source.setInfoType(infoType, function () { self.checkParamTypesOrSuccess(source, sourceInfo); }, function (error) { self.createSourceCallbackFail(error); });
-	}
-
-	checkParamTypesOrSuccess(source : Source, sourceInfo : any) {
-		var self = this;
-		if (!!!sourceInfo.paramType) {
-			Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - No param types return success");
-			self.socket.emit("sourceSaved", self.formatResponse(true, source.toJSONObject()));
-		} else {
-			if (!!sourceInfo.paramType && sourceInfo.paramType.length > 0) {
-				self.paramTypeLength = sourceInfo.paramType.length;
-
-				for (var i = 0;i < sourceInfo.paramType.length; i++)
-				{
-					Logger.debug("SocketId: " + this.socket.id + " - saveSourceDescription - Iterate on param types return success");
-					var paramTypeId : string = sourceInfo.paramType[i];
-
-					ParamType.read(parseInt(paramTypeId), function (paramType) { self.associateParamTypeAndSource(paramType, source); }, function (error) { self.createSourceCallbackFail(error); });
-				}
-			} else {
-				self.createSourceCallbackFail(new DataException("ParamTypes must be an array !"));
-			}
-		}
-	}
-
-	associateParamTypeAndSource(paramType : ParamType, source : Source) {
-		var self = this;
-		source.addParamType(paramType, function () { self.successLinkParamType(source); } , function (error) { self.createSourceCallbackFail(error); });
-	}
-
-	successLinkParamType(source : Source) {
-		var self = this;
-		this.paramTypeLength--;
-
-		if (this.paramTypeLength == 0) {
-			self.socket.emit("sourceSaved", self.formatResponse(true, source.toJSONObject()));
-		}
-	}
-
-	createSourceCallbackFail(error : Error, attemptNumber : number = 0) {
-        var self = this;
-		this.socket.emit("sourceSaved", self.formatResponse(false, error));
-	}
-
-////////////////////// End: Manage saveSourceDescription //////////////////////
 
 }

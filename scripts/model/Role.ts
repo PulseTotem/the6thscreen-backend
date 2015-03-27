@@ -132,7 +132,7 @@ class Role extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.deleteObject(Role, successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(Role, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**

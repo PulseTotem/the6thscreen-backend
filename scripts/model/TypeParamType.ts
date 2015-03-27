@@ -133,7 +133,7 @@ class TypeParamType extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.deleteObject(TypeParamType, successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(TypeParamType, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**

@@ -888,7 +888,7 @@ describe('ModelItf', function() {
                 done();
             };
 
-            model.deleteObject(ModelItf, success, fail);
+            ModelItf.deleteObject(ModelItf, null, success, fail);
 		});
 
 		it('should build a proper request to delete the object and set ID to null', function(done) {
@@ -908,7 +908,6 @@ describe('ModelItf', function() {
 
             var success = function() {
                 //assert.ok(retour, "The delete did not return true");
-                assert.equal(model.getId(), null, "The object ID is not null.");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
@@ -917,7 +916,7 @@ describe('ModelItf', function() {
                 done(err);
             };
 
-            model.deleteObject(modelName, success, fail);
+            ModelItf.deleteObject(modelName, id, success, fail);
 		});
 
 		it('should throw an error if no modelclass is given', function(done) {
@@ -938,7 +937,7 @@ describe('ModelItf', function() {
                 done();
             };
 
-            model.deleteObject(toto, success, fail);
+            ModelItf.deleteObject(toto, 24, success, fail);
 		});
 
 		it('should throw an error if the connection failed', function(done) {
@@ -962,7 +961,7 @@ describe('ModelItf', function() {
                 done();
             };
 
-            model.deleteObject(modelName, success, fail);
+			ModelItf.deleteObject(modelName, 42, success, fail);
 		});
 
 		it('should throw an error if the request failed', function(done) {
@@ -990,7 +989,7 @@ describe('ModelItf', function() {
                 done();
             };
 
-            model.deleteObject(modelName, success, fail);
+			ModelItf.deleteObject(modelName, id, success, fail);
 		});
 
 		it('should throw an error if the request failed on the server', function(done) {
@@ -1023,7 +1022,7 @@ describe('ModelItf', function() {
                 done();
             };
 
-            model.deleteObject(modelName, success, fail);
+			ModelItf.deleteObject(modelName, id, success, fail);
 		});
 	});
 

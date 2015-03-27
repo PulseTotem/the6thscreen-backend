@@ -84,7 +84,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    createObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+     createObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 
         var self = this;
 
@@ -93,11 +93,10 @@ class ModelItf {
             return;
 	    }
 
-	    // if the object already exists we throw an error
-        if (!!this.getId()) {
-            failCallback(new ModelException("Trying to create an already existing object with ID:"+this.getId()+", tableName: '"+modelClass.getTableName()+"' and data: "+JSON.stringify(data)), attemptNumber);
-            return;
-        }
+	    if (this.getId() !== null) {
+		    failCallback(new ModelException("This object already exists."), attemptNumber);
+		    return;
+	    }
 
         var success : Function = function(result) {
             var response = result.data();
@@ -106,7 +105,7 @@ class ModelItf {
                     failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when creating an object with URL: "+urlCreateObject+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
                 } else {
                     self._id = response.data.id;
-                    successCallback();
+                    successCallback(response.data);
                 }
             } else {
                 failCallback(new ResponseException("The request failed on the server when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nMessage : "+JSON.stringify(response)), attemptNumber);
@@ -317,27 +316,25 @@ class ModelItf {
      *
      * @method deleteObject
      * @param {ModelItf Class} modelClass - The model to delete.
+     * @param {number} objectId - The id of the object to delete.
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    deleteObject(modelClass : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-	    var self = this;
-
-        if (!modelClass) {
+    static deleteObject(modelClass : any, objectId : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+	    if (!modelClass) {
             failCallback(new ModelException("To delete an object, the modelClass must be given."), attemptNumber);
             return;
 	    }
 
-        if (!this.getId()) {
-            failCallback(new ModelException("The object does not exist yet. It can't be delete in database."), attemptNumber);
+        if (!objectId) {
+            failCallback(new ModelException("You must give an objectId. It can't be delete in database."), attemptNumber);
             return;
         }
 
         var success : Function = function(result) {
             var response = result.data();
             if(response.status == "success") {
-                self._id = null;
                 successCallback();
             } else {
                 failCallback(new ResponseException("The request failed on the server when trying to delete an object with URL:"+urlDelete+".\nMessage : "+JSON.stringify(response)), attemptNumber);
@@ -348,7 +345,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to delete an object with URL:"+urlDelete+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-	    var urlDelete = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
+	    var urlDelete = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), objectId.toString());
 	    //Logger.debug("[ModelItf] Delete an object with the URL : "+urlDelete);
 
         RestClient.delete(urlDelete, success, fail);
@@ -751,10 +748,17 @@ class ModelItf {
 	 * @param {Array<ModelItf>} tableau an array of ModelItf instances
 	 * @returns {Array} an array of JSON Objects
 	 */
-	serializeArray(tableau : Array<ModelItf>) : Object {
+	serializeArray(tableau : Array<ModelItf>, onlyId : boolean = false) : Object {
 		var data = [];
 		for (var i = 0; i < tableau.length; i++) {
-			data.push(tableau[i].toJSONObject());
+			var value : any;
+
+			if (onlyId) {
+				value = tableau[i].getId();
+			} else {
+				value = tableau[i].toJSONObject();
+			}
+			data.push(value);
 		}
 		return data;
 	}
@@ -817,7 +821,7 @@ class ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {

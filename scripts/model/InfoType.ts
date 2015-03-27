@@ -133,7 +133,7 @@ class InfoType extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.deleteObject(InfoType, successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(InfoType, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**

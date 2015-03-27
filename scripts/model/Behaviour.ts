@@ -159,7 +159,7 @@ class Behaviour extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-		return this.deleteObject(Behaviour, successCallback, failCallback, attemptNumber);
+		return ModelItf.deleteObject(Behaviour, this.getId(), successCallback, failCallback, attemptNumber);
 	}
 
     /**

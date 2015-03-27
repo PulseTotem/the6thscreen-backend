@@ -27,12 +27,12 @@ class ShareNamespaceManager extends NamespaceManager {
      * @param {number} objectId - The Object's Id to retrieve.
      * @param {string} responseChannel - The channel to send response
      */
-    sendObjectDescriptionFromId(modelClass : any, objectId : number, responseChannel : string) {
+    sendObjectDescriptionFromId(modelClass : any, objectId : number, responseChannel : string, onlyId : boolean = false) {
         var self = this;
 
         Logger.debug("SocketId: " + self.socket.id + " - sendModelDescription - ModelTableName : " + modelClass.getTableName() + " - query ObjectId : " + objectId.toString());
 
-        modelClass.read(objectId, function(obj) { self.retrieveObjectSuccess(obj, responseChannel); }, function(error) { self.retrieveObjectFail(error, responseChannel); });
+        modelClass.read(objectId, function(obj) { self.retrieveObjectSuccess(obj, responseChannel, onlyId); }, function(error) { self.retrieveObjectFail(error, responseChannel); });
     }
 
     /**
@@ -42,7 +42,7 @@ class ShareNamespaceManager extends NamespaceManager {
      * @param {ModelItf} object - The Object Description.
      * @param {string} responseChannel - The channel to send response
      */
-    retrieveObjectSuccess(object : ModelItf, responseChannel : string) {
+    retrieveObjectSuccess(object : ModelItf, responseChannel : string, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function(completeJSONObject) {
@@ -56,7 +56,7 @@ class ShareNamespaceManager extends NamespaceManager {
             Logger.debug("SocketId: " + self.socket.id + " - sendModelDescription : send done with fail status for Object with Id : " + object.getId() + " - Fail during completeJsonObject.");
         };
 
-        object.toCompleteJSONObject(success, fail);
+        object.toCompleteJSONObject(success, fail, onlyId);
     }
 
     /**
@@ -130,4 +130,117 @@ class ShareNamespaceManager extends NamespaceManager {
     }
 
 ////////////////////// End: Manage sendAllObjectDescription //////////////////////
+
+////////////////////// Begin: Manage updateObjectAttribute //////////////////////
+
+	/**
+	 * Update an object attribute and send back the object to the client.
+	 *
+	 * @method updateObjectAttribute
+	 * @param {ModelItf Class} modelClass - The model.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	updateObjectAttribute(modelClass : any, informations : any, responseChannel : string) {
+		var self = this;
+
+		Logger.debug("SocketId: " + self.socket.id + " - updateObjectAttribute : updateObject of Model with TableName: " + modelClass.getTableName());
+
+		var success = function () {
+			self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel, true);
+		};
+
+		ModelItf.updateAttribute(modelClass, informations, success, function (error) { self.updateObjectAttributeFail(error, responseChannel); });
+	}
+
+	/**
+	 * Update an object attribute fails, send an error.
+	 *
+	 * @method updateObjectAttributeFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	updateObjectAttributeFail(error : Error, responseChannel : string) {
+		var self = this;
+
+		self.socket.emit(responseChannel, self.formatResponse(false, error));
+		Logger.debug("SocketId: " + self.socket.id + " - updateObjectAttributeFail : send done with fail status - Fail during read all.");
+	}
+
+////////////////////// End: Manage updateObjectAttribute //////////////////////
+
+////////////////////// Begin: Manage createObject //////////////////////
+
+	/**
+	 * Create an object and send it back to the client.
+	 *
+	 * @method createObject
+	 * @param {ModelItf Class} modelClass - The model.
+	 * @param {any} informations - The information used to create the object. It must be a JSON object.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	createObject(modelClass : any, informations : any, responseChannel : string) {
+		var self = this;
+
+		Logger.debug("SocketId: " + self.socket.id + " - createObject : createObject of Model with TableName: " + modelClass.getTableName());
+
+		var success = function (object) {
+			self.sendObjectDescriptionFromId(modelClass, object.id, responseChannel, true);
+		};
+
+		var object = modelClass.fromJSONObject(informations);
+		object.create(success, function (error) { self.createObjectFail(error, responseChannel); });
+	}
+
+	/**
+	 * Create an object fails, send an error.
+	 *
+	 * @method createObjectFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	createObjectFail(error : Error, responseChannel : string) {
+		var self = this;
+
+		self.socket.emit(responseChannel, self.formatResponse(false, error));
+		Logger.debug("SocketId: " + self.socket.id + " - createObject : send done with fail status.");
+	}
+
+////////////////////// End: Manage updateObjectAttribute //////////////////////
+
+////////////////////// Begin: Manage deleteObject //////////////////////
+
+	/**
+	 * Delete an object.
+	 *
+	 * @method deleteObject
+	 * @param {ModelItf Class} modelClass - The model.
+	 * @param {number} objectId - The id of the object to delete.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	deleteObject(modelClass : any, objectId : number, responseChannel : string) {
+		var self = this;
+
+		Logger.debug("SocketId: " + self.socket.id + " - createObject : deleteObject of Model with TableName: " + modelClass.getTableName());
+
+		var success = function (object) {
+			self.socket.emit(responseChannel, self.formatResponse(true, objectId));
+		};
+		ModelItf.deleteObject(modelClass, objectId, success, function (error) { self.deleteObjectFail(error, responseChannel); });
+	}
+
+	/**
+	 * Delete an object fails, send an error.
+	 *
+	 * @method deleteObjectFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	deleteObjectFail(error : Error, responseChannel : string) {
+		var self = this;
+
+		self.socket.emit(responseChannel, self.formatResponse(false, error));
+		Logger.debug("SocketId: " + self.socket.id + " - deleteObject : send done with fail status.");
+	}
+
+////////////////////// End: Manage updateObjectAttribute //////////////////////
 }
