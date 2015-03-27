@@ -487,7 +487,7 @@ class Call extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.deleteObject(Call, successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(Call, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**

@@ -302,7 +302,7 @@ class ParamValue extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.deleteObject(ParamValue, successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(ParamValue, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**

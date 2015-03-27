@@ -329,7 +329,7 @@ class ConstraintParamType extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.deleteObject(ConstraintParamType, successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(ConstraintParamType, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**

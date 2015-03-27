@@ -171,10 +171,11 @@ class ShareNamespaceManager extends NamespaceManager {
 ////////////////////// Begin: Manage createObject //////////////////////
 
 	/**
-	 * Update an object attribute and send back the object to the client.
+	 * Create an object and send it back to the client.
 	 *
-	 * @method updateObjectAttribute
+	 * @method createObject
 	 * @param {ModelItf Class} modelClass - The model.
+	 * @param {any} informations - The information used to create the object. It must be a JSON object.
 	 * @param {string} responseChannel - The channel to send response
 	 */
 	createObject(modelClass : any, informations : any, responseChannel : string) {
@@ -202,6 +203,43 @@ class ShareNamespaceManager extends NamespaceManager {
 
 		self.socket.emit(responseChannel, self.formatResponse(false, error));
 		Logger.debug("SocketId: " + self.socket.id + " - createObject : send done with fail status.");
+	}
+
+////////////////////// End: Manage updateObjectAttribute //////////////////////
+
+////////////////////// Begin: Manage deleteObject //////////////////////
+
+	/**
+	 * Delete an object.
+	 *
+	 * @method deleteObject
+	 * @param {ModelItf Class} modelClass - The model.
+	 * @param {number} objectId - The id of the object to delete.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	deleteObject(modelClass : any, objectId : number, responseChannel : string) {
+		var self = this;
+
+		Logger.debug("SocketId: " + self.socket.id + " - createObject : deleteObject of Model with TableName: " + modelClass.getTableName());
+
+		var success = function (object) {
+			self.socket.emit(responseChannel, self.formatResponse(true, null));
+		};
+		ModelItf.deleteObject(modelClass, objectId, success, function (error) { self.deleteObjectFail(error, responseChannel); });
+	}
+
+	/**
+	 * Delete an object fails, send an error.
+	 *
+	 * @method deleteObjectFail
+	 * @param {Error} error - The Error reason of fail.
+	 * @param {string} responseChannel - The channel to send response
+	 */
+	deleteObjectFail(error : Error, responseChannel : string) {
+		var self = this;
+
+		self.socket.emit(responseChannel, self.formatResponse(false, error));
+		Logger.debug("SocketId: " + self.socket.id + " - deleteObject : send done with fail status.");
 	}
 
 ////////////////////// End: Manage updateObjectAttribute //////////////////////
