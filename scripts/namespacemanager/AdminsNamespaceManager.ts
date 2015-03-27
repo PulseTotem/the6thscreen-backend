@@ -24,6 +24,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
         this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
 	    this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
+	    this.addListenerToSocket('RetrieveSourceDescription', function(description) { self.sendSourceDescription(description); });
+	    this.addListenerToSocket('RetrieveSourceDescriptionOnlyId', function(description) { self.sendSourceDescription(description, true); });
 	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
 	    this.addListenerToSocket('RetrieveAllInfoTypeDescription', function() { self.sendAllObjectDescription(InfoType, "AllInfoTypeDescription"); });
@@ -31,6 +33,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveAllServiceDescription', function() { self.sendAllObjectDescription(Service, "AllServiceDescription"); });
 	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
 	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
+	    this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteSource(idSource); });
     }
 
 ////////////////////// Begin: Manage SendUserDescriptionFromToken //////////////////////
@@ -143,6 +146,45 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		var zoneId = zoneDescription.zoneId;
 
         self.sendObjectDescriptionFromId(Zone, zoneId, "ZoneDescription");
+	}
+
+////////////////////// End: Manage SendZoneDescription //////////////////////
+
+////////////////////// Begin: Manage SendSourceDescription //////////////////////
+
+	/**
+	 * Retrieve Source instance description and send it to client.
+	 *
+	 * @method SendSourceDescription
+	 * @param {any} sourceDescription - The SDI Description.
+	 */
+	sendSourceDescription(sourceDescription : any, onlyId : boolean = false) {
+		// sourceDescription : {"sourceId" : string}
+		var self = this;
+
+		var sourceId = sourceDescription.sourceId;
+
+		self.sendObjectDescriptionFromId(Source, sourceId, "SourceDescription", onlyId);
+	}
+
+////////////////////// End: Manage SendSDIDescription //////////////////////
+
+////////////////////// Begin: Manage DeleteSource //////////////////////
+
+	/**
+	 * Delete a source of the given id.
+	 *
+	 * @method deleteSource
+	 * @param {any} sourceDescription - The information containing ID of the source to delete.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
+	 */
+	deleteSource(sourceDescription : any, self : AdminsNamespaceManager = null) {
+		// sourceId : {"sourceId" : string}
+		var self = this;
+
+		var sourceId = sourceDescription.sourceId;
+
+		self.deleteObject(Source, sourceId, "deletedSource");
 	}
 
 ////////////////////// End: Manage SendZoneDescription //////////////////////
