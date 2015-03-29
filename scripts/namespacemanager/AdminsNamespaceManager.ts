@@ -26,8 +26,12 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
 	    this.addListenerToSocket('RetrieveSourceDescription', function(description) { self.sendSourceDescription(description); });
 	    this.addListenerToSocket('RetrieveSourceDescriptionOnlyId', function(description) { self.sendSourceDescription(description, true); });
+	    this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
+	    this.addListenerToSocket('RetrieveCallTypeDescriptionOnlyId', function(description) { self.sendCallTypeDescription(description, true); });
 	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
+	    this.addListenerToSocket('RetrieveAllZoneDescription', function() { self.sendAllObjectDescription(Zone, "AllZoneDescription"); });
+	    this.addListenerToSocket('RetrieveAllRendererDescription', function() { self.sendAllObjectDescription(Renderer, "AllRendererDescription"); });
 	    this.addListenerToSocket('RetrieveAllCallTypeDescription', function() { self.sendAllObjectDescription(CallType, "AllCallTypeDescription"); });
 	    this.addListenerToSocket('RetrieveAllInfoTypeDescription', function() { self.sendAllObjectDescription(InfoType, "AllInfoTypeDescription"); });
 	    this.addListenerToSocket('RetrieveAllParamTypeDescription', function() { self.sendAllObjectDescription(ParamType, "AllParamTypeDescription"); });
@@ -35,6 +39,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
 	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
 	    this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteSource(idSource); });
+	    this.addListenerToSocket('CreateCallTypeDescription', function(data) { self.createObject(CallType, data, "CallTypeDescription"); });
+	    this.addListenerToSocket('UpdateCallTypeDescription', function(data) { self.updateObjectAttribute(CallType, data, "CallTypeDescription"); });
+	    this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteCallType(idCallType); });
     }
 
 ////////////////////// Begin: Manage SendUserDescriptionFromToken //////////////////////
@@ -168,7 +175,27 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		self.sendObjectDescriptionFromId(Source, sourceId, "SourceDescription", onlyId);
 	}
 
-////////////////////// End: Manage SendSDIDescription //////////////////////
+////////////////////// End: Manage SendSourceDescription //////////////////////
+
+////////////////////// Begin: Manage SendCallTypeDescription //////////////////////
+
+	/**
+	 * Retrieve CallType instance description and send it to client.
+	 *
+	 * @method SendCallTypeDescription
+	 * @param {any} callTypeDescription - The callType Description.
+	 */
+	sendCallTypeDescription(callTypeDescription : any, onlyId : boolean = false) {
+		// callTypeDescription : {"callTypeId" : string}
+		var self = this;
+
+		var callTypeId = callTypeDescription.callTypeId;
+
+		self.sendObjectDescriptionFromId(CallType, callTypeId, "CallTypeDescription", onlyId);
+	}
+
+////////////////////// End: Manage SendCallTypeDescription //////////////////////
+
 
 ////////////////////// Begin: Manage DeleteSource //////////////////////
 
@@ -188,7 +215,27 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		self.deleteObject(Source, sourceId, "deletedSource");
 	}
 
-////////////////////// End: Manage SendZoneDescription //////////////////////
+////////////////////// End: Manage DeleteSource //////////////////////
+
+////////////////////// Begin: Manage deleteCallType //////////////////////
+
+	/**
+	 * Delete a callType of the given id.
+	 *
+	 * @method deleteCallType
+	 * @param {any} callTypeDescription - The information containing ID of the callType to delete.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
+	 */
+	deleteCallType(callTypeDescription : any, self : AdminsNamespaceManager = null) {
+		// sourceId : {"callTypeId" : string}
+		var self = this;
+
+		var callTypeId = callTypeDescription.callTypeId;
+
+		self.deleteObject(CallType, callTypeId, "deletedCallType");
+	}
+
+////////////////////// End: Manage deleteCallType //////////////////////
 
 
 }
