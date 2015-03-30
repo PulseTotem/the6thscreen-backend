@@ -271,6 +271,20 @@ class CleanAndInitDatabase {
 
             var retrievedParamTypes = new Array();
 
+	        var successUpdate = function () {
+		        Logger.info("Update source successfully.");
+		        sourcesNb = sourcesNb + 1;
+
+		        if(sourcesNb == sources.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCheckCompleteness = function () {
+		       Logger.info("Source check completeness successfully.");
+		       source.update(successUpdate, fail);
+	        };
+
             var successParamTypeRetrieve = function(newParamType) {
                 retrievedParamTypes.push(newParamType);
                 Logger.info("ParamType '" + retrievedParamTypes.length + "' retrieve successfully.");
@@ -282,11 +296,7 @@ class CleanAndInitDatabase {
                         Logger.info("ParamType associated to Source successfully.");
 
                         if(nbAssociation == retrievedParamTypes.length) {
-                            sourcesNb = sourcesNb + 1;
-
-                            if(sourcesNb == sources.length) {
-                                successCallback();
-                            }
+                           source.checkCompleteness(successCheckCompleteness, fail);
                         }
                     };
 
@@ -357,13 +367,23 @@ class CleanAndInitDatabase {
 
             var service = new Service(serviceDesc.name, serviceDesc.description, serviceDesc.host);
 
+	        var successUpdate = function () {
+		        Logger.info("Update service successfully.");
+		        servicesNb = servicesNb + 1;
+
+		        if(servicesNb == services.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check service completeness successfully.");
+		        service.update(successUpdate, fail);
+	        };
+
             var successServiceCreation = function() {
                 Logger.info("Service created successfully.");
-                servicesNb = servicesNb + 1;
-
-                if(servicesNb == services.length) {
-                    successCallback();
-                }
+                service.checkCompleteness(successCompleteness, fail);
             };
 
             service.create(successServiceCreation, fail);
@@ -398,13 +418,23 @@ class CleanAndInitDatabase {
 
             var infoType = new InfoType(infoTypeDesc.name);
 
+	        var successUpdate = function () {
+		        Logger.info("Update infoType successfully.");
+		        infoTypesNb = infoTypesNb + 1;
+
+		        if(infoTypesNb == infoTypes.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check infoType completeness successfully.");
+		        infoType.update(successUpdate, fail);
+	        };
+
             var successInfoTypeCreation = function() {
                 Logger.info("InfoType created successfully.");
-                infoTypesNb = infoTypesNb + 1;
-
-                if(infoTypesNb == infoTypes.length) {
-                    successCallback();
-                }
+                infoType.checkCompleteness(successCompleteness, fail);
             };
 
             infoType.create(successInfoTypeCreation, fail);
@@ -439,13 +469,23 @@ class CleanAndInitDatabase {
 
             var paramType = new ParamType(paramTypeDesc.name, paramTypeDesc.description);
 
+	        var successUpdate = function () {
+		        Logger.info("Update ParamType successfully.");
+		        paramTypesNb = paramTypesNb + 1;
+
+		        if(paramTypesNb == paramTypes.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check paramType completeness successfully.");
+		        paramType.update(successUpdate, fail);
+	        };
+
             var successConstraintAssociation = function() {
                 Logger.info("Constraint associated to ParamType successfully.");
-                paramTypesNb = paramTypesNb + 1;
-
-                if(paramTypesNb == paramTypes.length) {
-                    successCallback();
-                }
+	            paramType.checkCompleteness(successCompleteness, fail);
             }
 
             var successConstraintRetrieve = function(newConstraint) {
@@ -501,13 +541,23 @@ class CleanAndInitDatabase {
 
             var constraint = new ConstraintParamType(constraintDesc.name, constraintDesc.description);
 
+	        var successUpdate = function () {
+		        Logger.info("Update ConstraintParamType successfully.");
+		        constraintsNb = constraintsNb + 1;
+
+		        if(constraintsNb == constraints.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check ConstraintParamType completeness successfully.");
+		        constraint.update(successUpdate, fail);
+	        };
+
             var successTypeParamTypeAssociation = function() {
                 Logger.info("TypeParamType associated to Constraint successfully.");
-                constraintsNb = constraintsNb + 1;
-
-                if(constraintsNb == constraints.length) {
-                    successCallback();
-                }
+	            constraint.checkCompleteness(successCompleteness, fail);
             };
 
             var successTypeParamTypeRetrieve = function(newTypeParamType) {
@@ -553,13 +603,24 @@ class CleanAndInitDatabase {
 
             var typeParamType = new TypeParamType(typeParamTypeDesc.name);
 
-            var successTypeParamTypeCreation = function() {
-                Logger.info("TypeParamType create successfully.");
-                typeParamTypesNb = typeParamTypesNb + 1;
+	        var successUpdate = function () {
+		        Logger.info("Update TypeParamType successfully.");
+		        typeParamTypesNb = typeParamTypesNb + 1;
 
-                if(typeParamTypesNb == typeParamTypes.length) {
-                    successCallback();
-                }
+		        if(typeParamTypesNb == typeParamTypes.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check TypeParamType completeness successfully.");
+		        typeParamType.update(successUpdate, fail);
+	        };
+
+
+	        var successTypeParamTypeCreation = function() {
+                Logger.info("TypeParamType create successfully.");
+		        typeParamType.checkCompleteness(successCompleteness, fail);
             };
 
             typeParamType.create(successTypeParamTypeCreation, fail);
@@ -595,13 +656,23 @@ class CleanAndInitDatabase {
 
             var user = new User(userDesc.username, userDesc.email);
 
+	        var successUpdate = function () {
+		        Logger.info("Update user successfully.");
+		        usersNb = usersNb + 1;
+
+		        if(usersNb == users.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check user completeness successfully.");
+		        user.update(successUpdate, fail);
+	        };
+
             var successSetPassword = function() {
                 Logger.info("User set password successfully.");
-                usersNb = usersNb + 1;
-
-                if(usersNb == users.length) {
-                    successCallback();
-                }
+	            user.checkCompleteness(successCompleteness, fail);
             };
 
             var successUserCreate = function() {
@@ -647,17 +718,28 @@ class CleanAndInitDatabase {
 
             var nbCreatedCallTypes = 0;
 
-            var successCallTypeCreate = function(newCallType) {
+	        var successUpdate = function () {
+		        Logger.info("Update SDI successfully.");
+		        sdisNb = sdisNb + 1;
+
+		        if(sdisNb == sdis.length) {
+			        Logger.info("Fulfill SDIs END !");
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check SDI completeness successfully.");
+		        sdi.update(successUpdate, fail);
+	        };
+
+
+	        var successCallTypeCreate = function(newCallType) {
                 Logger.info("CallType created successfully.");
                 nbCreatedCallTypes = nbCreatedCallTypes + 1;
 
                 if(nbCreatedCallTypes == sdiDesc.callTypes.length) {
-                    sdisNb = sdisNb + 1;
-
-                    if(sdisNb == sdis.length) {
-                        Logger.info("Fulfill SDIs END !");
-                        successCallback();
-                    }
+	                sdi.checkCompleteness(successCompleteness, fail);
                 }
             };
 
@@ -738,13 +820,24 @@ class CleanAndInitDatabase {
 
             var behaviour = new Behaviour(behaviourDesc.name, behaviourDesc.description);
 
-            var successBehaviourCreation = function() {
-                Logger.info("Behaviour created successfully.");
-                behavioursNb = behavioursNb + 1;
+	        var successUpdate = function () {
+		        Logger.info("Update behaviour successfully.");
+		        behavioursNb = behavioursNb + 1;
 
-                if(behavioursNb == behaviours.length) {
-                    successCallback();
-                }
+		        if(behavioursNb == behaviours.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check behaviour completeness successfully.");
+		        behaviour.update(successUpdate, fail);
+	        };
+
+
+	        var successBehaviourCreation = function() {
+                Logger.info("Behaviour created successfully.");
+		        behaviour.checkCompleteness(successCompleteness, fail);
             };
 
             behaviour.create(successBehaviourCreation, fail);
@@ -777,18 +870,29 @@ class CleanAndInitDatabase {
                 failCallback(err);
             };
 
-            var renderer = new Renderer(rendererDesc.name, rendererDesc.description);
+            var renderer = new Renderer(rendererDesc.name, rendererDesc.description)
 
-            var successInfoTypeRetrieve = function(newInfotype) {
+	        var successUpdate = function () {
+		        Logger.info("Update renderer successfully.");
+		        renderersNb = renderersNb + 1;
+
+		        if(renderersNb == renderers.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check renderer completeness successfully.");
+		        renderer.update(successUpdate, fail);
+	        };
+
+
+	        var successInfoTypeRetrieve = function(newInfotype) {
                 Logger.info("InfoType retrieved successfully.");
 
                 var successInfoTypeAssociation = function() {
                     Logger.info("InfoType associated to Renderer successfully.");
-                    renderersNb = renderersNb + 1;
-
-                    if(renderersNb == renderers.length) {
-                        successCallback();
-                    }
+	                renderer.checkCompleteness(successCompleteness, fail);
                 };
 
                 renderer.linkInfoType(newInfotype.getId(), successInfoTypeAssociation, fail);
@@ -832,13 +936,23 @@ class CleanAndInitDatabase {
 
             var renderPolicy = new RenderPolicy(renderPolicyDesc.name, renderPolicyDesc.description);
 
+	        var successUpdate = function () {
+		        Logger.info("Update RenderPolicy successfully.");
+		        renderPoliciesNb = renderPoliciesNb + 1;
+
+		        if(renderPoliciesNb == renderPolicies.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check RenderPolicy completeness successfully.");
+		        renderPolicy.update(successUpdate, fail);
+	        };
+
             var successRenderPolicyCreation = function() {
                 Logger.info("RenderPolicy created successfully.");
-                renderPoliciesNb = renderPoliciesNb + 1;
-
-                if(renderPoliciesNb == renderPolicies.length) {
-                    successCallback();
-                }
+	            renderPolicy.checkCompleteness(successCompleteness, fail);
             };
 
             renderPolicy.create(successRenderPolicyCreation, fail);
@@ -866,20 +980,31 @@ class CleanAndInitDatabase {
             return;
         }
 
-        receivePolicies.forEach(function(receivePolicyDesc) {
+	    receivePolicies.forEach(function(receivePolicyDesc) {
             var fail = function (err) {
                 failCallback(err);
             };
 
             var receivePolicy = new ReceivePolicy(receivePolicyDesc.name);
 
-            var successReceivePolicyCreation = function() {
-                Logger.info("ReceivePolicy created successfully.");
-                receivePoliciesNb = receivePoliciesNb + 1;
+		    var successUpdate = function () {
+			    Logger.info("Update ReceivePolicy successfully.");
+			    receivePoliciesNb = receivePoliciesNb + 1;
 
-                if(receivePoliciesNb == receivePolicies.length) {
-                    successCallback();
-                }
+			    if(receivePoliciesNb == receivePolicies.length) {
+				    successCallback();
+			    }
+		    };
+
+		    var successCompleteness = function () {
+			    Logger.info("Check ReceivePolicy completeness successfully.");
+			    receivePolicy.update(successUpdate, fail);
+		    };
+
+
+		    var successReceivePolicyCreation = function() {
+                Logger.info("ReceivePolicy created successfully.");
+			    receivePolicy.checkCompleteness(successCompleteness, fail);
             };
 
             receivePolicy.create(successReceivePolicyCreation, fail);
@@ -915,17 +1040,27 @@ class CleanAndInitDatabase {
 
             var profil = new Profil(profilDesc.name, profilDesc.description);
 
+	        var successUpdate = function () {
+		        Logger.info("Update Profil successfully.");
+		        profilsNb = profilsNb + 1;
+
+		        if(profilsNb == profils.length) {
+			        successCallback();
+		        }
+	        };
+
+	        var successCompleteness = function () {
+		        Logger.info("Check Profil completeness successfully.");
+		        profil.update(successUpdate, fail);
+	        };
+
 
             var successSDIRetrieve = function(newSDI) {
                 Logger.info("SDI retrieve successfully");
 
                 var successSDIAssociation = function() {
                     Logger.info("Profil associated to SDI successfully.");
-                    profilsNb = profilsNb + 1;
-
-                    if(profilsNb == profils.length) {
-                        successCallback();
-                    }
+	                profil.checkCompleteness(successCompleteness, fail);
                 }
 
                 newSDI.addProfil(profil.getId(), successSDIAssociation, fail);
@@ -1149,11 +1284,22 @@ class CleanAndInitDatabase {
 
         var zone = new Zone(zoneDesc.name, zoneDesc.description, zoneDesc.width, zoneDesc.height, zoneDesc.positionFromTop, zoneDesc.positionFromLeft);
 
+
+	    var successUpdate = function () {
+		    Logger.info("Update zone successfully.");
+		    successCallback(zone);
+	    };
+
+	    var successCompleteness = function () {
+		    Logger.info("Check zone completeness successfully.");
+		    zone.update(successUpdate, fail);
+	    };
+
         var successBehaviourRetrieved = function(newBehaviour) {
             Logger.info("Behaviour retrieved successfully.");
             var successBehaviourAssociation = function() {
                 Logger.info("Behaviour associated to Zone successfully.");
-                successCallback(zone);
+                zone.checkCompleteness(successCompleteness, fail);
             };
 
             zone.linkBehaviour(newBehaviour.getId(), successBehaviourAssociation, fail);
@@ -1186,12 +1332,22 @@ class CleanAndInitDatabase {
 
         var callType = new CallType(callTypeDesc.name, callTypeDesc.description);
 
+	    var successUpdate = function () {
+		    Logger.info("Update callType successfully.");
+		    successCallback(callType);
+	    };
+
+	    var successCompleteness = function () {
+		    Logger.info("Check callType completeness successfully.");
+		    callType.update(successUpdate, fail);
+	    };
+
         var successReceivePolicyRetrieved = function(newReceivePolicy) {
             Logger.info("ReceivePolicy retrieved successfully.");
 
             var successReceivePolicyAssociation = function() {
                 Logger.info("ReceivePolicy associated to CallType successfully.");
-                successCallback(callType);
+	            callType.checkCompleteness(successCompleteness, fail);
             };
 
             callType.linkReceivePolicy(newReceivePolicy.getId(), successReceivePolicyAssociation, fail);
@@ -1267,6 +1423,16 @@ class CleanAndInitDatabase {
 
         var call = new Call(callDesc.name);
 
+	    var successUpdate = function () {
+		    Logger.info("Update call successfully.");
+		    successCallback(call);
+	    };
+
+	    var successCompleteness = function () {
+		    Logger.info("Check call completeness successfully.");
+		    call.update(successUpdate, fail);
+	    };
+
         var createdParamValues = new Array();
 
         var successParamValueCreate = function(newParamValue) {
@@ -1280,7 +1446,7 @@ class CleanAndInitDatabase {
                     nbAssociation = nbAssociation + 1;
 
                     if(nbAssociation == createdParamValues.length) {
-                        successCallback(call);
+	                    call.checkCompleteness(successCompleteness, fail);
                     }
                 };
 
@@ -1329,12 +1495,21 @@ class CleanAndInitDatabase {
 
         var paramValue = new ParamValue(paramValueDesc.value);
 
+	    var successUpdate = function () {
+		    Logger.info("Update paramValue successfully.");
+		    successCallback(paramValue);
+	    };
+
+	    var successCompleteness = function () {
+		    Logger.info("Check paramValue completeness successfully.");
+		    paramValue.update(successUpdate, fail);
+	    };
+
         var successParamTypeRetrieved = function(newParamType) {
             Logger.info("ParamType retrieved successfully.");
             var successParamTypeAssociation = function() {
                 Logger.info("ParamType associated to ParamValue successfully.");
-
-                successCallback(paramValue);
+	            paramValue.checkCompleteness(successCompleteness, fail);
             };
 
             paramValue.linkParamType(newParamType.getId(), successParamTypeAssociation, fail);
