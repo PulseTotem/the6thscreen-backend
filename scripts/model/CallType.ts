@@ -503,16 +503,24 @@ class CallType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["source"] = (self.source() !== null) ? self.source().toJSONObject() : null;
-            data["renderer"] = (self.renderer() !== null) ? self.renderer().toJSONObject() : null;
-            data["zone"] = (self.zone() !== null) ? self.zone().toJSONObject() : null;
-            data["receivePolicy"] = (self.receivePolicy() !== null) ? self.receivePolicy().toJSONObject() : null;
-            data["renderPolicy"] = (self.renderPolicy() !== null) ? self.renderPolicy().toJSONObject() : null;
+	        if (onlyId) {
+		        data["source"] = (self.source() !== null) ? self.source().getId() : null;
+		        data["renderer"] = (self.renderer() !== null) ? self.renderer().getId() : null;
+		        data["zone"] = (self.zone() !== null) ? self.zone().getId() : null;
+		        data["receivePolicy"] = (self.receivePolicy() !== null) ? self.receivePolicy().getId() : null;
+		        data["renderPolicy"] = (self.renderPolicy() !== null) ? self.renderPolicy().getId() : null;
+	        } else {
+		        data["source"] = (self.source() !== null) ? self.source().toJSONObject() : null;
+		        data["renderer"] = (self.renderer() !== null) ? self.renderer().toJSONObject() : null;
+		        data["zone"] = (self.zone() !== null) ? self.zone().toJSONObject() : null;
+		        data["receivePolicy"] = (self.receivePolicy() !== null) ? self.receivePolicy().toJSONObject() : null;
+		        data["renderPolicy"] = (self.renderPolicy() !== null) ? self.renderPolicy().toJSONObject() : null;
+	        }
 
             successCallback(data);
         };
@@ -742,14 +750,6 @@ class CallType extends ModelItf {
 	 * @return {CallType} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : CallType {
-		if(!jsonObject.id) {
-			throw new ModelException("A CallType object should have an ID.");
-		}
-
-		if(jsonObject.complete == undefined || jsonObject.complete == null) {
-			throw new ModelException("A CallType object should have a complete attribute.");
-		}
-
 		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
