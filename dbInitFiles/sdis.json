@@ -76,7 +76,7 @@
         "description" : "SDI avec 2 zones, 2 calls FluxRSS, un par zone",
         "allowedHost" : "*",
         "user" : {
-            "username" : "christian"
+            "username" : "simon"
         },
         "zones" : [
             {

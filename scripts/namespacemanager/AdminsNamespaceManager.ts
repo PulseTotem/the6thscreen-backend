@@ -28,6 +28,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveSourceDescriptionOnlyId', function(description) { self.sendSourceDescription(description, true); });
 	    this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
 	    this.addListenerToSocket('RetrieveCallTypeDescriptionOnlyId', function(description) { self.sendCallTypeDescription(description, true); });
+	    this.addListenerToSocket('RetrieveServiceDescription', function(description) { self.sendServiceDescription(description); });
+	    this.addListenerToSocket('RetrieveServiceDescriptionOnlyId', function(description) { self.sendServiceDescription(description, true); });
 	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
 	    this.addListenerToSocket('RetrieveAllZoneDescription', function() { self.sendAllObjectDescription(Zone, "AllZoneDescription"); });
@@ -42,6 +44,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('CreateCallTypeDescription', function(data) { self.createObject(CallType, data, "CallTypeDescription"); });
 	    this.addListenerToSocket('UpdateCallTypeDescription', function(data) { self.updateObjectAttribute(CallType, data, "CallTypeDescription"); });
 	    this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteCallType(idCallType); });
+	    this.addListenerToSocket('CreateServiceDescription', function(data) { self.createObject(Service, data, "ServiceDescription"); });
+	    this.addListenerToSocket('UpdateServiceDescription', function(data) { self.updateObjectAttribute(Service, data, "ServiceDescription"); });
+	    this.addListenerToSocket('DeleteService', function(idService) { self.deleteService(idService); });
     }
 
 ////////////////////// Begin: Manage SendUserDescriptionFromToken //////////////////////
@@ -196,6 +201,25 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage SendCallTypeDescription //////////////////////
 
+////////////////////// Begin: Manage SendServiceDescription //////////////////////
+
+	/**
+	 * Retrieve Service instance description and send it to client.
+	 *
+	 * @method sendServiceDescription
+	 * @param {any} callTypeDescription - The callType Description.
+	 */
+	sendServiceDescription(serviceDescription : any, onlyId : boolean = false) {
+		// serviceDescription : {"serviceId" : string}
+		var self = this;
+
+		var serviceId = serviceDescription.serviceId;
+
+		self.sendObjectDescriptionFromId(Service, serviceId, "ServiceDescription", onlyId);
+	}
+
+////////////////////// End: Manage SendServiceDescription //////////////////////
+
 
 ////////////////////// Begin: Manage DeleteSource //////////////////////
 
@@ -227,7 +251,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
 	 */
 	deleteCallType(callTypeDescription : any, self : AdminsNamespaceManager = null) {
-		// sourceId : {"callTypeId" : string}
+		// callTypeId : {"callTypeId" : string}
 		var self = this;
 
 		var callTypeId = callTypeDescription.callTypeId;
@@ -236,6 +260,26 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage deleteCallType //////////////////////
+
+////////////////////// Begin: Manage deleteService //////////////////////
+
+	/**
+	 * Delete a Service of the given id.
+	 *
+	 * @method deleteService
+	 * @param {any} serviceDescription - The information containing ID of the service to delete.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
+	 */
+	deleteService(serviceDescription : any, self : AdminsNamespaceManager = null) {
+		// serviceId : {"serviceId" : string}
+		var self = this;
+
+		var serviceId = serviceDescription.serviceId;
+
+		self.deleteObject(Service, serviceId, "deletedService");
+	}
+
+////////////////////// End: Manage deleteService //////////////////////
 
 
 }
