@@ -377,14 +377,21 @@ class ParamType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["type"] = (self.type() !== null) ? self.type().toJSONObject() : null;
-            data["constraint"] = (self.constraint() !== null) ? self.constraint().toJSONObject() : null;
-            data["defaultValue"] = (self.defaultValue() !== null) ? self.defaultValue().toJSONObject() : null;
+
+	        if (onlyId) {
+		        data["type"] = (self.type() !== null) ? self.type().getId() : null;
+		        data["constraint"] = (self.constraint() !== null) ? self.constraint().getId() : null;
+		        data["defaultValue"] = (self.defaultValue() !== null) ? self.defaultValue().getId() : null;
+	        } else {
+		        data["type"] = (self.type() !== null) ? self.type().toJSONObject() : null;
+		        data["constraint"] = (self.constraint() !== null) ? self.constraint().toJSONObject() : null;
+		        data["defaultValue"] = (self.defaultValue() !== null) ? self.defaultValue().toJSONObject() : null;
+	        }
 
             successCallback(data);
         };
@@ -560,12 +567,6 @@ class ParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ParamType {
-		if(!jsonObject.id) {
-			throw new ModelException("A ParamType object should have an ID.");
-		}
-		if(jsonObject.complete == undefined || jsonObject.complete == null) {
-			throw new ModelException("A ParamType object should have a complete attribute.");
-		}
 		return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 

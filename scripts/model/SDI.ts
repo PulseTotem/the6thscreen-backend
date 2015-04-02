@@ -439,15 +439,15 @@ class SDI extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["profils"] = self.serializeArray(self.profils());
-            data["timelines"] = self.serializeArray(self.timelines());
-            data["users"] = self.serializeArray(self.users());
-            data["zones"] = self.serializeArray(self.zones());
+            data["profils"] = self.serializeArray(self.profils(), onlyId);
+            data["timelines"] = self.serializeArray(self.timelines(), onlyId);
+            data["users"] = self.serializeArray(self.users(), onlyId);
+            data["zones"] = self.serializeArray(self.zones(), onlyId);
 
             successCallback(data);
         };
@@ -646,13 +646,6 @@ class SDI extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : SDI {
-		if(!jsonObject.id) {
-			throw new ModelException("A SDI object should have an ID.");
-		}
-		if(jsonObject.complete == undefined || jsonObject.complete == null) {
-			throw new ModelException("A SDI object should have a complete attribute.");
-		}
-
 		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id, jsonObject.complete);
 	}
 

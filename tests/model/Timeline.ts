@@ -57,61 +57,6 @@ describe('Timeline', function() {
 
 			assert.deepEqual(profilRetrieve, profilExpected, "The retrieve timeline (" + profilRetrieve + ") does not match with the expected one (" + profilExpected + ")");
 		});
-
-		it('should throw an exception if the ID is undefined', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"complete": false
-			};
-
-			assert.throws(function () {
-					Timeline.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the ID is null', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"id": null,
-				"complete": false
-			};
-
-			assert.throws(function () {
-					Timeline.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete attribute is undefined', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"id": 343
-			};
-
-			assert.throws(function () {
-					Timeline.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete attribute is null', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"id": 343,
-				"complete": null
-			};
-
-			assert.throws(function () {
-					Timeline.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
 	});
 
 	describe('#toJsonObject', function () {

@@ -243,12 +243,17 @@ class Renderer extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["infoType"] = (self.infoType() !== null) ? self.infoType().toJSONObject() : null;
+
+	        if (onlyId) {
+		        data["infoType"] = (self.infoType() !== null) ? self.infoType().getId() : null;
+	        } else {
+		        data["infoType"] = (self.infoType() !== null) ? self.infoType().toJSONObject() : null;
+	        }
             successCallback(data);
         };
 
@@ -369,12 +374,6 @@ class Renderer extends ModelItf {
 	 * @return {Renderer} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Renderer {
-		if(!jsonObject.id) {
-			throw new ModelException("A Renderer object should have an ID.");
-		}
-		if(jsonObject.complete == undefined || jsonObject.complete == null) {
-			throw new ModelException("A Renderer object should have a complete attribute.");
-		}
 		return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 

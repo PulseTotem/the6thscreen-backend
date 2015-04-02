@@ -170,12 +170,6 @@ class ReceivePolicy extends ModelItf {
 	 * @return {ReceivePolicy} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ReceivePolicy {
-		if (!jsonObject.id) {
-			throw new ModelException("A ReceivePolicy object should have an ID.");
-		}
-		if (jsonObject.complete == null || jsonObject.complete == undefined) {
-			throw new ModelException("A ReceivePolicy object should have a complete.");
-		}
 		return new ReceivePolicy(jsonObject.name, jsonObject.id, jsonObject.complete);
 	}
 

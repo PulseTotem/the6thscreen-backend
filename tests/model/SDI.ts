@@ -121,65 +121,6 @@ describe('SDI', function() {
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve SDI (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
-
-		it('should throw an exception if the ID is undefined', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"allowedHost": "toto",
-				"complete": false
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the ID is null', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"id": null,
-				"allowedHost": "toto",
-				"complete": false
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete attribute is undefined', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"allowedHost": "toto",
-				"id": 33
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete attribute is null', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"id": 34,
-				"allowedHost": "toto",
-				"complete": null
-			};
-
-			assert.throws(function () {
-					SDI.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
 	});
 
 	describe('#toJsonObject', function () {
