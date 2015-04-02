@@ -32,6 +32,14 @@ class OAuthKey extends ModelItf {
     private _description : string;
 
     /**
+     * Value property.
+     *
+     * @property _value
+     * @type string
+     */
+    private _value : string;
+
+    /**
      * Service property.
      *
      * @property _service
@@ -53,13 +61,15 @@ class OAuthKey extends ModelItf {
      * @constructor
      * @param {string} name - The OAuthKey's name.
      * @param {string} description - The OAuthKey's description.
+     * @param {string} value - The OAuthKey's value.
      * @param {number} id - The OAuthKey's ID.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+    constructor(name : string = "", description : string = "", value : string = "", id : number = null, complete : boolean = false) {
         super(id, complete);
 
         this.setName(name);
         this.setDescription(description);
+        this.setValue(value);
 
         this._service = null;
         this._service_loaded = false;
@@ -84,6 +94,15 @@ class OAuthKey extends ModelItf {
     }
 
     /**
+     * Set the OAuthKey's value.
+     *
+     * @method setValue
+     */
+    setValue(value : string) {
+        this._value = value;
+    }
+
+    /**
      * Return the OAuthKey's name.
      *
      * @method name
@@ -99,6 +118,15 @@ class OAuthKey extends ModelItf {
      */
     description() {
         return this._description;
+    }
+
+    /**
+     * Return the OAuthKey's value.
+     *
+     * @method value
+     */
+    value() {
+        return this._value;
     }
 
     /**
@@ -122,7 +150,7 @@ class OAuthKey extends ModelItf {
             var self = this;
             var success : Function = function(service) {
                 if(!!service) {
-                    self._service_loaded = service;
+                    self._service = service;
                 }
                 self._service_loaded = true;
                 if(successCallback != null) {
@@ -196,6 +224,7 @@ class OAuthKey extends ModelItf {
             "id": this.getId(),
             "name": this.name(),
             "description": this.description(),
+            "value": this.value(),
             "complete": this.isComplete()
         };
         return data;
@@ -375,7 +404,7 @@ class OAuthKey extends ModelItf {
         if(jsonObject.complete == undefined || jsonObject.complete == null) {
             throw new ModelException("A OAuthKey object should have a complete attribute.");
         }
-        return new OAuthKey(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+        return new OAuthKey(jsonObject.name, jsonObject.description, jsonObject.value, jsonObject.id, jsonObject.complete);
     }
 
     /**
