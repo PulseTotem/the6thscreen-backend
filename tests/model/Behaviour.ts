@@ -108,61 +108,6 @@ describe('Behaviour', function() {
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve renderer (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
-
-		it('should throw an exception if the ID is undefined', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"complete": false
-			};
-
-			assert.throws(function () {
-					Behaviour.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the ID is null', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"complete": false,
-				"id": null
-			};
-
-			assert.throws(function () {
-					Behaviour.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete is undefined', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"id": 23
-			};
-
-			assert.throws(function () {
-					Behaviour.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete is null', function () {
-			var json = {
-				"name": "toto",
-				"description": "blabla",
-				"id": 3,
-				"complete": null
-			};
-
-			assert.throws(function () {
-					Behaviour.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
 	});
 
 	describe('#toJsonObject', function () {

@@ -195,13 +195,6 @@ class Behaviour extends ModelItf {
 	 * @return {Behaviour} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Behaviour {
-		if(!jsonObject.id) {
-			throw new ModelException("A Behaviour object should have an ID.");
-		}
-		if(jsonObject.complete == null || jsonObject.complete == undefined) {
-			throw new ModelException("A Behaviour object should have a complete attribute.");
-		}
-
 		return new Behaviour(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 

@@ -168,12 +168,6 @@ class Role extends ModelItf {
 	 * @return {Role} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Role {
-		if (!jsonObject.id) {
-			throw new ModelException("A Role object should have an ID.");
-		}
-		if (jsonObject.complete == null || jsonObject.complete == undefined) {
-			throw new ModelException("A Role object should have a complete attribute.");
-		}
 		return new Role(jsonObject.name, jsonObject.id, jsonObject.complete);
 	}
 

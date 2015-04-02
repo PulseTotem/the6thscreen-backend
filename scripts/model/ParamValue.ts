@@ -211,12 +211,18 @@ class ParamValue extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["paramType"] = (self.paramType() !== null) ? self.paramType().toJSONObject() : null;
+
+	        if (onlyId) {
+		        data["paramType"] = (self.paramType() !== null) ? self.paramType().getId() : null;
+	        } else {
+		        data["paramType"] = (self.paramType() !== null) ? self.paramType().toJSONObject() : null;
+	        }
+
 
             successCallback(data);
         };
@@ -338,12 +344,6 @@ class ParamValue extends ModelItf {
 	 * @return {ParamValue} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ParamValue {
-		if (!jsonObject.id) {
-			throw new ModelException("A ParamValue object should have an ID.");
-		}
-		if (jsonObject.complete == undefined || jsonObject.complete == null) {
-			throw new ModelException("A ParamValue object should have a complete attribute.");
-		}
 		return new ParamValue(jsonObject.value, jsonObject.id, jsonObject.complete);
 	}
 

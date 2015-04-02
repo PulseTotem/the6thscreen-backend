@@ -63,57 +63,6 @@ describe('ParamValue', function() {
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve call (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
-
-		it('should throw an exception if the ID is undefined', function () {
-			var json = {
-				"value": "toto",
-				"complete": false
-			};
-
-			assert.throws(function () {
-					ParamValue.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the ID is null', function () {
-			var json = {
-				"value": "toto",
-				"id": null,
-				"complete": false
-			};
-
-			assert.throws(function () {
-					ParamValue.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete value is undefined', function () {
-			var json = {
-				"value": "toto",
-				"id": 12
-			};
-
-			assert.throws(function () {
-					ParamValue.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete value is null', function () {
-			var json = {
-				"value": "toto",
-				"id": 23,
-				"complete": null
-			};
-
-			assert.throws(function () {
-					ParamValue.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
 	});
 
 	describe('#checkCompleteness', function() {

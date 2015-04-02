@@ -225,12 +225,12 @@ class Profil extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["calls"] = self.serializeArray(self.calls());
+            data["calls"] = self.serializeArray(self.calls(), onlyId);
             successCallback(data);
         };
 
@@ -350,12 +350,6 @@ class Profil extends ModelItf {
      * @return {Profil} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Profil {
-	    if (!jsonObject.id) {
-		    throw new ModelException("A Profil object should have an ID.");
-	    }
-	    if (jsonObject.complete == undefined || jsonObject.complete == null) {
-		    throw new ModelException("A Profil object should have a complete attribute.");
-	    }
 	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
     }
 

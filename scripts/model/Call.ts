@@ -341,14 +341,20 @@ class Call extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 	    var data = this.toJSONObject();
 
         var success : Function = function() {
-            data["callType"] = (self.callType() !== null) ? self.callType().toJSONObject() : null;
-            data["profil"] = (self.profil() !== null) ? self.profil().toJSONObject() : null;
-            data["paramValues"] = self.serializeArray(self.paramValues());
+
+	        if (onlyId) {
+		        data["callType"] = (self.callType() !== null) ? self.callType().getId() : null;
+		        data["profil"] = (self.profil() !== null) ? self.profil().getId() : null;
+	        } else {
+		        data["callType"] = (self.callType() !== null) ? self.callType().toJSONObject() : null;
+		        data["profil"] = (self.profil() !== null) ? self.profil().toJSONObject() : null;
+	        }
+	        data["paramValues"] = self.serializeArray(self.paramValues(), onlyId);
 
             successCallback(data);
         };
@@ -523,13 +529,7 @@ class Call extends ModelItf {
      * @return {Call} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Call {
-	    if (!jsonObject.id) {
-		    throw new ModelException("A Call object should have an ID.");
-	    }
-	    if (jsonObject.complete == null || jsonObject.complete == undefined) {
-		    throw new ModelException("A Call object should have a complete attribute.");
-	    }
-        return new Call(jsonObject.name, jsonObject.id, jsonObject.complete);
+	    return new Call(jsonObject.name, jsonObject.id, jsonObject.complete);
     }
 
     /**

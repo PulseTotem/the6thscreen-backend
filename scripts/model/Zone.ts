@@ -427,13 +427,17 @@ class Zone extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["behaviour"] = (self.behaviour() !== null) ? self.behaviour().toJSONObject() : null;
-	        data["callTypes"] = self.serializeArray(self.callTypes());
+	        if (onlyId) {
+		        data["behaviour"] = (self.behaviour() !== null) ? self.behaviour().getId() : null;
+	        } else {
+		        data["behaviour"] = (self.behaviour() !== null) ? self.behaviour().toJSONObject() : null;
+	        }
+            data["callTypes"] = self.serializeArray(self.callTypes(), onlyId);
 
             successCallback(data);
         };
@@ -582,14 +586,6 @@ class Zone extends ModelItf {
 	 * @return {Zone} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Zone {
-		if (!jsonObject.id) {
-			throw new ModelException("A Zone object should have an ID.");
-		}
-
-		if (jsonObject.complete == undefined || jsonObject.complete == null) {
-			throw new ModelException("A Zone object should have a complete attribute.");
-		}
-
 		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id, jsonObject.complete);
 	}
 
