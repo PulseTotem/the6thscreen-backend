@@ -32,26 +32,32 @@ describe('Service', function(){
 			assert.equal(c.host(), host, "The host is not stored correctly.");
 		});
 
+		it('should store the oauth', function(){
+			var oauth = true;
+			var c = new Service("", "", "", oauth);
+			assert.equal(c.oauth(), oauth, "The oauth is not stored correctly.");
+		});
+
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new Service("", "", "", id);
+			var c = new Service("", "", "", true, id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete value', function() {
-			var c = new Service("", "", "", 12, true);
+			var c = new Service("", "", "", true, 12, true);
 			assert.equal(c.isComplete(), true, "The complete attribute is not stored.");
 		});
 
 		it('should assign a default value to the complete attribute', function() {
-			var c = new Service("", "", "", 12, false);
+			var c = new Service("", "", "", true, 12, false);
 			assert.equal(c.isComplete(), false, "The complete attribute is not stored.");
 		});
 	});
 
 	describe('#checkCompleteness', function() {
 		it('should specify the object is complete if a name, an host and an ID are given', function(done) {
-			var i = new Service("name", "", "localhost",324);
+			var i = new Service("name", "", "localhost", true, 324);
 			var success = function () {
 				assert.equal(i.isComplete(), true, "The Service is not considered as complete.");
 				done();
@@ -64,7 +70,7 @@ describe('Service', function(){
 		});
 
 		it('should not specify the object is complete if the name is an empty string', function(done) {
-			var i = new Service("", "", "localhost",324);
+			var i = new Service("", "", "localhost", true, 324);
 			var success = function () {
 				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
 				done();
@@ -77,7 +83,7 @@ describe('Service', function(){
 		});
 
 		it('should not specify the object is complete if the name is null', function(done) {
-			var i = new Service(null, "", "localhost",324);
+			var i = new Service(null, "", "localhost", true, 324);
 			var success = function () {
 				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
 				done();
@@ -90,7 +96,7 @@ describe('Service', function(){
 		});
 
 		it('should not specify the object is complete if the id is null', function(done) {
-			var i = new Service("name", "", "localhost",null);
+			var i = new Service("name", "", "localhost", true, null);
 			var success = function () {
 				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
 				done();
@@ -116,7 +122,7 @@ describe('Service', function(){
 		});
 
 		it('should not specify the object is complete if the host is an empty string', function(done) {
-			var i = new Service("test", "", "",324);
+			var i = new Service("test", "", "", true, 324);
 			var success = function () {
 				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
 				done();
@@ -129,7 +135,7 @@ describe('Service', function(){
 		});
 
 		it('should not specify the object is complete if the host is null', function(done) {
-			var i = new Service("test", "", null,324);
+			var i = new Service("test", "", null, true, 324);
 			var success = function () {
 				assert.equal(i.isComplete(), false, "The infoType is considered as complete.");
 				done();
@@ -149,11 +155,12 @@ describe('Service', function(){
 				"name": "toto",
 				"description": "tata",
 				"host": "localhost",
+				"oauth": true,
 				"complete": true
 			};
 
 			var callRetrieve = Service.fromJSONObject(json);
-			var callExpected = new Service("toto","tata","localhost",42,true);
+			var callExpected = new Service("toto","tata","localhost", true, 42,true);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve call ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -164,11 +171,12 @@ describe('Service', function(){
 				"name": "toto",
 				"description": "",
 				"host": null,
+				"oauth": true,
 				"complete": false
 			};
 
 			var callRetrieve = Service.fromJSONObject(json);
-			var callExpected = new Service("toto","",null,42);
+			var callExpected = new Service("toto","",null, true, 42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve call ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -232,11 +240,12 @@ describe('Service', function(){
 
 	describe('#toJsonObject', function() {
 		it('should create the expected JSON Object', function() {
-			var c = new Service("toto", "blabla", "blob", 52);
+			var c = new Service("toto", "blabla", "blob", true, 52);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
 				"host": "blob",
+				"oauth": true,
 				"id": 52,
 				"complete": false
 			};

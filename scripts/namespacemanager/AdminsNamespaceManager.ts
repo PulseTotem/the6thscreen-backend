@@ -86,7 +86,18 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
         Logger.debug("SocketId: " + this.socket.id + " - sendUserDescriptionFromToken : success");
 
-        self.socket.emit("UserDescriptionFromToken", self.formatResponse(true, user.toJSONObject()));
+		var success : Function = function(completeJSONObject) {
+			self.socket.emit("UserDescriptionFromToken", self.formatResponse(true, completeJSONObject));
+
+			Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken : send done with success status for User with Id : " + user.getId());
+		};
+
+		var fail : Function = function(error) {
+			self.socket.emit("UserDescriptionFromToken", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken : send done with fail status for User with Id : " + user.getId() + " - Fail during completeJsonObject.");
+		};
+
+		user.toCompleteJSONObject(success, fail);
     }
 
     /**

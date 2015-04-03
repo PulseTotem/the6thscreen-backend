@@ -166,6 +166,7 @@ describe('OAuthKey', function() {
                     "name": "service",
                     "description": "serviceDesc",
                     "host": "serviceHost",
+					"oauth": true,
                     "complete": true
                 }
             };
@@ -197,6 +198,7 @@ describe('OAuthKey', function() {
                     "name": "service",
                     "description": "serviceDesc",
                     "host": "serviceHost",
+					"oauth": true,
                     "complete": false
                 }
             };
@@ -290,7 +292,7 @@ describe('OAuthKey', function() {
     describe('#linkService', function () {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
-            var s = new Service("service", "serviceDesc", "serviceHost", 42);
+            var s = new Service("service", "serviceDesc", "serviceHost", true, 42);
             var spy = sinon.spy(s, "desynchronize");
 
             var response1:SequelizeRestfulResponse = {
@@ -340,7 +342,7 @@ describe('OAuthKey', function() {
     describe('#unlinkService', function () {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
-            var s = new Service("service", "serviceDesc", "serviceHost", 42);
+            var s = new Service("service", "serviceDesc", "serviceHost", true, 42);
 
             var response1:SequelizeRestfulResponse = {
                 "status": "success",

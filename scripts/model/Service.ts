@@ -38,19 +38,29 @@ class Service extends ModelItf {
 	private _host : string;
 
 	/**
+	 * OAuth property : determine if Service needs OAuth to be used.
+	 *
+	 * @property _oauth
+	 * @type boolean
+	 */
+	private _oauth : boolean;
+
+	/**
 	 * Constructor
 	 *
 	 * @constructor
 	 * @param name The name of the service
 	 * @param description A description of the service
 	 * @param host The host to reach the service
+	 * @param {boolean} oauth - To set if Service needs authentication or not
 	 * @param id The DB id of the service
 	 */
-	constructor(name : string = "", description : string = "", host : string = "", id : number = null, complete : boolean = false) {
+	constructor(name : string = "", description : string = "", host : string = "", oauth : boolean = false, id : number = null, complete : boolean = false) {
 		super(id, complete);
 		this.setName(name);
 		this.setDescription(description);
 		this.setHost(host);
+		this.setOAuth(oauth);
 	}
 
 	/**
@@ -81,6 +91,15 @@ class Service extends ModelItf {
 	}
 
 	/**
+	 * Set the Service's oauth.
+	 *
+	 * @method setOAuth
+	 */
+	setOAuth(oauth : boolean) {
+		this._oauth = oauth;
+	}
+
+	/**
 	 * Return the Service's name.
 	 *
 	 * @method name
@@ -107,6 +126,15 @@ class Service extends ModelItf {
 		return this._host;
 	}
 
+	/**
+	 * Return the Service's oauth.
+	 *
+	 * @method oauth
+	 */
+	oauth() {
+		return this._oauth;
+	}
+
 	//////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 
@@ -122,6 +150,7 @@ class Service extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"host": this.host(),
+			"oauth": this.oauth(),
 			"complete": this.isComplete()
 		};
 		return data;
@@ -226,7 +255,7 @@ class Service extends ModelItf {
 	 * @return {Service} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Service {
-		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.id, jsonObject.complete);
+		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.oauth, jsonObject.id, jsonObject.complete);
 	}
 
 	/**
