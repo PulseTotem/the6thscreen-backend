@@ -31,6 +31,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveServiceDescription', function(description) { self.sendServiceDescription(description); });
 	    this.addListenerToSocket('RetrieveServiceDescriptionOnlyId', function(description) { self.sendServiceDescription(description, true); });
 	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
+		this.addListenerToSocket('RetrieveOAuthKeyDescription', function(description) { self.sendOAuthKeyDescription(description); });
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
 	    this.addListenerToSocket('RetrieveAllZoneDescription', function() { self.sendAllObjectDescription(Zone, "AllZoneDescription"); });
 	    this.addListenerToSocket('RetrieveAllRendererDescription', function() { self.sendAllObjectDescription(Renderer, "AllRendererDescription"); });
@@ -173,6 +174,26 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage SendZoneDescription //////////////////////
+
+////////////////////// Begin: Manage SendOAuthKeyDescription //////////////////////
+
+	/**
+	 * Retrieve OAuthKey instance description and send it to client.
+	 *
+	 * @method sendOAuthKeyDescription
+	 * @param {any} oauthKeyDescription - The Zone Description.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
+	 */
+	sendOAuthKeyDescription(oauthKeyDescription : any, self : AdminsNamespaceManager = null) {
+		// oauthKeyDescription : {"oauthKeyId" : string}
+		var self = this;
+
+		var oauthKeyId = oauthKeyDescription.oauthKeyId;
+
+		self.sendObjectDescriptionFromId(OAuthKey, oauthKeyId, "OAuthKeyDescription_" + oauthKeyId);
+	}
+
+////////////////////// End: Manage SendOAuthKeyDescription //////////////////////
 
 ////////////////////// Begin: Manage SendSourceDescription //////////////////////
 
