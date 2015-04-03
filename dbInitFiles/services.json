@@ -3,12 +3,21 @@
         "name" : "RSSFeedReader",
         "description" : "Lecteur de flux RSS",
         "host" : "http://localhost:6002/RSSFeedReader",
+        "oauth": false,
         "port" : 6002
     },
     {
         "name" : "SmartShopping",
         "description" : "API du projet SmartShopping",
         "host" : "http://localhost:6003/SmartShopping",
+        "oauth": false,
         "port" : 6003
+    },
+    {
+      "name" : "Twitter",
+      "description" : "Service Twitter",
+      "host" : "http://localhost:6004/Twitter",
+      "oauth": true,
+      "port" : 6004
     }
 ]
