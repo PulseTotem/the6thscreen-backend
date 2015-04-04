@@ -8,6 +8,7 @@
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Role.ts" />
 /// <reference path="./SDI.ts" />
+/// <reference path="./OAuthKey.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -85,6 +86,22 @@ class User extends ModelItf {
      */
     private _sdis_loaded : boolean;
 
+    /**
+     * OAuthKeys property.
+     *
+     * @property _oauthkeys
+     * @type Array<OAuthKey>
+     */
+    private _oauthkeys : Array<OAuthKey>;
+
+    /**
+     * Lazy loading for OAuthKeys property.
+     *
+     * @property _oauthkeys_loaded
+     * @type boolean
+     */
+    private _oauthkeys_loaded : boolean;
+
 
     /**
      * Constructor.
@@ -107,6 +124,9 @@ class User extends ModelItf {
 
         this._sdis = new Array<SDI>();
         this._sdis_loaded = false;
+
+        this._oauthkeys = new Array<OAuthKey>();
+        this._oauthkeys_loaded = false;
     }
 
 	/**
@@ -263,6 +283,47 @@ class User extends ModelItf {
         }
     }
 
+    /**
+     * Return the OAuthKeys owned by the User.
+     *
+     * @method oauthkeys
+     */
+    oauthkeys() {
+        return this._oauthkeys;
+    }
+
+    /**
+     * Load the OAuthKeys owned by the User.
+     *
+     * @method loadOAuthKeys
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadOAuthKeys(successCallback : Function, failCallback : Function) {
+        if(! this._oauthkeys_loaded) {
+            var self = this;
+            var success : Function = function(oauthkeys) {
+                self._oauthkeys = oauthkeys;
+                self._oauthkeys_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(User, OAuthKey, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -277,7 +338,7 @@ class User extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._roles_loaded && self._sdis_loaded) {
+            if(self._roles_loaded && self._sdis_loaded && self._oauthkeys_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -294,6 +355,7 @@ class User extends ModelItf {
 
         this.loadRoles(success, fail);
         this.loadSdis(success, fail);
+        this.loadOAuthKeys(success, fail);
     }
 
 	/**
@@ -304,6 +366,7 @@ class User extends ModelItf {
 	desynchronize() : void {
 		this._roles_loaded = false;
 		this._sdis_loaded = false;
+        this._oauthkeys_loaded = false;
 	}
 
 	/**
@@ -367,6 +430,7 @@ class User extends ModelItf {
             var data = self.toJSONObject();
             data["roles"] = self.serializeArray(self.roles());
             data["sdis"] = self.serializeArray(self.sdis());
+            data["oauthkeys"] = self.serializeArray(self.oauthkeys());
 
             successCallback(data);
         };
@@ -503,6 +567,32 @@ class User extends ModelItf {
 	removeSDI(sdiID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(User, SDI, sdiID, successCallback, failCallback);
 	}
+
+    /**
+     * Add a new OAuthKey to the User and associate it in the database.
+     * A OAuthKey can only be added once.
+     *
+     * @method addOAuthKey
+     * @param {OAuthKey} oauthkeyID - The OAuthKey to link with the User. It cannot be a null value.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    addOAuthKey(oauthkeyID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(User, OAuthKey, oauthkeyID, successCallback, failCallback);
+    }
+
+    /**
+     * Remove a OAuthKey from the User: the association is removed both in the object and in database.
+     * The OAuthKey can only be removed if it exists first in the list of associated OAuthKeys, else an exception is thrown.
+     *
+     * @method removeOAuthKey
+     * @param {OAuthKey} oauthkeyID - The OAuthKey to remove from that User
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    removeOAuthKey(oauthkeyID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(User, OAuthKey, oauthkeyID, successCallback, failCallback);
+    }
 
 	/**
 	 * Add a new Role to the User and associate it in the database.

@@ -348,7 +348,7 @@ describe('User', function() {
             var success = function() {
                 var sdis = c.sdis();
 
-                assert.deepEqual(sdis, [], "The role is not an empty array: "+JSON.stringify(sdis));
+                assert.deepEqual(sdis, [], "The SDIs is not an empty array: "+JSON.stringify(sdis));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the sdis");
 
                 var response2 : SequelizeRestfulResponse = {
@@ -362,7 +362,7 @@ describe('User', function() {
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the addSDI is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the role in database.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the SDI in database.");
                     done();
                 };
 
@@ -422,7 +422,7 @@ describe('User', function() {
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the removeSDI is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the role in database.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the SDI in database.");
                     done();
                 };
 
@@ -440,4 +440,114 @@ describe('User', function() {
 			c.loadSdis(success, fail);
 		});
 	});
+
+    describe('#addOAuthKey', function() {
+        it('should call the right request', function(done) {
+            var c = new User("toto", "bla", 52);
+            var pv = new OAuthKey("mavaleur", "bidule", "maValeur", 12);
+            var spy = sinon.spy(pv, "desynchronize");
+
+            var response1 : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": []
+            };
+
+            var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+                .get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), OAuthKey.getTableName()))
+                .reply(200, JSON.stringify(response1));
+
+            var success = function() {
+                var oauthkeys = c.oauthkeys();
+
+                assert.deepEqual(oauthkeys, [], "The oauthkeys is not an empty array: "+JSON.stringify(oauthkeys));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the oauthkeys");
+
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
+
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .put(DatabaseConnection.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), OAuthKey.getTableName(), pv.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
+
+                var success2 = function() {
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the OAuthKey in database.");
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.addOAuthKey(pv.getId(), success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadOAuthKeys(success, fail);
+        });
+
+    });
+
+    describe('#removeOAuthKey', function() {
+        it('should call the right request', function(done) {
+            var c = new User("toto", "bla", 52);
+            var pv = new OAuthKey("mavaleur", "blup", "ouepKey", 12);
+
+            var response1 : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": [
+                    {
+                        "name": "mavaleur",
+                        "description": "blup",
+                        "value": "ouepKey",
+                        "complete": false,
+                        "id": 12
+                    }
+                ]
+            };
+
+            var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+                .get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), OAuthKey.getTableName()))
+                .reply(200, JSON.stringify(response1));
+
+            var success = function() {
+                var oauthkeys = c.oauthkeys();
+
+                assert.deepEqual(oauthkeys, [pv], "The oauthkeys array is not an array fill only with PV: "+JSON.stringify(oauthkeys));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the oauthkeys");
+
+                var spy = sinon.spy(pv, "desynchronize");
+                var response2 : SequelizeRestfulResponse = {
+                    "status": "success",
+                    "data": {}
+                };
+
+                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+                    .delete(DatabaseConnection.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), OAuthKey.getTableName(), pv.getId().toString()))
+                    .reply(200, JSON.stringify(response2));
+
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the removeOAuthKey is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the OAuthKey in database.");
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.removeOAuthKey(pv.getId(), success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadOAuthKeys(success, fail);
+        });
+    });
 });
