@@ -124,7 +124,7 @@
             },
             {
                 "name" : "RSSRightZone2",
-                "description" : "Display RSS feeds in the left zone with generic renderer",
+                "description" : "Display RSS feeds in the right zone with generic renderer",
                 "zone" : {
                     "name" : "RightZone2"
                 },
@@ -142,5 +142,77 @@
                 }
             }
         ]
-    }
+    },
+  {
+    "name" : "SDITwitterOnly",
+    "description" : "SDI avec 2 zones, 2 calls Twitter, un par zone",
+    "allowedHost" : "*",
+    "user" : {
+      "username" : "christian"
+    },
+    "zones" : [
+      {
+        "name" : "LeftZone3",
+        "description" : "Zone gauche de SDITwitterOnly",
+        "width" : 49,
+        "height" : 100,
+        "positionFromTop" : 0,
+        "positionFromLeft" : 0,
+        "behaviour" : {
+          "name" : "Appearance"
+        }
+      },
+      {
+        "name" : "RightZone3",
+        "description" : "Zone droite de SDITwitterOnly",
+        "width" : 49,
+        "height" : 100,
+        "positionFromTop" : 0,
+        "positionFromLeft" : 51,
+        "behaviour" : {
+          "name" : "Appearance"
+        }
+      }
+    ],
+    "callTypes" : [
+      {
+        "name" : "TwitterLeftZone3",
+        "description" : "Display Tweets in the left zone with generic renderer",
+        "zone" : {
+          "name" : "LeftZone3"
+        },
+        "source" : {
+          "name" : "LastTweetsFromSearch"
+        },
+        "renderer" : {
+          "name" : "TweetRendererGeneric"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
+        "name" : "TwitterRightZone3",
+        "description" : "Display Tweets in the right zone with generic renderer",
+        "zone" : {
+          "name" : "RightZone3"
+        },
+        "source" : {
+          "name" : "LastTweetsFromSearch"
+        },
+        "renderer" : {
+          "name" : "TweetRendererGeneric"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      }
+    ]
+  }
 ]
