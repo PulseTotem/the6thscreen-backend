@@ -48,6 +48,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('CreateServiceDescription', function(data) { self.createObject(Service, data, "ServiceDescription"); });
 	    this.addListenerToSocket('UpdateServiceDescription', function(data) { self.updateObjectAttribute(Service, data, "ServiceDescription"); });
 	    this.addListenerToSocket('DeleteService', function(idService) { self.deleteService(idService); });
+		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
+		this.addListenerToSocket('DeleteOAuthKey', function(idOAuthKey) { self.deleteOAuthKey(idOAuthKey); });
     }
 
 ////////////////////// Begin: Manage SendUserDescriptionFromToken //////////////////////
@@ -312,6 +314,81 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage deleteService //////////////////////
+
+////////////////////// Begin: Manage OAuthKey - create and delete //////////////////////
+
+	/**
+	 * Create an OAuthKey with the given description.
+	 *
+	 * @method createOAuthKey
+	 * @param {any} oauthKeyDescription - The information containing info of the OAuthKey to create.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
+	 */
+	createOAuthKey(oauthKeyDescription : any, self : AdminsNamespaceManager = null) {
+		// oauthKeyDescription : {"userId" : string, "serviceId" : string, "name" : string, "description" : string, "value" : any (JSONObject)}
+		var self = this;
+
+		var fail : Function = function(error) {
+			self.socket.emit("OAuthKeyDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - createOAuthKey failed ");
+		};
+
+		var informations = {
+			"id" : null,
+			"name" : oauthKeyDescription.name,
+			"description" : oauthKeyDescription.description,
+			"value" : oauthKeyDescription.value,
+			"complete" : false
+		};
+
+		var newOAuthKey = OAuthKey.fromJSONObject(informations);
+
+		var successCreateOAuthKey : Function = function(oauthKeyResult) {
+			var successLinkService : Function = function() {
+				var userId = oauthKeyDescription.userId;
+
+				var successRetrieveUser : Function = function(user) {
+
+					var successUserAssociation : Function = function() {
+
+						var successOAuthKeyCompleteJSON : Function = function(oauthKeyCompleteJSON) {
+							self.socket.emit("OAuthKeyDescription", self.formatResponse(true, oauthKeyCompleteJSON));
+							Logger.debug("SocketId: " + self.socket.id + " - createOAuthKey : send done with success status for OAuthKey with Id : " + newOAuthKey.getId());
+						};
+
+						newOAuthKey.toCompleteJSONObject(successOAuthKeyCompleteJSON, fail);
+					}
+
+					user.addOAuthKey(newOAuthKey.getId(),successUserAssociation, fail);
+
+
+				};
+
+				User.read(userId, successRetrieveUser, fail);
+			};
+			newOAuthKey.linkService(oauthKeyDescription.serviceId, successLinkService, fail);
+		};
+
+		newOAuthKey.create(successCreateOAuthKey, function (error) { self.createObjectFail(error, "OAuthKeyDescription"); });
+	}
+
+	/**
+	 * Delete an OAuthKey of the given id.
+	 *
+	 * @method deleteOAuthKey
+	 * @param {any} oauthKeyDescription - The information containing ID of the OAuthKey to delete.
+	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
+	 */
+	deleteOAuthKey(oauthKeyDescription : any, self : AdminsNamespaceManager = null) {
+		// oauthKeyDescription : {"oauthKeyId" : string}
+		var self = this;
+
+		var oauthKeyId = oauthKeyDescription.oauthKeyId;
+
+		self.deleteObject(OAuthKey, oauthKeyId, "deletedOAuthKey");
+	}
+
+////////////////////// End: Manage OAuthKey - create and delete //////////////////////
 
 
 }

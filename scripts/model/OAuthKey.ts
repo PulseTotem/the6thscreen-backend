@@ -398,12 +398,6 @@ class OAuthKey extends ModelItf {
      * @return {OAuthKey} The model instance.
      */
     static fromJSONObject(jsonObject : any) : OAuthKey {
-        if(!jsonObject.id) {
-            throw new ModelException("A OAuthKey object should have an ID.");
-        }
-        if(jsonObject.complete == undefined || jsonObject.complete == null) {
-            throw new ModelException("A OAuthKey object should have a complete attribute.");
-        }
         return new OAuthKey(jsonObject.name, jsonObject.description, jsonObject.value, jsonObject.id, jsonObject.complete);
     }
 
