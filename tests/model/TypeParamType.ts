@@ -129,56 +129,6 @@ describe('TypeParamType', function() {
 
 			assert.deepEqual(typeParamTypeRetrieve, typeParamTypeExpected, "The retrieve typeParamType (" + typeParamTypeRetrieve + ") does not match with the expected one (" + typeParamTypeExpected + ")");
 		});
-
-		it('should throw an exception if the ID is undefined', function () {
-			var json = {
-				"name": "toto",
-				"complete": false
-			};
-
-			assert.throws(function () {
-					TypeParamType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the ID is null', function () {
-			var json = {
-				"name": "toto",
-				"complete": false,
-				"id": null
-			};
-
-			assert.throws(function () {
-					TypeParamType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete is undefined', function () {
-			var json = {
-				"name": "toto",
-				"id": 12
-			};
-
-			assert.throws(function () {
-					TypeParamType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete is null', function () {
-			var json = {
-				"name": "toto",
-				"id": 24,
-				"complete": null
-			};
-
-			assert.throws(function () {
-					TypeParamType.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function () {

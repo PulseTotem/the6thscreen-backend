@@ -423,14 +423,14 @@ class User extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["roles"] = self.serializeArray(self.roles());
-            data["sdis"] = self.serializeArray(self.sdis());
-            data["oauthkeys"] = self.serializeArray(self.oauthkeys());
+            data["roles"] = self.serializeArray(self.roles(), onlyId);
+            data["sdis"] = self.serializeArray(self.sdis(), onlyId);
+			data["oauthkeys"] = self.serializeArray(self.oauthkeys(), onlyId);
 
             successCallback(data);
         };
@@ -739,14 +739,6 @@ class User extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : User {
-		if (!jsonObject.id) {
-			throw new ModelException("A User object should have an ID.");
-		}
-
-		if (jsonObject.complete == undefined || jsonObject.complete == null) {
-			throw new ModelException("A User object should have a complete attribute.");
-		}
-
 		var user = new User(jsonObject.username, jsonObject.email, jsonObject.id, jsonObject.complete);
 
         if(!!jsonObject.token) {

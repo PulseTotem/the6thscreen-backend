@@ -7,9 +7,7 @@
 
 class AdminsNamespaceManager extends ShareNamespaceManager {
 
-	private paramTypeLength : number;
-
-    /**
+	/**
      * Constructor.
      *
      * @constructor
@@ -20,18 +18,20 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
         var self = this;
 
-        //Authentication
-        this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
-	    this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
-	    this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
-	    this.addListenerToSocket('RetrieveSourceDescription', function(description) { self.sendSourceDescription(description); });
-	    this.addListenerToSocket('RetrieveSourceDescriptionOnlyId', function(description) { self.sendSourceDescription(description, true); });
-	    this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
-	    this.addListenerToSocket('RetrieveCallTypeDescriptionOnlyId', function(description) { self.sendCallTypeDescription(description, true); });
-	    this.addListenerToSocket('RetrieveServiceDescription', function(description) { self.sendServiceDescription(description); });
-	    this.addListenerToSocket('RetrieveServiceDescriptionOnlyId', function(description) { self.sendServiceDescription(description, true); });
-	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
-		this.addListenerToSocket('RetrieveOAuthKeyDescription', function(description) { self.sendOAuthKeyDescription(description); });
+        // Retrieve unique object from ID
+	    this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(User, "userId", description, "UserDescription"); });
+	    this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(SDI, "sdiId", description, "SDIDescription"); });
+	    this.addListenerToSocket('RetrieveSourceDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Source, "sourceId", description, "SourceDescription"); });
+	    this.addListenerToSocket('RetrieveSourceDescriptionOnlyId', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Source, "sourceId", description, "SourceDescription", true); });
+	    this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(CallType, "callTypeId", description, "CallTypeDescription"); });
+	    this.addListenerToSocket('RetrieveCallTypeDescriptionOnlyId', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(CallType, "callTypeId", description, "CallTypeDescription", true); });
+	    this.addListenerToSocket('RetrieveServiceDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Service, "serviceId", description, "ServiceDescription"); });
+	    this.addListenerToSocket('RetrieveServiceDescriptionOnlyId', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Service, "serviceId", description, "ServiceDescription", true); });
+	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Zone, "zoneId", description, "ZoneDescription"); });
+		this.addListenerToSocket('RetrieveZoneDescriptionOnlyId', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Zone, "zoneId", description, "ZoneDescription", true); });
+		this.addListenerToSocket('RetrieveOAuthKeyDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(OAuthKey, "oauthKeyId", description, "OAuthKeyDescription_" + description.oauthKeyId); });
+
+	    // Retrieve all objects
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
 	    this.addListenerToSocket('RetrieveAllZoneDescription', function() { self.sendAllObjectDescription(Zone, "AllZoneDescription"); });
 	    this.addListenerToSocket('RetrieveAllRendererDescription', function() { self.sendAllObjectDescription(Renderer, "AllRendererDescription"); });
@@ -39,18 +39,67 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveAllInfoTypeDescription', function() { self.sendAllObjectDescription(InfoType, "AllInfoTypeDescription"); });
 	    this.addListenerToSocket('RetrieveAllParamTypeDescription', function() { self.sendAllObjectDescription(ParamType, "AllParamTypeDescription"); });
 	    this.addListenerToSocket('RetrieveAllServiceDescription', function() { self.sendAllObjectDescription(Service, "AllServiceDescription"); });
+		this.addListenerToSocket('RetrieveAllBehaviourDescription', function() { self.sendAllObjectDescription(Behaviour, "AllBehaviourDescription"); });
+
+	    // Create object
 	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
-	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
-	    this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteSource(idSource); });
 	    this.addListenerToSocket('CreateCallTypeDescription', function(data) { self.createObject(CallType, data, "CallTypeDescription"); });
-	    this.addListenerToSocket('UpdateCallTypeDescription', function(data) { self.updateObjectAttribute(CallType, data, "CallTypeDescription"); });
-	    this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteCallType(idCallType); });
 	    this.addListenerToSocket('CreateServiceDescription', function(data) { self.createObject(Service, data, "ServiceDescription"); });
+		this.addListenerToSocket('CreateSDIDescription', function(data) { self.createObject(SDI, data, "SDIDescription"); });
+		this.addListenerToSocket('CreateZoneDescription', function(data) { self.createObject(Zone, data, "ZoneDescription"); });
+
+	    // Update object
+	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
+	    this.addListenerToSocket('UpdateCallTypeDescription', function(data) { self.updateObjectAttribute(CallType, data, "CallTypeDescription"); });
 	    this.addListenerToSocket('UpdateServiceDescription', function(data) { self.updateObjectAttribute(Service, data, "ServiceDescription"); });
-	    this.addListenerToSocket('DeleteService', function(idService) { self.deleteService(idService); });
+		this.addListenerToSocket('UpdateSDIDescription', function(data) { self.updateObjectAttribute(SDI, data, "SDIDescription"); });
+		this.addListenerToSocket('UpdateZoneDescription', function(data) { self.updateObjectAttribute(Zone, data, "ZoneDescription"); });
+
+	    // Delete object
+	    this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "deletedSource"); });
+	    this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteObjectFromDescription(CallType, "callTypeId", idCallType, "deletedCallType"); });
+	    this.addListenerToSocket('DeleteService', function(idService) { self.deleteObjectFromDescription(Service, "serviceId", idService, "deletedService"); });
+		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "deletedSDI"); });
+		this.addListenerToSocket('DeleteOAuthKey', function(idOAuthKey) { self.deleteObjectFromDescription(OAuthKey, "oauthKeyId", idOAuthKey, "deletedOAuthKey"); });
+
+	    // Custom requests
+	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
+	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
 		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
-		this.addListenerToSocket('DeleteOAuthKey', function(idOAuthKey) { self.deleteOAuthKey(idOAuthKey); });
     }
+
+	/**
+	 * Retrieve an object of the defined modelClass from the ID given in jsonDescription under the propertyName. Send it back through the channelResponse.
+	 * It is possible to specify to return only IDs for associated objects.
+	 *
+	 * @method sendObjectDescriptionFromJSONDescriptionWithID
+	 * @param modelClass - The model for the object to return.
+	 * @param propertyName - The property name of the ID to retrieve from the jsonDescription.
+	 * @param jsonDescription - A JSON containing the ID of the object to retrieve.
+	 * @param channelResponse - The channel to return the object.
+	 * @param onlyId - If true it only returns IDs for associated objects. It is false by defaults (complete objects are returned).
+	 */
+	sendObjectDescriptionFromJSONDescriptionWithID(modelClass : any, propertyName : string, jsonDescription : any, channelResponse : string, onlyId : boolean = false) {
+		var self = this;
+		var objectId = jsonDescription[propertyName];
+		self.sendObjectDescriptionFromId(modelClass, objectId, channelResponse, onlyId);
+	}
+
+	/**
+	 * Retrieve the ID of an object from its description and delete it.
+	 *
+	 * @method deleteObjectFromDescription
+	 * @param modelClass - The model of the object to delete
+	 * @param propertyName - The property name of the ID to retrieve from jsonDescription.
+	 * @param jsonDescription - The description of the object containing the ID.
+	 * @param channelResponse - The channel to give the result of the request.
+	 */
+	deleteObjectFromDescription(modelClass : any, propertyName : string, jsonDescription : any, channelResponse : string) {
+		var self = this;
+		var objectId = jsonDescription[propertyName];
+		self.deleteObject(modelClass, objectId, channelResponse);
+	}
+
 
 ////////////////////// Begin: Manage SendUserDescriptionFromToken //////////////////////
 
@@ -119,203 +168,42 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage SendUserDescriptionFromToken //////////////////////
 
-////////////////////// Begin: Manage SendUserDescription //////////////////////
+////////////////////// Begin: Manage sendAllZoneDescriptionFromSDI //////////////////////
 
-	/**
-	 * Retrieve User instance description and send it to client.
-	 *
-	 * @method sendUserDescription
-	 * @param {any} userDescription - The User Description.
-	 */
-	sendUserDescription(userDescription : any) {
-		// userDescription : {"userId" : string}
+	sendAllZoneDescriptionFromSDI(sdiDescription : any) {
+		// sdiDescription : {"sdiId" : number}
 		var self = this;
 
-		var userId = userDescription.userId;
-
-		self.sendObjectDescriptionFromId(User, userId, "UserDescription");
-	}
-
-////////////////////// End: Manage SendUserDescription //////////////////////
-
-////////////////////// Begin: Manage SendSDIDescription //////////////////////
-
-	/**
-	 * Retrieve SDI instance description and send it to client.
-	 *
-	 * @method sendSDIDescription
-	 * @param {any} sdiDescription - The SDI Description.
-	 */
-	sendSDIDescription(sdiDescription : any) {
-		// sdiDescription : {"sdiId" : string}
-		var self = this;
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllZoneDescriptionFromSDI");
 
 		var sdiId = sdiDescription.sdiId;
 
-        self.sendObjectDescriptionFromId(SDI, sdiId, "SDIDescription");
+		Logger.debug("SocketId: " + self.socket.id + " - sendAllZoneDescriptionFromSDI : sdiId " + sdiId);
+
+		SDI.read(sdiId, function (sdi) { self.readSDI(sdi); }, function (error) { self.retrieveSDIFromIdToSendZonesFail(error, sdiId); });
 	}
 
-////////////////////// End: Manage SendSDIDescription //////////////////////
+	readSDI (sdi : SDI) {
+		var self = this;
+		sdi.loadZones(function() { self.retrieveSDIFromIdToSendZonesSuccess(sdi); }, function (error) { self.retrieveSDIFromIdToSendZonesFail(error, sdi.getId()); });
+	}
 
-////////////////////// Begin: Manage SendZoneDescription //////////////////////
+	retrieveSDIFromIdToSendZonesSuccess(sdi : SDI) {
+		var self = this;
+		Logger.debug("SocketId: " + this.socket.id + " - sendAllZoneDescriptionFromSDI : success");
+		self.socket.emit("ZonesDescriptionFromSDI", self.formatResponse(true, sdi.serializeArray(sdi.zones())));
+	}
 
-	/**
-	 * Retrieve Zone instance description and send it to client.
-	 *
-	 * @method sendZoneDescription
-	 * @param {any} zoneDescription - The Zone Description.
-	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-	 */
-	sendZoneDescription(zoneDescription : any, self : AdminsNamespaceManager = null) {
-		// zoneDescription : {"zoneId" : string}
+	retrieveSDIFromIdToSendZonesFail(error : Error, sdiId : number) {
 		var self = this;
 
-		var zoneId = zoneDescription.zoneId;
-
-        self.sendObjectDescriptionFromId(Zone, zoneId, "ZoneDescription");
+		Logger.debug("SocketId: " + this.socket.id + " - sendAllZoneDescriptionFromSDI : error");
+		self.socket.emit("ZonesDescriptionFromSDI", self.formatResponse(false, error));
 	}
 
-////////////////////// End: Manage SendZoneDescription //////////////////////
+////////////////////// End: Manage sendAllZoneDescriptionFromSDI //////////////////////
 
-////////////////////// Begin: Manage SendOAuthKeyDescription //////////////////////
-
-	/**
-	 * Retrieve OAuthKey instance description and send it to client.
-	 *
-	 * @method sendOAuthKeyDescription
-	 * @param {any} oauthKeyDescription - The Zone Description.
-	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-	 */
-	sendOAuthKeyDescription(oauthKeyDescription : any, self : AdminsNamespaceManager = null) {
-		// oauthKeyDescription : {"oauthKeyId" : string}
-		var self = this;
-
-		var oauthKeyId = oauthKeyDescription.oauthKeyId;
-
-		self.sendObjectDescriptionFromId(OAuthKey, oauthKeyId, "OAuthKeyDescription_" + oauthKeyId);
-	}
-
-////////////////////// End: Manage SendOAuthKeyDescription //////////////////////
-
-////////////////////// Begin: Manage SendSourceDescription //////////////////////
-
-	/**
-	 * Retrieve Source instance description and send it to client.
-	 *
-	 * @method SendSourceDescription
-	 * @param {any} sourceDescription - The SDI Description.
-	 */
-	sendSourceDescription(sourceDescription : any, onlyId : boolean = false) {
-		// sourceDescription : {"sourceId" : string}
-		var self = this;
-
-		var sourceId = sourceDescription.sourceId;
-
-		self.sendObjectDescriptionFromId(Source, sourceId, "SourceDescription", onlyId);
-	}
-
-////////////////////// End: Manage SendSourceDescription //////////////////////
-
-////////////////////// Begin: Manage SendCallTypeDescription //////////////////////
-
-	/**
-	 * Retrieve CallType instance description and send it to client.
-	 *
-	 * @method SendCallTypeDescription
-	 * @param {any} callTypeDescription - The callType Description.
-	 */
-	sendCallTypeDescription(callTypeDescription : any, onlyId : boolean = false) {
-		// callTypeDescription : {"callTypeId" : string}
-		var self = this;
-
-		var callTypeId = callTypeDescription.callTypeId;
-
-		self.sendObjectDescriptionFromId(CallType, callTypeId, "CallTypeDescription", onlyId);
-	}
-
-////////////////////// End: Manage SendCallTypeDescription //////////////////////
-
-////////////////////// Begin: Manage SendServiceDescription //////////////////////
-
-	/**
-	 * Retrieve Service instance description and send it to client.
-	 *
-	 * @method sendServiceDescription
-	 * @param {any} callTypeDescription - The callType Description.
-	 */
-	sendServiceDescription(serviceDescription : any, onlyId : boolean = false) {
-		// serviceDescription : {"serviceId" : string}
-		var self = this;
-
-		var serviceId = serviceDescription.serviceId;
-
-		self.sendObjectDescriptionFromId(Service, serviceId, "ServiceDescription", onlyId);
-	}
-
-////////////////////// End: Manage SendServiceDescription //////////////////////
-
-
-////////////////////// Begin: Manage DeleteSource //////////////////////
-
-	/**
-	 * Delete a source of the given id.
-	 *
-	 * @method deleteSource
-	 * @param {any} sourceDescription - The information containing ID of the source to delete.
-	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-	 */
-	deleteSource(sourceDescription : any, self : AdminsNamespaceManager = null) {
-		// sourceId : {"sourceId" : string}
-		var self = this;
-
-		var sourceId = sourceDescription.sourceId;
-
-		self.deleteObject(Source, sourceId, "deletedSource");
-	}
-
-////////////////////// End: Manage DeleteSource //////////////////////
-
-////////////////////// Begin: Manage deleteCallType //////////////////////
-
-	/**
-	 * Delete a callType of the given id.
-	 *
-	 * @method deleteCallType
-	 * @param {any} callTypeDescription - The information containing ID of the callType to delete.
-	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-	 */
-	deleteCallType(callTypeDescription : any, self : AdminsNamespaceManager = null) {
-		// callTypeId : {"callTypeId" : string}
-		var self = this;
-
-		var callTypeId = callTypeDescription.callTypeId;
-
-		self.deleteObject(CallType, callTypeId, "deletedCallType");
-	}
-
-////////////////////// End: Manage deleteCallType //////////////////////
-
-////////////////////// Begin: Manage deleteService //////////////////////
-
-	/**
-	 * Delete a Service of the given id.
-	 *
-	 * @method deleteService
-	 * @param {any} serviceDescription - The information containing ID of the service to delete.
-	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-	 */
-	deleteService(serviceDescription : any, self : AdminsNamespaceManager = null) {
-		// serviceId : {"serviceId" : string}
-		var self = this;
-
-		var serviceId = serviceDescription.serviceId;
-
-		self.deleteObject(Service, serviceId, "deletedService");
-	}
-
-////////////////////// End: Manage deleteService //////////////////////
-
-////////////////////// Begin: Manage OAuthKey - create and delete //////////////////////
+////////////////////// Begin: Manage createOAuthKey //////////////////////
 
 	/**
 	 * Create an OAuthKey with the given description.
@@ -372,23 +260,5 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		newOAuthKey.create(successCreateOAuthKey, function (error) { self.createObjectFail(error, "OAuthKeyDescription"); });
 	}
 
-	/**
-	 * Delete an OAuthKey of the given id.
-	 *
-	 * @method deleteOAuthKey
-	 * @param {any} oauthKeyDescription - The information containing ID of the OAuthKey to delete.
-	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-	 */
-	deleteOAuthKey(oauthKeyDescription : any, self : AdminsNamespaceManager = null) {
-		// oauthKeyDescription : {"oauthKeyId" : string}
-		var self = this;
-
-		var oauthKeyId = oauthKeyDescription.oauthKeyId;
-
-		self.deleteObject(OAuthKey, oauthKeyId, "deletedOAuthKey");
-	}
-
-////////////////////// End: Manage OAuthKey - create and delete //////////////////////
-
-
+////////////////////// End: Manage createOAuthKey //////////////////////
 }

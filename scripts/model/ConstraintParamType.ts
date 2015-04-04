@@ -238,12 +238,17 @@ class ConstraintParamType extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["type"] = (self.type() !== null) ? self.type().toJSONObject() : null;
+
+	        if (onlyId) {
+		        data["type"] = (self.type() !== null) ? self.type().getId() : null;
+	        } else {
+		        data["type"] = (self.type() !== null) ? self.type().toJSONObject() : null;
+	        }
 
             successCallback(data);
         };
@@ -365,13 +370,6 @@ class ConstraintParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ConstraintParamType {
-		if(!jsonObject.id) {
-			throw new ModelException("A CallType object should have an ID.");
-		}
-		if(jsonObject.complete == null || jsonObject.complete == undefined) {
-			throw new ModelException("A CallType object should have a complete attribute.");
-		}
-
 		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 

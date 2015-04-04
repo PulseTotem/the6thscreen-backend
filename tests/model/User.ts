@@ -55,60 +55,6 @@ describe('User', function() {
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve user (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
-
-		it('should throw an exception if the ID is undefined', function () {
-			var json = {
-				"username": "toto",
-				"email": "blabla",
-				"complete": false
-			};
-
-			assert.throws(function () {
-					User.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the ID is null', function () {
-			var json = {
-				"username": "toto",
-				"email": "blabla",
-				"id": null,
-				"complete": false
-			};
-
-			assert.throws(function () {
-					User.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete is undefined', function () {
-			var json = {
-				"username": "toto",
-				"email": "blabla",
-				"id": 34
-			};
-
-			assert.throws(function () {
-					User.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete is null', function () {
-			var json = {
-				"username": "toto",
-				"email": "blabla",
-				"id": 34,
-				"complete": null
-			};
-
-			assert.throws(function () {
-					User.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
 	});
 
 	describe('#toJsonObject', function () {

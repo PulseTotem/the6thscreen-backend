@@ -222,12 +222,12 @@ class Timeline extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["profils"] = self.serializeArray(self.profils());
+            data["profils"] = self.serializeArray(self.profils(), onlyId);
 
             successCallback(data);
         };
@@ -348,12 +348,6 @@ class Timeline extends ModelItf {
 	 * @return {Timeline} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Timeline {
-		if(!jsonObject.id) {
-			throw new ModelException("A Timeline object should have an ID.");
-		}
-		if(jsonObject.complete == undefined || jsonObject.complete == null) {
-			throw new ModelException("A Timeline object should have a complete attribute.");
-		}
 		return new Timeline(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 

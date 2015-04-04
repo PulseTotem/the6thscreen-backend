@@ -79,64 +79,6 @@ describe('Source', function() {
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
-
-		/*it('should throw an exception if the ID is undefined', function () {
-			var json = {
-				"name": "machin",
-				"description": "desc",
-				"method": "method",
-				"complete": false
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the ID is null', function () {
-			var json = {
-				"id": null,
-				"name": "machin",
-				"description": "desc",
-				"method": "method",
-				"complete": false
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete value is undefined', function () {
-			var json = {
-				"name": "machin",
-				"description": "desc",
-				"method": "method",
-				"id": 34
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});
-
-		it('should throw an exception if the complete attribute is null', function () {
-			var json = {
-				"id": 34,
-				"name": "machin",
-				"description": "desc",
-				"method": "method",
-				"complete": null
-			};
-
-			assert.throws(function () {
-					Source.fromJSONObject(json);
-				},
-				ModelException, "The exception has not been thrown.");
-		});*/
 	});
 
 	describe('#toJsonObject', function () {
