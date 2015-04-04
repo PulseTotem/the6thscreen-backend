@@ -495,7 +495,11 @@ class CleanAndInitDatabase {
 
             var successTypeParamTypeAssociation = function() {
                 Logger.info("TypeParamType associated to ParamType successfully.");
-                self.retrieveConstraint(paramTypeDesc.constraint, successConstraintRetrieve, fail);
+				if(paramTypeDesc.constraint != null) {
+					self.retrieveConstraint(paramTypeDesc.constraint, successConstraintRetrieve, fail);
+				} else {
+					paramType.checkCompleteness(successCompleteness, fail);
+				}
             };
 
             var successTypeParamTypeRetrieve = function(newTypeParamType) {

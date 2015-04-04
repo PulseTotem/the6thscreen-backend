@@ -7,6 +7,13 @@
         }
     },
     {
+      "name" : "TweetRendererGeneric",
+      "description" : "Renderer générique pour les infos de type Tweet.",
+      "infoType" : {
+        "name" : "TweetList"
+      }
+    },
+    {
         "name" : "DiscountRenderer",
         "description" : "Renderer pour les infos de type Discount.",
         "infoType" : {

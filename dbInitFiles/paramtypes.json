@@ -18,5 +18,13 @@
         "constraint" : {
             "name" : "Positive"
         }
+    },
+    {
+      "name" : "SearchQuery",
+      "description" : "Description de la recherche à effectuer",
+      "type" : {
+        "name" : "String"
+      },
+      "constraint" : null
     }
 ]

@@ -33,5 +33,24 @@
         "infoType" : {
             "name" : "DiscountsList"
         }
+    },
+    {
+      "name" : "LastTweetsFromSearch",
+      "description" : "Récupération des derniers tweets à partir d'une recherche",
+      "service" : {
+        "name" : "Twitter"
+      },
+      "method" : "LastTweetsFromSearch",
+      "paramTypes" : [
+        {
+          "name" : "SearchQuery"
+        },
+        {
+          "name" : "Limit"
+        }
+      ],
+      "infoType" : {
+        "name" : "TweetList"
+      }
     }
 ]
