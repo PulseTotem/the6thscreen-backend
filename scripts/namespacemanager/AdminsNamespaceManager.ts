@@ -47,15 +47,20 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('CreateServiceDescription', function(data) { self.createObject(Service, data, "ServiceDescription"); });
 		this.addListenerToSocket('CreateSDIDescription', function(data) { self.createObject(SDI, data, "SDIDescription"); });
 		this.addListenerToSocket('CreateZoneDescription', function(data) { self.createObject(Zone, data, "ZoneDescription"); });
+		this.addListenerToSocket('CreateCallDescription', function(data) { self.createObject(Call, data, "CallDescription"); });
 
-	    // Update object
+
+		// Update object
 	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
 	    this.addListenerToSocket('UpdateCallTypeDescription', function(data) { self.updateObjectAttribute(CallType, data, "CallTypeDescription"); });
 	    this.addListenerToSocket('UpdateServiceDescription', function(data) { self.updateObjectAttribute(Service, data, "ServiceDescription"); });
 		this.addListenerToSocket('UpdateSDIDescription', function(data) { self.updateObjectAttribute(SDI, data, "SDIDescription"); });
 		this.addListenerToSocket('UpdateZoneDescription', function(data) { self.updateObjectAttribute(Zone, data, "ZoneDescription"); });
+		this.addListenerToSocket('UpdateCallDescription', function(data) { self.updateObjectAttribute(Call, data, "CallDescription"); });
+		this.addListenerToSocket('UpdateParamValueDescription', function(data) { self.updateObjectAttribute(ParamValue, data, "ParamValueDescription"); });
 
-	    // Delete object
+
+		// Delete object
 	    this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "deletedSource"); });
 	    this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteObjectFromDescription(CallType, "callTypeId", idCallType, "deletedCallType"); });
 	    this.addListenerToSocket('DeleteService', function(idService) { self.deleteObjectFromDescription(Service, "serviceId", idService, "deletedService"); });
@@ -67,6 +72,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
 		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
+		this.addListenerToSocket('RetrieveParamTypesFromCallType', function (callTypeDescription) { self.sendParamTypesDescriptionFromCallType(callTypeDescription); });
+		this.addListenerToSocket('CreateParamValueDescription', function (paramValueDescription) { self.createParamValueDescription(paramValueDescription); });
     }
 
 	/**
@@ -262,4 +269,80 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage createOAuthKey //////////////////////
+
+////////////////////// Begin: Manage sendParamTypesDescriptionFromCallType //////////////////////
+
+	/**
+	 * Retrieve ParamTypes from a given CallType id.
+	 * Send the result on the channel "ParamTypesDescription"
+	 *
+	 * @param callTypeDescription
+	 */
+	sendParamTypesDescriptionFromCallType(callTypeDescription : any) {
+		var self = this;
+
+		var callTypeId = callTypeDescription.callTypeId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("ParamTypesDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendParamTypesDescriptionFromCallType failed ");
+		};
+
+		var successRead = function (callType) {
+
+			var successLoadSource : Function = function () {
+				var source : Source = callType.source();
+
+				var successLoadParamTypes : Function = function () {
+
+					var successCompleteLoad = function (data) {
+						self.socket.emit("ParamTypesDescription", self.formatResponse(true, data));
+					};
+
+					for (var i = 0; i < source.paramTypes().length; i++) {
+						source.paramTypes()[i].toCompleteJSONObject(successCompleteLoad, fail);
+					}
+				};
+
+				source.loadParamTypes(successLoadParamTypes, fail);
+			};
+
+			callType.loadSource(successLoadSource, fail);
+		};
+
+		CallType.read(callTypeId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendParamTypesDescriptionFromCallType //////////////////////
+
+////////////////////// Begin: Manage createParamValueDescription //////////////////////
+
+	createParamValueDescription(paramValueDescription : any) {
+		var self = this;
+
+		var value = paramValueDescription.paramValue;
+		var paramTypeId = paramValueDescription.paramTypeId;
+
+		var paramValue : ParamValue = new ParamValue(value);
+
+		var fail : Function = function(error) {
+			self.socket.emit("ParamValueCreationDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - createParamValueDescription failed ");
+		};
+
+		var successCreate : Function = function () {
+
+			var successLinkParamType : Function = function () {
+				var data = { "paramValueId": paramValue.getId(), "paramTypeId": paramTypeId };
+				self.socket.emit("ParamValueCreationDescription", self.formatResponse(true, data));
+			};
+
+			paramValue.linkParamType(paramTypeId, successLinkParamType, fail);
+		};
+
+
+		paramValue.create(successCreate, fail);
+	}
+
+////////////////////// End: Manage createParamValueDescription //////////////////////
 }
