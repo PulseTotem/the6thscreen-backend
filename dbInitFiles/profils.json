@@ -121,7 +121,7 @@
       {
         "name" : "Twitter2",
         "callType" : {
-          "name" : "TwitterLeftZone3"
+          "name" : "TwitterRightZone3"
         },
         "paramValues" : [
           {
