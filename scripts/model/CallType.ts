@@ -116,6 +116,22 @@ class CallType extends ModelItf {
 	private _zone_loaded : boolean;
 
     /**
+     * Calls property
+     *
+     * @property _calls
+     * @type Array<Call>
+     */
+    private _calls : Array<Call>;
+
+    /**
+     * Lazy loading for Calls property
+     *
+     * @property _calls_loaded
+     * @type boolean
+     */
+    private _calls_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -143,6 +159,9 @@ class CallType extends ModelItf {
 
 	    this._zone = null;
 	    this._zone_loaded = false;
+
+        this._calls = new Array<Call>();
+        this._calls_loaded = false;
     }
 
 	/**
@@ -396,6 +415,47 @@ class CallType extends ModelItf {
         }
     }
 
+    /**
+     * Return the CallType's calls.
+     *
+     * @method calls
+     */
+    calls() {
+        return this._calls;
+    }
+
+    /**
+     * Load the CallType's calls.
+     *
+     * @method loadCalls
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadCalls(successCallback : Function, failCallback : Function) {
+        if(! this._calls_loaded) {
+            var self = this;
+            var success : Function = function(calls) {
+                self._calls = calls;
+                self._calls_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(CallType, Call, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -410,7 +470,7 @@ class CallType extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._source_loaded && self._renderer_loaded && self._receive_policy_loaded && self._render_policy_loaded && self._zone_loaded) {
+            if(self._source_loaded && self._renderer_loaded && self._receive_policy_loaded && self._render_policy_loaded && self._zone_loaded && self._calls_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -430,6 +490,7 @@ class CallType extends ModelItf {
         this.loadReceivePolicy(success, fail);
         this.loadRenderPolicy(success, fail);
         this.loadZone(success, fail);
+        this.loadCalls(success, fail);
     }
 
 	/**
@@ -443,6 +504,7 @@ class CallType extends ModelItf {
 		this._render_policy_loaded = false;
 		this._renderer_loaded = false;
 		this._zone_loaded = false;
+        this._calls_loaded = false;
 	}
 
 	/**
@@ -522,6 +584,7 @@ class CallType extends ModelItf {
 		        data["renderPolicy"] = (self.renderPolicy() !== null) ? self.renderPolicy().toJSONObject() : null;
 	        }
 
+            data["calls"] = self.serializeArray(self.calls(), onlyId);
             successCallback(data);
         };
 
