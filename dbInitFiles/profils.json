@@ -90,5 +90,54 @@
                 ]
             }
         ]
-    }
+    },
+  {
+    "name" : "ProfilSDITwitterOnly",
+    "description" : "Profil n°1 de SDITwitterOnly",
+    "sdi" : {
+      "name" : "SDITwitterOnly"
+    },
+    "calls" : [
+      {
+        "name" : "Twitter1",
+        "callType" : {
+          "name" : "TwitterLeftZone3"
+        },
+        "paramValues" : [
+          {
+            "value" : "#MT180FR",
+            "paramType" : {
+              "name" : "SearchQuery"
+            }
+          },
+          {
+            "value" : "10",
+            "paramType" : {
+              "name" : "Limit"
+            }
+          }
+        ]
+      },
+      {
+        "name" : "Twitter2",
+        "callType" : {
+          "name" : "TwitterRightZone3"
+        },
+        "paramValues" : [
+          {
+            "value" : "#VINCI_UX",
+            "paramType" : {
+              "name" : "SearchQuery"
+            }
+          },
+          {
+            "value" : "20",
+            "paramType" : {
+              "name" : "Limit"
+            }
+          }
+        ]
+      }
+    ]
+  }
 ]

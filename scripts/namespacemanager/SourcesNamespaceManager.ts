@@ -26,6 +26,7 @@ class SourcesNamespaceManager extends ShareNamespaceManager {
         this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
         this.addListenerToSocket('RetrieveSourceDescription', function(description) { self.sendSourceDescription(description); });
         this.addListenerToSocket('RetrieveParamValueDescription', function(description) { self.sendParamValueDescription(description); });
+		this.addListenerToSocket('RetrieveOAuthKeyDescription', function(description) { self.sendOAuthKeyDescription(description); });
     }
 
 ////////////////////// Begin: Manage SendCallDescription //////////////////////
@@ -107,5 +108,54 @@ class SourcesNamespaceManager extends ShareNamespaceManager {
     }
 
 ////////////////////// End: Manage SendParamValueDescription //////////////////////
+
+////////////////////// Begin: Manage SendOAuthKeyDescription //////////////////////
+
+	/**
+	 * Retrieve OAuthKey instance description and send it to sourcesServer.
+	 *
+	 * @method sendOAuthKeyDescription
+	 * @param {any} oauthKeyDescription - The OAuthKey Description.
+	 * @param {SourcesNamespaceManager} self - The SourcesNamespaceManager instance.
+	 */
+	sendOAuthKeyDescription(oauthKeyDescription : any, self : SourcesNamespaceManager = null) {
+		// oauthKeyDescription : {"userId" : string, "serviceId" : string}
+		var self = this;
+
+		var fail = function(error) {
+			self.socket.emit("OAuthKeyDescription", self.formatResponse(false, error));
+		};
+
+		var successUser = function(user) {
+
+			var successUserComplete = function(userComplete) {
+				var serviceId = oauthKeyDescription.serviceId;
+
+				userComplete.oauthkeys.forEach(function(oauthKeyJSON) {
+
+					var successOAuthKey = function(oauthKey) {
+						var successOAuthKeyComplete = function(oauthKeyComplete) {
+							if(oauthKeyComplete.service.id == serviceId) {
+								self.socket.emit("OAuthKeyDescription", self.formatResponse(true, oauthKeyComplete));
+							}
+						};
+
+						oauthKey.toCompleteJSONObject(successOAuthKeyComplete, fail);
+					};
+
+					OAuthKey.read(oauthKeyJSON.id, successOAuthKey, fail);
+
+				});
+			};
+
+			user.toCompleteJSONObject(successUserComplete, fail);
+		};
+
+		var userId = oauthKeyDescription.userId;
+
+		User.read(userId, successUser, fail);
+	}
+
+////////////////////// End: Manage SendOAuthKeyDescription //////////////////////
 
 }

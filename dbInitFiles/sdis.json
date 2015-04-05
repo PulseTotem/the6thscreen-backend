@@ -185,7 +185,7 @@
           "name" : "LastTweetsFromSearch"
         },
         "renderer" : {
-          "name" : "TweetRendererGeneric"
+          "name" : "TweetRenderer"
         },
         "renderPolicy" : {
           "name" : "FeedContentDumbRenderPolicy"
@@ -204,7 +204,7 @@
           "name" : "LastTweetsFromSearch"
         },
         "renderer" : {
-          "name" : "TweetRendererGeneric"
+          "name" : "TweetRenderer"
         },
         "renderPolicy" : {
           "name" : "FeedContentDumbRenderPolicy"
