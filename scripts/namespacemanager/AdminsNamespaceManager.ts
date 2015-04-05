@@ -30,8 +30,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Zone, "zoneId", description, "ZoneDescription"); });
 		this.addListenerToSocket('RetrieveZoneDescriptionOnlyId', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Zone, "zoneId", description, "ZoneDescription", true); });
 		this.addListenerToSocket('RetrieveOAuthKeyDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(OAuthKey, "oauthKeyId", description, "OAuthKeyDescription_" + description.oauthKeyId); });
+		this.addListenerToSocket('RetrieveCallDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Call, "callId", description, "CallDescription"); });
 
-	    // Retrieve all objects
+		// Retrieve all objects
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
 	    this.addListenerToSocket('RetrieveAllZoneDescription', function() { self.sendAllObjectDescription(Zone, "AllZoneDescription"); });
 	    this.addListenerToSocket('RetrieveAllRendererDescription', function() { self.sendAllObjectDescription(Renderer, "AllRendererDescription"); });
@@ -74,7 +75,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
 		this.addListenerToSocket('RetrieveParamTypesFromCallType', function (callTypeDescription) { self.sendParamTypesDescriptionFromCallType(callTypeDescription); });
 		this.addListenerToSocket('CreateParamValueDescription', function (paramValueDescription) { self.createParamValueDescription(paramValueDescription); });
-    }
+		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
+
+	}
 
 	/**
 	 * Retrieve an object of the defined modelClass from the ID given in jsonDescription under the propertyName. Send it back through the channelResponse.
@@ -315,7 +318,46 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage sendParamTypesDescriptionFromCallType //////////////////////
 
-////////////////////// Begin: Manage createParamValueDescription //////////////////////
+////////////////////// Begin: Manage sendParamValuesDescriptionFromCall //////////////////////
+
+	/**
+	 * Retrieve ParamValues from a given Call id.
+	 * Send the result on the channel "ParamValuesDescription"
+	 *
+	 * @param callTypeDescription
+	 */
+	sendParamValuesDescriptionFromCall(callDescription : any) {
+		var self = this;
+
+		var callId = callDescription.callId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("ParamValuesDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendParamValuesDescriptionFromCall failed ");
+		};
+
+		var successRead = function (call) {
+
+			var successLoadParamValues : Function = function () {
+
+				var successCompleteLoad = function (data) {
+					self.socket.emit("ParamValuesDescription", self.formatResponse(true, data));
+				};
+
+				for (var i = 0; i < call.paramValues().length; i++) {
+						call.paramValues()[i].toCompleteJSONObject(successCompleteLoad, fail);
+					}
+				};
+
+			call.loadParamValues(successLoadParamValues, fail);
+		};
+
+		Call.read(callId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendParamTypesDescriptionFromCallType //////////////////////
+
+////////////////////// Begin: Manage sendParamValuesDescriptionFromCall //////////////////////
 
 	createParamValueDescription(paramValueDescription : any) {
 		var self = this;
