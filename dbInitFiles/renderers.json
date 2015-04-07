@@ -7,7 +7,7 @@
         }
     },
     {
-      "name" : "TweetRendererGeneric",
+      "name" : "TweetRenderer",
       "description" : "Renderer générique pour les infos de type Tweet.",
       "infoType" : {
         "name" : "TweetList"
