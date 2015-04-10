@@ -195,16 +195,54 @@
         }
       },
       {
-        "name" : "TwitterRightZone3",
-        "description" : "Display Tweets in the right zone with generic renderer",
+        "name" : "InstagramLeftZone3",
+        "description" : "Display photos in the left zone with generic renderer",
+        "zone" : {
+          "name" : "LeftZone3"
+        },
+        "source" : {
+          "name" : "TaggedPictures"
+        },
+        "renderer" : {
+          "name" : "PictureAlbumRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
+        "name" : "FlickrRightZone3",
+        "description" : "Display photos in the right zone with generic renderer",
         "zone" : {
           "name" : "RightZone3"
         },
         "source" : {
-          "name" : "LastTweetsFromSearch"
+          "name" : "LastPicturesFromSearch"
         },
         "renderer" : {
-          "name" : "TweetRenderer"
+          "name" : "PictureAlbumRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
+        "name" : "FacebookRightZone3",
+        "description" : "Display photos in the right zone with generic renderer",
+        "zone" : {
+          "name" : "RightZone3"
+        },
+        "source" : {
+          "name" : "PicturesFromLoggedUser"
+        },
+        "renderer" : {
+          "name" : "PictureAlbumRenderer"
         },
         "renderPolicy" : {
           "name" : "FeedContentDumbRenderPolicy"

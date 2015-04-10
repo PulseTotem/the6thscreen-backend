@@ -19,5 +19,12 @@
         "infoType" : {
             "name" : "DiscountsList"
         }
+    },
+    {
+      "name" : "PictureAlbumRenderer",
+      "description" : "Renderer pour les infos de type PictureAlbum.",
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
     }
 ]

@@ -87,5 +87,24 @@
       "infoType" : {
         "name" : "PictureAlbum"
       }
+    },
+    {
+      "name" : "TaggedPictures",
+      "description" : "Récupération des photos à partir d'un tag",
+      "service" : {
+        "name" : "Instagram"
+      },
+      "method" : "TaggedPictures",
+      "paramTypes" : [
+        {
+          "name" : "SearchQuery"
+        },
+        {
+          "name" : "Limit"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
     }
 ]

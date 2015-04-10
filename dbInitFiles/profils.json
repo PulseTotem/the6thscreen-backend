@@ -105,13 +105,13 @@
         },
         "paramValues" : [
           {
-            "value" : "#MT180FR",
+            "value" : "%23VINCI_UX",
             "paramType" : {
               "name" : "SearchQuery"
             }
           },
           {
-            "value" : "10",
+            "value" : "2",
             "paramType" : {
               "name" : "Limit"
             }
@@ -119,19 +119,53 @@
         ]
       },
       {
-        "name" : "Twitter2",
+        "name" : "Instagram1",
         "callType" : {
-          "name" : "TwitterRightZone3"
+          "name" : "InstagramLeftZone3"
         },
         "paramValues" : [
           {
-            "value" : "#VINCI_UX",
+            "value" : "VINCI_UX",
             "paramType" : {
               "name" : "SearchQuery"
             }
           },
           {
-            "value" : "20",
+            "value" : "2",
+            "paramType" : {
+              "name" : "Limit"
+            }
+          }
+        ]
+      },
+      {
+        "name" : "Flickr1",
+        "callType" : {
+          "name" : "FlickrRightZone3"
+        },
+        "paramValues" : [
+          {
+            "value" : "vinci",
+            "paramType" : {
+              "name" : "SearchQuery"
+            }
+          },
+          {
+            "value" : "2",
+            "paramType" : {
+              "name" : "Limit"
+            }
+          }
+        ]
+      },
+      {
+        "name" : "Facebook1",
+        "callType" : {
+          "name" : "FacebookRightZone3"
+        },
+        "paramValues" : [
+          {
+            "value" : "2",
             "paramType" : {
               "name" : "Limit"
             }

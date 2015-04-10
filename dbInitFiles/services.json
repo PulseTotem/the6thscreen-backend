@@ -38,5 +38,13 @@
       "oauth": true,
       "provider": "facebook",
       "port" : 6006
+    },
+    {
+      "name" : "Instagram",
+      "description" : "Service Instagram",
+      "host" : "http://localhost:6007/Instagram",
+      "oauth": true,
+      "provider": "instagram",
+      "port" : 6007
     }
 ]
