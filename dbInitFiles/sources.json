@@ -52,5 +52,40 @@
       "infoType" : {
         "name" : "TweetList"
       }
+    },
+    {
+      "name" : "LastPicturesFromSearch",
+      "description" : "Récupération des dernieres photos à partir d'une recherche",
+      "service" : {
+        "name" : "Flickr"
+      },
+      "method" : "LastPicturesFromSearch",
+      "paramTypes" : [
+        {
+          "name" : "SearchQuery"
+        },
+        {
+          "name" : "Limit"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+    },
+    {
+      "name" : "PicturesFromLoggedUser",
+      "description" : "Récupération des dernieres photos d'un user",
+      "service" : {
+        "name" : "Facebook"
+      },
+      "method" : "PicturesFromLoggedUser",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
     }
 ]

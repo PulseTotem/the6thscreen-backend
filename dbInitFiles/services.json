@@ -22,5 +22,21 @@
       "oauth": true,
       "provider": "twitter",
       "port" : 6004
+    },
+    {
+      "name" : "Flickr",
+      "description" : "Service Flickr",
+      "host" : "http://localhost:6005/Flickr",
+      "oauth": true,
+      "provider": "flickr",
+      "port" : 6005
+    },
+    {
+      "name" : "Facebook",
+      "description" : "Service Facebook",
+      "host" : "http://localhost:6006/Facebook",
+      "oauth": true,
+      "provider": "facebook",
+      "port" : 6006
     }
 ]
