@@ -135,7 +135,7 @@ class The6thScreenBackend extends Server {
  * @type number
  * @private
  */
-var _The6thScreenBackendListeningPort : number = process.env.PORT_BACKEND || 4000;
+var _The6thScreenBackendListeningPort : number = process.env.PORT || 4000;
 
 /**
  * Server's The6thScreenBackend command line arguments.

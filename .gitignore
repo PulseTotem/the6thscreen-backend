@@ -13,3 +13,5 @@ core-repos-config.json
 scripts/core/backend_config.json
 package-bak.json
 package-tmp.json
+heroku
+herokuDBInit

@@ -1916,8 +1916,10 @@ try {
                         default :
                             logLevel = LoggerLevel.Error;
                     }
-                    break;
                 }
+				if(keyVal[0] == "dbhost") {
+					process.env["T6S_DATABASE_HOST"] = keyVal[1];
+				}
             }
         }
     }

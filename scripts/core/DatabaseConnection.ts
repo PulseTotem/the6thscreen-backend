@@ -52,15 +52,22 @@ class DatabaseConnection {
         if(DatabaseConnection.host == "" && DatabaseConnection.port == -1) {
             var file = __dirname + '/connection_infos.json';
 
-            try {
-                var connectionInfos = JSON.parse(fs.readFileSync(file, 'utf8'));
-                DatabaseConnection.host = connectionInfos.host;
-                DatabaseConnection.port = parseInt(connectionInfos.port);
-	            DatabaseConnection.endpoint = connectionInfos.endpoint;
-            } catch (e) {
-                Logger.error("Connection configuration file can't be read.");
-                //TODO ? Throw Exception ?
-            }
+
+			if(process.env.T6S_DATABASE_HOST) {
+				DatabaseConnection.host = process.env.T6S_DATABASE_HOST;
+				DatabaseConnection.port = 80;
+				DatabaseConnection.endpoint = "api";
+			} else {
+				try {
+					var connectionInfos = JSON.parse(fs.readFileSync(file, 'utf8'));
+					DatabaseConnection.host = connectionInfos.host;
+					DatabaseConnection.port = parseInt(connectionInfos.port);
+					DatabaseConnection.endpoint = connectionInfos.endpoint;
+				} catch (e) {
+					Logger.error("Connection configuration file can't be read.");
+					//TODO ? Throw Exception ?
+				}
+			}
         }
     }
 

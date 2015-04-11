@@ -47,6 +47,17 @@ module.exports = function (grunt) {
                     'devDependencies',
                     'overrides'
                 ]
+            },
+            packageHeroku: {
+              src: ['packageHeroku.json'],
+              dest: 'heroku/package.json',
+              fields: [
+                'name',
+                'version',
+                'dependencies',
+                'devDependencies',
+                'overrides'
+              ]
             }
         },
 // ---------------------------------------------
@@ -61,9 +72,9 @@ module.exports = function (grunt) {
             distConnectionInfosFile: {
                 files: 	[{'dist/js/connection_infos.json': 'scripts/core/connection_infos.json'}]
             },
-	        testConnectionInfosFile: {
-		        files: 	[{'build/tests/connection_infos.json': 'scripts/core/connection_infos-sample.json'}]
-	        },
+            testConnectionInfosFile: {
+              files: 	[{'build/tests/connection_infos.json': 'scripts/core/connection_infos-sample.json'}]
+            },
 
             buildBackendConfigInfosFile: {
                 files: 	[{'build/js/backend_config.json': 'scripts/core/backend_config.json'}]
@@ -87,6 +98,16 @@ module.exports = function (grunt) {
             },
             buildPackageReinit: {
                 files: 	[{'package.json': 'package-bak.json'}]
+            },
+
+            heroku: {
+              files: 	[{expand: true, cwd: 'dist', src: ['**'], dest: 'heroku'}]
+            },
+            herokuProcfile: {
+              files: 	[{expand: true, cwd: '.', src: ['Procfile'], dest: 'heroku'}]
+            },
+            herokuGitignore: {
+              files: 	[{expand: true, cwd: '.', src: ['.gitignore'], dest: 'heroku'}]
             }
         },
 
@@ -222,6 +243,7 @@ module.exports = function (grunt) {
         clean: {
             package: ['package-bak.json', 'package-tmp.json'],
             build: ['build/'],
+            heroku: ['heroku/'],
             dist: ['dist/'],
             doc: ['doc'],
             test: ['build/tests/Test.js']
@@ -253,6 +275,12 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('develop', ['build', 'express:build', 'watch']);
+
+    grunt.registerTask('heroku', function () {
+      grunt.task.run(['clean:heroku']);
+
+      grunt.task.run(['dist', 'update_json:packageHeroku', 'copy:heroku', 'copy:herokuProcfile', 'copy:herokuGitignore']);
+    });
 
     grunt.registerTask('doc', ['clean:doc', 'yuidoc']);
 
