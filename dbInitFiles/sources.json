@@ -153,6 +153,9 @@
       },
       "method" : "PublicEvents",
       "paramTypes" : [
+        {
+          "name" : "Limit"
+        }
       ],
       "infoType" : {
         "name" : "EventList"

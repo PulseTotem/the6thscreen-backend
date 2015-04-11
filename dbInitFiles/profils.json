@@ -218,6 +218,12 @@
           "name" : "EventLeftZone3"
         },
         "paramValues" : [
+          {
+            "value" : "1",
+            "paramType" : {
+              "name" : "Limit"
+            }
+          }
         ]
       }
     ]
