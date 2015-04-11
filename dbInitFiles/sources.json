@@ -144,5 +144,21 @@
       "infoType" : {
         "name" : "PictureAlbum"
       }
+    },
+    {
+      "name" : "PublicEvents",
+      "description" : "Récupération des evenements",
+      "service" : {
+        "name" : "Hackathon"
+      },
+      "method" : "PublicEvents",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        }
+      ],
+      "infoType" : {
+        "name" : "EventList"
+      }
     }
 ]

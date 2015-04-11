@@ -214,6 +214,25 @@
         }
       },
       {
+        "name" : "EventLeftZone3",
+        "description" : "Display events in the left zone with generic renderer",
+        "zone" : {
+          "name" : "LeftZone3"
+        },
+        "source" : {
+          "name" : "PublicEvents"
+        },
+        "renderer" : {
+          "name" : "EventListRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
         "name" : "FlickrRightZone3",
         "description" : "Display photos in the right zone with generic renderer",
         "zone" : {

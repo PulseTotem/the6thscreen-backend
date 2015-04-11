@@ -211,6 +211,20 @@
             }
           }
         ]
+      },
+      {
+        "name" : "Hackathon1",
+        "callType" : {
+          "name" : "EventLeftZone3"
+        },
+        "paramValues" : [
+          {
+            "value" : "1",
+            "paramType" : {
+              "name" : "Limit"
+            }
+          }
+        ]
       }
     ]
   }
