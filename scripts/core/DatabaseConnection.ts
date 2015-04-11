@@ -53,7 +53,7 @@ class DatabaseConnection {
             var file = __dirname + '/connection_infos.json';
 
 
-			if(process.env.T6S_DATABASE_URL) {
+			if(process.env.T6S_DATABASE_HOST) {
 				DatabaseConnection.host = process.env.T6S_DATABASE_HOST;
 				DatabaseConnection.port = 80;
 				DatabaseConnection.endpoint = "api";

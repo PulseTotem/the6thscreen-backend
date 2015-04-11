@@ -1,1 +1,0 @@
-web: node js/CleanAndInitDatabase.js loglevel=debug step=all

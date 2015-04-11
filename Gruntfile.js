@@ -58,17 +58,6 @@ module.exports = function (grunt) {
                 'devDependencies',
                 'overrides'
               ]
-            },
-            packageHerokuDBInit: {
-              src: ['packageHeroku.json'],
-              dest: 'herokuDBInit/package.json',
-              fields: [
-                'name',
-                'version',
-                'dependencies',
-                'devDependencies',
-                'overrides'
-              ]
             }
         },
 // ---------------------------------------------
@@ -119,16 +108,6 @@ module.exports = function (grunt) {
             },
             herokuGitignore: {
               files: 	[{expand: true, cwd: '.', src: ['.gitignore'], dest: 'heroku'}]
-            },
-
-            herokuDBInit: {
-              files: 	[{expand: true, cwd: 'build', src: ['**/*'], dest: 'herokuDBInit'}]
-            },
-            herokuProcfileDBInit: {
-              files: 	[{expand: true, cwd: '.', src: ['ProcfileDBInit'], dest: 'herokuDBInit'}]
-            },
-            herokuDBInitGitignore: {
-              files: 	[{expand: true, cwd: '.', src: ['.gitignore'], dest: 'herokuDBInit'}]
             }
         },
 
@@ -264,7 +243,7 @@ module.exports = function (grunt) {
         clean: {
             package: ['package-bak.json', 'package-tmp.json'],
             build: ['build/'],
-            heroku: ['herokuDBInit/', 'heroku/'],
+            heroku: ['heroku/'],
             dist: ['dist/'],
             doc: ['doc'],
             test: ['build/tests/Test.js']
@@ -299,8 +278,6 @@ module.exports = function (grunt) {
 
     grunt.registerTask('heroku', function () {
       grunt.task.run(['clean:heroku']);
-
-      grunt.task.run(['dbinit', 'update_json:packageHerokuDBInit', 'copy:herokuDBInit', 'copy:herokuProcfileDBInit', 'copy:herokuDBInitGitignore']);
 
       grunt.task.run(['dist', 'update_json:packageHeroku', 'copy:heroku', 'copy:herokuProcfile', 'copy:herokuGitignore']);
     });
