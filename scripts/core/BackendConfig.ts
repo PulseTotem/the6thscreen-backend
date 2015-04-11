@@ -33,14 +33,18 @@ class BackendConfig {
         if(BackendConfig.jwtSecret == "") {
             var file = __dirname + '/backend_config.json';
 
-            try {
-                var configInfos = JSON.parse(fs.readFileSync(file, 'utf8'));
-                BackendConfig.jwtSecret = configInfos.jwtSecret;
-            } catch (e) {
-                Logger.error("Backend configuration file can't be read.");
-                Logger.debug(e);
-                //TODO ? Throw Exception ?
-            }
+			if(process.env.T6S_JWT_SECRET) {
+				BackendConfig.jwtSecret = process.env.T6S_JWT_SECRET;
+			} else {
+				try {
+					var configInfos = JSON.parse(fs.readFileSync(file, 'utf8'));
+					BackendConfig.jwtSecret = configInfos.jwtSecret;
+				} catch (e) {
+					Logger.error("Backend configuration file can't be read.");
+					Logger.debug(e);
+					//TODO ? Throw Exception ?
+				}
+			}
         }
     }
 
