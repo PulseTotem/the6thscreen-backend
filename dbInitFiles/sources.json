@@ -89,6 +89,44 @@
       }
     },
     {
+      "name" : "PicturesFromPage",
+      "description" : "Récupération des dernieres photos d'une page facebook",
+      "service" : {
+        "name" : "Facebook"
+      },
+      "method" : "PicturesFromPage",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "PageName"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+    },
+    {
+      "name" : "PicturesFromAlbum",
+      "description" : "Récupération des photos d'un album",
+      "service" : {
+        "name" : "Facebook"
+      },
+      "method" : "PicturesFromAlbum",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "AlbumID"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+    },
+    {
       "name" : "TaggedPictures",
       "description" : "Récupération des photos à partir d'un tag",
       "service" : {

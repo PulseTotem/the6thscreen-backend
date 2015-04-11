@@ -165,9 +165,49 @@
         },
         "paramValues" : [
           {
-            "value" : "2",
+            "value" : "1",
             "paramType" : {
               "name" : "Limit"
+            }
+          }
+        ]
+      },
+      {
+        "name" : "Facebook2",
+        "callType" : {
+          "name" : "FacebookPageRightZone3"
+        },
+        "paramValues" : [
+          {
+            "value" : "1",
+            "paramType" : {
+              "name" : "Limit"
+            }
+          },
+          {
+            "value" : "BeMyAppFrance",
+            "paramType" : {
+              "name" : "PageName"
+            }
+          }
+        ]
+      },
+      {
+        "name" : "Facebook3",
+        "callType" : {
+          "name" : "FacebookAlbumRightZone3"
+        },
+        "paramValues" : [
+          {
+            "value" : "1",
+            "paramType" : {
+              "name" : "Limit"
+            }
+          },
+          {
+            "value" : "971527866204817",
+            "paramType" : {
+              "name" : "AlbumID"
             }
           }
         ]

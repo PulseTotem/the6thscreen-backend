@@ -250,6 +250,44 @@
         "receivePolicy" : {
           "name" : "DumbReceivePolicy"
         }
+      },
+      {
+        "name" : "FacebookPageRightZone3",
+        "description" : "Display photos in the right zone with generic renderer",
+        "zone" : {
+          "name" : "RightZone3"
+        },
+        "source" : {
+          "name" : "PicturesFromPage"
+        },
+        "renderer" : {
+          "name" : "PictureAlbumRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
+        "name" : "FacebookAlbumRightZone3",
+        "description" : "Display photos in the right zone with generic renderer",
+        "zone" : {
+          "name" : "RightZone3"
+        },
+        "source" : {
+          "name" : "PicturesFromAlbum"
+        },
+        "renderer" : {
+          "name" : "PictureAlbumRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
       }
     ]
   }

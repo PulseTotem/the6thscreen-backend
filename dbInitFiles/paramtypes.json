@@ -26,5 +26,21 @@
         "name" : "String"
       },
       "constraint" : null
+    },
+    {
+      "name" : "AlbumID",
+      "description" : "Identifiant d'un album photo",
+      "type" : {
+        "name" : "String"
+      },
+      "constraint" : null
+    },
+    {
+      "name" : "PageName",
+      "description" : "Identifiant d'une page facebook publique",
+      "type" : {
+        "name" : "String"
+      },
+      "constraint" : null
     }
 ]
