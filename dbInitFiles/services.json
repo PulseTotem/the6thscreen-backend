@@ -46,5 +46,13 @@
       "oauth": true,
       "provider": "instagram",
       "port" : 6007
+    },
+    {
+      "name" : "Hackathon",
+      "description" : "Service Hackathon",
+      "host" : "http://localhost:6008/Hackathon",
+      "oauth": false,
+      "provider": "",
+      "port" : 6008
     }
 ]

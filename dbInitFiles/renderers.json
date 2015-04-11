@@ -26,5 +26,12 @@
       "infoType" : {
         "name" : "PictureAlbum"
       }
+    },
+    {
+      "name" : "EventListRenderer",
+      "description" : "Renderer pour les infos de type EventList.",
+      "infoType" : {
+        "name" : "EventList"
+      }
     }
 ]

@@ -211,6 +211,14 @@
             }
           }
         ]
+      },
+      {
+        "name" : "Hackathon1",
+        "callType" : {
+          "name" : "EventLeftZone3"
+        },
+        "paramValues" : [
+        ]
       }
     ]
   }
