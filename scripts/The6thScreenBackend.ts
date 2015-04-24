@@ -42,6 +42,8 @@ class The6thScreenBackend extends Server {
                     // { clientIp: '127.0.0.1', clientIpRoutable: false }
                     var clientIp = ip_info.clientIp;
 
+					console.log(clientIp);
+
                     var profile = {
                         username: user.username(),
                         ip: clientIp,
@@ -99,6 +101,7 @@ class The6thScreenBackend extends Server {
         this.addNamespace("sources", SourcesNamespaceManager);
         var adminNamespace : any = this.addNamespace("admins", AdminsNamespaceManager);
 
+		//console.log("BYPASS CHECKING JWT Token !!!!!!!!! // TODO // TO FIX");
         adminNamespace.use(socketioJwt.authorize({
             secret: BackendConfig.getJWTSecret(),
             handshake: true
@@ -108,16 +111,22 @@ class The6thScreenBackend extends Server {
             var handshakeData : any = socket.request;
 
             var success = function(user) {
-                if(user.lastIp() == handshakeData.client._peername.address) {
+				console.log("check : ");
+				console.log(handshakeData.client._peername.address);
+				console.log("BYPASS CHECKING IP ADDRESS !!!!!!!!! // TODO // TO FIX");
+				//if(user.lastIp() == handshakeData.client._peername.address) {
                     next();
-                } else {
-                    next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));
-                }
+                //} else {
+                //    next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));
+                //}
             };
 
             var fail = function(error) {
                 next(error);
             };
+
+			console.log("token : ");
+			console.log(handshakeData._query.token);
 
             User.findOneByToken(handshakeData._query.token, success, fail);
             // make sure the handshake data looks good as before
