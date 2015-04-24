@@ -1,0 +1,313 @@
+[
+    {
+        "name" : "SDIRSSDiscounts",
+        "description" : "SDI avec 2 zones, un call FluxRSS, un call Discounts, un par zone",
+        "allowedHost" : "*",
+        "user" : {
+            "username" : "christian"
+        },
+        "zones" : [
+            {
+                "name" : "LeftZone1",
+                "description" : "Zone gauche de SDIRSSDiscount",
+                "width" : 45,
+                "height" : 100,
+                "positionFromTop" : 0,
+                "positionFromLeft" : 0,
+                "behaviour" : {
+                    "name" : "Appearance"
+                }
+            },
+            {
+                "name" : "RightZone1",
+                "description" : "Zone droite de SDIRSSDiscount",
+                "width" : 45,
+                "height" : 100,
+                "positionFromTop" : 0,
+                "positionFromLeft" : 55,
+                "behaviour" : {
+                    "name" : "Appearance"
+                }
+            }
+        ],
+        "callTypes" : [
+            {
+                "name" : "RSSLeftZone1",
+                "description" : "Display RSS feeds in the left zone with generic renderer",
+                "zone" : {
+                    "name" : "LeftZone1"
+                },
+                "source" : {
+                    "name" : "RetrieveFeedContent"
+                },
+                "renderer" : {
+                    "name" : "FeedNodeRendererGeneric"
+                },
+                "renderPolicy" : {
+                    "name" : "FeedContentDumbRenderPolicy"
+                },
+                "receivePolicy" : {
+                    "name" : "DumbReceivePolicy"
+                }
+            },
+            {
+                "name" : "DiscountsRightZone1",
+                "description" : "Display Discounts in the right zone with specific renderer",
+                "zone" : {
+                    "name" : "RightZone1"
+                },
+                "source" : {
+                    "name" : "RetrieveDiscounts"
+                },
+                "renderer" : {
+                    "name" : "DiscountRenderer"
+                },
+                "renderPolicy" : {
+                    "name" : "FeedContentDumbRenderPolicy"
+                },
+                "receivePolicy" : {
+                    "name" : "DumbReceivePolicy"
+                }
+            }
+        ]
+    },
+    {
+        "name" : "SDIDoubleRSS",
+        "description" : "SDI avec 2 zones, 2 calls FluxRSS, un par zone",
+        "allowedHost" : "*",
+        "user" : {
+            "username" : "simon"
+        },
+        "zones" : [
+            {
+                "name" : "LeftZone2",
+                "description" : "Zone gauche de SDIDoubleRSS",
+                "width" : 49,
+                "height" : 100,
+                "positionFromTop" : 0,
+                "positionFromLeft" : 0,
+                "behaviour" : {
+                    "name" : "Appearance"
+                }
+            },
+            {
+                "name" : "RightZone2",
+                "description" : "Zone droite de SDIDoubleRSS",
+                "width" : 49,
+                "height" : 100,
+                "positionFromTop" : 0,
+                "positionFromLeft" : 51,
+                "behaviour" : {
+                    "name" : "Appearance"
+                }
+            }
+        ],
+        "callTypes" : [
+            {
+                "name" : "RSSLeftZone2",
+                "description" : "Display RSS feeds in the left zone with generic renderer",
+                "zone" : {
+                    "name" : "LeftZone2"
+                },
+                "source" : {
+                    "name" : "RetrieveFeedContent"
+                },
+                "renderer" : {
+                    "name" : "FeedNodeRendererGeneric"
+                },
+                "renderPolicy" : {
+                    "name" : "FeedContentDumbRenderPolicy"
+                },
+                "receivePolicy" : {
+                    "name" : "DumbReceivePolicy"
+                }
+            },
+            {
+                "name" : "RSSRightZone2",
+                "description" : "Display RSS feeds in the right zone with generic renderer",
+                "zone" : {
+                    "name" : "RightZone2"
+                },
+                "source" : {
+                    "name" : "RetrieveFeedContent"
+                },
+                "renderer" : {
+                    "name" : "FeedNodeRendererGeneric"
+                },
+                "renderPolicy" : {
+                    "name" : "FeedContentDumbRenderPolicy"
+                },
+                "receivePolicy" : {
+                    "name" : "DumbReceivePolicy"
+                }
+            }
+        ]
+    },
+  {
+    "name" : "SDITwitterOnly",
+    "description" : "SDI avec 2 zones, 2 calls Twitter, un par zone",
+    "allowedHost" : "*",
+    "user" : {
+      "username" : "christian"
+    },
+    "zones" : [
+      {
+        "name" : "LeftZone3",
+        "description" : "Zone gauche de SDITwitterOnly",
+        "width" : 49,
+        "height" : 100,
+        "positionFromTop" : 0,
+        "positionFromLeft" : 0,
+        "behaviour" : {
+          "name" : "Appearance"
+        }
+      },
+      {
+        "name" : "RightZone3",
+        "description" : "Zone droite de SDITwitterOnly",
+        "width" : 49,
+        "height" : 100,
+        "positionFromTop" : 0,
+        "positionFromLeft" : 51,
+        "behaviour" : {
+          "name" : "Appearance"
+        }
+      }
+    ],
+    "callTypes" : [
+      {
+        "name" : "TwitterLeftZone3",
+        "description" : "Display Tweets in the left zone with generic renderer",
+        "zone" : {
+          "name" : "LeftZone3"
+        },
+        "source" : {
+          "name" : "LastTweetsFromSearch"
+        },
+        "renderer" : {
+          "name" : "TweetRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
+        "name" : "InstagramLeftZone3",
+        "description" : "Display photos in the left zone with generic renderer",
+        "zone" : {
+          "name" : "LeftZone3"
+        },
+        "source" : {
+          "name" : "TaggedPictures"
+        },
+        "renderer" : {
+          "name" : "PictureAlbumRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
+        "name" : "EventLeftZone3",
+        "description" : "Display events in the left zone with generic renderer",
+        "zone" : {
+          "name" : "LeftZone3"
+        },
+        "source" : {
+          "name" : "PublicEvents"
+        },
+        "renderer" : {
+          "name" : "EventListRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
+        "name" : "FlickrRightZone3",
+        "description" : "Display photos in the right zone with generic renderer",
+        "zone" : {
+          "name" : "RightZone3"
+        },
+        "source" : {
+          "name" : "LastPicturesFromSearch"
+        },
+        "renderer" : {
+          "name" : "PictureAlbumRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
+        "name" : "FacebookRightZone3",
+        "description" : "Display photos in the right zone with generic renderer",
+        "zone" : {
+          "name" : "RightZone3"
+        },
+        "source" : {
+          "name" : "PicturesFromLoggedUser"
+        },
+        "renderer" : {
+          "name" : "PictureAlbumRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
+        "name" : "FacebookPageRightZone3",
+        "description" : "Display photos in the right zone with generic renderer",
+        "zone" : {
+          "name" : "RightZone3"
+        },
+        "source" : {
+          "name" : "PicturesFromPage"
+        },
+        "renderer" : {
+          "name" : "PictureAlbumRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      },
+      {
+        "name" : "FacebookAlbumRightZone3",
+        "description" : "Display photos in the right zone with generic renderer",
+        "zone" : {
+          "name" : "RightZone3"
+        },
+        "source" : {
+          "name" : "PicturesFromAlbum"
+        },
+        "renderer" : {
+          "name" : "PictureAlbumRenderer"
+        },
+        "renderPolicy" : {
+          "name" : "FeedContentDumbRenderPolicy"
+        },
+        "receivePolicy" : {
+          "name" : "DumbReceivePolicy"
+        }
+      }
+    ]
+  }
+]

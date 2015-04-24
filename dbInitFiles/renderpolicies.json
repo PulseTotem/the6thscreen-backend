@@ -1,0 +1,6 @@
+[
+    {
+        "name" : "FeedContentDumbRenderPolicy",
+        "description" : "Dumb render policy for FeedContent."
+    }
+]

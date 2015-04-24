@@ -1,0 +1,37 @@
+[
+    {
+        "name" : "FeedNodeRendererGeneric",
+        "description" : "Renderer générique pour les infos de type FeedNode.",
+        "infoType" : {
+            "name" : "FeedContent"
+        }
+    },
+    {
+      "name" : "TweetRenderer",
+      "description" : "Renderer générique pour les infos de type Tweet.",
+      "infoType" : {
+        "name" : "TweetList"
+      }
+    },
+    {
+        "name" : "DiscountRenderer",
+        "description" : "Renderer pour les infos de type Discount.",
+        "infoType" : {
+            "name" : "DiscountsList"
+        }
+    },
+    {
+      "name" : "PictureAlbumRenderer",
+      "description" : "Renderer pour les infos de type PictureAlbum.",
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+    },
+    {
+      "name" : "EventListRenderer",
+      "description" : "Renderer pour les infos de type EventList.",
+      "infoType" : {
+        "name" : "EventList"
+      }
+    }
+]

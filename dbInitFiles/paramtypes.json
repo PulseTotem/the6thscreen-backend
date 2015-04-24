@@ -1,0 +1,46 @@
+[
+    {
+        "name" : "FeedURL",
+        "description" : "Lien du flux RSS",
+        "type" : {
+            "name" : "String"
+        },
+        "constraint" : {
+            "name" : "URL"
+        }
+    },
+    {
+        "name" : "Limit",
+        "description" : "Limiter le nombre de résultats",
+        "type" : {
+            "name" : "Entier"
+        },
+        "constraint" : {
+            "name" : "Positive"
+        }
+    },
+    {
+      "name" : "SearchQuery",
+      "description" : "Description de la recherche à effectuer",
+      "type" : {
+        "name" : "String"
+      },
+      "constraint" : null
+    },
+    {
+      "name" : "AlbumID",
+      "description" : "Identifiant d'un album photo",
+      "type" : {
+        "name" : "String"
+      },
+      "constraint" : null
+    },
+    {
+      "name" : "PageName",
+      "description" : "Identifiant d'une page facebook publique",
+      "type" : {
+        "name" : "String"
+      },
+      "constraint" : null
+    }
+]

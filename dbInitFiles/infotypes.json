@@ -1,0 +1,17 @@
+[
+    {
+        "name" : "FeedContent"
+    },
+    {
+        "name" : "DiscountsList"
+    },
+    {
+      "name" : "TweetList"
+    },
+    {
+        "name": "PictureAlbum"
+    },
+    {
+        "name": "EventList"
+    }
+]
