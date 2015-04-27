@@ -1,4 +1,5 @@
 /**
+ * @author Simon Urli <simon@the6thscreen.fr>
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
  */
 
@@ -7,12 +8,12 @@
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
- * Model : ReceivePolicy
+ * Model : Widget
  *
- * @class ReceivePolicy
+ * @class Widget
  * @extends ModelItf
  */
-class ReceivePolicy extends ModelItf {
+class Widget extends ModelItf {
 
     /**
      * Name property.
@@ -26,16 +27,17 @@ class ReceivePolicy extends ModelItf {
      * Constructor.
      *
      * @constructor
-     * @param {string} name - The ReceivePolicy's name.
-     * @param {number} id - The ReceivePolicy's ID.
+     * @param {string} name - The Widget's name.
+     * @param {number} id - The Widget's ID.
      */
     constructor(name : string = "", id : number = null, complete : boolean = false) {
         super(id, complete);
-	    this.setName(name);
+
+        this.setName(name);
     }
 
 	/**
-	 * Set the ReceivePolicy's name.
+	 * Set the Widget's name.
 	 *
 	 * @method setName
 	 */
@@ -44,7 +46,7 @@ class ReceivePolicy extends ModelItf {
 	}
 
     /**
-     * Return the ReceivePolicy's name.
+     * Return the Widget's name.
      *
      * @method name
      */
@@ -55,7 +57,7 @@ class ReceivePolicy extends ModelItf {
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Return a ReceivePolicy instance as a JSON Object
+	 * Return a Widget instance as a JSON Object
 	 *
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
@@ -70,21 +72,18 @@ class ReceivePolicy extends ModelItf {
 	}
 
 	/**
-	 * Check if the ReceivePolicy is complete or not.
-	 *
-	 * A ReceivePolicy is complete if it has an ID and a name.
+	 * Compute the completeness of a Widget.
+	 * The completeness is given by the presence of an ID and a name.
 	 */
-	checkCompleteness(successCallback : Function, failCallback : Function) : void  {
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
 		var self = this;
 
 		var success : Function = function () {
 			self._complete = (self._complete && !!self.name());
 			successCallback();
-		};
+		}
 
-		super.checkCompleteness(success, failCallback);
-
-
+		super.checkCompleteness(success,failCallback);
 	}
 
     /**
@@ -96,7 +95,7 @@ class ReceivePolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        this.createObject(ReceivePolicy, this.toJSONObject(), successCallback, failCallback);
+        this.createObject(Widget, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -110,7 +109,7 @@ class ReceivePolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        ModelItf.readObject(ReceivePolicy, id, successCallback, failCallback, attemptNumber);
+        ModelItf.readObject(Widget, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -122,7 +121,7 @@ class ReceivePolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.updateObject(ReceivePolicy, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+        return this.updateObject(Widget, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -134,7 +133,7 @@ class ReceivePolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(ReceivePolicy, this.getId(), successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(Widget, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -146,31 +145,31 @@ class ReceivePolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.allObjects(ReceivePolicy, successCallback, failCallback, attemptNumber);
+        return this.allObjects(Widget, successCallback, failCallback, attemptNumber);
     }
 
 	/**
-	 * Return a ReceivePolicy instance from a JSON string.
+	 * Return a Widget instance from a JSON string.
 	 *
 	 * @method parseJSON
 	 * @static
 	 * @param {string} json - The JSON string
-	 * @return {ReceivePolicy} The model instance.
+	 * @return {Widget} The model instance.
 	 */
-	static parseJSON(jsonString : string) : ReceivePolicy {
-		return ReceivePolicy.fromJSONObject(JSON.parse(jsonString));
+	static parseJSON(jsonString : string) : Widget {
+		return Widget.fromJSONObject(JSON.parse(jsonString));
 	}
 
 	/**
-	 * Return a ReceivePolicy instance from a JSON Object.
+	 * Return a Widget instance from a JSON Object.
 	 *
 	 * @method fromJSONObject
 	 * @static
 	 * @param {JSONObject} json - The JSON Object
-	 * @return {ReceivePolicy} The model instance.
+	 * @return {Widget} The model instance.
 	 */
-	static fromJSONObject(jsonObject : any) : ReceivePolicy {
-		return new ReceivePolicy(jsonObject.name, jsonObject.id, jsonObject.complete);
+	static fromJSONObject(jsonObject : any) : Widget {
+		return new Widget(jsonObject.name, jsonObject.id, jsonObject.complete);
 	}
 
     /**
@@ -180,6 +179,6 @@ class ReceivePolicy extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "ReceivePolicies";
+        return "Widgets";
     }
 }

@@ -6,29 +6,29 @@
 /// <reference path="../../libsdef/nock.d.ts" />
 /// <reference path="../../libsdef/sinon.d.ts" />
 
-/// <reference path="../../scripts/model/RenderPolicy.ts" />
+/// <reference path="../../scripts/model/Policy.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");
 
-describe('RenderPolicy', function() {
+describe('Policy', function() {
 	describe('#constructor', function() {
 
 		it('should store the name', function(){
 			var name = "machin";
-			var c = new RenderPolicy(name,"");
+			var c = new Policy(name,"");
 			assert.equal(c.name(), name, "The name is not stored correctly.");
 		});
 
 		it('should store the description', function(){
 			var desc = "machin";
-			var c = new RenderPolicy("",desc);
+			var c = new Policy("",desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new RenderPolicy("titi","",id);
+			var c = new Policy("titi","",id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 	});
@@ -42,8 +42,8 @@ describe('RenderPolicy', function() {
 				"complete": true
 			};
 
-			var callRetrieve = RenderPolicy.fromJSONObject(json);
-			var callExpected = new RenderPolicy("toto","blabla",42,true);
+			var callRetrieve = Policy.fromJSONObject(json);
+			var callExpected = new Policy("toto","blabla",42,true);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve callType ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -56,16 +56,16 @@ describe('RenderPolicy', function() {
 				"complete": false
 			};
 
-			var callRetrieve = RenderPolicy.fromJSONObject(json);
-			var callExpected = new RenderPolicy("","",42);
+			var callRetrieve = Policy.fromJSONObject(json);
+			var callExpected = new Policy("","",42);
 
-			assert.deepEqual(callRetrieve, callExpected, "The retrieve RenderPolicy ("+JSON.stringify(callRetrieve)+") does not match with the expected one ("+JSON.stringify(callExpected)+")");
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve Policy ("+JSON.stringify(callRetrieve)+") does not match with the expected one ("+JSON.stringify(callExpected)+")");
 		});
 	});
 
 	describe('#toJsonObject', function() {
 		it('should create the expected JSON Object', function() {
-			var c = new RenderPolicy("toto","blabla", 52);
+			var c = new Policy("toto","blabla", 52);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",

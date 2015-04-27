@@ -1,4 +1,5 @@
 /**
+ * @author Simon Urli <simon@the6thscreen.fr>
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
  */
 
@@ -7,12 +8,12 @@
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
- * Model : RenderPolicy
+ * Model : Policy
  *
- * @class RenderPolicy
+ * @class Policy
  * @extends ModelItf
  */
-class RenderPolicy extends ModelItf {
+class Policy extends ModelItf {
 
     /**
      * Name property.
@@ -34,8 +35,8 @@ class RenderPolicy extends ModelItf {
      * Constructor.
      *
      * @constructor
-     * @param {string} name - The RenderPolicy's name.
-     * @param {string} description - The RenderPolicy's description.
+     * @param {string} name - The Policy's name.
+     * @param {string} description - The Policy's description.
      * @param {number} id - The RenderPolicy's ID.
      */
     constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
@@ -46,7 +47,7 @@ class RenderPolicy extends ModelItf {
     }
 
 	/**
-	 * Set the RenderPolicy's name.
+	 * Set the Policy's name.
 	 *
 	 * @method setName
 	 */
@@ -55,7 +56,7 @@ class RenderPolicy extends ModelItf {
 	}
 
 	/**
-	 * Set the RenderPolicy's description.
+	 * Set the Policy's description.
 	 *
 	 * @method setDescription
 	 */
@@ -64,7 +65,7 @@ class RenderPolicy extends ModelItf {
 	}
 
     /**
-     * Return the RenderPolicy's name.
+     * Return the Policy's name.
      *
      * @method name
      */
@@ -73,7 +74,7 @@ class RenderPolicy extends ModelItf {
     }
 
     /**
-     * Return the RenderPolicy's description.
+     * Return the Policy's description.
      *
      * @method description
      */
@@ -84,7 +85,7 @@ class RenderPolicy extends ModelItf {
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Return a RenderPolicy instance as a JSON Object
+	 * Return a Policy instance as a JSON Object
 	 *
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
@@ -102,7 +103,7 @@ class RenderPolicy extends ModelItf {
 	/**
 	 * Check if the object is complete.
 	 *
-	 * A RendererPolicy is complete if it has an ID and a name.
+	 * A Policy is complete if it has an ID and a name.
 	 */
 	checkCompleteness(successCallback : Function, failCallback : Function) : void {
 		var self = this;
@@ -178,7 +179,7 @@ class RenderPolicy extends ModelItf {
     }
 
 	/**
-	 * Return a RenderPolicy instance from a JSON string.
+	 * Return a Policy instance from a JSON string.
 	 *
 	 * @method parseJSON
 	 * @static
@@ -190,7 +191,7 @@ class RenderPolicy extends ModelItf {
 	}
 
 	/**
-	 * Return a RenderPolicy instance from a JSON Object.
+	 * Return a Policy instance from a JSON Object.
 	 *
 	 * @method fromJSONObject
 	 * @static
@@ -208,6 +209,6 @@ class RenderPolicy extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "RenderPolicies";
+        return "Policies";
     }
 }
