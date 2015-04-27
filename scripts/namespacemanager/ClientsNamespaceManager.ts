@@ -128,6 +128,9 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 			"id" : 1,
 			"name": "My Super Tweet Search Call"
 		};
+		relativeEvent["call"]["callType"] = {
+			"id" : 1
+		}
 		zoneContent["relativeTimeline"]["relativeEvents"].push(relativeEvent);
 		zoneContent["absoluteTimeline"] = null;
 
