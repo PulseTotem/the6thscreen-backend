@@ -102,6 +102,39 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
 
+		var profilDesc = {};
+		profilDesc["zoneContents"] = [];
+		var zoneContent = {
+			"id": 1,
+			"name": "Central Zone Content",
+			"description": ""
+		};
+		zoneContent["zone"] = {
+			"id" : 1
+		};
+		zoneContent["widget"] = null;
+		zoneContent["relativeTimeline"] = {
+			"id" : 1,
+			"name": "Timeline for Central Zone"
+		};
+		zoneContent["relativeTimeline"]["relativeEvents"] = [];
+		var relativeEvent = {
+			"id" : 1,
+			"name": "Tweet Search Event",
+			"position" : 0,
+			"duration" : 60*5
+		};
+		relativeEvent["call"] = {
+			"id" : 1,
+			"name": "My Super Tweet Search Call"
+		};
+		zoneContent["relativeTimeline"]["relativeEvents"].push(relativeEvent);
+		zoneContent["absoluteTimeline"] = null;
+
+		profilDesc["zoneContents"].push(zoneContent);
+
+		self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+
 	}
 
 ////////////////////// End: Manage HashDescription //////////////////////
