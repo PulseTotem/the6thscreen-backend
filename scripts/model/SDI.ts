@@ -6,7 +6,6 @@
 /// <reference path="./User.ts" />
 /// <reference path="./Zone.ts" />
 /// <reference path="./Profil.ts" />
-/// <reference path="./Timeline.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -91,22 +90,6 @@ class SDI extends ModelItf {
     private _profils_loaded : boolean;
 
     /**
-     * Timelines property.
-     *
-     * @property _timelines
-     * @type Array<Timeline>
-     */
-    private _timelines : Array<Timeline>;
-
-    /**
-     * Lazy loading for Timelines property.
-     *
-     * @property _timelines_loaded
-     * @type boolean
-     */
-    private _timelines_loaded : boolean;
-
-    /**
      * Constructor.
      *
      * @constructor
@@ -130,9 +113,6 @@ class SDI extends ModelItf {
 
         this._profils = new Array<Profil>();
         this._profils_loaded = false;
-
-        this._timelines = new Array<Timeline>();
-        this._timelines_loaded = false;
     }
 
 	/**
@@ -312,47 +292,6 @@ class SDI extends ModelItf {
         }
     }
 
-    /**
-     * Return the SDI's timelines.
-     *
-     * @method timelines
-     */
-    timelines() {
-        return this._timelines;
-    }
-
-    /**
-     * Load the SDI's timelines.
-     *
-     * @method loadTimelines
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    loadTimelines(successCallback : Function, failCallback : Function) {
-        if(! this._timelines_loaded) {
-            var self = this;
-            var success : Function = function(timelines) {
-                self._timelines = timelines;
-                self._timelines_loaded = true;
-                if(successCallback != null) {
-                    successCallback();
-                }
-            };
-
-            var fail : Function = function(error) {
-                if(failCallback != null) {
-                    failCallback(error);
-                }
-            };
-
-            this.getAssociatedObjects(SDI, Timeline, success, fail);
-        } else {
-            if(successCallback != null) {
-                successCallback();
-            }
-        }
-    }
-
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -367,7 +306,7 @@ class SDI extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._users_loaded && self._profils_loaded && self._zones_loaded && self._timelines_loaded) {
+            if(self._users_loaded && self._profils_loaded && self._zones_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -385,7 +324,6 @@ class SDI extends ModelItf {
         this.loadUsers(success, fail);
         this.loadProfils(success, fail);
         this.loadZones(success, fail);
-        this.loadTimelines(success, fail);
     }
 
 	/**
@@ -395,7 +333,6 @@ class SDI extends ModelItf {
 	 */
 	desynchronize() : void {
 		this._profils_loaded = false;
-		this._timelines_loaded = false;
 		this._users_loaded = false;
 		this._zones_loaded = false;
 	}
@@ -445,7 +382,6 @@ class SDI extends ModelItf {
         var success : Function = function() {
             var data = self.toJSONObject();
             data["profils"] = self.serializeArray(self.profils(), onlyId);
-            data["timelines"] = self.serializeArray(self.timelines(), onlyId);
             data["users"] = self.serializeArray(self.users(), onlyId);
             data["zones"] = self.serializeArray(self.zones(), onlyId);
 
@@ -535,32 +471,6 @@ class SDI extends ModelItf {
 	 */
 	removeProfil(profilID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(SDI, Profil, profilID, successCallback, failCallback);
-	}
-
-	/**
-	 * Add a new Timeline to the SDI and associate it in the database.
-	 * A Timeline can only be added once.
-	 *
-     * @method addTimeline
-	 * @param {Timeline} t The Timeline to add inside the SDI. It cannot be a null value.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	addTimeline(tlID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(SDI, Timeline, tlID, successCallback, failCallback);
-	}
-
-	/**
-	 * Remove a Timeline from the SDI: the association is removed both in the object and in database.
-	 * The Timeline can only be removed if it exists first in the list of associated Timelines, else an exception is thrown.
-	 *
-     * @method removeTimeline
-	 * @param {Timeline} t The Timeline to remove from that SDI
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	removeTimeline(tlID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(SDI, Timeline, tlID, successCallback, failCallback);
 	}
 
 	/**

@@ -272,7 +272,7 @@ class ZoneContent extends ModelItf {
 				if(!!absoluteTimeline) {
 					self._absoluteTimeline = absoluteTimeline;
 				}
-				self._absoluteTimeline = true;
+				self._absoluteTimeline_loaded = true;
 				if(successCallback != null) {
 					successCallback();
 				}
@@ -315,7 +315,7 @@ class ZoneContent extends ModelItf {
 				if(!!relativeTimeline) {
 					self._relativeTimeline = relativeTimeline;
 				}
-				self._relativeTimeline = true;
+				self._relativeTimeline_loaded = true;
 				if(successCallback != null) {
 					successCallback();
 				}

@@ -4,6 +4,20 @@
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="./ShareNamespaceManager.ts" />
+/// <reference path="../model/User.ts" />
+/// <reference path="../model/SDI.ts" />
+/// <reference path="../model/Source.ts" />
+/// <reference path="../model/CallType.ts" />
+/// <reference path="../model/Service.ts" />
+/// <reference path="../model/Zone.ts" />
+/// <reference path="../model/OAuthKey.ts" />
+/// <reference path="../model/Call.ts" />
+/// <reference path="../model/Renderer.ts" />
+/// <reference path="../model/Profil.ts" />
+/// <reference path="../model/InfoType.ts" />
+/// <reference path="../model/Policy.ts" />
+/// <reference path="../model/Behaviour.ts" />
+
 
 class AdminsNamespaceManager extends ShareNamespaceManager {
 
@@ -35,8 +49,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveRendererDescriptionOnlyId', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Renderer, "rendererId", description, "RendererDescription", true); });
 		this.addListenerToSocket('RetrieveProfilDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Profil, "profilId", description, "ProfilDescription"); });
 		this.addListenerToSocket('RetrieveInfoTypeDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(InfoType, "infoTypeId", description, "InfoTypeDescription"); });
-		this.addListenerToSocket('RetrieveReceivePolicyDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(ReceivePolicy, "receivePolicyId", description, "ReceivePolicyDescription"); });
-		this.addListenerToSocket('RetrieveRenderPolicyDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(RenderPolicy, "renderPolicyId", description, "RenderPolicyDescription"); });
+		this.addListenerToSocket('RetrievePolicyDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Policy, "PolicyId", description, "PolicyDescription"); });
 
 		// Retrieve all objects
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
@@ -47,8 +60,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveAllParamTypeDescription', function() { self.sendAllObjectDescription(ParamType, "AllParamTypeDescription"); });
 	    this.addListenerToSocket('RetrieveAllServiceDescription', function() { self.sendAllObjectDescription(Service, "AllServiceDescription"); });
 		this.addListenerToSocket('RetrieveAllBehaviourDescription', function() { self.sendAllObjectDescription(Behaviour, "AllBehaviourDescription"); });
-		this.addListenerToSocket('RetrieveAllReceivePolicyDescription', function() { self.sendAllObjectDescription(ReceivePolicy, "AllReceivePolicyDescription"); });
-		this.addListenerToSocket('RetrieveAllRenderPolicyDescription', function() { self.sendAllObjectDescription(RenderPolicy, "AllRenderPolicyDescription"); });
+		this.addListenerToSocket('RetrieveAllPolicyDescription', function() { self.sendAllObjectDescription(Policy, "AllPolicyDescription"); });
 
 		// Create object
 	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
@@ -60,8 +72,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateRendererDescription', function(data) { self.createObject(Renderer, data, "RendererDescription"); });
 		this.addListenerToSocket('CreateProfilDescription', function(data) { self.createObject(Profil, data, "ProfilDescription"); });
 		this.addListenerToSocket('CreateInfoTypeDescription', function(data) { self.createObject(InfoType, data, "InfoTypeDescription"); });
-		this.addListenerToSocket('CreateRenderPolicyDescription', function(data) { self.createObject(RenderPolicy, data, "RenderPolicyDescription"); });
-		this.addListenerToSocket('CreateReceivePolicyDescription', function(data) { self.createObject(ReceivePolicy, data, "ReceivePolicyDescription"); });
+		this.addListenerToSocket('CreatePolicyDescription', function(data) { self.createObject(Policy, data, "PolicyDescription"); });
 
 		// Update object
 	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
@@ -74,8 +85,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateRendererDescription', function(data) { self.updateObjectAttribute(Renderer, data, "RendererDescription"); });
 		this.addListenerToSocket('UpdateProfilDescription', function(data) { self.updateObjectAttribute(Profil, data, "ProfilDescription"); });
 		this.addListenerToSocket('UpdateInfoTypeDescription', function(data) { self.updateObjectAttribute(InfoType, data, "InfoTypeDescription"); });
-		this.addListenerToSocket('UpdateRenderPolicyDescription', function(data) { self.updateObjectAttribute(RenderPolicy, data, "RenderPolicyDescription"); });
-		this.addListenerToSocket('UpdateReceivePolicyDescription', function(data) { self.updateObjectAttribute(ReceivePolicy, data, "ReceivePolicyDescription"); });
+		this.addListenerToSocket('UpdatePolicyDescription', function(data) { self.updateObjectAttribute(Policy, data, "PolicyDescription"); });
 
 		// Delete object
 	    this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "deletedSource"); });
@@ -88,8 +98,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteRenderer', function(idRenderer) { self.deleteObjectFromDescription(Renderer, "rendererId", idRenderer, "deletedRenderer"); });
 		this.addListenerToSocket('DeleteProfil', function(idProfil) { self.deleteObjectFromDescription(Profil, "profilId", idProfil, "deletedProfil"); });
 		this.addListenerToSocket('DeleteInfoType', function(idInfoType) { self.deleteObjectFromDescription(InfoType, "infoTypeId", idInfoType, "deletedInfoType"); });
-		this.addListenerToSocket('DeleteReceivePolicy', function(idReceivePolicy) { self.deleteObjectFromDescription(ReceivePolicy, "receivePolicyId", idReceivePolicy, "deletedReceivePolicy"); });
-		this.addListenerToSocket('DeleteRenderPolicy', function(idRenderPolicy) { self.deleteObjectFromDescription(RenderPolicy, "renderPolicyId", idRenderPolicy, "deletedRenderPolicy"); });
+		this.addListenerToSocket('DeletePolicy', function(idPolicy) { self.deleteObjectFromDescription(Policy, "policyId", idPolicy, "deletedPolicy"); });
 
 
 		// Custom requests

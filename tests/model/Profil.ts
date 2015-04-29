@@ -52,10 +52,10 @@ describe('Profil', function() {
 				"complete": true
 			};
 
-			var callRetrieve = Profil.fromJSONObject(json);
-			var callExpected = new Profil("toto", "blabla", 42, true);
+			var zoneContentRetrieve = Profil.fromJSONObject(json);
+			var zoneContentExpected = new Profil("toto", "blabla", 42, true);
 
-			assert.deepEqual(callRetrieve, callExpected, "The retrieve profil (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+			assert.deepEqual(zoneContentRetrieve, zoneContentExpected, "The retrieve profil (" + zoneContentRetrieve + ") does not match with the expected one (" + zoneContentExpected + ")");
 		});
 
 		it('should create the right object even if it is partial', function () {
@@ -66,10 +66,10 @@ describe('Profil', function() {
 				"complete": false
 			};
 
-			var callRetrieve = Profil.fromJSONObject(json);
-			var callExpected = new Profil(null, "blabla", 42);
+			var zoneContentRetrieve = Profil.fromJSONObject(json);
+			var zoneContentExpected = new Profil(null, "blabla", 42);
 
-			assert.deepEqual(callRetrieve, callExpected, "The retrieve profil (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+			assert.deepEqual(zoneContentRetrieve, zoneContentExpected, "The retrieve profil (" + zoneContentRetrieve + ") does not match with the expected one (" + zoneContentExpected + ")");
 		});
 
 	});
@@ -130,10 +130,10 @@ describe('Profil', function() {
 		});
 	});
 
-	describe('#addCall', function() {
-		it('should call the right request', function(done) {
+	describe('#addZoneContent', function() {
+		it('should zoneContent the right request', function(done) {
 			var c = new Profil("toto", "blabla", 52);
-			var pv = new Call("mavaleur",12);
+			var pv = new ZoneContent("mavaleur", "", 12);
 			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : SequelizeRestfulResponse = {
@@ -142,14 +142,14 @@ describe('Profil', function() {
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), c.getId().toString(), Call.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
-                var calls = c.calls();
+                var zoneContents = c.zoneContents();
 
-                assert.deepEqual(calls, [], "The call is not an empty array: "+JSON.stringify(calls));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the calls");
+                assert.deepEqual(zoneContents, [], "The zoneContent is not an empty array: "+JSON.stringify(zoneContents));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zoneContents");
 
                 var response2 : SequelizeRestfulResponse = {
                     "status": "success",
@@ -157,12 +157,12 @@ describe('Profil', function() {
                 };
 
                 var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(Profil.getTableName(), c.getId().toString(), Call.getTableName(), pv.getId().toString()))
+                    .put(DatabaseConnection.associatedObjectEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName(), pv.getId().toString()))
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the addCall is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the call in database.");
+                    //assert.ok(retour, "The return of the addZoneContent is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the zoneContent in database.");
                     done();
                 };
 
@@ -170,21 +170,21 @@ describe('Profil', function() {
                     done(err);
                 };
 
-                c.addCall(pv.getId(), success2, fail2);
+                c.addZoneContent(pv.getId(), success2, fail2);
             };
 
             var fail = function(err) {
                 done(err);
             };
 
-			c.loadCalls(success, fail);
+			c.loadZoneContents(success, fail);
 		});
 	});
 
-	describe('#removeCall', function() {
-		it('should call the right request', function(done) {
+	describe('#removeZoneContent', function() {
+		it('should zoneContent the right request', function(done) {
 			var c = new Profil("toto", "blabla", 52);
-			var pv = new Call("mavaleur",12);
+			var pv = new ZoneContent("mavaleur", "", 12);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
@@ -198,14 +198,14 @@ describe('Profil', function() {
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), c.getId().toString(), Call.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
-                var calls = c.calls();
+                var zoneContents = c.zoneContents();
 
-                assert.deepEqual(calls, [pv], "The call array is not an array fill only with PV: "+JSON.stringify(calls));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the calls");
+                assert.deepEqual(zoneContents, [pv], "The zoneContent array is not an array fill only with PV: "+JSON.stringify(zoneContents));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zoneContents");
 
                 var spy = sinon.spy(pv, "desynchronize");
                 var response2 : SequelizeRestfulResponse = {
@@ -214,12 +214,12 @@ describe('Profil', function() {
                 };
 
                 var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(Profil.getTableName(), c.getId().toString(), Call.getTableName(), pv.getId().toString()))
+                    .delete(DatabaseConnection.associatedObjectEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName(), pv.getId().toString()))
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the removeCall is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the call in database.");
+                    //assert.ok(retour, "The return of the removeZoneContent is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the zoneContent in database.");
                     done();
                 };
 
@@ -227,14 +227,14 @@ describe('Profil', function() {
                     done(err);
                 };
 
-                c.removeCall(pv.getId(), success2, fail2);
+                c.removeZoneContent(pv.getId(), success2, fail2);
             };
 
             var fail = function(err) {
                 done(err);
             };
 
-			c.loadCalls(success, fail);
+			c.loadZoneContents(success, fail);
 		});
 
 	});
