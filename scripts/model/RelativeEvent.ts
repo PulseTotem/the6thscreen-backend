@@ -290,6 +290,31 @@ class RelativeEvent extends ModelItf {
     }
 
     /**
+     * Set the Call of the RelativeEvent.
+     *
+     * @method linkCall
+     * @param {Call} s The Call to associate with the RelativeEvent.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    linkCall(sourceId : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(RelativeEvent, Call, sourceId, successCallback, failCallback);
+    }
+
+    /**
+     * Unset the current Call from the RelativeEvent.
+     * It both sets a null value for the object property and remove the association in database.
+     * A Call must have been set before using it, else an exception is thrown.
+     *
+     * @method unlinkCall
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    unlinkCall(sourceID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(RelativeEvent, Call, sourceID, successCallback, failCallback);
+    }
+
+    /**
      * Create model in database.
      *
      * @method create

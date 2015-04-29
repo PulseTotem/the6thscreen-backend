@@ -288,6 +288,31 @@ class AbsoluteEvent extends ModelItf {
 		this.loadAssociations(success, fail);
 	}
 
+	/**
+	 * Set the RelativeTimeline of the AbsoluteEvent.
+	 *
+	 * @method linkRelativeTimeline
+	 * @param {RelativeTimeline} s The RelativeTimeline to associate with the AbsoluteEvent.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkRelativeTimeline(sourceId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(AbsoluteEvent, RelativeTimeline, sourceId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current RelativeTimeline from the AbsoluteEvent.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A RelativeTimeline must have been set before using it, else an exception is thrown.
+	 *
+	 * @method unlinkRelativeTimeline
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkRelativeTimeline(sourceID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(AbsoluteEvent, RelativeTimeline, sourceID, successCallback, failCallback);
+	}
+
     /**
      * Create model in database.
      *
