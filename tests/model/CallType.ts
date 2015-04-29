@@ -598,10 +598,10 @@ describe('CallType', function(){
 
 	});
 
-	describe('#linkReceivePolicy', function() {
+	describe('#linkPolicy', function() {
 		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
-			var r = new ReceivePolicy("receivePolicy",12);
+			var r = new Policy("policy", "", 12);
 			var spy = sinon.spy(r, "desynchronize");
 
 			var response1 : SequelizeRestfulResponse = {
@@ -610,13 +610,13 @@ describe('CallType', function(){
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
-                var receivePolicy = c.receivePolicy();
-                assert.equal(receivePolicy, null, "The receivePolicy is not a null value: "+JSON.stringify(receivePolicy));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the receivePolicy");
+                var policy = c.policy();
+                assert.equal(policy, null, "The policy is not a null value: "+JSON.stringify(policy));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the policy");
 
                 var response2 : SequelizeRestfulResponse = {
                     "status": "success",
@@ -624,12 +624,12 @@ describe('CallType', function(){
                 };
 
                 var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName(), r.getId().toString()))
+                    .put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName(), r.getId().toString()))
                     .reply(200, JSON.stringify(response2));
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the linkReceivePolicy is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the receivePolicy in database.");
+                    //assert.ok(retour, "The return of the linkPolicy is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the policy in database.");
                     done();
                 };
 
@@ -637,22 +637,22 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.linkReceivePolicy(r.getId(), success2, fail2);
+                c.linkPolicy(r.getId(), success2, fail2);
             };
 
             var fail = function(err) {
                 done(err);
             };
 
-            c.loadReceivePolicy(success, fail);
+            c.loadPolicy(success, fail);
 		});
 
 	});
 
-	describe('#unlinkReceivePolicy', function() {
+	describe('#unlinkPolicy', function() {
 		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
-			var s = new ReceivePolicy("toto", 42);
+			var s = new Policy("toto", "", 42);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
@@ -660,13 +660,13 @@ describe('CallType', function(){
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
-                var receivePolicy = c.receivePolicy();
-                assert.deepEqual(receivePolicy, s, "The receivePolicy is not the expected value");
-                var spy = sinon.spy(receivePolicy, "desynchronize");
+                var policy = c.policy();
+                assert.deepEqual(policy, s, "The policy is not the expected value");
+                var spy = sinon.spy(policy, "desynchronize");
 
                 var response2 : SequelizeRestfulResponse = {
                     "status": "success",
@@ -674,12 +674,12 @@ describe('CallType', function(){
                 };
 
                 var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), ReceivePolicy.getTableName(), s.getId().toString()))
+                    .delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(response2));
 
 
                 var success2 = function() {
-                    //assert.ok(retour, "The return of the unlinkReceivePolicy is false.");
+                    //assert.ok(retour, "The return of the unlinkPolicy is false.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
                     done();
                 };
@@ -688,117 +688,14 @@ describe('CallType', function(){
                     done(err);
                 };
 
-                c.unlinkReceivePolicy(s.getId(), success2, fail2);
+                c.unlinkPolicy(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
                 done(err);
             };
 
-			c.loadReceivePolicy(success, fail);
-		});
-	});
-
-	describe('#linkRenderPolicy', function() {
-		it('should call the right request', function(done) {
-			var c = new CallType("toto","machin", 52);
-			var r = new RenderPolicy("renderPolicy","toto",12);
-			var spy = sinon.spy(r, "desynchronize");
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), RenderPolicy.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var renderPolicy = c.renderPolicy();
-                assert.equal(renderPolicy, null, "The renderPolicy is not a null value: "+JSON.stringify(renderPolicy));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the renderPolicy");
-
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
-
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), RenderPolicy.getTableName(), r.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
-
-
-                var success2 = function() {
-                    //assert.ok(retour, "The return of the linkRenderPolicy is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the renderPolicy in database.");
-                    done();
-                };
-
-                var fail2 = function(err) {
-                    done(err);
-                };
-
-                c.linkRenderPolicy(r.getId(), success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadRenderPolicy(success, fail);
-
-		});
-	});
-
-	describe('#unlinkRenderPolicy', function() {
-		it('should call the right request', function (done) {
-			var c = new CallType("toto", "machin", 52);
-			var s = new RenderPolicy("toto","tata", 42);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), RenderPolicy.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var renderPolicy = c.renderPolicy();
-                assert.deepEqual(renderPolicy, s, "The renderPolicy is not the expected value");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the renderPolicy");
-                var spy = sinon.spy(renderPolicy, "desynchronize");
-
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
-
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), RenderPolicy.getTableName(), s.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
-
-
-                var success2 = function() {
-                    //assert.ok(retour, "The return of the unlinkRenderPolicy is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
-                    done();
-                };
-
-                var fail2 = function(err) {
-                    done(err);
-                };
-
-                c.unlinkRenderPolicy(s.getId(), success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadRenderPolicy(success, fail);
+			c.loadPolicy(success, fail);
 		});
 	});
 

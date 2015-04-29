@@ -138,7 +138,7 @@ class Profil extends ModelItf {
                 }
             };
 
-            this.getAssociatedObjects(Profil, Call, success, fail);
+            this.getAssociatedObjects(Profil, ZoneContent, success, fail);
         } else {
             if(successCallback != null) {
                 successCallback();
@@ -251,7 +251,7 @@ class Profil extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	addZoneContent(zoneContentID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(Profil, Call, zoneContentID, successCallback, failCallback);
+		this.associateObject(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
 	}
 
 	/**
@@ -264,7 +264,7 @@ class Profil extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	removeZoneContent(zoneContentID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(Profil, Call, zoneContentID, successCallback, failCallback);
+		this.deleteObjectAssociation(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
 	}
 
     /**
