@@ -5,226 +5,283 @@
         "sdi" : {
             "name" : "SDIRSSDiscounts"
         },
-        "calls" : [
-            {
-                "name" : "FilUNS1",
-                "callType" : {
-                    "name" : "RSSLeftZone1"
-                },
-                "paramValues" : [
-                    {
-                        "value" : "http://filuns.unice.fr/accueil/atom.xml",
-                        "paramType" : {
-                            "name" : "FeedURL"
-                        }
+        "zoneContents": [
+          {
+            "name": "ZC1",
+            "zone": "LeftZone1",
+            "relativeTimeline": {
+              "name": "TL1",
+              "relativeEvents": [
+                {
+                  "name": "FILUNS1",
+                  "position": 0,
+                  "duration": 10,
+                  "call": {
+                    "name": "FilUNS1",
+                    "callType": {
+                      "name": "RSSLeftZone1"
                     },
-                    {
-                        "value" : "10",
-                        "paramType" : {
-                            "name" : "Limit"
+                    "paramValues": [
+                      {
+                        "value": "http://filuns.unice.fr/accueil/atom.xml",
+                        "paramType": {
+                          "name": "FeedURL"
                         }
-                    }
-                ]
-            },
-            {
-                "name" : "DiscountsSmartShopping1",
-                "callType" : {
-                    "name" : "DiscountsRightZone1"
+                      },
+                      {
+                        "value": "10",
+                        "paramType": {
+                          "name": "Limit"
+                        }
+                      }
+                    ]
+                  }
                 },
-                "paramValues" : [
-                    {
-                        "value" : "10",
-                        "paramType" : {
-                            "name" : "Limit"
+                {
+                  "name": "Lemonde",
+                  "position": 1,
+                  "duration": 30,
+                  "call": {
+                    "name": "Lemonde",
+                    "callType": {
+                      "name": "RSSLeftZone1"
+                    },
+                    "paramValues": [
+                      {
+                        "value": "http://www.lemonde.fr/rss/une.xml",
+                        "paramType": {
+                          "name": "FeedURL"
                         }
-                    }
-                ]
+                      },
+                      {
+                        "value": "3",
+                        "paramType": {
+                          "name": "Limit"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
             }
-        ]
-    },
-    {
-        "name" : "ProfilSDIDoubleRSS",
-        "description" : "Profil n°1 de SDIDoubleRSS",
-        "sdi" : {
-            "name" : "SDIDoubleRSS"
-        },
-        "calls" : [
-            {
-                "name" : "FilUNS2",
-                "callType" : {
-                    "name" : "RSSLeftZone2"
-                },
-                "paramValues" : [
-                    {
-                        "value" : "http://filuns.unice.fr/accueil/atom.xml",
-                        "paramType" : {
-                            "name" : "FeedURL"
-                        }
+          },
+          {
+            "name": "ZC2",
+            "zone": "RightZone1",
+            "relativeTimeline": {
+              "name": "TL2",
+              "relativeEvents": [
+                {
+                  "name": "DiscountsSmartShopping1",
+                  "position": 0,
+                  "duration": 10,
+                  "call": {
+                    "name" : "DiscountsSmartShopping1",
+                    "callType" : {
+                      "name" : "DiscountsRightZone1"
                     },
-                    {
+                    "paramValues" : [
+                      {
                         "value" : "10",
                         "paramType" : {
-                            "name" : "Limit"
+                          "name" : "Limit"
                         }
-                    }
-                ]
-            },
-            {
-                "name" : "FilUNS3",
-                "callType" : {
-                    "name" : "RSSRightZone2"
-                },
-                "paramValues" : [
-                    {
-                        "value" : "https://www.facebook.com/feeds/page.php?format=rss20&id=219679114761075",
-                        "paramType" : {
-                            "name" : "FeedURL"
-                        }
-                    },
-                    {
-                        "value" : "10",
-                        "paramType" : {
-                            "name" : "Limit"
-                        }
-                    }
-                ]
+                      }
+                    ]
+                  }
+                }
+              ]
             }
+          }
         ]
     },
   {
-    "name" : "ProfilSDITwitterOnly",
-    "description" : "Profil n°1 de SDITwitterOnly",
+    "name" : "ProfilSocialWall",
+    "description" : "Profil n°1 de SDISocialWall",
     "sdi" : {
-      "name" : "SDITwitterOnly"
+      "name" : "SDISocialWall"
     },
-    "calls" : [
+    "zoneContents": [
       {
-        "name" : "Twitter1",
-        "callType" : {
-          "name" : "TwitterLeftZone3"
-        },
-        "paramValues" : [
-          {
-            "value" : "%23VINCI_UX",
-            "paramType" : {
-              "name" : "SearchQuery"
+        "name": "ZC3",
+        "zone": "LeftZone3",
+        "relativeTimeline": {
+          "name": "TL3",
+          "relativeEvents": [
+            {
+              "name": "Twitter1",
+              "position": 0,
+              "duration": 30,
+              "call": {
+                "name" : "Twitter1",
+                "callType" : {
+                  "name" : "TwitterLeftZone3"
+                },
+                "paramValues" : [
+                  {
+                    "value" : "%23VINCI_UX",
+                    "paramType" : {
+                      "name" : "SearchQuery"
+                    }
+                  },
+                  {
+                    "value" : "2",
+                    "paramType" : {
+                      "name" : "Limit"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Insta1",
+              "position": 1,
+              "duration": 120,
+              "call": {
+                "name": "Instagram1",
+                "callType": {
+                  "name": "InstagramLeftZone3"
+                },
+                "paramValues": [
+                  {
+                    "value": "VINCI_UX",
+                    "paramType": {
+                      "name": "SearchQuery"
+                    }
+                  },
+                  {
+                    "value": "2",
+                    "paramType": {
+                      "name": "Limit"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Hack1",
+              "position": 2,
+              "duration": 10,
+              "call": {
+                "name" : "Hackathon1",
+                "callType" : {
+                  "name" : "EventLeftZone3"
+                },
+                "paramValues" : [
+                  {
+                    "value" : "1",
+                    "paramType" : {
+                      "name" : "Limit"
+                    }
+                  }
+                ]
+              }
             }
-          },
-          {
-            "value" : "2",
-            "paramType" : {
-              "name" : "Limit"
-            }
-          }
-        ]
+          ]
+        }
       },
       {
-        "name" : "Instagram1",
-        "callType" : {
-          "name" : "InstagramLeftZone3"
-        },
-        "paramValues" : [
-          {
-            "value" : "VINCI_UX",
-            "paramType" : {
-              "name" : "SearchQuery"
+        "name": "ZC4",
+        "zone": "RightZone3",
+        "relativeTimeline": {
+          "name": "TL4",
+          "relativeEvents": [
+            {
+              "name": "Flickr1",
+              "position": 0,
+              "duration": 30,
+              "call": {
+                "name" : "Flickr1",
+                "callType" : {
+                  "name" : "FlickrRightZone3"
+                },
+                "paramValues" : [
+                  {
+                    "value" : "vinci",
+                    "paramType" : {
+                      "name" : "SearchQuery"
+                    }
+                  },
+                  {
+                    "value" : "2",
+                    "paramType" : {
+                      "name" : "Limit"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "FB1",
+              "position": 1,
+              "duration": 30,
+              "call": {
+                "name" : "Facebook1",
+                "callType" : {
+                  "name" : "FacebookRightZone3"
+                },
+                "paramValues" : [
+                  {
+                    "value" : "1",
+                    "paramType" : {
+                      "name" : "Limit"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "FB2",
+              "position": 2,
+              "duration": 15,
+              "call": {
+                "name" : "Facebook2",
+                "callType" : {
+                  "name" : "FacebookPageRightZone3"
+                },
+                "paramValues" : [
+                  {
+                    "value" : "1",
+                    "paramType" : {
+                      "name" : "Limit"
+                    }
+                  },
+                  {
+                    "value" : "BeMyAppFrance",
+                    "paramType" : {
+                      "name" : "PageName"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "FB3",
+              "position": 3,
+              "duration": 20,
+              "call": {
+                "name" : "Facebook3",
+                "callType" : {
+                  "name" : "FacebookAlbumRightZone3"
+                },
+                "paramValues" : [
+                  {
+                    "value" : "1",
+                    "paramType" : {
+                      "name" : "Limit"
+                    }
+                  },
+                  {
+                    "value" : "971527866204817",
+                    "paramType" : {
+                      "name" : "AlbumID"
+                    }
+                  }
+                ]
+              }
             }
-          },
-          {
-            "value" : "2",
-            "paramType" : {
-              "name" : "Limit"
-            }
-          }
-        ]
-      },
-      {
-        "name" : "Flickr1",
-        "callType" : {
-          "name" : "FlickrRightZone3"
-        },
-        "paramValues" : [
-          {
-            "value" : "vinci",
-            "paramType" : {
-              "name" : "SearchQuery"
-            }
-          },
-          {
-            "value" : "2",
-            "paramType" : {
-              "name" : "Limit"
-            }
-          }
-        ]
-      },
-      {
-        "name" : "Facebook1",
-        "callType" : {
-          "name" : "FacebookRightZone3"
-        },
-        "paramValues" : [
-          {
-            "value" : "1",
-            "paramType" : {
-              "name" : "Limit"
-            }
-          }
-        ]
-      },
-      {
-        "name" : "Facebook2",
-        "callType" : {
-          "name" : "FacebookPageRightZone3"
-        },
-        "paramValues" : [
-          {
-            "value" : "1",
-            "paramType" : {
-              "name" : "Limit"
-            }
-          },
-          {
-            "value" : "BeMyAppFrance",
-            "paramType" : {
-              "name" : "PageName"
-            }
-          }
-        ]
-      },
-      {
-        "name" : "Facebook3",
-        "callType" : {
-          "name" : "FacebookAlbumRightZone3"
-        },
-        "paramValues" : [
-          {
-            "value" : "1",
-            "paramType" : {
-              "name" : "Limit"
-            }
-          },
-          {
-            "value" : "971527866204817",
-            "paramType" : {
-              "name" : "AlbumID"
-            }
-          }
-        ]
-      },
-      {
-        "name" : "Hackathon1",
-        "callType" : {
-          "name" : "EventLeftZone3"
-        },
-        "paramValues" : [
-          {
-            "value" : "1",
-            "paramType" : {
-              "name" : "Limit"
-            }
-          }
-        ]
+          ]
+        }
       }
     ]
   }

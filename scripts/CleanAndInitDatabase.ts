@@ -919,7 +919,7 @@ class CleanAndInitDatabase {
 
         var policiesNb = 0;
 
-        var policies : any = require("../dbInitFiles/receivepolicies.json");
+        var policies : any = require("../dbInitFiles/policies.json");
 
         if(policies.length == 0) {
             Logger.info("No Policy to create.");

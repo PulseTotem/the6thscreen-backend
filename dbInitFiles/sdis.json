@@ -43,11 +43,8 @@
                 "renderer" : {
                     "name" : "FeedNodeRendererGeneric"
                 },
-                "renderPolicy" : {
-                    "name" : "FeedContentDumbRenderPolicy"
-                },
-                "receivePolicy" : {
-                    "name" : "DumbReceivePolicy"
+                "policy" : {
+                    "name" : "DumbPolicy"
                 }
             },
             {
@@ -62,11 +59,8 @@
                 "renderer" : {
                     "name" : "DiscountRenderer"
                 },
-                "renderPolicy" : {
-                    "name" : "FeedContentDumbRenderPolicy"
-                },
-                "receivePolicy" : {
-                    "name" : "DumbReceivePolicy"
+                "policy" : {
+                    "name" : "DumbPolicy"
                 }
             }
         ]
@@ -115,11 +109,8 @@
                 "renderer" : {
                     "name" : "FeedNodeRendererGeneric"
                 },
-                "renderPolicy" : {
-                    "name" : "FeedContentDumbRenderPolicy"
-                },
-                "receivePolicy" : {
-                    "name" : "DumbReceivePolicy"
+                "policy" : {
+                    "name" : "DumbPolicy"
                 }
             },
             {
@@ -134,17 +125,14 @@
                 "renderer" : {
                     "name" : "FeedNodeRendererGeneric"
                 },
-                "renderPolicy" : {
-                    "name" : "FeedContentDumbRenderPolicy"
-                },
-                "receivePolicy" : {
-                    "name" : "DumbReceivePolicy"
+                "policy" : {
+                    "name" : "DumbPolicy"
                 }
             }
         ]
     },
   {
-    "name" : "SDITwitterOnly",
+    "name" : "SDISocialWall",
     "description" : "SDI avec 2 zones, 2 calls Twitter, un par zone",
     "allowedHost" : "*",
     "user" : {
@@ -187,11 +175,8 @@
         "renderer" : {
           "name" : "TweetRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "DumbPolicy"
         }
       },
       {
@@ -206,11 +191,8 @@
         "renderer" : {
           "name" : "PictureAlbumRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "DumbPolicy"
         }
       },
       {
@@ -225,11 +207,8 @@
         "renderer" : {
           "name" : "EventListRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "DumbPolicy"
         }
       },
       {
@@ -244,11 +223,8 @@
         "renderer" : {
           "name" : "PictureAlbumRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "DumbPolicy"
         }
       },
       {
@@ -263,11 +239,8 @@
         "renderer" : {
           "name" : "PictureAlbumRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "DumbPolicy"
         }
       },
       {
@@ -282,11 +255,8 @@
         "renderer" : {
           "name" : "PictureAlbumRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "DumbPolicy"
         }
       },
       {
@@ -301,11 +271,8 @@
         "renderer" : {
           "name" : "PictureAlbumRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "DumbPolicy"
         }
       }
     ]
