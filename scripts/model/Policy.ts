@@ -37,7 +37,7 @@ class Policy extends ModelItf {
      * @constructor
      * @param {string} name - The Policy's name.
      * @param {string} description - The Policy's description.
-     * @param {number} id - The RenderPolicy's ID.
+     * @param {number} id - The Policy's ID.
      */
     constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
         super(id, complete);
@@ -125,7 +125,7 @@ class Policy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        this.createObject(RenderPolicy, this.toJSONObject(), successCallback, failCallback);
+        this.createObject(Policy, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -139,7 +139,7 @@ class Policy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        ModelItf.readObject(RenderPolicy, id, successCallback, failCallback, attemptNumber);
+        ModelItf.readObject(Policy, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -151,7 +151,7 @@ class Policy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.updateObject(RenderPolicy, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+        return this.updateObject(Policy, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -163,7 +163,7 @@ class Policy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(RenderPolicy, this.getId(), successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(Policy, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -175,7 +175,7 @@ class Policy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.allObjects(RenderPolicy, successCallback, failCallback, attemptNumber);
+        return this.allObjects(Policy, successCallback, failCallback, attemptNumber);
     }
 
 	/**
@@ -184,10 +184,10 @@ class Policy extends ModelItf {
 	 * @method parseJSON
 	 * @static
 	 * @param {string} json - The JSON string
-	 * @return {RenderPolicy} The model instance.
+	 * @return {Policy} The model instance.
 	 */
-	static parseJSON(jsonString : string) : RenderPolicy {
-		return RenderPolicy.fromJSONObject(JSON.parse(jsonString));
+	static parseJSON(jsonString : string) : Policy {
+		return Policy.fromJSONObject(JSON.parse(jsonString));
 	}
 
 	/**
@@ -196,10 +196,10 @@ class Policy extends ModelItf {
 	 * @method fromJSONObject
 	 * @static
 	 * @param {JSONObject} json - The JSON Object
-	 * @return {RenderPolicy} The model instance.
+	 * @return {Policy} The model instance.
 	 */
-	static fromJSONObject(jsonObject : any) : RenderPolicy {
-		return new RenderPolicy(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+	static fromJSONObject(jsonObject : any) : Policy {
+		return new Policy(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
     /**
