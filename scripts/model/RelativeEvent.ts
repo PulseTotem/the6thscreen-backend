@@ -4,17 +4,15 @@
 
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Call.ts" />
-/// <reference path="./ZoneContent.ts" />
-
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
- * Model : Profil
+ * Model : RelativeEvent
  *
- * @class Profil
+ * @class RelativeEvent
  * @extends ModelItf
  */
-class Profil extends ModelItf {
+class RelativeEvent extends ModelItf {
 
     /**
      * Name property.
@@ -25,108 +23,134 @@ class Profil extends ModelItf {
     private _name : string;
 
     /**
-     * Description property.
-     *
-     * @property _description
-     * @type string
+     * This property describes the position of the event in the timeline
+     * 
+     * @property _position
+     * @type number
      */
-    private _description : string;
+    private _position : number;
 
     /**
-     * Calls property.
-     *
-     * @property _calls
-     * @type Array<Call>
+     * This property describes the duration of the event in seconds
+     * 
+     * @property _duration
+     * @type number
      */
-    private _calls : Array<Call>;
+    private _duration : number;
 
     /**
-     * Lazy loading for Calls property.
+     * Call property
      *
-     * @property _calls_loaded
+     * @property _call
+     * @type Call
+     */
+    private _call : Call;
+
+    /**
+     * Lazy loading for the call property
+     *
+     * @property _call_loaded
      * @type boolean
      */
-    private _calls_loaded : boolean;
+    private _call_loaded : boolean;
+
 
     /**
      * Constructor.
      *
      * @constructor
-     * @param {string} name - The Profil's name.
-     * @param {string} description - The Profil's description.
-     * @param {number} id - The Profil's ID.
+     * @param {string} name - The RelativeEvent's name.
+     * @param {number} id - The RelativeEvent's ID.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+    constructor(name : string = "", position : number = 0, duration : number = 0, id : number = null, complete : boolean = false) {
         super(id, complete);
 
         this.setName(name);
-        this.setDescription(description);
+        this.setPosition(position);
+        this.setDuration(duration);
 
-        this._calls = new Array<Call>();
-        this._calls_loaded = false;
+        this._call = null;
+        this._call_loaded = false;
     }
 
+	/**
+	 * Set the RelativeEvent's name.
+	 *
+	 * @method setName
+	 */
+	setName(name : string) {
+		this._name = name;
+	}
+
     /**
-     * Return the Profil's name.
+     * Return the RelativeEvent's name.
      *
      * @method name
-     * @return {string} The Profil's name.
      */
     name() {
         return this._name;
     }
 
     /**
-     * Set the Profil's name.
+     * Set the RelativeEvent's position.
      *
-     * @method setName
+     * @method setPosition
      */
-    setName(name : string) {
-        this._name = name;
+    setPosition(position : number) {
+        this._position = position;
     }
 
     /**
-     * Return the Profil's description.
+     * Return the RelativeEvent's position.
      *
-     * @method description
-     * @return {string} The Profil's description.
+     * @method position
      */
-    description() : string {
-        return this._description;
+    position() {
+        return this._position;
     }
 
     /**
-     * Set the Profil's description.
+     * Set the RelativeEvent's duration.
      *
-     * @method setDescription
+     * @method setDuration
      */
-    setDescription(description : string) {
-        this._description = description;
+    setDuration(duration : number) {
+        this._duration = duration;
     }
 
     /**
-     * Return the Profil's calls.
+     * Return the RelativeEvent's duration.
      *
-     * @method calls
-     * @return {Array<Call>} The Profil's calls.
+     * @method duration
      */
-    calls() : Array<Call> {
-        return this._calls;
+    duration() {
+        return this._duration;
     }
 
     /**
-     * Load the Profil's calls.
+     * Return the CallType's call.
      *
-     * @method loadCalls
+     * @method call
+     */
+    call() {
+        return this._call;
+    }
+
+    /**
+     * Load the RelativeEvent's call.
+     *
+     * @method loadCall
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadCalls(successCallback : Function, failCallback : Function) {
-        if(! this._calls_loaded) {
+    loadCall(successCallback : Function, failCallback : Function) {
+        if(! this._call_loaded) {
             var self = this;
-            var success : Function = function(calls) {
-                self._calls = calls;
-                self._calls_loaded = true;
+            var success : Function = function(call) {
+                if(!!call) {
+                    self._call = call;
+                }
+                self._call_loaded = true;
                 if(successCallback != null) {
                     successCallback();
                 }
@@ -138,7 +162,7 @@ class Profil extends ModelItf {
                 }
             };
 
-            this.getAssociatedObjects(Profil, Call, success, fail);
+            this.getUniquelyAssociatedObject(RelativeEvent, Call, success, fail);
         } else {
             if(successCallback != null) {
                 successCallback();
@@ -148,19 +172,19 @@ class Profil extends ModelItf {
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
-	/**
-	 * Load all the lazy loading properties of the object.
-	 * Useful when you want to get a complete object.
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
      *
      * @method loadAssociations
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
-	 */
-	loadAssociations(successCallback : Function, failCallback : Function) {
+     */
+    loadAssociations(successCallback : Function, failCallback : Function) {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._calls_loaded) {
+            if(self._call_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -175,20 +199,21 @@ class Profil extends ModelItf {
             }
         };
 
-        this.loadCalls(success, fail);
-	}
+        this.loadCall(success, fail);
+    }
 
-	/**
-	 * Set the object as desynchronized given the different lazy properties.
+    /**
+     * Set the object as desynchronized given the different lazy properties.
      *
      * @method desynchronize
-	 */
-	desynchronize() : void {
-		this._calls_loaded = false;
-	}
+     */
+    desynchronize() : void {
+        this._call_loaded = false;
+    }
 
-	/**
-	 * Return a Profil instance as a JSON Object
+
+    /**
+	 * Return a RelativeEvent instance as a JSON Object
 	 *
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
@@ -197,28 +222,46 @@ class Profil extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description(),
+            "position": this.position(),
+            "duration": this.duration(),
 			"complete": this.isComplete()
 		};
 		return data;
 	}
 
 	/**
-	 * Check completeness of a Profil.
-	 * The completeness is determined by the presence of a name and an id.
+	 * Compute the completeness of an RelativeEvent.
+	 * The completeness is given by the presence of an ID and a name.
 	 */
 	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+
 		var self = this;
 
 		var success : Function = function () {
-			self._complete = (self._complete && !!self.name());
-			successCallback();
+            if (self.isComplete() && !!self.name()) {
+                var success:Function = function () {
+                    if (self._call_loaded) {
+                        self._complete = (!!self.call() && self.call().isComplete());
+                        successCallback();
+                    }
+                };
+
+                var fail:Function = function (error) {
+                    failCallback(error);
+                };
+
+                self.loadCall(success, fail);
+            } else {
+                self._complete = false;
+                successCallback();
+            }
 		};
+
 		super.checkCompleteness(success, failCallback);
 	}
 
     /**
-     * Return a Profil instance as a JSON Object including associated object.
+     * Return a RelativeEvent instance as a JSON Object including associated object.
      * However the method should not be recursive due to cycle in the model.
      *
      * @method toCompleteJSONObject
@@ -230,7 +273,12 @@ class Profil extends ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["calls"] = self.serializeArray(self.calls(), onlyId);
+            if (onlyId) {
+                data["call"] = (self.call() !== null) ? self.call().getId() : null;
+            } else {
+                data["call"] = (self.call() !== null) ? self.call().toJSONObject() : null;
+            }
+
             successCallback(data);
         };
 
@@ -241,32 +289,6 @@ class Profil extends ModelItf {
         this.loadAssociations(success, fail);
     }
 
-	/**
-	 * Add a new Call to the Profil and associate it in the database.
-	 * A Call can only be added once.
-	 *
-     * @method addCall
-	 * @param {Call} c The Call to add inside the Profil. It cannot be a null value.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	addCall(callID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(Profil, Call, callID, successCallback, failCallback);
-	}
-
-	/**
-	 * Remove a Call from the Profil: the association is removed both in the object and in database.
-	 * The Call can only be removed if it exists first in the list of associated Calls, else an exception is thrown.
-	 *
-     * @method removeCall
-     * @param {Call} c The Call to remove from that Profil
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	removeCall(callID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(Profil, Call, callID, successCallback, failCallback);
-	}
-
     /**
      * Create model in database.
      *
@@ -276,7 +298,7 @@ class Profil extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        this.createObject(Profil, this.toJSONObject(), successCallback, failCallback);
+        this.createObject(RelativeEvent, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -290,7 +312,7 @@ class Profil extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        ModelItf.readObject(Profil, id, successCallback, failCallback, attemptNumber);
+        ModelItf.readObject(RelativeEvent, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -302,7 +324,7 @@ class Profil extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.updateObject(Profil, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+        return this.updateObject(RelativeEvent, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -314,7 +336,7 @@ class Profil extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Profil, this.getId(), successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(RelativeEvent, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -326,32 +348,32 @@ class Profil extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.allObjects(Profil, successCallback, failCallback, attemptNumber);
+        return this.allObjects(RelativeEvent, successCallback, failCallback, attemptNumber);
     }
 
-    /**
-     * Return a Profil instance from a JSON string.
-     *
-     * @method parseJSON
-     * @static
-     * @param {string} json - The JSON string
-     * @return {Profil} The model instance.
-     */
-    static parseJSON(jsonString : string) : Profil {
-        return Profil.fromJSONObject(JSON.parse(jsonString));
-    }
+	/**
+	 * Return an RelativeEvent instance from a JSON string.
+	 *
+	 * @method parseJSON
+	 * @static
+	 * @param {string} json - The JSON string
+	 * @return {Call} The model instance.
+	 */
+	static parseJSON(jsonString : string) : RelativeEvent {
+		return RelativeEvent.fromJSONObject(JSON.parse(jsonString));
+	}
 
-    /**
-     * Return a Profil instance from a JSON Object.
-     *
-     * @method fromJSONObject
-     * @static
-     * @param {JSONObject} json - The JSON Object
-     * @return {Profil} The model instance.
-     */
-    static fromJSONObject(jsonObject : any) : Profil {
-	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
-    }
+	/**
+	 * Return an RelativeEvent instance from a JSON Object.
+	 *
+	 * @method fromJSONObject
+	 * @static
+	 * @param {JSONObject} json - The JSON Object
+	 * @return {Call} The model instance.
+	 */
+	static fromJSONObject(jsonObject : any) : RelativeEvent {
+		return new RelativeEvent(jsonObject.name, jsonObject.position, jsonObject.duration, jsonObject.id, jsonObject.complete);
+	}
 
     /**
      * Retrieve DataBase Table Name.
@@ -360,6 +382,6 @@ class Profil extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "Profils";
+        return "RelativeEvents";
     }
 }

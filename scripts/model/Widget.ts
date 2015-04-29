@@ -24,16 +24,25 @@ class Widget extends ModelItf {
     private _name : string;
 
     /**
+     * Description property.
+     *
+     * @property _description
+     * @type string
+     */
+    private _description : string;
+
+    /**
      * Constructor.
      *
      * @constructor
      * @param {string} name - The Widget's name.
      * @param {number} id - The Widget's ID.
      */
-    constructor(name : string = "", id : number = null, complete : boolean = false) {
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
         super(id, complete);
 
         this.setName(name);
+        this.setDescription(description);
     }
 
 	/**
@@ -54,6 +63,24 @@ class Widget extends ModelItf {
         return this._name;
     }
 
+    /**
+     * Set the Widget's description.
+     *
+     * @method setDescription
+     */
+    setDescription(description : string) {
+        this._description = description;
+    }
+
+    /**
+     * Return the Widget's description.
+     *
+     * @method description
+     */
+    description() {
+        return this._description;
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
@@ -66,6 +93,7 @@ class Widget extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
+            "description": this.description(),
 			"complete": this.isComplete()
 		};
 		return data;
@@ -169,7 +197,7 @@ class Widget extends ModelItf {
 	 * @return {Widget} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Widget {
-		return new Widget(jsonObject.name, jsonObject.id, jsonObject.complete);
+		return new Widget(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
 	}
 
     /**

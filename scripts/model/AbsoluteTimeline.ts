@@ -4,7 +4,7 @@
  */
 
 /// <reference path="./ModelItf.ts" />
-
+/// <reference path="./AbsoluteEvent.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
@@ -22,6 +22,16 @@ class AbsoluteTimeline extends ModelItf {
      * @type string
      */
     private _name : string;
+
+    /**
+     * AbsoluteEvents property
+     *
+     * @property _absoluteEvents
+     * @type Array<AbsoluteEvent>
+     */
+    private _absoluteEvents : Array<AbsoluteEvent>;
+
+
 
     /**
      * Constructor.
