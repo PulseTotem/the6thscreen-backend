@@ -292,6 +292,49 @@ class ZoneContent extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the ZoneContent's relativeTimeline.
+	 *
+	 * @method relativeTimeline
+	 */
+	relativeTimeline() {
+		return this._relativeTimeline;
+	}
+
+	/**
+	 * Load the ZoneContent's relativeTimeline.
+	 *
+	 * @method loadRelativeTimeline
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadRelativeTimeline(successCallback : Function, failCallback : Function) {
+		if(! this._relativeTimeline_loaded) {
+			var self = this;
+			var success : Function = function(relativeTimeline) {
+				if(!!relativeTimeline) {
+					self._relativeTimeline = relativeTimeline;
+				}
+				self._relativeTimeline = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(ZoneContent, RelativeTimeline, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -306,7 +349,7 @@ class ZoneContent extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._source_loaded && self._renderer_loaded && self._receive_policy_loaded && self._render_policy_loaded && self._zone_loaded && self._calls_loaded) {
+            if(self._absoluteTimeline_loaded && self._relativeTimeline_loaded && self._widget_loaded && self._zone_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -321,12 +364,10 @@ class ZoneContent extends ModelItf {
             }
         };
 
-        this.loadSource(success, fail);
-        this.loadRenderer(success, fail);
-        this.loadReceivePolicy(success, fail);
-        this.loadRenderPolicy(success, fail);
+        this.loadAbsoluteTimeline(success, fail);
+        this.loadRelativeTimeline(success, fail);
+        this.loadWidget(success, fail);
         this.loadZone(success, fail);
-        this.loadCalls(success, fail);
     }
 
 	/**
@@ -335,12 +376,10 @@ class ZoneContent extends ModelItf {
      * @method desynchronize
 	 */
 	desynchronize() : void {
-		this._source_loaded = false;
-		this._receive_policy_loaded = false;
-		this._render_policy_loaded = false;
-		this._renderer_loaded = false;
+		this._absoluteTimeline_loaded = false;
+		this._relativeTimeline_loaded = false;
+		this._widget_loaded = false;
 		this._zone_loaded = false;
-        this._calls_loaded = false;
 	}
 
 	/**
@@ -372,8 +411,19 @@ class ZoneContent extends ModelItf {
 		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 				var success:Function = function () {
-					if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
-						self._complete = (!!self.renderer() && self.renderer().isComplete()) && (!!self.zone() && self.zone().isComplete()) && (!!self.source() && self.source().isComplete());
+					if (self._zone_loaded && self._widget_loaded && self._absoluteTimeline_loaded && self._relativeTimeline_loaded) {
+						var link : ModelItf = null;
+						if (!!self.widget()) {
+							link = self.widget();
+						} else if (!!self.absoluteTimeline()) {
+							link = self.absoluteTimeline();
+						} else if (!!self.relativeTimeline()) {
+							link = self.relativeTimeline();
+						} else {
+							self._complete = false;
+							successCallback();
+						}
+						self._complete = (!!self.zone()) && (link.isComplete());
 						successCallback();
 					}
 				};
@@ -382,9 +432,9 @@ class ZoneContent extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadSource(success, fail);
 				self.loadZone(success, fail);
-				self.loadRenderer(success, fail);
+				self.loadAbsoluteTimeline(success, fail);
+				self.loadRelativeTimeline(success, fail);
 			} else {
 				self._complete = false;
 				successCallback();
@@ -407,20 +457,17 @@ class ZoneContent extends ModelItf {
         var success : Function = function() {
             var data = self.toJSONObject();
 	        if (onlyId) {
-		        data["source"] = (self.source() !== null) ? self.source().getId() : null;
-		        data["renderer"] = (self.renderer() !== null) ? self.renderer().getId() : null;
 		        data["zone"] = (self.zone() !== null) ? self.zone().getId() : null;
-		        data["receivePolicy"] = (self.receivePolicy() !== null) ? self.receivePolicy().getId() : null;
-		        data["renderPolicy"] = (self.renderPolicy() !== null) ? self.renderPolicy().getId() : null;
+		        data["widget"] = (self.widget() !== null) ? self.widget().getId() : null;
+		        data["absoluteTimeline"] = (self.absoluteTimeline() !== null) ? self.absoluteTimeline().getId() : null;
+		        data["relativeTimeline"] = (self.relativeTimeline() !== null) ? self.relativeTimeline().getId() : null;
 	        } else {
-		        data["source"] = (self.source() !== null) ? self.source().toJSONObject() : null;
-		        data["renderer"] = (self.renderer() !== null) ? self.renderer().toJSONObject() : null;
 		        data["zone"] = (self.zone() !== null) ? self.zone().toJSONObject() : null;
-		        data["receivePolicy"] = (self.receivePolicy() !== null) ? self.receivePolicy().toJSONObject() : null;
-		        data["renderPolicy"] = (self.renderPolicy() !== null) ? self.renderPolicy().toJSONObject() : null;
+		        data["widget"] = (self.widget() !== null) ? self.widget().toJSONObject() : null;
+		        data["absoluteTimeline"] = (self.absoluteTimeline() !== null) ? self.absoluteTimeline().toJSONObject() : null;
+		        data["relativeTimeline"] = (self.relativeTimeline() !== null) ? self.relativeTimeline().toJSONObject() : null;
 	        }
 
-            data["calls"] = self.serializeArray(self.calls(), onlyId);
             successCallback(data);
         };
 
@@ -432,120 +479,10 @@ class ZoneContent extends ModelItf {
     }
 
 	/**
-	 * Set the Source of the ZoneContent.
-	 * As a ZoneContent can only have one Source, if the value is already set, this method throws an exception: you need first to unset the Source.
-	 * Moreover the given Source must be created in database.
-	 *
-     * @method linkSource
-	 * @param {Source} s The Source to associate with the ZoneContent.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	linkSource(sourceId : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(ZoneContent, Source, sourceId, successCallback, failCallback);
-	}
-
-	/**
-	 * Unset the current Source from the ZoneContent.
-	 * It both sets a null value for the object property and remove the association in database.
-	 * A Source must have been set before using it, else an exception is thrown.
-	 *
-     * @method unlinkSource
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	unlinkSource(sourceID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(ZoneContent, Source, sourceID, successCallback, failCallback);
-	}
-
-	/**
-	 * Set the Renderer of the ZoneContent.
-	 * As a ZoneContent can only have one Renderer, if the value is already set, this method throws an exception: you need first to unset the Renderer.
-	 * Moreover the given Renderer must be created in database.
-	 *
-     * @method linkRenderer
-	 * @param {Renderer} r The Renderer to associate with the ZoneContent.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	linkRenderer(rendererID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(ZoneContent, Renderer, rendererID, successCallback, failCallback);
-	}
-
-	/**
-	 * Unset the current Renderer from the ZoneContent.
-	 * It both sets a null value for the object property and remove the association in database.
-	 * A Renderer must have been set before using it, else an exception is thrown.
-	 *
-     * @method unlinkRenderer
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	unlinkRenderer(rendererID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(ZoneContent, Renderer, rendererID, successCallback, failCallback);
-	}
-
-	/**
-	 * Set the ReceivePolicy of the ZoneContent.
-	 * As a ZoneContent can only have one ReceivePolicy, if the value is already set, this method throws an exception: you need first to unset the ReceivePolicy.
-	 * Moreover the given ReceivePolicy must be created in database.
-	 *
-     * @method linkReceivePolicy
-	 * @param {ReceivePolicy} rp The ReceivePolicy to associate with the ZoneContent.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	linkReceivePolicy(rpID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(ZoneContent, ReceivePolicy, rpID, successCallback, failCallback);
-	}
-
-	/**
-	 * Unset the current ReceivePolicy from the ZoneContent.
-	 * It both sets a null value for the object property and remove the association in database.
-	 * A ReceivePolicy must have been set before using it, else an exception is thrown.
-	 *
-     * @method unlinkReceivePolicy
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	unlinkReceivePolicy(rpID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(ZoneContent, ReceivePolicy, rpID, successCallback, failCallback);
-	}
-
-	/**
-	 * Set the RenderPolicy of the ZoneContent.
-	 * As a ZoneContent can only have one RenderPolicy, if the value is already set, this method throws an exception: you need first to unset the RenderPolicy.
-	 * Moreover the given RenderPolicy must be created in database.
-	 *
-     * @method linkRenderPolicy
-	 * @param {RenderPolicy} rp The RenderPolicy to associate with the ZoneContent.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	linkRenderPolicy(rpID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(ZoneContent, RenderPolicy, rpID, successCallback, failCallback);
-	}
-
-	/**
-	 * Unset the current RenderPolicy from the ZoneContent.
-	 * It both sets a null value for the object property and remove the association in database.
-	 * A RenderPolicy must have been set before using it, else an exception is thrown.
-	 *
-     * @method unlinkRenderPolicy
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	unlinkRenderPolicy(rpID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(ZoneContent, RenderPolicy, rpID, successCallback, failCallback);
-	}
-
-	/**
 	 * Set the Zone of the ZoneContent.
-	 * As a ZoneContent can only have one Zone, if the value is already set, this method throws an exception: you need first to unset the Zone.
-	 * Moreover the given Zone must be created in database.
 	 *
      * @method linkZone
-	 * @param {Zone} z The Zone to associate with the ZoneContent.
+	 * @param {Zone} zoneID The Zone to associate with the ZoneContent.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
@@ -555,8 +492,6 @@ class ZoneContent extends ModelItf {
 
 	/**
 	 * Unset the current Zone from the ZoneContent.
-	 * It both sets a null value for the object property and remove the association in database.
-	 * A Zone must have been set before using it, else an exception is thrown.
 	 *
      * @method unlinkZone
 	 * @param {Function} successCallback - The callback function when success.
@@ -566,7 +501,86 @@ class ZoneContent extends ModelItf {
 		this.deleteObjectAssociation(ZoneContent, Zone, zoneID, successCallback, failCallback);
 	}
 
-    /**
+	/**
+	 * Set the Widget of the ZoneContent.
+	 *
+	 * @method linkWidget
+	 * @param {number} widgetID The widget ID of the widget to associate with the ZoneContent.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkWidget(widgetID : number, successCallback : Function, failCallback : Function) {
+		if (this.isComplete()) {
+			throw new ModelException("This ZoneContent is already complete ! You cannot link a widget.");
+		}
+		this.associateObject(ZoneContent, Widget, widgetID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current Widget from the ZoneContent.
+	 *
+	 * @method unlinkWidget
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkWidget(widgetID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ZoneContent, Widget, widgetID, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the Absolute timeline of the ZoneContent.
+	 *
+	 * @method linkAbsoluteTimeline
+	 * @param {number} absoluteTimelineID The absolute timeline ID of the absolute timeline to associate with the ZoneContent.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkAbsoluteTimeline(absoluteTimelineID : number, successCallback : Function, failCallback : Function) {
+		if (this.isComplete()) {
+			throw new ModelException("This ZoneContent is already complete ! You cannot link an absolute timeline.");
+		}
+		this.associateObject(ZoneContent, AbsoluteTimeline, absoluteTimelineID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the absolute timeline from the ZoneContent.
+	 *
+	 * @method unlinkAbsoluteTimeline
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkAbsoluteTimeline(absoluteTimelineID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ZoneContent, AbsoluteTimeline, absoluteTimelineID, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the relative timeline of the ZoneContent.
+	 *
+	 * @method linkRelativeTimeline
+	 * @param {number} relativeTimelineID The absolute timeline ID of the absolute timeline to associate with the ZoneContent.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkRelativeTimeline(relativeTimelineID : number, successCallback : Function, failCallback : Function) {
+		if (this.isComplete()) {
+			throw new ModelException("This ZoneContent is already complete ! You cannot link a relative timeline.");
+		}
+		this.associateObject(ZoneContent, RelativeTimeline, relativeTimelineID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the relative timeline from the ZoneContent.
+	 *
+	 * @method unlinkRelativeTimeline
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkRelativeTimeline(relativeTimelineID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ZoneContent, RelativeTimeline, relativeTimelineID, successCallback, failCallback);
+	}
+
+
+	/**
      * Create model in database.
      *
      * @method create

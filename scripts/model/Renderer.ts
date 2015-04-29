@@ -7,6 +7,7 @@
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
+
 /**
  * Model : Renderer
  *
