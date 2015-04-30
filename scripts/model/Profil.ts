@@ -4,7 +4,7 @@
 
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Call.ts" />
-/// <reference path="./Timeline.ts" />
+/// <reference path="./ZoneContent.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -33,20 +33,20 @@ class Profil extends ModelItf {
     private _description : string;
 
     /**
-     * Calls property.
+     * ZoneContents property.
      *
-     * @property _calls
-     * @type Array<Call>
+     * @property _zoneContents
+     * @type Array<ZoneContent>
      */
-    private _calls : Array<Call>;
+    private _zoneContents : Array<ZoneContent>;
 
     /**
-     * Lazy loading for Calls property.
+     * Lazy loading for ZoneContents property.
      *
-     * @property _calls_loaded
+     * @property _zoneContents_loaded
      * @type boolean
      */
-    private _calls_loaded : boolean;
+    private _zoneContents_loaded : boolean;
 
     /**
      * Constructor.
@@ -62,8 +62,8 @@ class Profil extends ModelItf {
         this.setName(name);
         this.setDescription(description);
 
-        this._calls = new Array<Call>();
-        this._calls_loaded = false;
+        this._zoneContents = new Array<ZoneContent>();
+        this._zoneContents_loaded = false;
     }
 
     /**
@@ -105,28 +105,28 @@ class Profil extends ModelItf {
     }
 
     /**
-     * Return the Profil's calls.
+     * Return the Profil's zoneContents.
      *
-     * @method calls
-     * @return {Array<Call>} The Profil's calls.
+     * @method zoneContents
+     * @return {Array<ZoneContent>} The Profil's zoneContents.
      */
-    calls() : Array<Call> {
-        return this._calls;
+    zoneContents() : Array<ZoneContent> {
+        return this._zoneContents;
     }
 
     /**
-     * Load the Profil's calls.
+     * Load the Profil's zoneContents.
      *
-     * @method loadCalls
+     * @method loadZoneContents
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadCalls(successCallback : Function, failCallback : Function) {
-        if(! this._calls_loaded) {
+    loadZoneContents(successCallback : Function, failCallback : Function) {
+        if(! this._zoneContents_loaded) {
             var self = this;
-            var success : Function = function(calls) {
-                self._calls = calls;
-                self._calls_loaded = true;
+            var success : Function = function(zoneContents) {
+                self._zoneContents = zoneContents;
+                self._zoneContents_loaded = true;
                 if(successCallback != null) {
                     successCallback();
                 }
@@ -138,7 +138,7 @@ class Profil extends ModelItf {
                 }
             };
 
-            this.getAssociatedObjects(Profil, Call, success, fail);
+            this.getAssociatedObjects(Profil, ZoneContent, success, fail);
         } else {
             if(successCallback != null) {
                 successCallback();
@@ -160,7 +160,7 @@ class Profil extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._calls_loaded) {
+            if(self._zoneContents_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -175,7 +175,7 @@ class Profil extends ModelItf {
             }
         };
 
-        this.loadCalls(success, fail);
+        this.loadZoneContents(success, fail);
 	}
 
 	/**
@@ -184,7 +184,7 @@ class Profil extends ModelItf {
      * @method desynchronize
 	 */
 	desynchronize() : void {
-		this._calls_loaded = false;
+		this._zoneContents_loaded = false;
 	}
 
 	/**
@@ -230,7 +230,7 @@ class Profil extends ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["calls"] = self.serializeArray(self.calls(), onlyId);
+            data["zoneContents"] = self.serializeArray(self.zoneContents(), onlyId);
             successCallback(data);
         };
 
@@ -242,29 +242,29 @@ class Profil extends ModelItf {
     }
 
 	/**
-	 * Add a new Call to the Profil and associate it in the database.
-	 * A Call can only be added once.
+	 * Add a new ZoneContent to the Profil and associate it in the database.
+	 * A ZoneContent can only be added once.
 	 *
      * @method addCall
-	 * @param {Call} c The Call to add inside the Profil. It cannot be a null value.
+	 * @param {Call} c The ZoneContent to add inside the Profil. It cannot be a null value.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	addCall(callID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(Profil, Call, callID, successCallback, failCallback);
+	addZoneContent(zoneContentID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
 	}
 
 	/**
-	 * Remove a Call from the Profil: the association is removed both in the object and in database.
-	 * The Call can only be removed if it exists first in the list of associated Calls, else an exception is thrown.
+	 * Remove a ZoneContent from the Profil: the association is removed both in the object and in database.
+	 * The ZoneContent can only be removed if it exists first in the list of associated ZoneContents, else an exception is thrown.
 	 *
      * @method removeCall
-     * @param {Call} c The Call to remove from that Profil
+     * @param {Call} c The ZoneContent to remove from that Profil
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	removeCall(callID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(Profil, Call, callID, successCallback, failCallback);
+	removeZoneContent(zoneContentID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
 	}
 
     /**

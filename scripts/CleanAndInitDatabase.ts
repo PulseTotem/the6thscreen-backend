@@ -11,15 +11,13 @@
 /// <reference path="./model/Call.ts" />
 /// <reference path="./model/CallType.ts" />
 /// <reference path="./model/Profil.ts" />
-/// <reference path="./model/Timeline.ts" />
 /// <reference path="./model/InfoType.ts" />
 /// <reference path="./model/ParamValue.ts" />
 /// <reference path="./model/ParamType.ts" />
 /// <reference path="./model/TypeParamType.ts" />
 /// <reference path="./model/ConstraintParamType.ts" />
-/// <reference path="./model/ReceivePolicy.ts" />
+/// <reference path="./model/Policy.ts" />
 /// <reference path="./model/Renderer.ts"/>
-/// <reference path="./model/RenderPolicy.ts" />
 /// <reference path="./model/Role.ts" />
 /// <reference path="./model/Source.ts" />
 /// <reference path="./model/Service.ts" />
@@ -37,8 +35,8 @@ class CleanAndInitDatabase {
 
     static toCleanSources : Array<any> = [Source, Service, ParamType, InfoType, TypeParamType, ConstraintParamType];
     static toCleanUsers : Array<any> = [User];
-    static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, RenderPolicy, ReceivePolicy];
-    static toCleanProfils : Array<any> = [ParamValue, Call, Profil];
+    static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, Policy];
+    static toCleanProfils : Array<any> = [ParamValue, Call, Profil, ZoneContent, RelativeTimeline, RelativeEvent];
 
     /**
      * Method to clean and fulfill database with some data.
@@ -195,16 +193,12 @@ class CleanAndInitDatabase {
             failCallback(err);
         };
 
-        var successFulfillReceivePolicies = function() {
+        var successFulfillPolicies = function() {
             self.fulfillSDIs(success, fail);
         };
 
-        var successFulfillRenderPolicies = function() {
-            self.fulfillReceivePolicies(successFulfillReceivePolicies, fail);
-        };
-
         var successFulfillRenderers = function() {
-            self.fulfillRenderPolicies(successFulfillRenderPolicies, fail);
+	        self.fulfillPolicies(successFulfillPolicies, fail);
         };
 
         var successFulfillBehaviours = function() {
@@ -914,104 +908,53 @@ class CleanAndInitDatabase {
     }
 
     /**
-     * Method to fulfill database with RenderPolicies.
+     * Method to fulfill database with Policies.
      *
-     * @method fulfillRenderPolicies
+     * @method fulfillPolicies
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    fulfillRenderPolicies(successCallback : Function = null, failCallback : Function = null) {
+    fulfillPolicies(successCallback : Function = null, failCallback : Function = null) {
         var self = this;
 
-        var renderPoliciesNb = 0;
+        var policiesNb = 0;
 
-        var renderPolicies : any = require("../dbInitFiles/renderpolicies.json");
+        var policies : any = require("../dbInitFiles/policies.json");
 
-        if(renderPolicies.length == 0) {
-            Logger.info("No RenderPolicy to create.");
+        if(policies.length == 0) {
+            Logger.info("No Policy to create.");
             successCallback();
             return;
         }
 
-        renderPolicies.forEach(function(renderPolicyDesc) {
+	    policies.forEach(function(policyDesc) {
             var fail = function (err) {
                 failCallback(err);
             };
 
-            var renderPolicy = new RenderPolicy(renderPolicyDesc.name, renderPolicyDesc.description);
-
-	        var successUpdate = function () {
-		        Logger.info("Update RenderPolicy successfully.");
-		        renderPoliciesNb = renderPoliciesNb + 1;
-
-		        if(renderPoliciesNb == renderPolicies.length) {
-			        successCallback();
-		        }
-	        };
-
-	        var successCompleteness = function () {
-		        Logger.info("Check RenderPolicy completeness successfully.");
-		        renderPolicy.update(successUpdate, fail);
-	        };
-
-            var successRenderPolicyCreation = function() {
-                Logger.info("RenderPolicy created successfully.");
-	            renderPolicy.checkCompleteness(successCompleteness, fail);
-            };
-
-            renderPolicy.create(successRenderPolicyCreation, fail);
-
-        });
-    }
-
-    /**
-     * Method to fulfill database with ReceivePolicies.
-     *
-     * @method fulfillReceivePolicies
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    fulfillReceivePolicies(successCallback : Function = null, failCallback : Function = null) {
-        var self = this;
-
-        var receivePoliciesNb = 0;
-
-        var receivePolicies : any = require("../dbInitFiles/receivepolicies.json");
-
-        if(receivePolicies.length == 0) {
-            Logger.info("No ReceivePolicy to create.");
-            successCallback();
-            return;
-        }
-
-	    receivePolicies.forEach(function(receivePolicyDesc) {
-            var fail = function (err) {
-                failCallback(err);
-            };
-
-            var receivePolicy = new ReceivePolicy(receivePolicyDesc.name);
+            var policy = new Policy(policyDesc.name);
 
 		    var successUpdate = function () {
-			    Logger.info("Update ReceivePolicy successfully.");
-			    receivePoliciesNb = receivePoliciesNb + 1;
+			    Logger.info("Update Policy successfully.");
+			    policiesNb = policiesNb + 1;
 
-			    if(receivePoliciesNb == receivePolicies.length) {
+			    if(policiesNb == policies.length) {
 				    successCallback();
 			    }
 		    };
 
 		    var successCompleteness = function () {
-			    Logger.info("Check ReceivePolicy completeness successfully.");
-			    receivePolicy.update(successUpdate, fail);
+			    Logger.info("Check Policy completeness successfully.");
+			    policy.update(successUpdate, fail);
 		    };
 
 
-		    var successReceivePolicyCreation = function() {
-                Logger.info("ReceivePolicy created successfully.");
-			    receivePolicy.checkCompleteness(successCompleteness, fail);
+		    var successPolicyCreation = function() {
+                Logger.info("Policy created successfully.");
+			    policy.checkCompleteness(successCompleteness, fail);
             };
 
-            receivePolicy.create(successReceivePolicyCreation, fail);
+            policy.create(successPolicyCreation, fail);
 
         });
     }
@@ -1070,25 +1013,25 @@ class CleanAndInitDatabase {
                 newSDI.addProfil(profil.getId(), successSDIAssociation, fail);
             };
 
-            var createdCalls = new Array();
+            var createdZoneContents = new Array();
 
-            var successCallCreate = function(newCall) {
-                createdCalls.push(newCall);
-                Logger.info("Call created successfully.");
+            var successZoneContentCreate = function(newZoneContent) {
+	            createdZoneContents.push(newZoneContent);
+                Logger.info("ZoneContent created successfully.");
 
-                if(createdCalls.length == profilDesc.calls.length) {
+                if(createdZoneContents.length == profilDesc.zoneContents.length) {
                     var nbAssociation = 0;
-                    var successCallAssociation = function() {
-                        Logger.info("Call associated to Profil successfully.");
+                    var successZoneContentAssociation = function() {
+                        Logger.info("ZoneContent associated to Profil successfully.");
                         nbAssociation = nbAssociation + 1;
 
-                        if(nbAssociation == createdCalls.length) {
+                        if (nbAssociation == createdZoneContents.length) {
                             self.retrieveSDI(profilDesc.sdi, successSDIRetrieve, fail);
                         }
                     };
 
-                    createdCalls.forEach(function(call) {
-                        profil.addCall(call.getId(), successCallAssociation, fail);
+	                createdZoneContents.forEach(function(zoneContent) {
+                        profil.addZoneContent(zoneContent.getId(), successZoneContentAssociation, fail);
                     });
                 }
             };
@@ -1096,8 +1039,8 @@ class CleanAndInitDatabase {
             var successProfilCreate = function() {
                 Logger.info("Profil create successfully.");
 
-                profilDesc.calls.forEach(function(call) {
-                    self.manageCallCreation(call, successCallCreate, fail);
+                profilDesc.zoneContents.forEach(function(zoneContent) {
+                    self.manageZoneContentCreation(zoneContent, successZoneContentCreate, fail);
                 });
             };
 
@@ -1275,7 +1218,7 @@ class CleanAndInitDatabase {
      * Method to manage creation of Zone.
      *
      * @method manageZoneCreation
-     * @param {JSON Object} zoneDesc - The Zone's description
+     * @param {JSON} zoneDesc - The Zone's description
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
@@ -1346,26 +1289,15 @@ class CleanAndInitDatabase {
 		    callType.update(successUpdate, fail);
 	    };
 
-        var successReceivePolicyRetrieved = function(newReceivePolicy) {
-            Logger.info("ReceivePolicy retrieved successfully.");
+        var successPolicyRetrieved = function(newPolicy) {
+            Logger.info("Policy retrieved successfully.");
 
-            var successReceivePolicyAssociation = function() {
-                Logger.info("ReceivePolicy associated to CallType successfully.");
+            var successPolicyAssociation = function() {
+                Logger.info("Policy associated to CallType successfully.");
 	            callType.checkCompleteness(successCompleteness, fail);
             };
 
-            callType.linkReceivePolicy(newReceivePolicy.getId(), successReceivePolicyAssociation, fail);
-        };
-
-        var successRenderPolicyRetrieved = function(newRenderPolicy) {
-            Logger.info("RenderPolicy retrieved successfully.");
-
-            var successRenderPolicyAssociation = function() {
-                Logger.info("RenderPolicy associated to CallType successfully.");
-                self.retrieveReceivePolicy(callTypeDesc.receivePolicy, successReceivePolicyRetrieved, fail);
-            };
-
-            callType.linkRenderPolicy(newRenderPolicy.getId(), successRenderPolicyAssociation, fail);
+            callType.linkPolicy(newPolicy.getId(), successPolicyAssociation, fail);
         };
 
         var successRendererRetrieved = function(newRenderer) {
@@ -1373,7 +1305,7 @@ class CleanAndInitDatabase {
 
             var successRendererAssociation = function() {
                 Logger.info("Renderer associated to CallType successfully.");
-                self.retrieveRenderPolicy(callTypeDesc.renderPolicy, successRenderPolicyRetrieved, fail);
+                self.retrievePolicy(callTypeDesc.policy, successPolicyRetrieved, fail);
             };
 
             callType.linkRenderer(newRenderer.getId(), successRendererAssociation, fail);
@@ -1409,6 +1341,146 @@ class CleanAndInitDatabase {
         callType.create(successCallTypeCreation, fail);
 
     }
+
+	manageRelativeEventCreation(relativeEventDesc : any, successCallback : Function = null, failCallback : Function = null) {
+		var self = this;
+
+		var fail = function (err) {
+			failCallback(err);
+		};
+
+		var relativeEvent = new RelativeEvent(relativeEventDesc.name, relativeEventDesc.position, relativeEventDesc.duration);
+
+		var successUpdate = function() {
+			Logger.info("RelativeEvent update successfully");
+
+			successCallback(relativeEvent);
+		};
+
+		var successCheck = function () {
+			Logger.info("RelativeEvent check sucessfully");
+
+			relativeEvent.update(successUpdate, fail);
+		};
+
+		var successLinkCall = function () {
+			Logger.info("Call linked successfully");
+
+			relativeEvent.checkCompleteness(successCheck, fail);
+		};
+
+		var successCallCreation = function (call) {
+			Logger.info("Call creation successfully");
+
+			relativeEvent.linkCall(call.getId(), successLinkCall, fail);
+		};
+
+		var successRelativeEventCreation = function () {
+			Logger.info("Relative event creation successfully");
+
+			self.manageCallCreation(relativeEventDesc.call, successCallCreation, fail);
+		};
+
+		relativeEvent.create(successRelativeEventCreation, fail);
+	}
+
+	manageRelativeTimelineCreation(relativeTimelineDesc : any, successCallback : Function = null, failCallback : Function = null) {
+		var self = this;
+
+		var fail = function (err) {
+			failCallback(err);
+		};
+
+		var relativeTL = new RelativeTimeline(relativeTimelineDesc.name);
+
+		var linkedRelativeEvent = 0;
+
+		var successUpdate = function () {
+			Logger.info("Update successfully");
+			successCallback(relativeTL);
+		};
+
+		var sucessCheckCompleteness = function () {
+			Logger.info("Check completeness successfully");
+			relativeTL.update(successUpdate, fail);
+		};
+
+		var successLinkRelativeEvent = function () {
+			Logger.info("Relative Event added successfully");
+
+			linkedRelativeEvent++;
+
+			if (linkedRelativeEvent == relativeTimelineDesc.relativeEvents.length) {
+				relativeTL.checkCompleteness(sucessCheckCompleteness, fail);
+			}
+		};
+
+		var successRelativeEventCreation = function (relativeEvent) {
+			Logger.info("Relative Event created successfully");
+
+			relativeTL.addRelativeEvent(relativeEvent.getId(), successLinkRelativeEvent, fail);
+		};
+
+		var successRelativeTLCreation = function () {
+			Logger.info("Relative TL created successfully");
+
+			relativeTimelineDesc.relativeEvents.forEach( function (relativeEventDesc) {
+				self.manageRelativeEventCreation(relativeEventDesc, successRelativeEventCreation, fail);
+			});
+		};
+
+		relativeTL.create(successRelativeTLCreation, fail);
+	}
+
+	manageZoneContentCreation(zoneContentDesc : any, successCallback : Function = null, failCallback : Function = null) {
+		var self = this;
+
+		var fail = function (err) {
+			failCallback(err);
+		};
+
+		var zonec = new ZoneContent(zoneContentDesc.name);
+
+		var successUpdate = function () {
+			Logger.info("ZoneCOntent Update successfully.");
+			successCallback(zonec);
+		};
+
+		var successCheck = function () {
+			Logger.info("ZoneContent Check completeness successfully.");
+			zonec.update(successUpdate, fail);
+		};
+
+		var successLinkRelativeTimeline = function () {
+			Logger.info("Relative timeline linked successfully.");
+			zonec.checkCompleteness(successCheck, fail);
+		};
+
+		var successCreateRelativeTimeline = function (relativeTimeline) {
+			Logger.info("Relative timeline created successfully.");
+			zonec.linkRelativeTimeline(relativeTimeline.getId(), successLinkRelativeTimeline, fail);
+		};
+
+		var successLinkZone = function() {
+			Logger.info("Zone linked successfully.");
+
+			self.manageRelativeTimelineCreation(zoneContentDesc.relativeTimeline, successCreateRelativeTimeline, fail);
+		};
+
+
+		var sucessRetrieveZone = function (zone) {
+			Logger.info("Zone retrieved successfully.");
+			zonec.linkZone(zone.getId(), successLinkZone, fail);
+		};
+
+
+		var successZoneContentCreation = function() {
+			Logger.info("ZoneContent created successfully.");
+
+			self.retrieveZone(zoneContentDesc.zone, sucessRetrieveZone, fail);
+		}
+		zonec.create(successZoneContentCreation, fail);
+	}
 
     /**
      * Method to manage creation of Call.
@@ -1760,69 +1832,36 @@ class CleanAndInitDatabase {
     }
 
     /**
-     * Method to retrieve RenderPolicy.
+     * Method to retrieve Policy.
      *
-     * @method retrieveRenderPolicy
-     * @param {JSON Object} renderPolicyDesc - The RenderPolicy's description
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    retrieveRenderPolicy(renderPolicyDesc : any, successCallback : Function = null, failCallback : Function = null) {
-        var self = this;
-
-        var fail = function (err) {
-            failCallback(err);
-        };
-
-        var successAll = function(allRenderPolicies) {
-            var renderPolicy = null;
-            allRenderPolicies.forEach(function(rp) {
-                if(rp.name() == renderPolicyDesc.name) {
-                    renderPolicy = rp;
-                }
-            });
-
-            if(renderPolicy == null) {
-                failCallback(new Error("The RenderPolicy '" + renderPolicyDesc.name + "' doesn't exist !"));
-            } else {
-                successCallback(renderPolicy);
-            }
-        };
-
-        RenderPolicy.all(successAll, fail);
-    }
-
-    /**
-     * Method to retrieve ReceivePolicy.
-     *
-     * @method retrieveReceivePolicy
+     * @method retrievePolicy
      * @param {JSON Object} receivePolicyDesc - The ReceivePolicy's description
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    retrieveReceivePolicy(receivePolicyDesc : any, successCallback : Function = null, failCallback : Function = null) {
+    retrievePolicy(policyDesc : any, successCallback : Function = null, failCallback : Function = null) {
         var self = this;
 
         var fail = function (err) {
             failCallback(err);
         };
 
-        var successAll = function(allReceivePolicies) {
-            var receivePolicy = null;
-            allReceivePolicies.forEach(function(rp) {
-                if(rp.name() == receivePolicyDesc.name) {
-                    receivePolicy = rp;
+        var successAll = function(allpolicies) {
+            var policy = null;
+	        allpolicies.forEach(function(rp) {
+                if(rp.name() == policyDesc.name) {
+	                policy = rp;
                 }
             });
 
-            if(receivePolicy == null) {
-                failCallback(new Error("The ReceivePolicy '" + receivePolicyDesc.name + "' doesn't exist !"));
+            if (policy == null) {
+                failCallback(new Error("The ReceivePolicy '" + policyDesc.name + "' doesn't exist !"));
             } else {
-                successCallback(receivePolicy);
+                successCallback(policy);
             }
         };
 
-        ReceivePolicy.all(successAll, fail);
+        Policy.all(successAll, fail);
     }
 
     /**

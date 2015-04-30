@@ -3,17 +3,16 @@
  */
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./Profil.ts" />
-
+/// <reference path="./Call.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
- * Model : Timeline
+ * Model : RelativeEvent
  *
- * @class Timeline
+ * @class RelativeEvent
  * @extends ModelItf
  */
-class Timeline extends ModelItf {
+class RelativeEvent extends ModelItf {
 
     /**
      * Name property.
@@ -24,49 +23,58 @@ class Timeline extends ModelItf {
     private _name : string;
 
     /**
-     * Description property.
-     *
-     * @property _description
-     * @type string
+     * This property describes the position of the event in the timeline
+     * 
+     * @property _position
+     * @type number
      */
-    private _description : string;
+    private _position : number;
 
     /**
-     * Profils property.
-     *
-     * @property _profils
-     * @type Array<Profil>
+     * This property describes the duration of the event in seconds
+     * 
+     * @property _duration
+     * @type number
      */
-    private _profils : Array<Profil>;
+    private _duration : number;
 
     /**
-     * Lazy loading for Profils property.
+     * Call property
      *
-     * @property _profils_loaded
+     * @property _call
+     * @type Call
+     */
+    private _call : Call;
+
+    /**
+     * Lazy loading for the call property
+     *
+     * @property _call_loaded
      * @type boolean
      */
-    private _profils_loaded : boolean;
+    private _call_loaded : boolean;
+
 
     /**
      * Constructor.
      *
      * @constructor
-     * @param {string} name - The Timeline's name.
-     * @param {string} description - The Timeline's description.
-     * @param {number} id - The Timeline's ID.
+     * @param {string} name - The RelativeEvent's name.
+     * @param {number} id - The RelativeEvent's ID.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
+    constructor(name : string = "", position : number = 0, duration : number = 0, id : number = null, complete : boolean = false) {
         super(id, complete);
 
         this.setName(name);
-	    this.setDescription(description);
+        this.setPosition(position);
+        this.setDuration(duration);
 
-        this._profils = new Array<Profil>();
-        this._profils_loaded = false;
+        this._call = null;
+        this._call_loaded = false;
     }
 
 	/**
-	 * Set the Timeline's name.
+	 * Set the RelativeEvent's name.
 	 *
 	 * @method setName
 	 */
@@ -74,17 +82,8 @@ class Timeline extends ModelItf {
 		this._name = name;
 	}
 
-	/**
-	 * Set the Timeline's description.
-	 *
-	 * @method setDescription
-	 */
-	setDescription(description : string) {
-		this._description = description;
-	}
-
     /**
-     * Return the Timeline's name.
+     * Return the RelativeEvent's name.
      *
      * @method name
      */
@@ -93,36 +92,65 @@ class Timeline extends ModelItf {
     }
 
     /**
-     * Return the Timeline's description.
+     * Set the RelativeEvent's position.
      *
-     * @method description
+     * @method setPosition
      */
-    description() {
-        return this._description;
+    setPosition(position : number) {
+        this._position = position;
     }
 
     /**
-     * Return the Timeline's profils.
+     * Return the RelativeEvent's position.
      *
-     * @method profils
+     * @method position
      */
-    profils() {
-        return this._profils;
+    position() {
+        return this._position;
     }
 
     /**
-     * Load the Timeline's profils.
+     * Set the RelativeEvent's duration.
      *
-     * @method loadProfils
+     * @method setDuration
+     */
+    setDuration(duration : number) {
+        this._duration = duration;
+    }
+
+    /**
+     * Return the RelativeEvent's duration.
+     *
+     * @method duration
+     */
+    duration() {
+        return this._duration;
+    }
+
+    /**
+     * Return the CallType's call.
+     *
+     * @method call
+     */
+    call() {
+        return this._call;
+    }
+
+    /**
+     * Load the RelativeEvent's call.
+     *
+     * @method loadCall
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadProfils(successCallback : Function, failCallback : Function) {
-        if(! this._profils_loaded) {
+    loadCall(successCallback : Function, failCallback : Function) {
+        if(! this._call_loaded) {
             var self = this;
-            var success : Function = function(profils) {
-                self._profils = profils;
-                self._profils_loaded = true;
+            var success : Function = function(call) {
+                if(!!call) {
+                    self._call = call;
+                }
+                self._call_loaded = true;
                 if(successCallback != null) {
                     successCallback();
                 }
@@ -134,7 +162,7 @@ class Timeline extends ModelItf {
                 }
             };
 
-            this.getAssociatedObjects(Timeline, Profil, success, fail);
+            this.getUniquelyAssociatedObject(RelativeEvent, Call, success, fail);
         } else {
             if(successCallback != null) {
                 successCallback();
@@ -156,7 +184,7 @@ class Timeline extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._profils_loaded) {
+            if(self._call_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -171,20 +199,21 @@ class Timeline extends ModelItf {
             }
         };
 
-        this.loadProfils(success, fail);
+        this.loadCall(success, fail);
     }
 
-	/**
-	 * Set the object as desynchronized given the different lazy properties.
+    /**
+     * Set the object as desynchronized given the different lazy properties.
      *
      * @method desynchronize
-	 */
-	desynchronize() : void {
-		this._profils_loaded = false;
-	}
+     */
+    desynchronize() : void {
+        this._call_loaded = false;
+    }
 
-	/**
-	 * Return a Timeline instance as a JSON Object
+
+    /**
+	 * Return a RelativeEvent instance as a JSON Object
 	 *
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
@@ -193,29 +222,46 @@ class Timeline extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description(),
+            "position": this.position(),
+            "duration": this.duration(),
 			"complete": this.isComplete()
 		};
 		return data;
 	}
 
 	/**
-	 * Check completeness of a Timeline.
-	 * The completeness is determined by the presence of a name and an id.
+	 * Compute the completeness of an RelativeEvent.
+	 * The completeness is given by the presence of an ID and a name.
 	 */
 	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+
 		var self = this;
 
 		var success : Function = function () {
-			self._complete = (self._complete && !!self.name());
-			successCallback();
+            if (self.isComplete() && !!self.name()) {
+                var success:Function = function () {
+                    if (self._call_loaded) {
+                        self._complete = (!!self.call() && self.call().isComplete());
+                        successCallback();
+                    }
+                };
+
+                var fail:Function = function (error) {
+                    failCallback(error);
+                };
+
+                self.loadCall(success, fail);
+            } else {
+                self._complete = false;
+                successCallback();
+            }
 		};
 
 		super.checkCompleteness(success, failCallback);
 	}
 
     /**
-     * Return a Timeline instance as a JSON Object including associated object.
+     * Return a RelativeEvent instance as a JSON Object including associated object.
      * However the method should not be recursive due to cycle in the model.
      *
      * @method toCompleteJSONObject
@@ -227,7 +273,11 @@ class Timeline extends ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["profils"] = self.serializeArray(self.profils(), onlyId);
+            if (onlyId) {
+                data["call"] = (self.call() !== null) ? self.call().getId() : null;
+            } else {
+                data["call"] = (self.call() !== null) ? self.call().toJSONObject() : null;
+            }
 
             successCallback(data);
         };
@@ -239,33 +289,32 @@ class Timeline extends ModelItf {
         this.loadAssociations(success, fail);
     }
 
-	/**
-	 * Add a new Profil to the Timeline and associate it in the database.
-	 * A Profil can only be added once.
-	 *
-     * @method addProfil
-	 * @param {Profil} p The Profil to add inside the Timeline. It cannot be a null value.
-	 * @param {Function} successCallback - The callback function when success.
+    /**
+     * Set the Call of the RelativeEvent.
+     *
+     * @method linkCall
+     * @param {Call} s The Call to associate with the RelativeEvent.
+     * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
-	 */
-	addProfil(profilID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(Timeline, Profil, profilID, successCallback, failCallback);
-	}
+     */
+    linkCall(sourceId : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(RelativeEvent, Call, sourceId, successCallback, failCallback);
+    }
 
-	/**
-	 * Remove a Profil from the Timeline: the association is removed both in the object and in database.
-	 * The Profil can only be removed if it exists first in the list of associated Profils, else an exception is thrown.
-	 *
-     * @method removeProfil
-	 * @param {Profil} p The Profil to remove from that Timeline
-	 * @param {Function} successCallback - The callback function when success.
+    /**
+     * Unset the current Call from the RelativeEvent.
+     * It both sets a null value for the object property and remove the association in database.
+     * A Call must have been set before using it, else an exception is thrown.
+     *
+     * @method unlinkCall
+     * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
-	 */
-	removeProfil(profilID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(Timeline, Profil, profilID, successCallback, failCallback);
-	}
+     */
+    unlinkCall(sourceID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(RelativeEvent, Call, sourceID, successCallback, failCallback);
+    }
 
-	/**
+    /**
      * Create model in database.
      *
      * @method create
@@ -274,7 +323,7 @@ class Timeline extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        this.createObject(Timeline, this.toJSONObject(), successCallback, failCallback);
+        this.createObject(RelativeEvent, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -288,7 +337,7 @@ class Timeline extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        ModelItf.readObject(Timeline, id, successCallback, failCallback, attemptNumber);
+        ModelItf.readObject(RelativeEvent, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -300,7 +349,7 @@ class Timeline extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.updateObject(Timeline, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+        return this.updateObject(RelativeEvent, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -312,7 +361,7 @@ class Timeline extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Timeline, this.getId(), successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(RelativeEvent, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -324,31 +373,31 @@ class Timeline extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.allObjects(Timeline, successCallback, failCallback, attemptNumber);
+        return this.allObjects(RelativeEvent, successCallback, failCallback, attemptNumber);
     }
 
 	/**
-	 * Return a Timeline instance from a JSON string.
+	 * Return an RelativeEvent instance from a JSON string.
 	 *
 	 * @method parseJSON
 	 * @static
 	 * @param {string} json - The JSON string
-	 * @return {Timeline} The model instance.
+	 * @return {Call} The model instance.
 	 */
-	static parseJSON(jsonString : string) : Timeline {
-		return Timeline.fromJSONObject(JSON.parse(jsonString));
+	static parseJSON(jsonString : string) : RelativeEvent {
+		return RelativeEvent.fromJSONObject(JSON.parse(jsonString));
 	}
 
 	/**
-	 * Return a Timeline instance from a JSON Object.
+	 * Return an RelativeEvent instance from a JSON Object.
 	 *
 	 * @method fromJSONObject
 	 * @static
 	 * @param {JSONObject} json - The JSON Object
-	 * @return {Timeline} The model instance.
+	 * @return {Call} The model instance.
 	 */
-	static fromJSONObject(jsonObject : any) : Timeline {
-		return new Timeline(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+	static fromJSONObject(jsonObject : any) : RelativeEvent {
+		return new RelativeEvent(jsonObject.name, jsonObject.position, jsonObject.duration, jsonObject.id, jsonObject.complete);
 	}
 
     /**
@@ -358,6 +407,6 @@ class Timeline extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "Timelines";
+        return "RelativeEvents";
     }
 }
