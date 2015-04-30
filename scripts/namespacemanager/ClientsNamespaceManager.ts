@@ -32,7 +32,115 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
         this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
         this.addListenerToSocket('RetrieveCallDescription', function(description) { self.sendCallDescription(description); });
         this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
+
+
+		this.addListenerToSocket('HashDescription', function(description) { self.manageHashDescription(description); });
     }
+
+
+////////////////////// Begin: Manage HashDescription //////////////////////
+
+	/**
+	 * Manage Hash description and send corresponding SDI structure and Profil description to client.
+	 *
+	 * @method manageHashDescription
+	 * @param {any} hashDescription - The Hash Description.
+	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 */
+	manageHashDescription(hashDescription : any, self : ClientsNamespaceManager = null) {
+		// hashDescription : {"hash" : string}
+		var self = this;
+
+		var hash = hashDescription.hash;
+
+		//TODO : Manage Hash
+		var sdiId = 1;
+		var profilId = 1;
+
+		//TODO : self.sendObjectDescriptionFromId(SDI, sdiId, "SDIDescription");
+
+		//TODO : self.sendObjectDescriptionFromId(Profil, profilId, "ProfilDescription");
+
+		var sdiDesc = {
+			"id": 1,
+			"name": "MySDI",
+			"description": "My awesome SDI !"
+		};
+		sdiDesc["zones"] = [];
+		var zoneDesc = {
+			"id": 1,
+			"name": "Central Zone",
+			"description": "Only one zone",
+			"width": 100,
+			"height": 100,
+			"positionFromTop": 0,
+			"positionFromLeft": 0
+		};
+		zoneDesc["behaviour"] = {
+			"id": 1,
+			"name": "AppearanceBehaviour",
+			"description": "No transition effect."
+		};
+		zoneDesc["callTypes"] = [];
+		var callTypeDesc = {
+			"id": 1,
+			"name": "TwitterSearch in Central Zone",
+			"description": ""
+		};
+		callTypeDesc["renderer"] = {
+			"id": 1,
+			"name": "TweetRenderer",
+			"description": "Renderer pour les tweets."
+		};
+		callTypeDesc["policy"] = {
+			"id": 1,
+			"name": "BasicPolicy",
+			"description": ""
+		};
+		zoneDesc["callTypes"].push(callTypeDesc);
+		sdiDesc["zones"].push(zoneDesc);
+
+		self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
+
+		var profilDesc = {};
+		profilDesc["zoneContents"] = [];
+		var zoneContent = {
+			"id": 1,
+			"name": "Central Zone Content",
+			"description": ""
+		};
+		zoneContent["zone"] = {
+			"id" : 1
+		};
+		zoneContent["widget"] = null;
+		zoneContent["relativeTimeline"] = {
+			"id" : 1,
+			"name": "Timeline for Central Zone"
+		};
+		zoneContent["relativeTimeline"]["relativeEvents"] = [];
+		var relativeEvent = {
+			"id" : 1,
+			"name": "Tweet Search Event",
+			"position" : 0,
+			"duration" : 60*5
+		};
+		relativeEvent["call"] = {
+			"id" : 1,
+			"name": "My Super Tweet Search Call"
+		};
+		relativeEvent["call"]["callType"] = {
+			"id" : 1
+		}
+		zoneContent["relativeTimeline"]["relativeEvents"].push(relativeEvent);
+		zoneContent["absoluteTimeline"] = null;
+
+		profilDesc["zoneContents"].push(zoneContent);
+
+		self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+
+	}
+
+////////////////////// End: Manage HashDescription //////////////////////
 
 ////////////////////// Begin: Manage SendProfilDescription //////////////////////
 
