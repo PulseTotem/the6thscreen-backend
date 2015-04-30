@@ -5,6 +5,7 @@
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Call.ts" />
 /// <reference path="./ZoneContent.ts" />
+/// <reference path="./SDI.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -49,6 +50,22 @@ class Profil extends ModelItf {
     private _zoneContents_loaded : boolean;
 
     /**
+     * SDI Property
+     *
+     * @property _sdi
+     * @type SDI
+     */
+    private _sdi : SDI;
+
+    /**
+     * Lazy loading for SDI property
+     *
+     * @property _sdi_loaded
+     * @type boolean
+     */
+    private _sdi_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -64,6 +81,9 @@ class Profil extends ModelItf {
 
         this._zoneContents = new Array<ZoneContent>();
         this._zoneContents_loaded = false;
+
+	    this._sdi = null;
+	    this._sdi_loaded = false;
     }
 
     /**
@@ -146,6 +166,49 @@ class Profil extends ModelItf {
         }
     }
 
+	/**
+	 * Return the Profil's sdi.
+	 *
+	 * @method sdi
+	 */
+	sdi() {
+		return this._sdi;
+	}
+
+	/**
+	 * Load the Profil's sdi.
+	 *
+	 * @method loadSDI
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadSDI(successCallback : Function, failCallback : Function) {
+		if(! this._sdi_loaded) {
+			var self = this;
+			var success : Function = function(sdi) {
+				if(!!sdi) {
+					self._sdi = sdi;
+				}
+				self._sdi_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Profil, SDI, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
@@ -160,7 +223,7 @@ class Profil extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._zoneContents_loaded) {
+            if(self._zoneContents_loaded && self._sdi_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -176,6 +239,7 @@ class Profil extends ModelItf {
         };
 
         this.loadZoneContents(success, fail);
+		this.loadSDI(success, fail);
 	}
 
 	/**
@@ -185,6 +249,7 @@ class Profil extends ModelItf {
 	 */
 	desynchronize() : void {
 		this._zoneContents_loaded = false;
+		this._sdi_loaded = false;
 	}
 
 	/**

@@ -55,88 +55,146 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		//TODO : Manage Hash
 		var sdiId = 1;
-		var profilId = 1;
+		var profilId = hash;
 
 		//TODO : self.sendObjectDescriptionFromId(SDI, sdiId, "SDIDescription");
 
-		//TODO : self.sendObjectDescriptionFromId(Profil, profilId, "ProfilDescription");
+		var fail = function (err) {
+			Logger.debug("SocketId: " + self.socket.id + " - manageHashDescription : send done with fail status for Profil with Id : " + profilId + " : "+err);
+			self.socket.emit("SDIDescription", self.formatResponse(false, err));
+		};
 
-		var sdiDesc = {
-			"id": 1,
-			"name": "MySDI",
-			"description": "My awesome SDI !"
-		};
-		sdiDesc["zones"] = [];
-		var zoneDesc = {
-			"id": 1,
-			"name": "Central Zone",
-			"description": "Only one zone",
-			"width": 100,
-			"height": 100,
-			"positionFromTop": 0,
-			"positionFromLeft": 0
-		};
-		zoneDesc["behaviour"] = {
-			"id": 1,
-			"name": "AppearanceBehaviour",
-			"description": "No transition effect."
-		};
-		zoneDesc["callTypes"] = [];
-		var callTypeDesc = {
-			"id": 1,
-			"name": "TwitterSearch in Central Zone",
-			"description": ""
-		};
-		callTypeDesc["renderer"] = {
-			"id": 1,
-			"name": "TweetRenderer",
-			"description": "Renderer pour les tweets."
-		};
-		callTypeDesc["policy"] = {
-			"id": 1,
-			"name": "BasicPolicy",
-			"description": ""
-		};
-		zoneDesc["callTypes"].push(callTypeDesc);
-		sdiDesc["zones"].push(zoneDesc);
 
-		self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
 
+
+		var profil : Profil = null;
+		var sdiDesc = {};
+		var sdi : SDI = null;
 		var profilDesc = {};
-		profilDesc["zoneContents"] = [];
-		var zoneContent = {
-			"id": 1,
-			"name": "Central Zone Content",
-			"description": ""
-		};
-		zoneContent["zone"] = {
-			"id" : 1
-		};
-		zoneContent["widget"] = null;
-		zoneContent["relativeTimeline"] = {
-			"id" : 1,
-			"name": "Timeline for Central Zone"
-		};
-		zoneContent["relativeTimeline"]["relativeEvents"] = [];
-		var relativeEvent = {
-			"id" : 1,
-			"name": "Tweet Search Event",
-			"position" : 0,
-			"duration" : 60*5
-		};
-		relativeEvent["call"] = {
-			"id" : 1,
-			"name": "My Super Tweet Search Call"
-		};
-		relativeEvent["call"]["callType"] = {
-			"id" : 1
-		}
-		zoneContent["relativeTimeline"]["relativeEvents"].push(relativeEvent);
-		zoneContent["absoluteTimeline"] = null;
 
-		profilDesc["zoneContents"].push(zoneContent);
+		var successLoadAssoSDI = function () {
+			var zones : Array<Zone> = sdi.zones();
 
-		self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+			var nbZones = 0;
+
+			zones.forEach(function (zone) {
+				var zoneDesc = zone.toJSONObject();
+
+				var successLoadAssoZone = function () {
+					var behaviour : Behaviour = zone.behaviour();
+
+					zoneDesc["behaviour"] = behaviour.toJSONObject();
+
+					zoneDesc["callTypes"] = [];
+
+					var callTypes : Array<CallType> = zone.callTypes();
+					var nbCT = 0;
+
+					callTypes.forEach( function (callType) {
+
+						var successCallTypeToCompleteJSON = function (data) {
+							zoneDesc["callTypes"].push(data);
+							nbCT++;
+							if (nbCT == callTypes.length) {
+								nbZones++;
+
+								sdiDesc["zones"].push(zoneDesc);
+
+								if (nbZones == zones.length) {
+									self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
+								}
+							}
+						};
+
+						callType.toCompleteJSONObject(successCallTypeToCompleteJSON, fail);
+					})
+				};
+				zone.loadAssociations(successLoadAssoZone, fail);
+			});
+		};
+
+		var successLoadAssoProfil = function () {
+			sdi = profil.sdi();
+
+			sdiDesc = sdi.toJSONObject();
+			sdiDesc["zones"] = [];
+
+			sdi.loadAssociations(successLoadAssoSDI, fail);
+
+			profilDesc = profil.toJSONObject();
+			profilDesc["zoneContents"] = [];
+
+			var zoneContents : Array<ZoneContent> = profil.zoneContents();
+			var nbZC = 0;
+
+			zoneContents.forEach(function (zoneContent) {
+				var zcDesc = zoneContent.toJSONObject();
+
+
+				var successZCLoadAsso = function () {
+					zcDesc["zone"] = zoneContent.zone().toJSONObject();
+					zcDesc["widget"] = null;
+					zcDesc["absoluteTimeline"] = null;
+
+					var relativeTL : RelativeTimeline = zoneContent.relativeTimeline();
+
+					zcDesc["relativeTimeline"] = relativeTL.toJSONObject();
+					zcDesc["relativeTimeline"]["relativeEvents"] = [];
+
+					var successRelativeTLLoadAsso = function () {
+
+						var relativeEvents : Array<RelativeEvent> = relativeTL.relativeEvents();
+
+						var nbRelEv = 0;
+						relativeEvents.forEach(function (relativeEvent) {
+
+							var relEvDesc = relativeEvent.toJSONObject();
+
+							var successRelativeEventLoadAsso = function () {
+								var call : Call = relativeEvent.call();
+
+								var callDesc = call.toJSONObject();
+
+								var successCallLoadAsso = function () {
+									callDesc["callType"] = {
+										"id": call.callType().getId()
+									};
+
+									relEvDesc["call"] = callDesc;
+									zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+									nbRelEv++;
+
+									if (nbRelEv == relativeEvents.length) {
+										profilDesc["zoneContents"].push(zcDesc);
+										nbZC++;
+
+										if (nbZC == zoneContents.length) {
+											self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+										}
+									}
+								};
+
+								call.loadAssociations(successCallLoadAsso, fail);
+							}
+
+							relativeEvent.loadAssociations(successRelativeEventLoadAsso, fail);
+						});
+					};
+
+					relativeTL.loadAssociations(successRelativeTLLoadAsso, fail);
+				};
+
+				zoneContent.loadAssociations(successZCLoadAsso, fail);
+			});
+		};
+
+		var successReadProfil = function (pro : Profil) {
+			profil = pro;
+
+			profil.loadAssociations(successLoadAssoProfil, fail);
+		};
+
+		Profil.read(profilId, successReadProfil, fail);
 
 	}
 
