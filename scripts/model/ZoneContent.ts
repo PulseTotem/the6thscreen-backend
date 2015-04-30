@@ -435,6 +435,7 @@ class ZoneContent extends ModelItf {
 				self.loadZone(success, fail);
 				self.loadAbsoluteTimeline(success, fail);
 				self.loadRelativeTimeline(success, fail);
+				self.loadWidget(success, fail);
 			} else {
 				self._complete = false;
 				successCallback();

@@ -8,7 +8,9 @@
         "zoneContents": [
           {
             "name": "ZC1",
-            "zone": "LeftZone1",
+            "zone": {
+              "name": "LeftZone1"
+            },
             "relativeTimeline": {
               "name": "TL1",
               "relativeEvents": [
@@ -67,7 +69,9 @@
           },
           {
             "name": "ZC2",
-            "zone": "RightZone1",
+            "zone": {
+              "name": "RightZone1"
+            },
             "relativeTimeline": {
               "name": "TL2",
               "relativeEvents": [
@@ -104,7 +108,9 @@
     "zoneContents": [
       {
         "name": "ZC3",
-        "zone": "LeftZone3",
+        "zone": {
+          "name": "LeftZone3"
+        },
         "relativeTimeline": {
           "name": "TL3",
           "relativeEvents": [
@@ -182,7 +188,9 @@
       },
       {
         "name": "ZC4",
-        "zone": "RightZone3",
+        "zone": {
+          "name": "RightZone3"
+        },
         "relativeTimeline": {
           "name": "TL4",
           "relativeEvents": [

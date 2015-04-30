@@ -42,22 +42,6 @@ class Call extends ModelItf {
 	 */
 	private _call_type_loaded : boolean;
 
-	/**
-	 * Profil property.
-	 *
-	 * @property _profil
-	 * @type Profil
-	 */
-	private _profil : Profil;
-
-	/**
-	 * Lazy loading for Profil property.
-	 *
-	 * @property _profil_loaded
-	 * @type boolean
-	 */
-	private _profil_loaded : boolean;
-
     /**
      * ParamValues property.
      *
@@ -91,9 +75,6 @@ class Call extends ModelItf {
 
 	    this._call_type = null;
 	    this._call_type_loaded = false;
-
-	    this._profil = null;
-	    this._profil_loaded = false;
     }
 
     /**
@@ -148,49 +129,6 @@ class Call extends ModelItf {
             };
 
             this.getAssociatedObjects(Call, ParamValue, success, fail);
-        }
-    }
-
-	/**
-	 * Return the Call's profil.
-     *
-     * @method profil
-	 */
-	profil() {
-		return this._profil;
-	}
-
-    /**
-     * Load the Call's profil.
-     *
-     * @method loadProfil
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    loadProfil(successCallback : Function = null, failCallback : Function = null) {
-        if(! this._profil_loaded) {
-            var self = this;
-            var success : Function = function(profil) {
-                if(!!profil) {
-                    self._profil = profil;
-                }
-                self._profil_loaded = true;
-                if(successCallback != null) {
-                    successCallback();
-                }
-            };
-
-            var fail : Function = function(error) {
-                if(failCallback != null) {
-                    failCallback(error);
-                }
-            };
-
-            this.getUniquelyAssociatedObject(Call, Profil, success, fail);
-        } else {
-            if(successCallback != null) {
-                successCallback();
-            }
         }
     }
 
@@ -251,7 +189,7 @@ class Call extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._param_values_loaded && self._profil_loaded && self._call_type_loaded) {
+            if(self._param_values_loaded && self._call_type_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -267,7 +205,6 @@ class Call extends ModelItf {
         };
 
         this.loadParamValues(success, fail);
-        this.loadProfil(success, fail);
         this.loadCallType(success, fail);
     }
 
@@ -280,7 +217,6 @@ class Call extends ModelItf {
 		super.desynchronize();
 		this._call_type_loaded = false;
 		this._param_values_loaded = false;
-		this._profil_loaded = false;
 	}
 
 	/**
@@ -297,8 +233,8 @@ class Call extends ModelItf {
 		var success = function () {
 			if (self.isComplete() && !!self.name()) {
 				var success : Function = function () {
-					if (self._call_type_loaded && self._profil_loaded) {
-						self._complete = (!!self.callType() && self.callType().isComplete()) && (!!self.profil() && self.profil().isComplete());
+					if (self._call_type_loaded) {
+						self._complete = (!!self.callType() && self.callType().isComplete());
 						successCallback();
 					}
 				};
@@ -308,7 +244,6 @@ class Call extends ModelItf {
 				};
 
 				self.loadCallType(success,fail);
-				self.loadProfil(success,fail);
 			} else {
 				self._complete = false;
 				successCallback();
@@ -349,10 +284,8 @@ class Call extends ModelItf {
 
 	        if (onlyId) {
 		        data["callType"] = (self.callType() !== null) ? self.callType().getId() : null;
-		        data["profil"] = (self.profil() !== null) ? self.profil().getId() : null;
 	        } else {
 		        data["callType"] = (self.callType() !== null) ? self.callType().toJSONObject() : null;
-		        data["profil"] = (self.profil() !== null) ? self.profil().toJSONObject() : null;
 	        }
 	        data["paramValues"] = self.serializeArray(self.paramValues(), onlyId);
 
@@ -390,33 +323,6 @@ class Call extends ModelItf {
 	 */
 	removeParamValue(paramValueId : number, successCallback : Function, failCallback : Function) {
         this.deleteObjectAssociation(Call, ParamValue, paramValueId, successCallback, failCallback);
-	}
-
-	/**
-	 * Set the Profil of the Call.
-	 * As a Call can only have one Profil, if the value is already set, this method throws an exception: you need first to unset the profil.
-	 * Moreover the given Profil must be created in database.
-	 *
-     * @method linkProfil
-	 * @param {Profil} p The Profil to associate with the Call.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	linkProfil(profilID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(Call, Profil, profilID, successCallback, failCallback);
-	}
-
-	/**
-	 * Unset the current Profil from the Call.
-	 * It both sets a null value for the object property and remove the association in database.
-	 * A Profil must have been set before using it, else an exception is thrown.
-	 *
-     * @method unlinkProfil
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	unlinkProfil(profilID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(Call, Profil, profilID, successCallback, failCallback);
 	}
 
 	/**

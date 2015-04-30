@@ -44,7 +44,7 @@
                     "name" : "FeedNodeRendererGeneric"
                 },
                 "policy" : {
-                    "name" : "DumbPolicy"
+                    "name" : "IdemPolicy"
                 }
             },
             {
@@ -60,7 +60,7 @@
                     "name" : "DiscountRenderer"
                 },
                 "policy" : {
-                    "name" : "DumbPolicy"
+                    "name" : "IdemPolicy"
                 }
             }
         ]
@@ -110,7 +110,7 @@
                     "name" : "FeedNodeRendererGeneric"
                 },
                 "policy" : {
-                    "name" : "DumbPolicy"
+                    "name" : "IdemPolicy"
                 }
             },
             {
@@ -126,7 +126,7 @@
                     "name" : "FeedNodeRendererGeneric"
                 },
                 "policy" : {
-                    "name" : "DumbPolicy"
+                    "name" : "IdemPolicy"
                 }
             }
         ]
@@ -176,7 +176,7 @@
           "name" : "TweetRenderer"
         },
         "policy" : {
-          "name" : "DumbPolicy"
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -192,7 +192,7 @@
           "name" : "PictureAlbumRenderer"
         },
         "policy" : {
-          "name" : "DumbPolicy"
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -208,7 +208,7 @@
           "name" : "EventListRenderer"
         },
         "policy" : {
-          "name" : "DumbPolicy"
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -224,7 +224,7 @@
           "name" : "PictureAlbumRenderer"
         },
         "policy" : {
-          "name" : "DumbPolicy"
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -240,7 +240,7 @@
           "name" : "PictureAlbumRenderer"
         },
         "policy" : {
-          "name" : "DumbPolicy"
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -256,7 +256,7 @@
           "name" : "PictureAlbumRenderer"
         },
         "policy" : {
-          "name" : "DumbPolicy"
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -272,7 +272,7 @@
           "name" : "PictureAlbumRenderer"
         },
         "policy" : {
-          "name" : "DumbPolicy"
+          "name" : "IdemPolicy"
         }
       }
     ]

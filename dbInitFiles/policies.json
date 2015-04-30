@@ -1,6 +1,6 @@
 [
     {
-        "name" : "DumbPolicy",
-        "description": "une super politique !"
+        "name" : "IdemPolicy",
+        "description": "Keep the data as they are retrieved."
     }
 ]

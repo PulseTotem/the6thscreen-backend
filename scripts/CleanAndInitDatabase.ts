@@ -36,7 +36,7 @@ class CleanAndInitDatabase {
     static toCleanSources : Array<any> = [Source, Service, ParamType, InfoType, TypeParamType, ConstraintParamType];
     static toCleanUsers : Array<any> = [User];
     static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, Policy];
-    static toCleanProfils : Array<any> = [ParamValue, Call, Profil];
+    static toCleanProfils : Array<any> = [ParamValue, Call, Profil, ZoneContent, RelativeTimeline, RelativeEvent];
 
     /**
      * Method to clean and fulfill database with some data.
@@ -1019,7 +1019,7 @@ class CleanAndInitDatabase {
 	            createdZoneContents.push(newZoneContent);
                 Logger.info("ZoneContent created successfully.");
 
-                if(createdZoneContents.length == profilDesc.calls.length) {
+                if(createdZoneContents.length == profilDesc.zoneContents.length) {
                     var nbAssociation = 0;
                     var successZoneContentAssociation = function() {
                         Logger.info("ZoneContent associated to Profil successfully.");
@@ -1442,12 +1442,12 @@ class CleanAndInitDatabase {
 		var zonec = new ZoneContent(zoneContentDesc.name);
 
 		var successUpdate = function () {
-			Logger.info("Update successfully.");
+			Logger.info("ZoneCOntent Update successfully.");
 			successCallback(zonec);
 		};
 
 		var successCheck = function () {
-			Logger.info("Check completeness successfully.");
+			Logger.info("ZoneContent Check completeness successfully.");
 			zonec.update(successUpdate, fail);
 		};
 
