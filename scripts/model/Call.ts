@@ -7,6 +7,7 @@
 /// <reference path="./ParamValue.ts" />
 /// <reference path="./CallType.ts" />
 /// <reference path="./Profil.ts" />
+/// <reference path="./OAuthKey.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -58,6 +59,22 @@ class Call extends ModelItf {
      */
     private _param_values_loaded : boolean;
 
+	/**
+	 * OAuthKey property.
+	 *
+	 * @property _oauthkey
+	 * @type OAuthKey
+	 */
+	private _oauthkey : OAuthKey;
+
+	/**
+	 * Lazy loading for OAuthKey property.
+	 *
+	 * @property _oauthkey_loaded
+	 * @type boolean
+	 */
+	private _oauthkey_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -75,6 +92,9 @@ class Call extends ModelItf {
 
 	    this._call_type = null;
 	    this._call_type_loaded = false;
+
+		this._oauthkey = null;
+		this._oauthkey_loaded = false;
     }
 
     /**
@@ -175,6 +195,49 @@ class Call extends ModelItf {
         }
     }
 
+	/**
+	 * Return the Call's oAuthKey.
+	 *
+	 * @method oAuthKey
+	 */
+	oAuthKey() {
+		return this._oauthkey;
+	}
+
+	/**
+	 * Load the Call's oAuthKey.
+	 *
+	 * @method loadOAuthKey
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadOAuthKey(successCallback : Function = null, failCallback : Function = null) {
+		if(! this._oauthkey_loaded) {
+			var self = this;
+			var success : Function = function(oAuthKey) {
+				if(!!oAuthKey) {
+					self._oauthkey = oAuthKey;
+				}
+				self._oauthkey_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Call, OAuthKey, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -189,7 +252,7 @@ class Call extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._param_values_loaded && self._call_type_loaded) {
+            if(self._param_values_loaded && self._call_type_loaded && self._oauthkey_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -206,6 +269,7 @@ class Call extends ModelItf {
 
         this.loadParamValues(success, fail);
         this.loadCallType(success, fail);
+		this.loadOAuthKey(success, fail);
     }
 
 	/**
@@ -217,6 +281,7 @@ class Call extends ModelItf {
 		super.desynchronize();
 		this._call_type_loaded = false;
 		this._param_values_loaded = false;
+		this._oauthkey_loaded = false;
 	}
 
 	/**
@@ -284,8 +349,10 @@ class Call extends ModelItf {
 
 	        if (onlyId) {
 		        data["callType"] = (self.callType() !== null) ? self.callType().getId() : null;
+				data["oAuthKey"] = (self.oAuthKey() !== null) ? self.oAuthKey().getId() : null;
 	        } else {
 		        data["callType"] = (self.callType() !== null) ? self.callType().toJSONObject() : null;
+				data["oAuthKey"] = (self.oAuthKey() !== null) ? self.oAuthKey().toJSONObject() : null;
 	        }
 	        data["paramValues"] = self.serializeArray(self.paramValues(), onlyId);
 
@@ -350,6 +417,34 @@ class Call extends ModelItf {
 	 */
 	unlinkCallType(callTypeId : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Call, CallType, callTypeId, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the OAuthKey of the Call.
+	 * As a Call can only have one OAuthKey, if the value is already set, this method throws an exception: you need first to unset the OAuthKey.
+	 * Moreover the given OAuthKey must be created in database.
+	 *
+	 * @method linkOAuthKey
+	 * @param {number} oAuthKeyId - The OAuthKey to associate with the Call.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkOAuthKey(oAuthKeyId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Call, OAuthKey, oAuthKeyId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current OAuthKey from the Call.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A OAuthKey must have been set before using it, else an exception is thrown.
+	 *
+	 * @method unlinkOAuthKey
+	 * @param {number} oAuthKeyId - The OAuthKey to unset from the Call.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkOAuthKey(oAuthKeyId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Call, OAuthKey, oAuthKeyId, successCallback, failCallback);
 	}
 
     /**
