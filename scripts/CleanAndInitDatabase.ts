@@ -1013,34 +1013,34 @@ class CleanAndInitDatabase {
                 newSDI.addProfil(profil.getId(), successSDIAssociation, fail);
             };
 
-            var createdCalls = new Array();
+            var createdZoneContents = new Array();
 
-            var successCallCreate = function(newCall) {
-                createdCalls.push(newCall);
-                Logger.info("Call created successfully.");
+            var successZoneContentCreate = function(newZoneContent) {
+	            createdZoneContents.push(newZoneContent);
+                Logger.info("ZoneContent created successfully.");
 
-                if(createdCalls.length == profilDesc.calls.length) {
+                if(createdZoneContents.length == profilDesc.calls.length) {
                     var nbAssociation = 0;
-                    var successCallAssociation = function() {
-                        Logger.info("Call associated to Profil successfully.");
+                    var successZoneContentAssociation = function() {
+                        Logger.info("ZoneContent associated to Profil successfully.");
                         nbAssociation = nbAssociation + 1;
 
-                        if(nbAssociation == createdCalls.length) {
+                        if (nbAssociation == createdZoneContents.length) {
                             self.retrieveSDI(profilDesc.sdi, successSDIRetrieve, fail);
                         }
                     };
 
-                    /**createdCalls.forEach(function(call) {
-                        profil.addCall(call.getId(), successCallAssociation, fail);
-                    });*/
+	                createdZoneContents.forEach(function(zoneContent) {
+                        profil.addZoneContent(zoneContent.getId(), successZoneContentAssociation, fail);
+                    });
                 }
             };
 
             var successProfilCreate = function() {
                 Logger.info("Profil create successfully.");
 
-                profilDesc.calls.forEach(function(call) {
-                    self.manageCallCreation(call, successCallCreate, fail);
+                profilDesc.zoneContents.forEach(function(zoneContent) {
+                    self.manageZoneContentCreation(zoneContent, successZoneContentCreate, fail);
                 });
             };
 
@@ -1341,6 +1341,146 @@ class CleanAndInitDatabase {
         callType.create(successCallTypeCreation, fail);
 
     }
+
+	manageRelativeEventCreation(relativeEventDesc : any, successCallback : Function = null, failCallback : Function = null) {
+		var self = this;
+
+		var fail = function (err) {
+			failCallback(err);
+		};
+
+		var relativeEvent = new RelativeEvent(relativeEventDesc.name, relativeEventDesc.position, relativeEventDesc.duration);
+
+		var successUpdate = function() {
+			Logger.info("RelativeEvent update successfully");
+
+			successCallback(relativeEvent);
+		};
+
+		var successCheck = function () {
+			Logger.info("RelativeEvent check sucessfully");
+
+			relativeEvent.update(successUpdate, fail);
+		};
+
+		var successLinkCall = function () {
+			Logger.info("Call linked successfully");
+
+			relativeEvent.checkCompleteness(successCheck, fail);
+		};
+
+		var successCallCreation = function (call) {
+			Logger.info("Call creation successfully");
+
+			relativeEvent.linkCall(call.getId(), successLinkCall, fail);
+		};
+
+		var successRelativeEventCreation = function () {
+			Logger.info("Relative event creation successfully");
+
+			self.manageCallCreation(relativeEventDesc.call, successCallCreation, fail);
+		};
+
+		relativeEvent.create(successRelativeEventCreation, fail);
+	}
+
+	manageRelativeTimelineCreation(relativeTimelineDesc : any, successCallback : Function = null, failCallback : Function = null) {
+		var self = this;
+
+		var fail = function (err) {
+			failCallback(err);
+		};
+
+		var relativeTL = new RelativeTimeline(relativeTimelineDesc.name);
+
+		var linkedRelativeEvent = 0;
+
+		var successUpdate = function () {
+			Logger.info("Update successfully");
+			successCallback(relativeTL);
+		};
+
+		var sucessCheckCompleteness = function () {
+			Logger.info("Check completeness successfully");
+			relativeTL.update(successUpdate, fail);
+		};
+
+		var successLinkRelativeEvent = function () {
+			Logger.info("Relative Event added successfully");
+
+			linkedRelativeEvent++;
+
+			if (linkedRelativeEvent == relativeTimelineDesc.relativeEvents.length) {
+				relativeTL.checkCompleteness(sucessCheckCompleteness, fail);
+			}
+		};
+
+		var successRelativeEventCreation = function (relativeEvent) {
+			Logger.info("Relative Event created successfully");
+
+			relativeTL.addRelativeEvent(relativeEvent.getId(), successLinkRelativeEvent, fail);
+		};
+
+		var successRelativeTLCreation = function () {
+			Logger.info("Relative TL created successfully");
+
+			relativeTimelineDesc.relativeEvents.forEach( function (relativeEventDesc) {
+				self.manageRelativeEventCreation(relativeEventDesc, successRelativeEventCreation, fail);
+			});
+		};
+
+		relativeTL.create(successRelativeTLCreation, fail);
+	}
+
+	manageZoneContentCreation(zoneContentDesc : any, successCallback : Function = null, failCallback : Function = null) {
+		var self = this;
+
+		var fail = function (err) {
+			failCallback(err);
+		};
+
+		var zonec = new ZoneContent(zoneContentDesc.name);
+
+		var successUpdate = function () {
+			Logger.info("Update successfully.");
+			successCallback(zonec);
+		};
+
+		var successCheck = function () {
+			Logger.info("Check completeness successfully.");
+			zonec.update(successUpdate, fail);
+		};
+
+		var successLinkRelativeTimeline = function () {
+			Logger.info("Relative timeline linked successfully.");
+			zonec.checkCompleteness(successCheck, fail);
+		};
+
+		var successCreateRelativeTimeline = function (relativeTimeline) {
+			Logger.info("Relative timeline created successfully.");
+			zonec.linkRelativeTimeline(relativeTimeline.getId(), successLinkRelativeTimeline, fail);
+		};
+
+		var successLinkZone = function() {
+			Logger.info("Zone linked successfully.");
+
+			self.manageRelativeTimelineCreation(zoneContentDesc.relativeTimeline, successCreateRelativeTimeline, fail);
+		};
+
+
+		var sucessRetrieveZone = function (zone) {
+			Logger.info("Zone retrieved successfully.");
+			zonec.linkZone(zone.getId(), successLinkZone, fail);
+		};
+
+
+		var successZoneContentCreation = function() {
+			Logger.info("ZoneContent created successfully.");
+
+			self.retrieveZone(zoneContentDesc.zone, sucessRetrieveZone, fail);
+		}
+		zonec.create(successZoneContentCreation, fail);
+	}
 
     /**
      * Method to manage creation of Call.
