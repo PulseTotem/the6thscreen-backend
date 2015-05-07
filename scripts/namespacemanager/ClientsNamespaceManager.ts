@@ -57,15 +57,10 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var sdiId = 1;
 		var profilId = hash;
 
-		//TODO : self.sendObjectDescriptionFromId(SDI, sdiId, "SDIDescription");
-
 		var fail = function (err) {
 			Logger.debug("SocketId: " + self.socket.id + " - manageHashDescription : send done with fail status for Profil with Id : " + profilId + " : "+err);
 			self.socket.emit("SDIDescription", self.formatResponse(false, err));
 		};
-
-
-
 
 		var profil : Profil = null;
 		var sdiDesc = {};
