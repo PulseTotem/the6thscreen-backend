@@ -47,7 +47,8 @@ class The6thScreenBackend extends Server {
                     var profile = {
                         username: user.username(),
                         ip: clientIp,
-                        id: user.getId()
+                        id: user.getId(),
+						date: new Date()
                     };
 
                     // we are sending the profile in the token
@@ -84,6 +85,52 @@ class The6thScreenBackend extends Server {
 
             User.findOneByUsername(req.body.usernameOrEmail, success, fail);
         });
+
+		this.app.post('/loginFromToken', function(req, res) {
+			var success = function(user) {
+
+				var now : any = new Date();
+				var lastUserUpdated : any = new Date(user.getUpdatedAt());
+				var diffDate = now - lastUserUpdated;
+
+				if( !req.body.tmp || ( diffDate <= 1000*60*60*2 ) ) {
+					var ip_info = get_ip(req);
+					// { clientIp: '127.0.0.1', clientIpRoutable: false }
+					var clientIp = ip_info.clientIp;
+
+					var profile = {
+						username: user.username(),
+						ip: clientIp,
+						id: user.getId(),
+						date: new Date()
+					};
+
+					// we are sending the profile in the token
+					var token = jwt.sign(profile, BackendConfig.getJWTSecret());
+
+					var successUpdate = function () {
+						res.json({token: token});
+					};
+
+					var failUpdate = function (error) {
+						res.status(500).send({'error': JSON.stringify(error)});
+					};
+
+					user.setLastIp(clientIp);
+					user.setToken(token);
+
+					user.update(successUpdate, failUpdate);
+				} else {
+					res.status(401).send({'error': 'Session expired.'});
+				}
+			};
+
+			var fail = function(error) {
+				res.status(404).send({ 'error': JSON.stringify(error) });
+			}
+
+			User.findOneByToken(req.body.token, success, fail);
+		});
 
 
         this.init();
