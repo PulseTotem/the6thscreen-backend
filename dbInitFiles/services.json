@@ -54,5 +54,13 @@
       "oauth": false,
       "provider": "",
       "port" : 6008
+    },
+    {
+      "name" : "Notifier",
+      "description" : "Service Notifier",
+      "host" : "http://localhost:6009/Notifier",
+      "oauth": false,
+      "provider": "",
+      "port" : 6009
     }
 ]

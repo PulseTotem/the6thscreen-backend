@@ -160,5 +160,21 @@
       "infoType" : {
         "name" : "EventList"
       }
+    },
+    {
+      "name" : "Subscribe",
+      "description" : "Souscription aux messages",
+      "service" : {
+        "name" : "Notifier"
+      },
+      "method" : "Subscribe",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        }
+      ],
+      "infoType" : {
+        "name" : "UserList"
+      }
     }
 ]
