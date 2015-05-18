@@ -5,6 +5,9 @@
 
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./RelativeEvent.ts" />
+/// <reference path="./TimelineRunner.ts" />
+/// <reference path="./SystemTrigger.ts" />
+/// <reference path="./UserTrigger.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -35,10 +38,58 @@ class RelativeTimeline extends ModelItf {
     /**
      * Lazy loading for relativeEvents property
      *
-     * @property _relativeEvents_loading
+     * @property _relativeEvents_loaded
      * @type boolean
      */
     private _relativeEvents_loaded : boolean;
+
+	/**
+	 * TimelineRunner property
+	 *
+	 * @property _timelineRunner
+	 * @type TimelineRunner
+	 */
+	private _timelineRunner : TimelineRunner;
+
+	/**
+	 * Lazy loading for timelineRunner property
+	 *
+	 * @property _timelineRunner_loaded
+	 * @type boolean
+	 */
+	private _timelineRunner_loaded : boolean;
+
+	/**
+	 * SystemTrigger property
+	 *
+	 * @property _systemTrigger
+	 * @type SystemTrigger
+	 */
+	private _systemTrigger : SystemTrigger;
+
+	/**
+	 * Lazy loading for SystemTrigger property
+	 *
+	 * @property _systemTrigger_loaded
+	 * @type boolean
+	 */
+	private _systemTrigger_loaded : boolean;
+
+	/**
+	 * UserTrigger property
+	 *
+	 * @property _userTrigger
+	 * @type UserTrigger
+	 */
+	private _userTrigger : UserTrigger;
+
+	/**
+	 * Lazy loading for UserTrigger property
+	 *
+	 * @property _userTrigger_loaded
+	 * @type boolean
+	 */
+	private _userTrigger_loaded : boolean;
 
     /**
      * Constructor.
@@ -54,6 +105,15 @@ class RelativeTimeline extends ModelItf {
 
 	    this._relativeEvents = new Array();
 	    this._relativeEvents_loaded = false;
+
+	    this._timelineRunner = null;
+	    this._timelineRunner_loaded = false;
+
+	    this._systemTrigger = null;
+	    this._systemTrigger_loaded = false;
+
+	    this._userTrigger = null;
+	    this._userTrigger_loaded = false;
     }
 
 	/**
@@ -116,6 +176,138 @@ class RelativeTimeline extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the RelativeTimeline's timelineRunner.
+	 *
+	 * @method timelineRunner
+	 * @returns {TimelineRunner} The RelativeTimeline's timelineRunner
+	 */
+	timelineRunner() : TimelineRunner {
+		return this._timelineRunner;
+	}
+
+	/**
+	 * Load the RelativeTimeline's timelineRunner.
+	 *
+	 * @method loadTimelineRunner
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadTimelineRunner(successCallback : Function, failCallback : Function) {
+		if(! this._timelineRunner_loaded) {
+			var self = this;
+			var success : Function = function(timelineRunner) {
+				if(!!timelineRunner) {
+					self._timelineRunner = timelineRunner;
+				}
+				self._timelineRunner_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(RelativeTimeline, TimelineRunner, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
+	/**
+	 * Return the RelativeTimeline's systemTrigger.
+	 *
+	 * @method systemTrigger
+	 * @returns {SystemTrigger} The RelativeTimeline's systemTrigger
+	 */
+	systemTrigger() : SystemTrigger {
+		return this._systemTrigger;
+	}
+
+	/**
+	 * Load the RelativeTimeline's systemTrigger.
+	 *
+	 * @method loadSystemTrigger
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadSystemTrigger(successCallback : Function, failCallback : Function) {
+		if(! this._systemTrigger_loaded) {
+			var self = this;
+			var success : Function = function(systemTrigger) {
+				if(!!systemTrigger) {
+					self._systemTrigger = systemTrigger;
+				}
+				self._systemTrigger_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(RelativeTimeline, SystemTrigger, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
+	/**
+	 * Return the RelativeTimeline's userTrigger.
+	 *
+	 * @method userTrigger
+	 * @returns {UserTrigger} The RelativeTimeline's userTrigger
+	 */
+	userTrigger() : UserTrigger {
+		return this._userTrigger;
+	}
+
+	/**
+	 * Load the RelativeTimeline's userTrigger.
+	 *
+	 * @method loadUserTrigger
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadUserTrigger(successCallback : Function, failCallback : Function) {
+		if(! this._userTrigger_loaded) {
+			var self = this;
+			var success : Function = function(userTrigger) {
+				if(!!userTrigger) {
+					self._userTrigger = userTrigger;
+				}
+				self._userTrigger_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(RelativeTimeline, UserTrigger, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
@@ -130,7 +322,7 @@ class RelativeTimeline extends ModelItf {
 		var self = this;
 
 		var success : Function = function(models) {
-			if(self._relativeEvents_loaded) {
+			if(self._relativeEvents_loaded && self._timelineRunner_loaded && self._systemTrigger_loaded && self._userTrigger_loaded) {
 				if (successCallback != null) {
 					successCallback();
 				} // else //Nothing to do ?
@@ -146,6 +338,9 @@ class RelativeTimeline extends ModelItf {
 		};
 
 		this.loadRelativeEvents(success, fail);
+		this.loadTimelineRunner(success, fail);
+		this.loadSystemTrigger(success, fail);
+		this.loadUserTrigger(success, fail);
 	}
 
 	/**
@@ -155,6 +350,9 @@ class RelativeTimeline extends ModelItf {
 	 */
 	desynchronize() : void {
 		this._relativeEvents_loaded = false;
+		this._timelineRunner_loaded = false;
+		this._userTrigger_loaded = false;
+		this._systemTrigger_loaded = false;
 	}
 	
 	/**
@@ -182,8 +380,8 @@ class RelativeTimeline extends ModelItf {
 		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 				var success:Function = function () {
-					if (self._relativeEvents_loaded) {
-						self._complete = (self._relativeEvents.length > 0);
+					if (self._relativeEvents_loaded && self._systemTrigger_loaded && self._timelineRunner_loaded) {
+						self._complete = (self._relativeEvents.length > 0) && self._systemTrigger.isComplete() && self._timelineRunner.isComplete();
 
 						self._relativeEvents.forEach(function (relativeEvent : RelativeEvent) {
 							self._complete = self._complete && relativeEvent.isComplete();
@@ -195,7 +393,8 @@ class RelativeTimeline extends ModelItf {
 				var fail:Function = function (error) {
 					failCallback(error);
 				};
-
+				self.loadSystemTrigger(success, fail);
+				self.loadTimelineRunner(success, fail);
 				self.loadRelativeEvents(success, fail);
 			} else {
 				self._complete = false;
@@ -218,6 +417,16 @@ class RelativeTimeline extends ModelItf {
 
 		var success : Function = function() {
 			var data = self.toJSONObject();
+			if (onlyId) {
+				data["systemTrigger"] = (self.systemTrigger() !== null) ? self.systemTrigger().getId() : null;
+				data["userTrigger"] = (self.userTrigger() !== null) ? self.userTrigger().getId() : null;
+				data["timelineRunner"] = (self.timelineRunner() !== null) ? self.timelineRunner().getId() : null;
+			} else {
+				data["systemTrigger"] = (self.systemTrigger() !== null) ? self.systemTrigger().toJSONObject() : null;
+				data["userTrigger"] = (self.userTrigger() !== null) ? self.userTrigger().toJSONObject() : null;
+				data["timelineRunner"] = (self.timelineRunner() !== null) ? self.timelineRunner().toJSONObject() : null;
+			}
+
 			data["relativeEvents"] = self.serializeArray(self.relativeEvents(), onlyId);
 			successCallback(data);
 		};
@@ -253,6 +462,75 @@ class RelativeTimeline extends ModelItf {
 	 */
 	removeRelativeEvent(relativeEventID : number, successRelativeEventback : Function, failRelativeEventback : Function) {
 		this.deleteObjectAssociation(RelativeTimeline, RelativeEvent, relativeEventID, successRelativeEventback, failRelativeEventback);
+	}
+
+	/**
+	 * Set the TimelineRunner of the RelativeTimeline.
+	 *
+	 * @method linkTimelineRunner
+	 * @param {TimelineRunner} it The TimelineRunner to associate with the RelativeTimeline.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkTimelineRunner(runnerID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(RelativeTimeline, TimelineRunner, runnerID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current TimelineRunner from the RelativeTimeline.
+	 *
+	 * @method unlinkTimelineRunner
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkTimelineRunner(runnerID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(RelativeTimeline, TimelineRunner, runnerID, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the UserTrigger of the RelativeTimeline.
+	 *
+	 * @method linkUserTrigger
+	 * @param {UserTrigger} it The UserTrigger to associate with the RelativeTimeline.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkUserTrigger(runnerID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(RelativeTimeline, UserTrigger, runnerID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current UserTrigger from the RelativeTimeline.
+	 *
+	 * @method unlinkUserTrigger
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkUserTrigger(runnerID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(RelativeTimeline, UserTrigger, runnerID, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the SystemTrigger of the RelativeTimeline.
+	 *
+	 * @method linkSystemTrigger
+	 * @param {SystemTrigger} it The SystemTrigger to associate with the RelativeTimeline.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkSystemTrigger(runnerID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(RelativeTimeline, SystemTrigger, runnerID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current SystemTrigger from the RelativeTimeline.
+	 *
+	 * @method unlinkSystemTrigger
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkSystemTrigger(runnerID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(RelativeTimeline, SystemTrigger, runnerID, successCallback, failCallback);
 	}
 
     /**
