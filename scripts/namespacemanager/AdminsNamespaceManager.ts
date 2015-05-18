@@ -64,11 +64,11 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 		// Create object
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
+		this.addListenerToSocket('CreateZone', function(data) { self.createObject(Zone, data, "AnswerCreateZone"); });
 
 	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
 	    this.addListenerToSocket('CreateCallTypeDescription', function(data) { self.createObject(CallType, data, "CallTypeDescription"); });
 	    this.addListenerToSocket('CreateServiceDescription', function(data) { self.createObject(Service, data, "ServiceDescription"); });
-		this.addListenerToSocket('CreateZoneDescription', function(data) { self.createObject(Zone, data, "ZoneDescription"); });
 		this.addListenerToSocket('CreateCallDescription', function(data) { self.createObject(Call, data, "CallDescription"); });
 		this.addListenerToSocket('CreateRendererDescription', function(data) { self.createObject(Renderer, data, "RendererDescription"); });
 		this.addListenerToSocket('CreateProfilDescription', function(data) { self.createObject(Profil, data, "ProfilDescription"); });
@@ -77,11 +77,11 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 		// Update object
 		this.addListenerToSocket('UpdateSDI', function(data) { self.updateObjectAttribute(SDI, data, "AnswerUpdateSDI"); });
+		this.addListenerToSocket('UpdateZone', function(data) { self.updateObjectAttribute(Zone, data, "AnswerUpdateZone"); });
 
 	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
 	    this.addListenerToSocket('UpdateCallTypeDescription', function(data) { self.updateObjectAttribute(CallType, data, "CallTypeDescription"); });
 	    this.addListenerToSocket('UpdateServiceDescription', function(data) { self.updateObjectAttribute(Service, data, "ServiceDescription"); });
-		this.addListenerToSocket('UpdateZoneDescription', function(data) { self.updateObjectAttribute(Zone, data, "ZoneDescription"); });
 		this.addListenerToSocket('UpdateCallDescription', function(data) { self.updateObjectAttribute(Call, data, "CallDescription"); });
 		this.addListenerToSocket('UpdateParamValueDescription', function(data) { self.updateObjectAttribute(ParamValue, data, "ParamValueDescription"); });
 		this.addListenerToSocket('UpdateRendererDescription', function(data) { self.updateObjectAttribute(Renderer, data, "RendererDescription"); });
