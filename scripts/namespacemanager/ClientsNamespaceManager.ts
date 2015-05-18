@@ -137,6 +137,9 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 					zcDesc["relativeTimeline"]["relativeEvents"] = [];
 
 					var successRelativeTLLoadAsso = function () {
+						zcDesc["relativeTimeline"]["timelineRunner"] = relativeTL.timelineRunner().toJSONObject();
+						zcDesc["relativeTimeline"]["systemTrigger"] = relativeTL.systemTrigger().toJSONObject();
+						zcDesc["relativeTimeline"]["userTrigger"] = relativeTL.userTrigger().toJSONObject();
 
 						var relativeEvents : Array<RelativeEvent> = relativeTL.relativeEvents();
 
