@@ -33,5 +33,12 @@
       "infoType" : {
         "name" : "EventList"
       }
+    },
+    {
+      "name" : "UserRenderer",
+      "description" : "Renderer pour les infos de type User.",
+      "infoType" : {
+        "name" : "UserList"
+      }
     }
 ]
