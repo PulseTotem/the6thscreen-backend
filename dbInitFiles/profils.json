@@ -13,6 +13,15 @@
             },
             "relativeTimeline": {
               "name": "TL1",
+              "timelineRunner": {
+                "name": "DefaultRunner"
+              },
+              "systemTrigger": {
+                "name": "DefaultSystemTrigger"
+              },
+              "userTrigger": {
+                "name": "DefaultUserTrigger"
+              },
               "relativeEvents": [
                 {
                   "name": "FILUNS1",
@@ -74,6 +83,15 @@
             },
             "relativeTimeline": {
               "name": "TL2",
+              "timelineRunner": {
+                "name": "DefaultRunner"
+              },
+              "systemTrigger": {
+                "name": "DefaultSystemTrigger"
+              },
+              "userTrigger": {
+                "name": "DefaultUserTrigger"
+              },
               "relativeEvents": [
                 {
                   "name": "DiscountsSmartShopping1",
@@ -113,6 +131,15 @@
         },
         "relativeTimeline": {
           "name": "TL3",
+          "timelineRunner": {
+            "name": "DefaultRunner"
+          },
+          "systemTrigger": {
+            "name": "DefaultSystemTrigger"
+          },
+          "userTrigger": {
+            "name": "DefaultUserTrigger"
+          },
           "relativeEvents": [
             {
               "name": "Twitter1",
@@ -193,6 +220,15 @@
         },
         "relativeTimeline": {
           "name": "TL4",
+          "timelineRunner": {
+            "name": "DefaultRunner"
+          },
+          "systemTrigger": {
+            "name": "DefaultSystemTrigger"
+          },
+          "userTrigger": {
+            "name": "DefaultUserTrigger"
+          },
           "relativeEvents": [
             {
               "name": "Flickr1",

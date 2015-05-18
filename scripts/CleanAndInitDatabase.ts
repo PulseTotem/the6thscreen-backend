@@ -35,7 +35,7 @@ class CleanAndInitDatabase {
 
     static toCleanSources : Array<any> = [Source, Service, ParamType, InfoType, TypeParamType, ConstraintParamType];
     static toCleanUsers : Array<any> = [User];
-    static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, Policy];
+    static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, Policy, TimelineRunner, SystemTrigger, UserTrigger];
     static toCleanProfils : Array<any> = [ParamValue, Call, Profil, ZoneContent, RelativeTimeline, RelativeEvent];
 
     /**
@@ -193,8 +193,20 @@ class CleanAndInitDatabase {
             failCallback(err);
         };
 
-        var successFulfillPolicies = function() {
+        var successFulfillUserTriggers = function() {
             self.fulfillSDIs(success, fail);
+        };
+
+        var successFulfillSystemTriggers = function() {
+            self.fulfillUserTriggers(successFulfillUserTriggers, fail);
+        };
+
+        var successFulfillRunners = function() {
+            self.fulfillSystemTriggers(successFulfillSystemTriggers, fail);
+        };
+
+        var successFulfillPolicies = function() {
+            self.fulfillTimelineRunners(successFulfillRunners, fail);
         };
 
         var successFulfillRenderers = function() {
@@ -960,6 +972,162 @@ class CleanAndInitDatabase {
     }
 
     /**
+     * Method to fulfill database with TimelineRunners.
+     *
+     * @method fulfillTimelineRunners
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillTimelineRunners(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var timelineRunnersNb = 0;
+
+        var timelineRunners : any = require("../dbInitFiles/timelineRunners.json");
+
+        if(timelineRunners.length == 0) {
+            Logger.info("No TimelineRunner to create.");
+            successCallback();
+            return;
+        }
+
+        timelineRunners.forEach(function(timelineRunnerDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var timelineRunner = new TimelineRunner(timelineRunnerDesc.name);
+
+            var successUpdate = function () {
+                Logger.info("Update TimelineRunner successfully.");
+                timelineRunnersNb = timelineRunnersNb + 1;
+
+                if(timelineRunnersNb == timelineRunners.length) {
+                    successCallback();
+                }
+            };
+
+            var successCompleteness = function () {
+                Logger.info("Check TimelineRunner completeness successfully.");
+                timelineRunner.update(successUpdate, fail);
+            };
+
+
+            var successTimelineRunnerCreation = function() {
+                Logger.info("TimelineRunner created successfully.");
+                timelineRunner.checkCompleteness(successCompleteness, fail);
+            };
+
+            timelineRunner.create(successTimelineRunnerCreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with SystemTriggers.
+     *
+     * @method fulfillSystemTriggers
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillSystemTriggers(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var systemTriggersNb = 0;
+
+        var systemTriggers : any = require("../dbInitFiles/systemTriggers.json");
+
+        if(systemTriggers.length == 0) {
+            Logger.info("No SystemTrigger to create.");
+            successCallback();
+            return;
+        }
+
+        systemTriggers.forEach(function(systemTriggerDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var systemTrigger = new SystemTrigger(systemTriggerDesc.name);
+
+            var successUpdate = function () {
+                Logger.info("Update SystemTrigger successfully.");
+                systemTriggersNb = systemTriggersNb + 1;
+
+                if(systemTriggersNb == systemTriggers.length) {
+                    successCallback();
+                }
+            };
+
+            var successCompleteness = function () {
+                Logger.info("Check SystemTrigger completeness successfully.");
+                systemTrigger.update(successUpdate, fail);
+            };
+
+
+            var successSystemTriggerCreation = function() {
+                Logger.info("SystemTrigger created successfully.");
+                systemTrigger.checkCompleteness(successCompleteness, fail);
+            };
+
+            systemTrigger.create(successSystemTriggerCreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with UserTriggers.
+     *
+     * @method fulfillUserTriggers
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillUserTriggers(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var userTriggersNb = 0;
+
+        var userTriggers : any = require("../dbInitFiles/userTriggers.json");
+
+        if(userTriggers.length == 0) {
+            Logger.info("No UserTrigger to create.");
+            successCallback();
+            return;
+        }
+
+        userTriggers.forEach(function(userTriggerDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var userTrigger = new UserTrigger(userTriggerDesc.name);
+
+            var successUpdate = function () {
+                Logger.info("Update UserTrigger successfully.");
+                userTriggersNb = userTriggersNb + 1;
+
+                if(userTriggersNb == userTriggers.length) {
+                    successCallback();
+                }
+            };
+
+            var successCompleteness = function () {
+                Logger.info("Check UserTrigger completeness successfully.");
+                userTrigger.update(successUpdate, fail);
+            };
+
+
+            var successUserTriggerCreation = function() {
+                Logger.info("UserTrigger created successfully.");
+                userTrigger.checkCompleteness(successCompleteness, fail);
+            };
+
+            userTrigger.create(successUserTriggerCreation, fail);
+
+        });
+    }
+
+    /**
      * Method to fulfill database with Profils.
      *
      * @method fulfillProfils
@@ -1421,12 +1589,48 @@ class CleanAndInitDatabase {
 			relativeTL.addRelativeEvent(relativeEvent.getId(), successLinkRelativeEvent, fail);
 		};
 
+        var successLinkUserTrigger = function () {
+            Logger.info("UserTrigger linked successfully");
+
+            relativeTimelineDesc.relativeEvents.forEach( function (relativeEventDesc) {
+                self.manageRelativeEventCreation(relativeEventDesc, successRelativeEventCreation, fail);
+            });
+        };
+
+        var successRetrieveUserTrigger = function (userTrigger) {
+            Logger.info("UserTrigger retrieved successfully");
+
+            relativeTL.linkUserTrigger(userTrigger.getId(), successLinkUserTrigger, fail);
+        };
+
+        var successLinkSystemTrigger = function () {
+            Logger.info("SystemTrigger linked successfully");
+
+            self.retrieveUserTrigger(relativeTimelineDesc.userTrigger, successRetrieveUserTrigger, fail);
+        };
+
+        var successRetrieveSystemTrigger = function (systemTrigger) {
+            Logger.info("SystemTrigger retrieved successfully");
+
+            relativeTL.linkSystemTrigger(systemTrigger.getId(), successLinkSystemTrigger, fail);
+        };
+
+        var successLinkTLRunner = function () {
+            Logger.info("TimelineRunner linked successfully");
+
+            self.retrieveSystemTrigger(relativeTimelineDesc.systemTrigger, successRetrieveSystemTrigger, fail);
+        };
+
+        var successRetrieveTimelineRunner = function (timelineRunner) {
+            Logger.info("TimelineRunner retrieved successfully");
+
+            relativeTL.linkTimelineRunner(timelineRunner.getId(), successLinkTLRunner, fail);
+        };
+
 		var successRelativeTLCreation = function () {
 			Logger.info("Relative TL created successfully");
 
-			relativeTimelineDesc.relativeEvents.forEach( function (relativeEventDesc) {
-				self.manageRelativeEventCreation(relativeEventDesc, successRelativeEventCreation, fail);
-			});
+            self.retrieveTimelineRunner(relativeTimelineDesc.timelineRunner, successRetrieveTimelineRunner, fail);
 		};
 
 		relativeTL.create(successRelativeTLCreation, fail);
@@ -1697,6 +1901,105 @@ class CleanAndInitDatabase {
         };
 
         Zone.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve TimelineRunner.
+     *
+     * @method retrieveTimelineRunner
+     * @param {JSON Object} timelineRunnerDesc - The TimelineRunner's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveTimelineRunner(timelineRunnerDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allTimelineRunners) {
+            var timelineRunner = null;
+            allTimelineRunners.forEach(function(z) {
+                if(z.name() == timelineRunnerDesc.name) {
+                    timelineRunner = z;
+                }
+            });
+
+            if(timelineRunner == null) {
+                failCallback(new Error("The TimelineRunner '" + timelineRunnerDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(timelineRunner);
+            }
+        };
+
+        TimelineRunner.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve UserTrigger.
+     *
+     * @method retrieveUserTrigger
+     * @param {JSON Object} userTriggerDesc - The UserTrigger's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveUserTrigger(userTriggerDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allUserTriggers) {
+            var userTrigger = null;
+            allUserTriggers.forEach(function(z) {
+                if(z.name() == userTriggerDesc.name) {
+                    userTrigger = z;
+                }
+            });
+
+            if(userTrigger == null) {
+                failCallback(new Error("The UserTrigger '" + userTriggerDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(userTrigger);
+            }
+        };
+
+        UserTrigger.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve SystemTrigger.
+     *
+     * @method retrieveSystemTrigger
+     * @param {JSON Object} systemTriggerDesc - The SystemTrigger's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveSystemTrigger(systemTriggerDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allSystemTriggers) {
+            var systemTrigger = null;
+            allSystemTriggers.forEach(function(z) {
+                if(z.name() == systemTriggerDesc.name) {
+                    systemTrigger = z;
+                }
+            });
+
+            if(systemTrigger == null) {
+                failCallback(new Error("The SystemTrigger '" + systemTriggerDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(systemTrigger);
+            }
+        };
+
+        SystemTrigger.all(successAll, fail);
     }
 
     /**
