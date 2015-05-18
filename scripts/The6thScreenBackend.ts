@@ -89,11 +89,12 @@ class The6thScreenBackend extends Server {
 		this.app.post('/loginFromToken', function(req, res) {
 			var success = function(user) {
 
+				/* TODO: ADDED UpdatedAt and CreatedAt in all models.
 				var now : any = new Date();
 				var lastUserUpdated : any = new Date(user.getUpdatedAt());
 				var diffDate = now - lastUserUpdated;
 
-				if( !req.body.tmp || ( diffDate <= 1000*60*60*2 ) ) {
+				if( !req.body.tmp || ( diffDate <= 1000*60*60*2 ) ) {*/
 					var ip_info = get_ip(req);
 					// { clientIp: '127.0.0.1', clientIpRoutable: false }
 					var clientIp = ip_info.clientIp;
@@ -120,9 +121,11 @@ class The6thScreenBackend extends Server {
 					user.setToken(token);
 
 					user.update(successUpdate, failUpdate);
+				/* TODO: ADDED UpdatedAt and CreatedAt in all models.
+
 				} else {
 					res.status(401).send({'error': 'Session expired.'});
-				}
+				}*/
 			};
 
 			var fail = function(error) {
