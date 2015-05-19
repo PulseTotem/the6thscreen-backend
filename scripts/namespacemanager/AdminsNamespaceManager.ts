@@ -107,6 +107,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 		// Custom requests
 		this.addListenerToSocket('RetrieveSourcesFromServiceId', function(serviceIdDescription) { self.sendSourcesFromServiceId(serviceIdDescription); });
+		this.addListenerToSocket('RetrieveRenderersFromSourceId', function(sourceIdDescription) { self.sendRenderersFromSourceId(sourceIdDescription); });
 
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
@@ -426,13 +427,13 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage createParamValueDescription //////////////////////
 
-////////////////////// Begin: Manage sendParamTypesDescriptionFromCallType //////////////////////
+////////////////////// Begin: Manage sendSourcesFromServiceId //////////////////////
 
 	/**
-	 * Retrieve ParamTypes from a given CallType id.
-	 * Send the result on the channel "ParamTypesDescription"
+	 * Retrieve Sources from a given ServiceId.
+	 * Send the result on the channel "SourcesDescriptionFromService"
 	 *
-	 * @param callTypeDescription
+	 * @param serviceIdDescription
 	 */
 	sendSourcesFromServiceId(serviceIdDescription : any) {
 		// serviceIdDescription : { "serviceId": number }
@@ -458,5 +459,47 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		Service.read(serviceId, successRead, fail);
 	}
 
-////////////////////// End: Manage sendParamTypesDescriptionFromCallType //////////////////////
+////////////////////// End: Manage sendSourcesFromServiceId //////////////////////
+
+////////////////////// Begin: Manage sendRenderersFromSourceId //////////////////////
+
+	/**
+	 * Retrieve Renderers from a given Source ID.
+	 * Send the result on the channel "RenderersDescriptionFromSource"
+	 *
+	 * @param sourceIdDescription
+	 */
+	sendRenderersFromSourceId(sourceIdDescription : any) {
+		// sourceIdDescription : { "sourceId": number }
+		var self = this;
+
+		var sourceId = sourceIdDescription.sourceId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("RenderersDescriptionFromSource", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendSourcesFromServiceId failed ");
+		};
+
+		var successRead = function (source : Source) {
+
+			var successLoadInfoType : Function = function () {
+				var infoType : InfoType = source.infoType();
+
+				var successLoadRenderers : Function = function () {
+					var renderers : Array<Renderer> = infoType.renderers();
+
+					self.socket.emit("RenderersDescriptionFromSource", self.formatResponse(true, infoType.serializeArray(renderers)));
+				};
+
+				infoType.loadRenderers(successLoadRenderers, fail);
+
+			};
+
+			source.loadInfoType(successLoadInfoType, fail);
+		};
+
+		Source.read(sourceId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendRenderersFromSourceId //////////////////////
 }
