@@ -79,9 +79,10 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		// Update object
 		this.addListenerToSocket('UpdateSDI', function(data) { self.updateObjectAttribute(SDI, data, "AnswerUpdateSDI"); });
 		this.addListenerToSocket('UpdateZone', function(data) { self.updateObjectAttribute(Zone, data, "AnswerUpdateZone"); });
+		this.addListenerToSocket('UpdateCallType', function(data) { self.updateObjectAttribute(CallType, data, "AnswerUpdateCallType"); });
 
 	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
-	    this.addListenerToSocket('UpdateCallTypeDescription', function(data) { self.updateObjectAttribute(CallType, data, "CallTypeDescription"); });
+
 	    this.addListenerToSocket('UpdateServiceDescription', function(data) { self.updateObjectAttribute(Service, data, "ServiceDescription"); });
 		this.addListenerToSocket('UpdateCallDescription', function(data) { self.updateObjectAttribute(Call, data, "CallDescription"); });
 		this.addListenerToSocket('UpdateParamValueDescription', function(data) { self.updateObjectAttribute(ParamValue, data, "ParamValueDescription"); });
@@ -434,38 +435,27 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	 * @param callTypeDescription
 	 */
 	sendSourcesFromServiceId(serviceIdDescription : any) {
+		// serviceIdDescription : { "serviceId": number }
 		var self = this;
 
-		var callTypeId = callTypeDescription.callTypeId;
+		var serviceId = serviceIdDescription.serviceId;
 
 		var fail : Function = function(error) {
-			self.socket.emit("ParamTypesDescription", self.formatResponse(false, error));
-			Logger.debug("SocketId: " + self.socket.id + " - sendParamTypesDescriptionFromCallType failed ");
+			self.socket.emit("SourcesDescriptionFromService", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendSourcesFromServiceId failed ");
 		};
 
-		var successRead = function (callType) {
+		var successRead = function (service) {
 
-			var successLoadSource : Function = function () {
-				var source : Source = callType.source();
-
-				var successLoadParamTypes : Function = function () {
-
-					var successCompleteLoad = function (data) {
-						self.socket.emit("ParamTypesDescription", self.formatResponse(true, data));
-					};
-
-					for (var i = 0; i < source.paramTypes().length; i++) {
-						source.paramTypes()[i].toCompleteJSONObject(successCompleteLoad, fail);
-					}
-				};
-
-				source.loadParamTypes(successLoadParamTypes, fail);
+			var successLoadSources : Function = function () {
+				var sources : Array<Source> = service.sources();
+				self.socket.emit("SourcesDescriptionFromService", self.formatResponse(true, service.serializeArray(sources)));
 			};
 
-			callType.loadSource(successLoadSource, fail);
+			service.loadSources(successLoadSources, fail);
 		};
 
-		CallType.read(callTypeId, successRead, fail);
+		Service.read(serviceId, successRead, fail);
 	}
 
 ////////////////////// End: Manage sendParamTypesDescriptionFromCallType //////////////////////

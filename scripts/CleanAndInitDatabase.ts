@@ -371,7 +371,7 @@ class CleanAndInitDatabase {
                 failCallback(err);
             };
 
-            var service = new Service(serviceDesc.name, serviceDesc.description, serviceDesc.host, serviceDesc.oauth, serviceDesc.provider);
+            var service = new Service(serviceDesc.name, serviceDesc.description, serviceDesc.host, serviceDesc.oauth, serviceDesc.provider, serviceDesc.logo);
 
 	        var successUpdate = function () {
 		        Logger.info("Update service successfully.");
