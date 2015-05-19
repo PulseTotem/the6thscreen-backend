@@ -5,7 +5,7 @@
       "host" : "http://localhost:6002/RSSFeedReader",
       "oauth": false,
       "provider": "",
-      "port" : 6002
+      "logo": "http://www.dailydooh.com/wp-content/uploads/img/rss-icon.png"
     },
     {
       "name" : "SmartShopping",
@@ -13,7 +13,7 @@
       "host" : "http://localhost:6003/SmartShopping",
       "oauth": false,
       "provider": "",
-      "port" : 6003
+      "logo": "http://static4.wikia.nocookie.net/__cb20131121214007/destinypedia/images/7/71/Information_Icon.svg"
     },
     {
       "name" : "Twitter",
@@ -21,7 +21,7 @@
       "host" : "http://localhost:6004/Twitter",
       "oauth": true,
       "provider": "twitter",
-      "port" : 6004
+      "logo": "https://g.twimg.com/Twitter_logo_blue.png"
     },
     {
       "name" : "Flickr",
@@ -29,7 +29,7 @@
       "host" : "http://localhost:6005/Flickr",
       "oauth": true,
       "provider": "flickr",
-      "port" : 6005
+      "logo": "http://www.epscameraclub.co.uk/wp-content/uploads/2014/01/transparent-flickr-logo-icon.png"
     },
     {
       "name" : "Facebook",
@@ -37,7 +37,7 @@
       "host" : "http://localhost:6006/Facebook",
       "oauth": true,
       "provider": "facebook",
-      "port" : 6006
+      "logo": "https://www.facebook.com/images/fb_icon_325x325.png"
     },
     {
       "name" : "Instagram",
@@ -45,7 +45,7 @@
       "host" : "http://localhost:6007/Instagram",
       "oauth": true,
       "provider": "instagram",
-      "port" : 6007
+      "logo": "http://www.iphone3gsystem.fr/wp-content/uploads/2013/01/instagram-logo.jpg"
     },
     {
       "name" : "Hackathon",
@@ -53,7 +53,7 @@
       "host" : "http://localhost:6008/Hackathon",
       "oauth": false,
       "provider": "",
-      "port" : 6008
+      "logo": "http://static4.wikia.nocookie.net/__cb20131121214007/destinypedia/images/7/71/Information_Icon.svg"
     },
     {
       "name" : "Notifier",
@@ -61,6 +61,6 @@
       "host" : "http://localhost:6009/Notifier",
       "oauth": false,
       "provider": "",
-      "port" : 6009
+      "logo": "http://static4.wikia.nocookie.net/__cb20131121214007/destinypedia/images/7/71/Information_Icon.svg"
     }
 ]

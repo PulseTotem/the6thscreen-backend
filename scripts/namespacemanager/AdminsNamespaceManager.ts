@@ -65,9 +65,10 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		// Create object
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
 		this.addListenerToSocket('CreateZone', function(data) { self.createObject(Zone, data, "AnswerCreateZone"); });
+		this.addListenerToSocket('CreateCallType', function(data) { self.createObject(CallType, data, "AnswerCreateCallType"); });
 
 	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
-	    this.addListenerToSocket('CreateCallTypeDescription', function(data) { self.createObject(CallType, data, "CallTypeDescription"); });
+
 	    this.addListenerToSocket('CreateServiceDescription', function(data) { self.createObject(Service, data, "ServiceDescription"); });
 		this.addListenerToSocket('CreateCallDescription', function(data) { self.createObject(Call, data, "CallDescription"); });
 		this.addListenerToSocket('CreateRendererDescription', function(data) { self.createObject(Renderer, data, "RendererDescription"); });
@@ -104,6 +105,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 
 		// Custom requests
+		this.addListenerToSocket('RetrieveSourcesFromServiceId', function(serviceIdDescription) { self.sendSourcesFromServiceId(serviceIdDescription); });
+
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
 		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
@@ -421,4 +424,49 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage createParamValueDescription //////////////////////
+
+////////////////////// Begin: Manage sendParamTypesDescriptionFromCallType //////////////////////
+
+	/**
+	 * Retrieve ParamTypes from a given CallType id.
+	 * Send the result on the channel "ParamTypesDescription"
+	 *
+	 * @param callTypeDescription
+	 */
+	sendSourcesFromServiceId(serviceIdDescription : any) {
+		var self = this;
+
+		var callTypeId = callTypeDescription.callTypeId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("ParamTypesDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendParamTypesDescriptionFromCallType failed ");
+		};
+
+		var successRead = function (callType) {
+
+			var successLoadSource : Function = function () {
+				var source : Source = callType.source();
+
+				var successLoadParamTypes : Function = function () {
+
+					var successCompleteLoad = function (data) {
+						self.socket.emit("ParamTypesDescription", self.formatResponse(true, data));
+					};
+
+					for (var i = 0; i < source.paramTypes().length; i++) {
+						source.paramTypes()[i].toCompleteJSONObject(successCompleteLoad, fail);
+					}
+				};
+
+				source.loadParamTypes(successLoadParamTypes, fail);
+			};
+
+			callType.loadSource(successLoadSource, fail);
+		};
+
+		CallType.read(callTypeId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendParamTypesDescriptionFromCallType //////////////////////
 }

@@ -324,7 +324,7 @@ describe('Source', function() {
 	describe('#linkService', function () {
 		it('should call the right request', function (done) {
 			var c = new Source("machin", "desc", "method", 28);
-			var s = new Service("toto", "machin", "blabla", true, "provider", 42);
+			var s = new Service("toto", "machin", "blabla", true, "provider", "", 42);
 
 			var response1:SequelizeRestfulResponse = {
 				"status": "success",
@@ -374,7 +374,7 @@ describe('Source', function() {
 	describe('#unlinkService', function () {
 		it('should call the right request', function (done) {
 			var c = new Source("machin", "desc", "method", 28);
-			var s = new Service("toto", "machin", "blabla", true, "provider", 42);
+			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var response1:SequelizeRestfulResponse = {
 				"status": "success",
@@ -747,7 +747,7 @@ describe('Source', function() {
 	describe('#updateAttribute', function () {
 		it('should update the service when asking but not the object as it remains not complete', function (done) {
 			var model = new Source("toto", "bla", "method", 12);
-			var s = new Service("toto", "machin", "blabla", true, "provider", 42);
+			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var newInfo = {
 				'id' : model.getId(),
@@ -804,7 +804,7 @@ describe('Source', function() {
 		it('should update the source to link a service when asking and update the source if it becomes complete', function (done) {
 			var model = new Source("toto", "bla", "method", 12);
 			var modelUpdated = new Source("toto", "bla", "method", 12, true);
-			var s = new Service("toto", "machin", "blabla", true, "provider", 42);
+			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var newInfo = {
 				'id' : model.getId(),
@@ -870,7 +870,7 @@ describe('Source', function() {
 
 		it('should update the source to unlink a service when asking and do not update the source', function (done) {
 			var model = new Source("toto", "bla", "method", 12);
-			var s = new Service("toto", "machin", "blabla", true, "provider", 42);
+			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var newInfo = {
 				'id' : model.getId(),
