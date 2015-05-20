@@ -534,11 +534,23 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				var sources : Array<Source> = new Array<Source>();
 
 				var retrieveSource : Function = function (s : number) {
-					sources.forEach(function (elem: Source) {
+					for (var i = 0; i < sources.length; i++) {
+						var elem = sources[i];
 						if (elem.getId() === s) {
 							return elem;
 						}
-					});
+					}
+					return undefined;
+				};
+
+				var retrieveService : Function = function (s : number) {
+					for (var i = 0; i < data.services.length; i++) {
+						var elem = data.services[i];
+						if (elem.id === s) {
+							return elem;
+						}
+					}
+					return undefined;
 				};
 
 				var indexCT = 0;
@@ -547,11 +559,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				var saveCallType : Function = function (dataCT) {
 					var service = dataCT.source.service;
 
-					var serviceToPush = data.services.forEach(function (elem : any) {
-						if (elem.id === service.id) {
-							return elem;
-						}
-					});
+					var serviceToPush = retrieveService(service.id);
 
 					if (serviceToPush === undefined) {
 						var index = data.services.push(dataCT.source.service);
