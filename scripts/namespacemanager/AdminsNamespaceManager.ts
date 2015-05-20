@@ -108,6 +108,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		// Custom requests
 		this.addListenerToSocket('RetrieveSourcesFromServiceId', function(serviceIdDescription) { self.sendSourcesFromServiceId(serviceIdDescription); });
 		this.addListenerToSocket('RetrieveRenderersFromSourceId', function(sourceIdDescription) { self.sendRenderersFromSourceId(sourceIdDescription); });
+		this.addListenerToSocket('RetrieveCallTypesFromZoneId', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription); });
 
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
@@ -502,4 +503,110 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage sendRenderersFromSourceId //////////////////////
+
+////////////////////// Begin: Manage sendCallTypesFromZoneId //////////////////////
+
+	/**
+	 * Retrieve CallTypes from a given Zone ID and organize them by services, displaying sources and renderers informations.
+	 * Send the result on the channel "CallTypesDescriptionFromZone"
+	 *
+	 * @param zoneIdDescription
+	 */
+	sendCallTypesFromZoneId(zoneIdDescription : any) {
+		// zoneIdDescription : { "zoneId": number }
+		var self = this;
+
+		var zoneId = zoneIdDescription.zoneId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("CallTypesDescriptionFromZone", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendCallTypesFromZoneId failed ");
+		};
+
+		var successRead = function (zone : Zone) {
+
+			var successLoadCallTypes : Function = function () {
+				var callTypes : Array<CallType> = zone.callTypes();
+
+				var data : any = zone.toJSONObject();
+				data.services = [];
+
+				var sources : Array<Source> = new Array<Source>();
+
+				var retrieveSource : Function = function (s : number) {
+					sources.forEach(function (elem: Source) {
+						if (elem.getId() === s) {
+							return elem;
+						}
+					});
+				};
+
+				var indexCT = 0;
+				var limit = callTypes.length;
+
+				var saveCallType : Function = function (dataCT) {
+					var service = dataCT.source.service;
+
+					var serviceToPush = data.services.forEach(function (elem : any) {
+						if (elem.id === service.id) {
+							return elem;
+						}
+					});
+
+					if (serviceToPush === undefined) {
+						var index = data.services.push(dataCT.source.service);
+						dataCT.source.service = null;
+						index--;
+						data.services[index].callTypes = [];
+						serviceToPush = data.services[index];
+					}
+					serviceToPush.callTypes.push(dataCT);
+
+					indexCT++;
+
+					if (indexCT == limit) {
+						self.socket.emit("CallTypesDescriptionFromZone", self.formatResponse(true, data));
+					}
+				};
+
+
+				callTypes.forEach( function (callType : CallType) {
+
+					var successLoadAssoCT : Function = function (dataCT) {
+						var sourceId : number = dataCT.source.id;
+
+						var rSource = retrieveSource(sourceId);
+
+						if (rSource === undefined) {
+							var successReadSource : Function = function (source : Source) {
+								var successLoadService : Function = function () {
+									sources.push(source);
+									dataCT.source.service = source.service().toJSONObject();
+									saveCallType(dataCT);
+								};
+
+								source.loadService(successLoadService, fail);
+							};
+
+
+							Source.read(sourceId, successReadSource, fail);
+
+						} else {
+							dataCT.source = rSource;
+							saveCallType(dataCT);
+						}
+					};
+
+					callType.toCompleteJSONObject(successLoadAssoCT, fail);
+				});
+
+			};
+
+			zone.loadCallTypes(successLoadCallTypes, fail);
+		};
+
+		Zone.read(zoneId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendCallTypesFromZoneId //////////////////////
 }
