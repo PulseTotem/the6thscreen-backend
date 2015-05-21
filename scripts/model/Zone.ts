@@ -5,6 +5,7 @@
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Behaviour.ts" />
 /// <reference path="./CallType.ts" />
+/// <reference path="./ZoneContent.ts" />
 
 /// <reference path="../customizedTypes/Percentage.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
@@ -97,6 +98,22 @@ class Zone extends ModelItf {
 	 */
 	private _callTypes_loaded : boolean;
 
+	/**
+	 * ZoneContents property.
+	 *
+	 * @property _zoneContents
+	 * @type Array<ZoneContent>
+	 */
+	private _zoneContents : Array<ZoneContent>;
+
+	/**
+	 * Lazy loading for _zoneContents property.
+	 *
+	 * @property _zoneContents_loaded
+	 * @type boolean
+	 */
+	private _zoneContents_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -121,6 +138,9 @@ class Zone extends ModelItf {
 
 	    this._callTypes = null;
 	    this._callTypes_loaded = false;
+
+		this._zoneContents = null;
+		this._zoneContents_loaded = false;
     }
 
 	/**
@@ -321,6 +341,47 @@ class Zone extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the ZoneContents owned by the Zone.
+	 *
+	 * @method zoneContents
+	 */
+	zoneContents() {
+		return this._zoneContents;
+	}
+
+	/**
+	 * Load the ZoneContents owned by the Zone.
+	 *
+	 * @method loadZoneContents
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadZoneContents(successCallback : Function, failCallback : Function) {
+		if(! this._zoneContents_loaded) {
+			var self = this;
+			var success : Function = function(zoneContents) {
+				self._zoneContents = zoneContents;
+				self._zoneContents_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getAssociatedObjects(Zone, ZoneContent, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -335,7 +396,7 @@ class Zone extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._behaviour_loaded && self._callTypes_loaded) {
+            if(self._behaviour_loaded && self._callTypes_loaded && self._zoneContents_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -352,6 +413,7 @@ class Zone extends ModelItf {
 
         this.loadBehaviour(success, fail);
 	    this.loadCallTypes(success, fail);
+		this.loadZoneContents(success, fail);
     }
 
 	/**
@@ -362,6 +424,7 @@ class Zone extends ModelItf {
 	desynchronize() : void {
 		this._behaviour_loaded = false;
 		this._callTypes_loaded = false;
+		this._zoneContents_loaded = false;
 	}
 
 
@@ -438,6 +501,7 @@ class Zone extends ModelItf {
 		        data["behaviour"] = (self.behaviour() !== null) ? self.behaviour().toJSONObject() : null;
 	        }
             data["callTypes"] = self.serializeArray(self.callTypes(), onlyId);
+			data["zoneContents"] = self.serializeArray(self.zoneContents(), onlyId);
 
             successCallback(data);
         };
@@ -500,6 +564,32 @@ class Zone extends ModelItf {
 	 */
 	removeCallType(ctID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Zone, CallType, ctID, successCallback, failCallback);
+	}
+
+	/**
+	 * Add a new ZoneContent to the Zone and associate it in the database.
+	 * A ZoneContent can only be added once.
+	 *
+	 * @method addZoneContent
+	 * @param {ZoneContent} zcID The ZoneContent's id to link with the Zone. It cannot be a null value.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	addZoneContent(zcID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Zone, ZoneContent, zcID, successCallback, failCallback);
+	}
+
+	/**
+	 * Remove a ZoneContent from the Zone: the association is removed both in the object and in database.
+	 * The ZoneContent can only be removed if it exists first in the list of associated ZoneContents, else an exception is thrown.
+	 *
+	 * @method removeZoneContent
+	 * @param {ZoneContent} zcID The ZoneContent to remove from that Zone
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	removeZoneContent(zcID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Zone, ZoneContent, zcID, successCallback, failCallback);
 	}
 
 
