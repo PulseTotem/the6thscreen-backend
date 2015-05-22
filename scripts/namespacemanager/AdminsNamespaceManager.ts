@@ -109,6 +109,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveSourcesFromServiceId', function(serviceIdDescription) { self.sendSourcesFromServiceId(serviceIdDescription); });
 		this.addListenerToSocket('RetrieveRenderersFromSourceId', function(sourceIdDescription) { self.sendRenderersFromSourceId(sourceIdDescription); });
 		this.addListenerToSocket('RetrieveCallTypesFromZoneId', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription); });
+		this.addListenerToSocket('RetrieveCallTypesFromZoneIdComplete', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription, true); });
 
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
@@ -511,8 +512,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	 * Send the result on the channel "CallTypesDescriptionFromZone"
 	 *
 	 * @param zoneIdDescription
+	 * @param {boolean} complete - To specify if we want complete description for Zone
 	 */
-	sendCallTypesFromZoneId(zoneIdDescription : any) {
+	sendCallTypesFromZoneId(zoneIdDescription : any, complete : boolean = false) {
 		// zoneIdDescription : { "zoneId": number }
 		var self = this;
 
@@ -525,10 +527,15 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 		var successRead = function (zone : Zone) {
 
-			var successLoadCallTypes : Function = function () {
+			var successLoadCallTypes : Function = function (completeDesc) {
 				var callTypes : Array<CallType> = zone.callTypes();
 
-				var data : any = zone.toJSONObject();
+				var data : any = null;
+				if(complete) {
+					data = completeDesc;
+				} else {
+					data = zone.toJSONObject();
+				}
 				data.services = [];
 
 				var sources : Array<Source> = new Array<Source>();
@@ -610,7 +617,12 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 			};
 
-			zone.loadCallTypes(successLoadCallTypes, fail);
+			if(complete) {
+				zone.toCompleteJSONObject(successLoadCallTypes, fail);
+			} else {
+				zone.loadCallTypes(successLoadCallTypes, fail);
+			}
+
 		};
 
 		Zone.read(zoneId, successRead, fail);
