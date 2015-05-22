@@ -43,6 +43,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveServiceDescriptionOnlyId', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Service, "serviceId", description, "ServiceDescription", true); });
 	    this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Zone, "zoneId", description, "ZoneDescription"); });
 		this.addListenerToSocket('RetrieveZoneDescriptionOnlyId', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Zone, "zoneId", description, "ZoneDescription", true); });
+		this.addListenerToSocket('RetrieveZoneContentDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(ZoneContent, "zoneContentId", description, "ZoneContentDescription"); });
 		this.addListenerToSocket('RetrieveOAuthKeyDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(OAuthKey, "oauthKeyId", description, "OAuthKeyDescription_" + description.oauthKeyId); });
 		this.addListenerToSocket('RetrieveCallDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Call, "callId", description, "CallDescription"); });
 		this.addListenerToSocket('RetrieveRendererDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Renderer, "rendererId", description, "RendererDescription"); });
@@ -110,6 +111,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveRenderersFromSourceId', function(sourceIdDescription) { self.sendRenderersFromSourceId(sourceIdDescription); });
 		this.addListenerToSocket('RetrieveCallTypesFromZoneId', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription); });
 		this.addListenerToSocket('RetrieveCallTypesFromZoneIdComplete', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription, true); });
+		this.addListenerToSocket('RetrieveCompleteRelativeTimeline', function(timelineIdDescription) { self.sendCompleteRelativeTimeline(timelineIdDescription); });
 
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
@@ -629,4 +631,60 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage sendCallTypesFromZoneId //////////////////////
+
+////////////////////// Begin: Manage sendCallTypesFromZoneId //////////////////////
+
+	/**
+	 * Retrieve a complete RelativeTimeline description.
+	 * Send the result on the channel "CompleteRelativeTimelineDescription"
+	 *
+	 * @param timelineIdDescription
+	 * @param {boolean} complete - To specify if we want complete description for Zone
+	 */
+	sendCompleteRelativeTimeline(timelineIdDescription : any, complete : boolean = false) {
+		// timelineIdDescription : { "timelineId": number }
+		var self = this;
+
+		var timelineId = timelineIdDescription.timelineId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("CompleteRelativeTimelineDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendCompleteRelativeTimeline failed ");
+		};
+
+		var successRead = function (relTimeline : RelativeTimeline) {
+			var timelineJSON = relTimeline.toJSONObject();
+
+			var successLoadAssociations = function() {
+				timelineJSON["relativeEvents"] = [];
+
+				relTimeline.relativeEvents().forEach(function(relEvent : RelativeEvent) {
+					var relEventJSON = relEvent.toJSONObject();
+
+					var successEventLoadAssociations = function() {
+						var successCallComplete = function(callComplete) {
+							relEventJSON["call"] = callComplete;
+							timelineJSON["relativeEvents"].push(relEventJSON);
+
+							if(timelineJSON["relativeEvents"].length == relTimeline.relativeEvents().length) {
+								self.socket.emit("CompleteRelativeTimelineDescription", self.formatResponse(true, timelineJSON));
+							}
+						};
+
+						relEvent.call().toCompleteJSONObject(successCallComplete, fail);
+					};
+
+					relEvent.loadAssociations(successEventLoadAssociations, fail);
+				});
+			};
+
+			relTimeline.loadAssociations(successLoadAssociations, fail);
+
+		};
+
+		RelativeTimeline.read(timelineId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendCallTypesFromZoneId //////////////////////
+
 }
