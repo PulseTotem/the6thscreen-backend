@@ -112,6 +112,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveCallTypesFromZoneId', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription); });
 		this.addListenerToSocket('RetrieveCallTypesFromZoneIdComplete', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription, true); });
 		this.addListenerToSocket('RetrieveCompleteRelativeTimeline', function(timelineIdDescription) { self.sendCompleteRelativeTimeline(timelineIdDescription); });
+		this.addListenerToSocket('RetrieveCompleteAbsoluteTimeline', function(timelineIdDescription) { self.sendCompleteAbsoluteTimeline(timelineIdDescription); });
 
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
@@ -632,7 +633,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage sendCallTypesFromZoneId //////////////////////
 
-////////////////////// Begin: Manage sendCallTypesFromZoneId //////////////////////
+////////////////////// Begin: Manage sendCompleteRelativeTimeline //////////////////////
 
 	/**
 	 * Retrieve a complete RelativeTimeline description.
@@ -658,24 +659,29 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 			var successLoadAssociations = function() {
 				timelineJSON["relativeEvents"] = [];
 
-				relTimeline.relativeEvents().forEach(function(relEvent : RelativeEvent) {
-					var relEventJSON = relEvent.toJSONObject();
+				if(relTimeline.relativeEvents().length > 0) {
 
-					var successEventLoadAssociations = function() {
-						var successCallComplete = function(callComplete) {
-							relEventJSON["call"] = callComplete;
-							timelineJSON["relativeEvents"].push(relEventJSON);
+					relTimeline.relativeEvents().forEach(function (relEvent:RelativeEvent) {
+						var relEventJSON = relEvent.toJSONObject();
 
-							if(timelineJSON["relativeEvents"].length == relTimeline.relativeEvents().length) {
-								self.socket.emit("CompleteRelativeTimelineDescription", self.formatResponse(true, timelineJSON));
-							}
+						var successEventLoadAssociations = function () {
+							var successCallComplete = function (callComplete) {
+								relEventJSON["call"] = callComplete;
+								timelineJSON["relativeEvents"].push(relEventJSON);
+
+								if (timelineJSON["relativeEvents"].length == relTimeline.relativeEvents().length) {
+									self.socket.emit("CompleteRelativeTimelineDescription", self.formatResponse(true, timelineJSON));
+								}
+							};
+
+							relEvent.call().toCompleteJSONObject(successCallComplete, fail);
 						};
 
-						relEvent.call().toCompleteJSONObject(successCallComplete, fail);
-					};
-
-					relEvent.loadAssociations(successEventLoadAssociations, fail);
-				});
+						relEvent.loadAssociations(successEventLoadAssociations, fail);
+					});
+				} else {
+					self.socket.emit("CompleteRelativeTimelineDescription", self.formatResponse(true, timelineJSON));
+				}
 			};
 
 			relTimeline.loadAssociations(successLoadAssociations, fail);
@@ -685,6 +691,94 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		RelativeTimeline.read(timelineId, successRead, fail);
 	}
 
-////////////////////// End: Manage sendCallTypesFromZoneId //////////////////////
+////////////////////// End: Manage sendCompleteRelativeTimeline //////////////////////
 
+////////////////////// Begin: Manage sendCompleteAbsoluteTimeline //////////////////////
+
+	/**
+	 * Retrieve a complete AbsoluteTimeline description.
+	 * Send the result on the channel "CompleteAbsoluteTimelineDescription"
+	 *
+	 * @param timelineIdDescription
+	 * @param {boolean} complete - To specify if we want complete description for Zone
+	 */
+	sendCompleteAbsoluteTimeline(timelineIdDescription : any, complete : boolean = false) {
+		// timelineIdDescription : { "timelineId": number }
+		var self = this;
+
+		var timelineId = timelineIdDescription.timelineId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("CompleteAbsoluteTimelineDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendCompleteAbsoluteTimeline failed ");
+		};
+
+		var successRead = function (absTimeline : AbsoluteTimeline) {
+			var timelineJSON = absTimeline.toJSONObject();
+
+			var successLoadAssociations = function() {
+				timelineJSON["absoluteEvents"] = [];
+
+				if(absTimeline.absoluteEvents().length > 0) {
+
+					absTimeline.absoluteEvents().forEach(function (absEvent:AbsoluteEvent) {
+						var absEventJSON = absEvent.toJSONObject();
+
+						var successEventLoadAssociations = function () {
+							absEventJSON["relativeTimeline"] = absEvent.relativeTimeline().toJSONObject();
+
+							var successRelativeTimelineLoadAssociations = function () {
+								absEventJSON["relativeTimeline"]["relativeEvents"] = [];
+
+								if(absEvent.relativeTimeline().relativeEvents().length > 0) {
+
+									absEvent.relativeTimeline().relativeEvents().forEach(function (relEvent:RelativeEvent) {
+										var relEventJSON = relEvent.toJSONObject();
+
+										var successRelEventLoadAssociations = function () {
+											var successCallComplete = function (callComplete) {
+												relEventJSON["call"] = callComplete;
+												absEventJSON["relativeTimeline"]["relativeEvents"].push(relEventJSON);
+
+												if (absEventJSON["relativeTimeline"]["relativeEvents"].length == absEvent.relativeTimeline().relativeEvents().length) {
+													timelineJSON["absoluteEvents"].push(absEventJSON);
+
+													if (timelineJSON["absoluteEvents"].length == absTimeline.absoluteEvents().length) {
+														self.socket.emit("CompleteAbsoluteTimelineDescription", self.formatResponse(true, timelineJSON));
+													}
+												}
+											};
+
+											relEvent.call().toCompleteJSONObject(successCallComplete, fail);
+										};
+
+										relEvent.loadAssociations(successRelEventLoadAssociations, fail);
+									});
+								} else {
+									timelineJSON["absoluteEvents"].push(absEventJSON);
+
+									if (timelineJSON["absoluteEvents"].length == absTimeline.absoluteEvents().length) {
+										self.socket.emit("CompleteAbsoluteTimelineDescription", self.formatResponse(true, timelineJSON));
+									}
+								}
+							};
+
+							absEvent.relativeTimeline().loadAssociations(successRelativeTimelineLoadAssociations, fail);
+						};
+
+						absEvent.loadAssociations(successEventLoadAssociations, fail);
+					});
+				} else {
+					self.socket.emit("CompleteAbsoluteTimelineDescription", self.formatResponse(true, timelineJSON));
+				}
+			};
+
+			absTimeline.loadAssociations(successLoadAssociations, fail);
+
+		};
+
+		AbsoluteTimeline.read(timelineId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendCompleteAbsoluteTimeline //////////////////////
 }
