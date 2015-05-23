@@ -116,9 +116,11 @@ class Source extends ModelItf {
      * @param {string} host - The Source's host.
      * @param {number} port - The Source's port.
      * @param {number} id - The Source's ID.
+	 * @param {string} createdAt - The Source's createdAt.
+	 * @param {string} updatedAt - The Source's updatedAt.
      */
-    constructor(name : string = "", description : string = "", method : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", method : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -419,7 +421,9 @@ class Source extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"method": this.method(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -678,7 +682,7 @@ class Source extends ModelItf {
 	 * @return {Source} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Source {
-		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.id, jsonObject.complete);
+		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

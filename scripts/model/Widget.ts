@@ -37,9 +37,11 @@ class Widget extends ModelItf {
      * @constructor
      * @param {string} name - The Widget's name.
      * @param {number} id - The Widget's ID.
+	 * @param {string} createdAt - The Widget's createdAt.
+	 * @param {string} updatedAt - The Widget's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
         this.setDescription(description);
@@ -94,7 +96,9 @@ class Widget extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
             "description": this.description(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -197,7 +201,7 @@ class Widget extends ModelItf {
 	 * @return {Widget} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Widget {
-		return new Widget(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new Widget(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

@@ -38,9 +38,11 @@ class Policy extends ModelItf {
      * @param {string} name - The Policy's name.
      * @param {string} description - The Policy's description.
      * @param {number} id - The Policy's ID.
+	 * @param {string} createdAt - The Policy's createdAt.
+	 * @param {string} updatedAt - The Policy's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -95,7 +97,9 @@ class Policy extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": false
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -199,7 +203,7 @@ class Policy extends ModelItf {
 	 * @return {Policy} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Policy {
-		return new Policy(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new Policy(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

@@ -88,9 +88,12 @@ class Service extends ModelItf {
 	 * @param {boolean} oauth - To set if Service needs authentication or not
 	 * @param {string} provider - The OAuthD provider's name
 	 * @param id The DB id of the service
+	 * @param {string} createdAt - The Service's createdAt.
+	 * @param {string} updatedAt - The Service's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", host : string = "", oauth : boolean = false, provider : string = "", logo : string = "", id : number = null, complete : boolean = false) {
-		super(id, complete);
+	constructor(name : string = "", description : string = "", host : string = "", oauth : boolean = false, provider : string = "", logo : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
+
 		this.setName(name);
 		this.setDescription(description);
 		this.setHost(host);
@@ -306,7 +309,9 @@ class Service extends ModelItf {
 			"oauth": this.oauth(),
 			"provider": this.provider(),
 			"logo": this.logo(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -438,7 +443,7 @@ class Service extends ModelItf {
 	 * @return {Service} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Service {
-		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.oauth, jsonObject.provider, jsonObject.logo, jsonObject.id, jsonObject.complete);
+		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.oauth, jsonObject.provider, jsonObject.logo, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

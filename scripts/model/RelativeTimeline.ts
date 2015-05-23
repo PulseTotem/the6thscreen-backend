@@ -97,9 +97,11 @@ class RelativeTimeline extends ModelItf {
      * @constructor
      * @param {string} name - The RelativeTimeline's name.
      * @param {number} id - The RelativeTimeline's ID.
+	 * @param {string} createdAt - The RelativeTimeline's createdAt.
+	 * @param {string} updatedAt - The RelativeTimeline's updatedAt.
      */
-    constructor(name : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 
@@ -365,7 +367,9 @@ class RelativeTimeline extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -616,7 +620,7 @@ class RelativeTimeline extends ModelItf {
 	 * @return {RelativeTimeline} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : RelativeTimeline {
-		return new RelativeTimeline(jsonObject.name, jsonObject.id, jsonObject.complete);
+		return new RelativeTimeline(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

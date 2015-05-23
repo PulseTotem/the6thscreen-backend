@@ -38,9 +38,11 @@ class TimelineRunner extends ModelItf {
      * @param {string} name - The TimelineRunner's name.
      * @param {string} description - The TimelineRunner's description.
      * @param {number} id - The TimelineRunner's ID.
+	 * @param {string} createdAt - The TimelineRunner's createdAt.
+	 * @param {string} updatedAt - The TimelineRunner's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -95,7 +97,9 @@ class TimelineRunner extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": false
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -199,7 +203,7 @@ class TimelineRunner extends ModelItf {
 	 * @return {TimelineRunner} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : TimelineRunner {
-		return new TimelineRunner(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new TimelineRunner(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

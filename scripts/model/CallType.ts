@@ -122,9 +122,11 @@ class CallType extends ModelItf {
      * @param {string} name - The CallType's name.
      * @param {string} description - The CallType's description.
      * @param {number} id - The CallType's ID.
+	 * @param {string} createdAt - The CallType's createdAt.
+	 * @param {string} updatedAt - The CallType's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
@@ -454,7 +456,9 @@ class CallType extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -721,7 +725,7 @@ class CallType extends ModelItf {
 	 * @return {CallType} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : CallType {
-		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

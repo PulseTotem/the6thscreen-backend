@@ -38,9 +38,11 @@ class UserTrigger extends ModelItf {
      * @param {string} name - The UserTrigger's name.
      * @param {string} description - The UserTrigger's description.
      * @param {number} id - The UserTrigger's ID.
+	 * @param {string} createdAt - The UserTrigger's createdAt.
+	 * @param {string} updatedAt - The UserTrigger's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -95,7 +97,9 @@ class UserTrigger extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": false
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -199,7 +203,7 @@ class UserTrigger extends ModelItf {
 	 * @return {UserTrigger} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : UserTrigger {
-		return new UserTrigger(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new UserTrigger(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

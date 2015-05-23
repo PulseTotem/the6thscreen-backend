@@ -72,9 +72,11 @@ class Profil extends ModelItf {
      * @param {string} name - The Profil's name.
      * @param {string} description - The Profil's description.
      * @param {number} id - The Profil's ID.
+	 * @param {string} createdAt - The Profil's createdAt.
+	 * @param {string} updatedAt - The Profil's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
         this.setDescription(description);
@@ -263,7 +265,9 @@ class Profil extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -415,7 +419,7 @@ class Profil extends ModelItf {
      * @return {Profil} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Profil {
-	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
 
     /**

@@ -97,9 +97,11 @@ class SDI extends ModelItf {
      * @param {string} description - The SDI's description.
      * @param {string} allowedHost - The SDI's allowedHost.
      * @param {number} id - The SDI's ID.
+	 * @param {string} createdAt - The SDI's createdAt.
+	 * @param {string} updatedAt - The SDI's updatedAt.
      */
-    constructor(name : string = "", description : string = "", allowedHost : string = "*", id : number = null, complete: boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", allowedHost : string = "*", id : number = null, complete: boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -349,7 +351,9 @@ class SDI extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"allowedHost": this.allowedHost(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -556,7 +560,7 @@ class SDI extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : SDI {
-		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id, jsonObject.complete);
+		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

@@ -81,9 +81,11 @@ class Call extends ModelItf {
      * @constructor
      * @param {string} name - The Call's name.
      * @param {number} id - The Call's ID.
+	 * @param {string} createdAt - The Call's createdAt.
+	 * @param {string} updatedAt - The Call's updatedAt.
      */
-    constructor(name : string = "", id : number = null, complete : boolean = false) {
-        super(id,complete);
+    constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 
@@ -328,7 +330,9 @@ class Call extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -530,7 +534,7 @@ class Call extends ModelItf {
      * @return {Call} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Call {
-	    return new Call(jsonObject.name, jsonObject.id, jsonObject.complete);
+	    return new Call(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
 
     /**

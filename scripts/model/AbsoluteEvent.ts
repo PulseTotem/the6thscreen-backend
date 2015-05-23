@@ -61,9 +61,11 @@ class AbsoluteEvent extends ModelItf {
      * @constructor
      * @param {string} name - The AbsoluteEvent's name.
      * @param {number} id - The AbsoluteEvent's ID.
+	 * @param {string} createdAt - The AbsoluteEvent's createdAt.
+	 * @param {string} updatedAt - The AbsoluteEvent's updatedAt.
      */
-    constructor(name : string = "", begin : Date = new Date(), duration : number = 0, id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", begin : Date = new Date(), duration : number = 0, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
         this.setBegin(begin);
@@ -223,7 +225,9 @@ class AbsoluteEvent extends ModelItf {
 			"name": this.name(),
             "begin": this.begin(),
             "duration": this.duration(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -396,7 +400,7 @@ class AbsoluteEvent extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : AbsoluteEvent {
-		return new AbsoluteEvent(jsonObject.name, jsonObject.begin, jsonObject.duration, jsonObject.id, jsonObject.complete);
+		return new AbsoluteEvent(jsonObject.name, jsonObject.begin, jsonObject.duration, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

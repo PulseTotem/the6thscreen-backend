@@ -122,9 +122,11 @@ class Zone extends ModelItf {
      * @param {string} description - The Zone's description.
      * @param {string} position - The Zone's position.
      * @param {number} id - The Zone's ID.
+	 * @param {string} createdAt - The Zone's createdAt.
+	 * @param {string} updatedAt - The Zone's updatedAt.
      */
-    constructor(name : string = "", description : string = "", width : number = 0, height : number = 0, positionFromTop : number = 0, positionFromLeft : number = 0, id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", width : number = 0, height : number = 0, positionFromTop : number = 0, positionFromLeft : number = 0, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -443,7 +445,9 @@ class Zone extends ModelItf {
 			"height": this.height(),
 			"positionFromTop": this.positionFromTop(),
 			"positionFromLeft": this.positionFromLeft(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -676,7 +680,7 @@ class Zone extends ModelItf {
 	 * @return {Zone} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Zone {
-		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id, jsonObject.complete);
+		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

@@ -61,9 +61,11 @@ class RelativeEvent extends ModelItf {
      * @constructor
      * @param {string} name - The RelativeEvent's name.
      * @param {number} id - The RelativeEvent's ID.
+	 * @param {string} createdAt - The RelativeEvent's createdAt.
+	 * @param {string} updatedAt - The RelativeEvent's updatedAt.
      */
-    constructor(name : string = "", position : number = 0, duration : number = 0, id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", position : number = 0, duration : number = 0, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
         this.setPosition(position);
@@ -224,7 +226,9 @@ class RelativeEvent extends ModelItf {
 			"name": this.name(),
             "position": this.position(),
             "duration": this.duration(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -397,7 +401,7 @@ class RelativeEvent extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : RelativeEvent {
-		return new RelativeEvent(jsonObject.name, jsonObject.position, jsonObject.duration, jsonObject.id, jsonObject.complete);
+		return new RelativeEvent(jsonObject.name, jsonObject.position, jsonObject.duration, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

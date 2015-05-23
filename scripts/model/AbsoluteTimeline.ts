@@ -46,9 +46,11 @@ class AbsoluteTimeline extends ModelItf {
      * @constructor
      * @param {string} name - The AbsoluteTimeline's name.
      * @param {number} id - The AbsoluteTimeline's ID.
+	 * @param {string} createdAt - The AbsoluteTimeline's createdAt.
+	 * @param {string} updatedAt - The AbsoluteTimeline's updatedAt.
      */
-    constructor(name : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 
@@ -167,7 +169,9 @@ class AbsoluteTimeline extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -338,7 +342,7 @@ class AbsoluteTimeline extends ModelItf {
 	 * @return {AbsoluteTimeline} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : AbsoluteTimeline {
-		return new AbsoluteTimeline(jsonObject.name, jsonObject.id, jsonObject.complete);
+		return new AbsoluteTimeline(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

@@ -109,9 +109,11 @@ class User extends ModelItf {
      * @constructor
      * @param {string} username - The User's username.
      * @param {number} id - The User's ID.
+	 * @param {string} createdAt - The User's createdAt.
+	 * @param {string} updatedAt - The User's updatedAt.
      */
-    constructor(username : string = "", email : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(username : string = "", email : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setUsername(username);
         this.setEmail(email);
@@ -397,7 +399,9 @@ class User extends ModelItf {
             "email": this.email(),
             "token": this.token(),
             "lastIp": this.lastIp(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -739,7 +743,7 @@ class User extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : User {
-		var user = new User(jsonObject.username, jsonObject.email, jsonObject.id, jsonObject.complete);
+		var user = new User(jsonObject.username, jsonObject.email, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 
         if(!!jsonObject.token) {
             user.setToken(jsonObject.token);

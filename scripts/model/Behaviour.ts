@@ -38,9 +38,11 @@ class Behaviour extends ModelItf {
 	 * @param {string} name - The Behaviour's name.
 	 * @param {string} description - The Behaviour's description.
 	 * @param {number} id - The Behaviour's ID.
+	 * @param {string} createdAt - The Behaviour's createdAt.
+	 * @param {string} updatedAt - The Behaviour's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-		super(id,complete);
+	constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
@@ -107,7 +109,9 @@ class Behaviour extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -195,7 +199,7 @@ class Behaviour extends ModelItf {
 	 * @return {Behaviour} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Behaviour {
-		return new Behaviour(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new Behaviour(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**
