@@ -89,7 +89,9 @@ describe('OAuthKey', function() {
                 "description": "blabla",
                 "value": "heyhey",
                 "id": 52,
-                "complete": true
+                "complete": true,
+				"createdAt":null,
+				"updatedAt":null
             };
             var json = c.toJSONObject();
 

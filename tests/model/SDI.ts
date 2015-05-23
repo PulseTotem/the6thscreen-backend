@@ -131,7 +131,9 @@ describe('SDI', function() {
 				"description": "blabla",
 				"allowedHost": "tata",
 				"id": 52,
-				"complete": true
+				"complete": true,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 

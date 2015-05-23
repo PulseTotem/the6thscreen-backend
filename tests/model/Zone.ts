@@ -246,7 +246,9 @@ describe('Zone', function() {
 				"height": 20,
 				"positionFromTop": 30,
 				"positionFromLeft": 40,
-				"complete": true
+				"complete": true,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 

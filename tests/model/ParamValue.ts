@@ -199,7 +199,9 @@ describe('ParamValue', function() {
 			var expected = {
 				"value": "toto",
 				"id": 52,
-				"complete": false
+				"complete": false,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 

@@ -82,7 +82,9 @@ describe('CallType', function(){
 				"name": "toto",
 				"description": "blabla",
 				"id": 52,
-				"complete": false
+				"complete": false,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 

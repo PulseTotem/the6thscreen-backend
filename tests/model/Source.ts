@@ -89,7 +89,9 @@ describe('Source', function() {
 				"name": "machin",
 				"description": "desc",
 				"method": "method",
-				"complete": true
+				"complete": true,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 

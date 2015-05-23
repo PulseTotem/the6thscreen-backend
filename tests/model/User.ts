@@ -66,7 +66,9 @@ describe('User', function() {
 				"email": "bla",
 				"token": null,
 				"lastIp": null,
-				"complete": false
+				"complete": false,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 
