@@ -67,6 +67,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
 		this.addListenerToSocket('CreateZone', function(data) { self.createObject(Zone, data, "AnswerCreateZone"); });
 		this.addListenerToSocket('CreateCallType', function(data) { self.createObject(CallType, data, "AnswerCreateCallType"); });
+		this.addListenerToSocket('CreateCall', function(data) { self.createObject(Call, data, "AnswerCreateCall"); });
+		this.addListenerToSocket('CreateRelativeEvent', function(data) { self.createObject(RelativeEvent, data, "AnswerCreateRelativeEvent"); });
 
 	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
 
@@ -81,6 +83,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateSDI', function(data) { self.updateObjectAttribute(SDI, data, "AnswerUpdateSDI"); });
 		this.addListenerToSocket('UpdateZone', function(data) { self.updateObjectAttribute(Zone, data, "AnswerUpdateZone"); });
 		this.addListenerToSocket('UpdateCallType', function(data) { self.updateObjectAttribute(CallType, data, "AnswerUpdateCallType"); });
+		this.addListenerToSocket('UpdateCall', function(data) { self.updateObjectAttribute(Call, data, "AnswerUpdateCall"); });
+		this.addListenerToSocket('UpdateRelativeEvent', function(data) { self.updateObjectAttribute(RelativeEvent, data, "AnswerUpdateRelativeEvent"); });
+		this.addListenerToSocket('UpdateRelativeTimeline', function(data) { self.updateObjectAttribute(RelativeTimeline, data, "AnswerUpdateRelativeTimeline"); });
 
 	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
 
@@ -670,6 +675,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 								timelineJSON["relativeEvents"].push(relEventJSON);
 
 								if (timelineJSON["relativeEvents"].length == relTimeline.relativeEvents().length) {
+									var sortedRelativeEvents = self._sortRelativeEvents(timelineJSON["relativeEvents"]);
+									timelineJSON["relativeEvents"] = sortedRelativeEvents;
+
 									self.socket.emit("CompleteRelativeTimelineDescription", self.formatResponse(true, timelineJSON));
 								}
 							};
@@ -689,6 +697,29 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		};
 
 		RelativeTimeline.read(timelineId, successRead, fail);
+	}
+
+	/**
+	 * Sort RelativeTimeline's events.
+	 *
+	 * @method _sortRelativeEvents
+	 * @private
+	 * @param {Array<RelativeEvent_JSON>} relativeEvents - RelativeEvents to sort
+	 */
+	private _sortRelativeEvents(relativeEvents : Array<any>) {
+		var map = relativeEvents.map(function(e, i) {
+			return { index: i, value: e.position };
+		});
+
+		map.sort(function(a, b) {
+			return a.value - b.value;
+		});
+
+		var result = map.map(function(e){
+			return relativeEvents[e.index];
+		});
+
+		return result;
 	}
 
 ////////////////////// End: Manage sendCompleteRelativeTimeline //////////////////////
