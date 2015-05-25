@@ -117,6 +117,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveCallTypesFromZoneId', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteRelativeTimeline', function(timelineIdDescription) { self.sendCompleteRelativeTimeline(timelineIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteAbsoluteTimeline', function(timelineIdDescription) { self.sendCompleteAbsoluteTimeline(timelineIdDescription); });
+		this.addListenerToSocket('RetrieveCompleteCallType', function(callTypeIdDescription) { self.sendCompleteCallType(callTypeIdDescription); });
 
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
@@ -636,10 +637,10 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	 * Retrieve a complete RelativeTimeline description.
 	 * Send the result on the channel "CompleteRelativeTimelineDescription"
 	 *
-	 * @param timelineIdDescription
-	 * @param {boolean} complete - To specify if we want complete description for Zone
+	 * @method sendCompleteRelativeTimeline
+	 * @param {JSONObject} timelineIdDescription - Timeline description to retrieve
 	 */
-	sendCompleteRelativeTimeline(timelineIdDescription : any, complete : boolean = false) {
+	sendCompleteRelativeTimeline(timelineIdDescription : any) {
 		// timelineIdDescription : { "timelineId": number }
 		var self = this;
 
@@ -722,10 +723,10 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	 * Retrieve a complete AbsoluteTimeline description.
 	 * Send the result on the channel "CompleteAbsoluteTimelineDescription"
 	 *
-	 * @param timelineIdDescription
-	 * @param {boolean} complete - To specify if we want complete description for Zone
+	 * @method sendCompleteAbsoluteTimeline
+	 * @param {JSONObject} timelineIdDescription - Timeline description to retrieve
 	 */
-	sendCompleteAbsoluteTimeline(timelineIdDescription : any, complete : boolean = false) {
+	sendCompleteAbsoluteTimeline(timelineIdDescription : any) {
 		// timelineIdDescription : { "timelineId": number }
 		var self = this;
 
@@ -804,4 +805,96 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage sendCompleteAbsoluteTimeline //////////////////////
+
+////////////////// Begin: Manage sendCompleteCallType //////////////////////
+
+	/**
+	 * Retrieve a complete CallType description.
+	 * Send the result on the channel "CompleteCallTypeDescription"
+	 *
+	 * @method sendCompleteCallType
+	 * @param {JSONObject} callTypeIdDescription - Represents CallType to retrieve
+	 */
+	sendCompleteCallType(callTypeIdDescription : any) {
+		// callTypeIdDescription : { "callTypeId": number }
+		var self = this;
+
+		var callTypeId = callTypeIdDescription.callTypeId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("CompleteCallTypeDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendCompleteCallType failed ");
+		};
+
+		var successRead = function (callType : CallType) {
+			var cTJSON = callType.toJSONObject();
+
+			var successLoadAssociations = function() {
+				cTJSON["source"] = callType.source().toJSONObject();
+
+				var successSourceLoadAssociations = function() {
+					cTJSON["source"]["paramTypes"] = [];
+					cTJSON["source"]["paramValues"] = [];
+
+					if(callType.source().paramTypes().length == 0 && callType.source().paramValues().length == 0) {
+						self.socket.emit("CompleteCallTypeDescription", self.formatResponse(true, cTJSON));
+					} else {
+						callType.source().paramTypes().forEach(function (pT) {
+							var pTJSON = pT.toJSONObject();
+
+							var successParamTypeLoadAssociations = function () {
+								if(pT.constraint() != null) {
+									pTJSON["constraint"] = pT.constraint().toJSONObject();
+
+									var successConstraintComplete = function (constraintDesc) {
+										pTJSON["constraint"] = constraintDesc;
+
+										cTJSON["source"]["paramTypes"].push(pTJSON);
+
+										if (cTJSON["source"]["paramTypes"].length == callType.source().paramTypes().length && cTJSON["source"]["paramValues"].length == callType.source().paramValues().length) {
+											self.socket.emit("CompleteCallTypeDescription", self.formatResponse(true, cTJSON));
+										}
+									};
+
+									pT.constraint().toCompleteJSONObject(successConstraintComplete, fail);
+								} else {
+									cTJSON["source"]["paramTypes"].push(pTJSON);
+
+									if (cTJSON["source"]["paramTypes"].length == callType.source().paramTypes().length && cTJSON["source"]["paramValues"].length == callType.source().paramValues().length) {
+										self.socket.emit("CompleteCallTypeDescription", self.formatResponse(true, cTJSON));
+									}
+								}
+							};
+
+
+							pT.loadAssociations(successParamTypeLoadAssociations, fail);
+						});
+
+
+						callType.source().paramValues().forEach(function (pV) {
+
+							var successParamValueComplete = function (pVDesc) {
+								cTJSON["source"]["paramValues"].push(pVDesc);
+
+								if (cTJSON["source"]["paramValues"].length == callType.source().paramValues().length && cTJSON["source"]["paramTypes"].length == callType.source().paramTypes().length) {
+									self.socket.emit("CompleteCallTypeDescription", self.formatResponse(true, cTJSON));
+								}
+							};
+
+
+							pV.toCompleteJSONObject(successParamValueComplete, fail);
+						});
+					}
+				}
+
+				callType.source().loadAssociations(successSourceLoadAssociations, fail);
+			};
+
+			callType.loadAssociations(successLoadAssociations, fail);
+		};
+
+		CallType.read(callTypeId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendCompleteCallType //////////////////////
 }
