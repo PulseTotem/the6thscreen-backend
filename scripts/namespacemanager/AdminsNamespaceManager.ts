@@ -115,7 +115,6 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveSourcesFromServiceId', function(serviceIdDescription) { self.sendSourcesFromServiceId(serviceIdDescription); });
 		this.addListenerToSocket('RetrieveRenderersFromSourceId', function(sourceIdDescription) { self.sendRenderersFromSourceId(sourceIdDescription); });
 		this.addListenerToSocket('RetrieveCallTypesFromZoneId', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription); });
-		this.addListenerToSocket('RetrieveCallTypesFromZoneIdComplete', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription, true); });
 		this.addListenerToSocket('RetrieveCompleteRelativeTimeline', function(timelineIdDescription) { self.sendCompleteRelativeTimeline(timelineIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteAbsoluteTimeline', function(timelineIdDescription) { self.sendCompleteAbsoluteTimeline(timelineIdDescription); });
 
@@ -520,9 +519,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	 * Send the result on the channel "CallTypesDescriptionFromZone"
 	 *
 	 * @param zoneIdDescription
-	 * @param {boolean} complete - To specify if we want complete description for Zone
 	 */
-	sendCallTypesFromZoneId(zoneIdDescription : any, complete : boolean = false) {
+	sendCallTypesFromZoneId(zoneIdDescription : any) {
 		// zoneIdDescription : { "zoneId": number }
 		var self = this;
 
@@ -539,11 +537,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				var callTypes : Array<CallType> = zone.callTypes();
 
 				var data : any = null;
-				if(complete) {
-					data = completeDesc;
-				} else {
-					data = zone.toJSONObject();
-				}
+				data = completeDesc;
+
 				data.services = [];
 
 				var sources : Array<Source> = new Array<Source>();
@@ -602,6 +597,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 						if (rSource === undefined) {
 							var successReadSource : Function = function (source : Source) {
+
 								var successLoadService : Function = function () {
 									sources.push(source);
 									dataCT.source.service = source.service().toJSONObject();
@@ -615,7 +611,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 							Source.read(sourceId, successReadSource, fail);
 
 						} else {
-							dataCT.source = rSource;
+							dataCT.source.service = rSource.service().toJSONObject();
 							saveCallType(dataCT);
 						}
 					};
@@ -625,11 +621,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 			};
 
-			if(complete) {
-				zone.toCompleteJSONObject(successLoadCallTypes, fail);
-			} else {
-				zone.loadCallTypes(successLoadCallTypes, fail);
-			}
+			zone.toCompleteJSONObject(successLoadCallTypes, fail);
 
 		};
 
