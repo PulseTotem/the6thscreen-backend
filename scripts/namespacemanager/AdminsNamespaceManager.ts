@@ -69,6 +69,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateCallType', function(data) { self.createObject(CallType, data, "AnswerCreateCallType"); });
 		this.addListenerToSocket('CreateCall', function(data) { self.createObject(Call, data, "AnswerCreateCall"); });
 		this.addListenerToSocket('CreateRelativeEvent', function(data) { self.createObject(RelativeEvent, data, "AnswerCreateRelativeEvent"); });
+		this.addListenerToSocket('CreateParamValue', function(data) { self.createObject(ParamValue, data, "AnswerCreateParamValue"); });
 
 	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
 
@@ -86,6 +87,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateCall', function(data) { self.updateObjectAttribute(Call, data, "AnswerUpdateCall"); });
 		this.addListenerToSocket('UpdateRelativeEvent', function(data) { self.updateObjectAttribute(RelativeEvent, data, "AnswerUpdateRelativeEvent"); });
 		this.addListenerToSocket('UpdateRelativeTimeline', function(data) { self.updateObjectAttribute(RelativeTimeline, data, "AnswerUpdateRelativeTimeline"); });
+		this.addListenerToSocket('UpdateParamValue', function(data) { self.updateObjectAttribute(ParamValue, data, "AnswerUpdateParamValue"); });
 
 	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
 
@@ -119,6 +121,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveCompleteAbsoluteTimeline', function(timelineIdDescription) { self.sendCompleteAbsoluteTimeline(timelineIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteCallType', function(callTypeIdDescription) { self.sendCompleteCallType(callTypeIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteCall', function(callIdDescription) { self.sendCompleteCall(callIdDescription); });
+		this.addListenerToSocket('CreateEmptyParamValueForParamTypeId', function(paramTypeIdDescription) { self.createEmptyParamValue(paramTypeIdDescription); });
 
 
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
@@ -951,4 +954,40 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage sendCompleteCallType //////////////////////
+
+////////////////// Begin: Manage createEmptyParamValue //////////////////////
+
+	/**
+	 * Create an empty ParamValue and associate it to ParamType in param.
+	 * Send the result on the channel "AnswerCreateEmptyParamValueForParamTypeId"
+	 *
+	 * @method createEmptyParamValue
+	 * @param {JSONObject} paramTypeIdDescription - Represents Call to retrieve
+	 */
+	createEmptyParamValue(paramTypeIdDescription : any) {
+		// paramTypeIdDescription : { "paramTypeId": number }
+		var self = this;
+
+		var paramTypeId = paramTypeIdDescription.paramTypeId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("AnswerCreateEmptyParamValueForParamTypeId", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - createEmptyParamValue failed ");
+		};
+
+		var pV = new ParamValue();
+
+		var successCreateParamValue = function() {
+
+			var successlinkParamType = function() {
+				self.socket.emit("AnswerCreateEmptyParamValueForParamTypeId", self.formatResponse(true, pV.toJSONObject()));
+			}
+
+			pV.linkParamType(paramTypeId, successlinkParamType, fail);
+		}
+
+		pV.create(successCreateParamValue, fail);
+	}
+
+////////////////////// End: Manage createEmptyParamValue //////////////////////
 }
