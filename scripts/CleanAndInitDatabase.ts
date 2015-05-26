@@ -33,10 +33,10 @@ var crypto : any = require('crypto');
  */
 class CleanAndInitDatabase {
 
-    static toCleanSources : Array<any> = [Source, Service, ParamType, InfoType, TypeParamType, ConstraintParamType];
+    static toCleanSources : Array<any> = [Source, Service, ParamType, ParamValue, InfoType, TypeParamType, ConstraintParamType];
     static toCleanUsers : Array<any> = [User];
     static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, Policy, TimelineRunner, SystemTrigger, UserTrigger];
-    static toCleanProfils : Array<any> = [ParamValue, Call, Profil, ZoneContent, RelativeTimeline, RelativeEvent];
+    static toCleanProfils : Array<any> = [Call, Profil, ZoneContent, RelativeTimeline, RelativeEvent];
 
     /**
      * Method to clean and fulfill database with some data.
@@ -491,7 +491,37 @@ class CleanAndInitDatabase {
 
             var successConstraintAssociation = function() {
                 Logger.info("Constraint associated to ParamType successfully.");
-	            paramType.checkCompleteness(successCompleteness, fail);
+
+
+				if(typeof(paramTypeDesc.paramValue) != "undefined" && typeof(paramTypeDesc.paramValue.value) != "undefined" && paramTypeDesc.paramValue.value != "") {
+					var paramValue = new ParamValue(paramTypeDesc.paramValue.value);
+
+					var successParamValueCreated = function() {
+						var successParamTypeAssociation = function() {
+							Logger.info("ParamType associated to ParamValue successfully.");
+
+							var successParamValueCompleteness = function() {
+								Logger.info("Check paramValue completeness successfully.");
+
+								var successParamValueAssociation = function() {
+									Logger.info("ParamValue associated to ParamType as DefaultValue successfully.");
+
+									paramType.checkCompleteness(successCompleteness, fail);
+								}
+
+								paramType.linkDefaultValue(paramValue.getId(), successParamValueAssociation, fail);
+							};
+
+							paramValue.checkCompleteness(successParamValueCompleteness, fail);
+						};
+
+						paramValue.linkParamType(paramType.getId(), successParamTypeAssociation, fail);
+					};
+
+					paramValue.create(successParamValueCreated, fail);
+				} else {
+					paramType.checkCompleteness(successCompleteness, fail);
+				}
             }
 
             var successConstraintRetrieve = function(newConstraint) {

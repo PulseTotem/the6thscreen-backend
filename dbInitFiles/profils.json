@@ -44,6 +44,12 @@
                         "paramType": {
                           "name": "Limit"
                         }
+                      },
+                      {
+                        "value": "10",
+                        "paramType": {
+                          "name": "InfoDuration"
+                        }
                       }
                     ]
                   }
@@ -68,6 +74,12 @@
                         "value": "3",
                         "paramType": {
                           "name": "Limit"
+                        }
+                      },
+                      {
+                        "value": "10",
+                        "paramType": {
+                          "name": "InfoDuration"
                         }
                       }
                     ]
@@ -104,9 +116,15 @@
                     },
                     "paramValues" : [
                       {
-                        "value" : "10",
-                        "paramType" : {
-                          "name" : "Limit"
+                        "value": "10",
+                        "paramType": {
+                          "name": "Limit"
+                        }
+                      },
+                      {
+                        "value": "10",
+                        "paramType": {
+                          "name": "InfoDuration"
                         }
                       }
                     ]
@@ -158,9 +176,15 @@
                     }
                   },
                   {
-                    "value" : "2",
-                    "paramType" : {
-                      "name" : "Limit"
+                    "value": "2",
+                    "paramType": {
+                      "name": "Limit"
+                    }
+                  },
+                  {
+                    "value": "10",
+                    "paramType": {
+                      "name": "InfoDuration"
                     }
                   }
                 ]
@@ -187,6 +211,12 @@
                     "paramType": {
                       "name": "Limit"
                     }
+                  },
+                  {
+                    "value": "10",
+                    "paramType": {
+                      "name": "InfoDuration"
+                    }
                   }
                 ]
               }
@@ -202,9 +232,15 @@
                 },
                 "paramValues" : [
                   {
-                    "value" : "1",
-                    "paramType" : {
-                      "name" : "Limit"
+                    "value": "1",
+                    "paramType": {
+                      "name": "Limit"
+                    }
+                  },
+                  {
+                    "value": "10",
+                    "paramType": {
+                      "name": "InfoDuration"
                     }
                   }
                 ]
@@ -247,9 +283,15 @@
                     }
                   },
                   {
-                    "value" : "2",
-                    "paramType" : {
-                      "name" : "Limit"
+                    "value": "2",
+                    "paramType": {
+                      "name": "Limit"
+                    }
+                  },
+                  {
+                    "value": "10",
+                    "paramType": {
+                      "name": "InfoDuration"
                     }
                   }
                 ]
@@ -266,9 +308,15 @@
                 },
                 "paramValues" : [
                   {
-                    "value" : "1",
-                    "paramType" : {
-                      "name" : "Limit"
+                    "value": "1",
+                    "paramType": {
+                      "name": "Limit"
+                    }
+                  },
+                  {
+                    "value": "10",
+                    "paramType": {
+                      "name": "InfoDuration"
                     }
                   }
                 ]
@@ -285,9 +333,15 @@
                 },
                 "paramValues" : [
                   {
-                    "value" : "1",
-                    "paramType" : {
-                      "name" : "Limit"
+                    "value": "1",
+                    "paramType": {
+                      "name": "Limit"
+                    }
+                  },
+                  {
+                    "value": "10",
+                    "paramType": {
+                      "name": "InfoDuration"
                     }
                   },
                   {
@@ -310,9 +364,15 @@
                 },
                 "paramValues" : [
                   {
-                    "value" : "1",
-                    "paramType" : {
-                      "name" : "Limit"
+                    "value": "1",
+                    "paramType": {
+                      "name": "Limit"
+                    }
+                  },
+                  {
+                    "value": "10",
+                    "paramType": {
+                      "name": "InfoDuration"
                     }
                   },
                   {
