@@ -12,6 +12,9 @@
             },
             {
                 "name" : "Limit"
+            },
+            {
+              "name" : "InfoDuration"
             }
         ],
         "infoType" : {
@@ -27,7 +30,10 @@
         "method" : "RetrieveDiscounts",
         "paramTypes" : [
             {
-                "name" : "Limit"
+              "name" : "Limit"
+            },
+            {
+              "name" : "InfoDuration"
             }
         ],
         "infoType" : {
@@ -47,6 +53,9 @@
         },
         {
           "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
         }
       ],
       "infoType" : {
@@ -66,6 +75,9 @@
         },
         {
           "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
         }
       ],
       "infoType" : {
@@ -80,9 +92,12 @@
       },
       "method" : "PicturesFromLoggedUser",
       "paramTypes" : [
-        {
-          "name" : "Limit"
-        }
+          {
+            "name" : "Limit"
+          },
+          {
+            "name" : "InfoDuration"
+          }
       ],
       "infoType" : {
         "name" : "PictureAlbum"
@@ -98,6 +113,9 @@
       "paramTypes" : [
         {
           "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
         },
         {
           "name" : "PageName"
@@ -117,6 +135,9 @@
       "paramTypes" : [
         {
           "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
         },
         {
           "name" : "AlbumID"
@@ -139,6 +160,9 @@
         },
         {
           "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
         }
       ],
       "infoType" : {
@@ -155,6 +179,9 @@
       "paramTypes" : [
         {
           "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
         }
       ],
       "infoType" : {
@@ -171,6 +198,9 @@
       "paramTypes" : [
         {
           "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
         }
       ],
       "infoType" : {
