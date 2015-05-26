@@ -119,6 +119,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveCompleteAbsoluteTimeline', function(timelineIdDescription) { self.sendCompleteAbsoluteTimeline(timelineIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteCallType', function(callTypeIdDescription) { self.sendCompleteCallType(callTypeIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteCall', function(callIdDescription) { self.sendCompleteCall(callIdDescription); });
+		this.addListenerToSocket('UpdateZonePosition', function(data) { self.updateZonePosition(data); });
 
 
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
@@ -951,4 +952,42 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage sendCompleteCallType //////////////////////
+
+////////////////// Begin: Manage updateZonePosition //////////////////////
+
+	/**
+	 * Update Zone with the new position informations
+	 * Send the result on the channel "CompleteCallDescription"
+	 *
+	 * @method updateZonePosition
+	 * @param {JSONObject} zoneDescription - Represents Zone to update
+	 */
+	updateZonePosition(zoneDescription : any) {
+		var self = this;
+
+		var zoneId = zoneDescription.id;
+
+		var fail : Function = function(error) {
+			self.socket.emit("AnswerZoneUpdate", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - updateZonePosition failed ");
+		};
+
+		var successRead = function (zone : Zone) {
+			zone.setPositionFromLeft(zoneDescription.positionFromLeft);
+			zone.setPositionFromTop(zoneDescription.positionFromTop);
+			zone.setWidth(zoneDescription.width);
+			zone.setHeight(zoneDescription.height);
+
+			var successUpdate = function () {
+				self.socket.emit("AnswerZoneUpdate", zone.toJSONObject());
+			};
+
+			zone.update(successUpdate, fail);
+		};
+
+		Zone.read(zoneId, successRead, fail);
+	}
+
+////////////////////// End: Manage updateZonePosition //////////////////////
+
 }
