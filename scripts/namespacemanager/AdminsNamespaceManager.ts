@@ -118,6 +118,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveCompleteRelativeTimeline', function(timelineIdDescription) { self.sendCompleteRelativeTimeline(timelineIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteAbsoluteTimeline', function(timelineIdDescription) { self.sendCompleteAbsoluteTimeline(timelineIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteCallType', function(callTypeIdDescription) { self.sendCompleteCallType(callTypeIdDescription); });
+		this.addListenerToSocket('RetrieveCompleteCall', function(callIdDescription) { self.sendCompleteCall(callIdDescription); });
+
 
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
@@ -894,6 +896,58 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		};
 
 		CallType.read(callTypeId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendCompleteCallType //////////////////////
+
+////////////////// Begin: Manage sendCompleteCall //////////////////////
+
+	/**
+	 * Retrieve a complete Call description.
+	 * Send the result on the channel "CompleteCallDescription"
+	 *
+	 * @method sendCompleteCall
+	 * @param {JSONObject} callIdDescription - Represents Call to retrieve
+	 */
+	sendCompleteCall(callIdDescription : any) {
+		// callIdDescription : { "callId": number }
+		var self = this;
+
+		var callId = callIdDescription.callId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("CompleteCallDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendCompleteCall failed ");
+		};
+
+		var successRead = function (call : Call) {
+
+			var successCallCompleteDescription = function(callComplete) {
+				var callJSON = callComplete;
+				callJSON["paramValues"] = [];
+
+				if(call.paramValues().length > 0) {
+					call.paramValues().forEach(function (pV:ParamValue) {
+
+						var successParamValueCompleteDescription = function(pVComplete) {
+							callJSON["paramValues"].push(pVComplete);
+
+							if(callJSON["paramValues"].length == call.paramValues().length) {
+								self.socket.emit("CompleteCallDescription", self.formatResponse(true, callJSON));
+							}
+						};
+
+						pV.toCompleteJSONObject(successParamValueCompleteDescription, fail);
+					});
+				} else {
+					self.socket.emit("CompleteCallDescription", self.formatResponse(true, callJSON));
+				}
+			};
+
+			call.toCompleteJSONObject(successCallCompleteDescription, fail);
+		};
+
+		Call.read(callId, successRead, fail);
 	}
 
 ////////////////////// End: Manage sendCompleteCallType //////////////////////
