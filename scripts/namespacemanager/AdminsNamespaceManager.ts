@@ -845,9 +845,13 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 						self.socket.emit("CompleteCallTypeDescription", self.formatResponse(true, cTJSON));
 					} else {
 						callType.source().paramTypes().forEach(function (pT) {
-							var pTJSON = pT.toJSONObject();
 
-							var successParamTypeLoadAssociations = function () {
+
+							var successParamTypeCompleteDesc = function (pTCompleteDesc) {
+								var pTJSON = pTCompleteDesc;
+
+								pTJSON["constraint"] = null;
+
 								if(pT.constraint() != null) {
 									pTJSON["constraint"] = pT.constraint().toJSONObject();
 
@@ -872,9 +876,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 							};
 
 
-							pT.loadAssociations(successParamTypeLoadAssociations, fail);
+							pT.toCompleteJSONObject(successParamTypeCompleteDesc, fail);
 						});
-
 
 						callType.source().paramValues().forEach(function (pV) {
 
@@ -889,6 +892,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 							pV.toCompleteJSONObject(successParamValueComplete, fail);
 						});
+
 					}
 				}
 
@@ -975,18 +979,33 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 			Logger.debug("SocketId: " + self.socket.id + " - createEmptyParamValue failed ");
 		};
 
-		var pV = new ParamValue();
+		var successReadParamType = function(paramType : ParamType) {
 
-		var successCreateParamValue = function() {
+			var successLoadParamTypeAssociations = function() {
+				var pV = new ParamValue();
 
-			var successlinkParamType = function() {
-				self.socket.emit("AnswerCreateEmptyParamValueForParamTypeId", self.formatResponse(true, pV.toJSONObject()));
-			}
+				if(paramType.defaultValue() != null) {
+					pV.setValue(paramType.defaultValue().value());
+				}
 
-			pV.linkParamType(paramTypeId, successlinkParamType, fail);
+				var successCreateParamValue = function() {
+
+					var successlinkParamType = function() {
+						self.socket.emit("AnswerCreateEmptyParamValueForParamTypeId", self.formatResponse(true, pV.toJSONObject()));
+					}
+
+					pV.linkParamType(paramTypeId, successlinkParamType, fail);
+				}
+
+				pV.create(successCreateParamValue, fail);
+			};
+
+			paramType.loadAssociations(successLoadParamTypeAssociations, fail);
 		}
 
-		pV.create(successCreateParamValue, fail);
+		ParamType.read(paramTypeId, successReadParamType, fail);
+
+
 	}
 
 ////////////////////// End: Manage createEmptyParamValue //////////////////////

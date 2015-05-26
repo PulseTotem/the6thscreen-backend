@@ -4,5 +4,8 @@
     },
     {
         "name" : "Entier"
+    },
+    {
+        "name" : "Duration"
     }
 ]

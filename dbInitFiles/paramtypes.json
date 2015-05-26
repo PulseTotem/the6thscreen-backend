@@ -16,11 +16,9 @@
       "name" : "InfoDuration",
       "description" : "Durée d'affichage de chacune des informations",
       "type" : {
-        "name" : "Entier"
+        "name" : "Duration"
       },
-      "constraint" : {
-        "name" : "Positive"
-      },
+      "constraint" : null,
       "paramValue": {
         "value": "10"
       }
