@@ -599,28 +599,40 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				callTypes.forEach( function (callType : CallType) {
 
 					var successLoadAssoCT : Function = function (dataCT) {
-						var sourceId : number = dataCT.source.id;
-
-						var rSource = retrieveSource(sourceId);
-
-						if (rSource === undefined) {
-							var successReadSource : Function = function (source : Source) {
-
-								var successLoadService : Function = function () {
-									sources.push(source);
-									dataCT.source.service = source.service().toJSONObject();
-									saveCallType(dataCT);
-								};
-
-								source.loadService(successLoadService, fail);
+						if (dataCT.source == null) {
+							var ctObject : CallType = CallType.fromJSONObject(dataCT);
+							var successDelete = function () {
+								Logger.debug("CallType deleted because the source is missing: "+JSON.stringify(dataCT));
 							};
 
-
-							Source.read(sourceId, successReadSource, fail);
-
+							var failDelete = function () {
+								Logger.debug("Error during delete of "+JSON.stringify(dataCT));
+							};
+							ctObject.delete(successDelete, failDelete);
 						} else {
-							dataCT.source.service = rSource.service().toJSONObject();
-							saveCallType(dataCT);
+							var sourceId : number = dataCT.source.id;
+
+							var rSource = retrieveSource(sourceId);
+
+							if (rSource === undefined) {
+								var successReadSource : Function = function (source : Source) {
+
+									var successLoadService : Function = function () {
+										sources.push(source);
+										dataCT.source.service = source.service().toJSONObject();
+										saveCallType(dataCT);
+									};
+
+									source.loadService(successLoadService, fail);
+								};
+
+
+								Source.read(sourceId, successReadSource, fail);
+
+							} else {
+								dataCT.source.service = rSource.service().toJSONObject();
+								saveCallType(dataCT);
+							}
 						}
 					};
 
