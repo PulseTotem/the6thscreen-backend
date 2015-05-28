@@ -78,131 +78,14 @@ describe('ThemeZone', function(){
 		it('should specify the object is complete even if it is completely empty', function(done) {
 			var c = new ThemeZone("", "", false, "", "", "", "");
 			var success = function () {
-				assert.equal(i.isComplete(), true, "The ThemeZone is not considered as complete.");
+				assert.equal(c.isComplete(), true, "The ThemeZone is not considered as complete.");
 				done();
 			};
 
 			var fail = function (error) {
 				done(error);
 			};
-			i.checkCompleteness(success, fail);
-		});
-
-		it('should specify the object is complete if a name, an host, a provider and an ID are given in case of oauth', function(done) {
-			var i = new ThemeZone("name", "", "localhost", true, "provider", "", 324);
-			var success = function () {
-				assert.equal(i.isComplete(), true, "The ThemeZone is not considered as complete.");
-				done();
-			};
-
-			var fail = function (error) {
-				done(error);
-			};
-			i.checkCompleteness(success, fail);
-		});
-
-		it('should not specify the object is complete if the name is an empty string', function(done) {
-			var i = new ThemeZone("", "", "localhost", true, "provider", "", 324);
-			var success = function () {
-				assert.equal(i.isComplete(), false, "The themeZone is considered as complete.");
-				done();
-			};
-
-			var fail = function (error) {
-				done(error);
-			};
-			i.checkCompleteness(success, fail);
-		});
-
-		it('should not specify the object is complete if the name is null', function(done) {
-			var i = new ThemeZone(null, "", "localhost", true, "provider", "", 324);
-			var success = function () {
-				assert.equal(i.isComplete(), false, "The themeZone is considered as complete.");
-				done();
-			};
-
-			var fail = function (error) {
-				done(error);
-			};
-			i.checkCompleteness(success, fail);
-		});
-
-		it('should not specify the object is complete if the id is null', function(done) {
-			var i = new ThemeZone("name", "", "localhost", true, "provider", "", null);
-			var success = function () {
-				assert.equal(i.isComplete(), false, "The themeZone is considered as complete.");
-				done();
-			};
-
-			var fail = function (error) {
-				done(error);
-			};
-			i.checkCompleteness(success, fail);
-		});
-
-		it('should not specify the object is complete if the object is empty', function(done) {
-			var i = new ThemeZone();
-			var success = function () {
-				assert.equal(i.isComplete(), false, "The themeZone is considered as complete.");
-				done();
-			};
-
-			var fail = function (error) {
-				done(error);
-			};
-			i.checkCompleteness(success, fail);
-		});
-
-		it('should not specify the object is complete if the host is an empty string', function(done) {
-			var i = new ThemeZone("test", "", "", true, "provider", "", 324);
-			var success = function () {
-				assert.equal(i.isComplete(), false, "The themeZone is considered as complete.");
-				done();
-			};
-
-			var fail = function (error) {
-				done(error);
-			};
-			i.checkCompleteness(success, fail);
-		});
-
-		it('should not specify the object is complete if the host is null', function(done) {
-			var i = new ThemeZone("test", "", null, true, "provider", "", 324);
-			var success = function () {
-				assert.equal(i.isComplete(), false, "The themeZone is considered as complete.");
-				done();
-			};
-
-			var fail = function (error) {
-				done(error);
-			};
-			i.checkCompleteness(success, fail);
-		});
-
-		it('should not specify the object is complete if the provider is an empty string in case of oauth', function(done) {
-			var i = new ThemeZone("test", "", "localhost", true, "", "", 324);
-			var success = function () {
-				assert.equal(i.isComplete(), false, "The themeZone is considered as complete.");
-				done();
-			};
-
-			var fail = function (error) {
-				done(error);
-			};
-			i.checkCompleteness(success, fail);
-		});
-
-		it('should not specify the object is complete if the provider is null in case of oauth', function(done) {
-			var i = new ThemeZone("test", "", "localhost", true, null, "", 324);
-			var success = function () {
-				assert.equal(i.isComplete(), false, "The themeZone is considered as complete.");
-				done();
-			};
-
-			var fail = function (error) {
-				done(error);
-			};
-			i.checkCompleteness(success, fail);
+			c.checkCompleteness(success, fail);
 		});
 	});
 
@@ -212,50 +95,53 @@ describe('ThemeZone', function(){
 				"id": 42,
 				"name": "toto",
 				"description": "tata",
-				"host": "localhost",
-				"oauth": true,
-				"provider": "provider",
-				"logo": "blarf",
+				"defaultTheme": true,
+				"background": "red",
+				"font": "arial",
+				"opacity": "24%",
+				"border": "1px",
 				"complete": true
 			};
 
 			var callRetrieve = ThemeZone.fromJSONObject(json);
-			var callExpected = new ThemeZone("toto","tata","localhost", true, "provider", "blarf", 42,true);
+			var callExpected = new ThemeZone("toto", "tata", true, "red", "arial", "24%", "1px", 42, true);
 
-			assert.deepEqual(callRetrieve, callExpected, "The retrieve call ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve themeZone ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
 
 		it('should create the right object even if it is partial', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": "",
-				"host": null,
-				"oauth": true,
-				"provider": "provider",
-				"logo": "blup",
+				"description": "tata",
+				"defaultTheme": false,
+				"background": "red",
+				"font": "arial",
+				"opacity": "24%",
+				"border": "",
 				"complete": false
 			};
 
 			var callRetrieve = ThemeZone.fromJSONObject(json);
-			var callExpected = new ThemeZone("toto","",null, true, "provider", "blup", 42);
+			var callExpected = new ThemeZone("toto", "tata", false, "red", "arial", "24%", "", 42);
 
-			assert.deepEqual(callRetrieve, callExpected, "The retrieve call ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
+			assert.deepEqual(callRetrieve, callExpected, "The retrieve themeZone ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
 	});
 
 	describe('#toJsonObject', function() {
 		it('should create the expected JSON Object', function() {
-			var c = new ThemeZone("toto", "blabla", "blob", true,"provider", "tidum", 52);
+			var c = new ThemeZone("toto", "truc", true, "black", "arial", "89%", "14px", 52, true);
 			var expected = {
-				"name": "toto",
-				"description": "blabla",
-				"host": "blob",
-				"oauth": true,
-				"provider": "provider",
-				"logo": "tidum",
 				"id": 52,
-				"complete": false,
+				"name": "toto",
+				"description": "truc",
+				"defaultTheme": true,
+				"background": "black",
+				"font": "arial",
+				"opacity": "89%",
+				"border": "14px",
+				"complete": true,
 				"createdAt":null,
 				"updatedAt":null
 			};
