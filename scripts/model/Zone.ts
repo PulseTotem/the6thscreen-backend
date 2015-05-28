@@ -114,6 +114,22 @@ class Zone extends ModelItf {
 	 */
 	private _zoneContents_loaded : boolean;
 
+	/**
+	 * Theme property.
+	 *
+	 * @property _theme
+	 * @type ThemeZone
+	 */
+	private _theme : ThemeZone;
+
+	/**
+	 * Lazy loading for the Theme property
+	 *
+	 * @property _theme_loaded
+	 * @type boolean
+	 */
+	private _theme_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -143,6 +159,9 @@ class Zone extends ModelItf {
 
 		this._zoneContents = null;
 		this._zoneContents_loaded = false;
+
+	    this._theme = null;
+	    this._theme_loaded = false;
     }
 
 	/**
@@ -384,7 +403,49 @@ class Zone extends ModelItf {
 		}
 	}
 
-    //////////////////// Methods managing model. Connections to database. ///////////////////////////
+	/**
+	 * Return the Zone's theme.
+	 *
+	 * @method theme
+	 */
+	theme() {
+		return this._theme;
+	}
+
+	/**
+	 * Load the Zone's theme.
+	 *
+	 * @method loadTheme
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadTheme(successCallback : Function, failCallback : Function) {
+		if(! this._theme_loaded) {
+			var self = this;
+			var success : Function = function(theme) {
+				self._theme = theme;
+				self._theme_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Zone, ThemeZone, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
+
+	//////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
      * Load all the lazy loading properties of the object.
@@ -398,7 +459,7 @@ class Zone extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._behaviour_loaded && self._callTypes_loaded && self._zoneContents_loaded) {
+            if(self._behaviour_loaded && self._callTypes_loaded && self._zoneContents_loaded && self._theme_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -416,6 +477,7 @@ class Zone extends ModelItf {
         this.loadBehaviour(success, fail);
 	    this.loadCallTypes(success, fail);
 		this.loadZoneContents(success, fail);
+	    this.loadTheme(success, fail);
     }
 
 	/**
@@ -427,6 +489,7 @@ class Zone extends ModelItf {
 		this._behaviour_loaded = false;
 		this._callTypes_loaded = false;
 		this._zoneContents_loaded = false;
+		this._theme_loaded = false;
 	}
 
 
@@ -501,8 +564,10 @@ class Zone extends ModelItf {
             var data = self.toJSONObject();
 	        if (onlyId) {
 		        data["behaviour"] = (self.behaviour() !== null) ? self.behaviour().getId() : null;
+		        data["theme"] = (self.theme() !== null) ? self.theme().getId() : null;
 	        } else {
 		        data["behaviour"] = (self.behaviour() !== null) ? self.behaviour().toJSONObject() : null;
+		        data["theme"] = (self.theme() !== null) ? self.theme().toJSONObject() : null;
 	        }
             data["callTypes"] = self.serializeArray(self.callTypes(), onlyId);
 			data["zoneContents"] = self.serializeArray(self.zoneContents(), onlyId);
@@ -594,6 +659,29 @@ class Zone extends ModelItf {
 	 */
 	removeZoneContent(zcID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Zone, ZoneContent, zcID, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the Theme of the Zone.
+	 *
+	 * @method linkTheme
+	 * @param {ThemeZone} it The Theme to associate with the Zone.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkTheme(themeZoneID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Zone, ThemeZone, themeZoneID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current Theme from the Zone.
+	 *
+	 * @method unlinkTheme
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkTheme(themeZoneID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Zone, ThemeZone, themeZoneID, successCallback, failCallback);
 	}
 
 
