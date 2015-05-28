@@ -70,6 +70,14 @@ class ThemeZone extends ModelItf {
 	private _border : string;
 
 	/**
+	 * Color property.
+	 *
+	 * @property _color
+	 * @type string
+	 */
+	private _color : string;
+
+	/**
 	 * Constructor
 	 *
 	 * @constructor
@@ -82,7 +90,7 @@ class ThemeZone extends ModelItf {
 	 * @param {string} createdAt - The ThemeZone's createdAt.
 	 * @param {string} updatedAt - The ThemeZone's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, background : string = "", font : string = "", opacity : string = "", border : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, background : string = "", font : string = "", color : string = "", opacity : string = "", border : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
@@ -90,6 +98,7 @@ class ThemeZone extends ModelItf {
 		this.setDefaultTheme(defaultTheme);
 		this.setBackground(background);
 		this.setFont(font);
+		this.setColor(color);
 		this.setOpacity(opacity);
 		this.setBorder(border);
 	}
@@ -137,6 +146,15 @@ class ThemeZone extends ModelItf {
 	 */
 	setFont(font : string) {
 		this._font = font;
+	}
+
+	/**
+	 * Set the ThemeZone's color.
+	 *
+	 * @method setColor
+	 */
+	setColor(color : string) {
+		this._color = color;
 	}
 
 	/**
@@ -203,6 +221,15 @@ class ThemeZone extends ModelItf {
 	}
 
 	/**
+	 * Return the ThemeZone's color.
+	 *
+	 * @method color
+	 */
+	color() {
+		return this._color;
+	}
+
+	/**
 	 * Return the ThemeZone's opacity.
 	 *
 	 * @method opacity
@@ -239,6 +266,7 @@ class ThemeZone extends ModelItf {
 			"defaultTheme": this.defaultTheme(),
 			"background": this.background(),
 			"font": this.font(),
+			"color": this.color(),
 			"opacity": this.opacity(),
 			"border": this.border(),
 			"complete": this.isComplete(),
@@ -347,7 +375,7 @@ class ThemeZone extends ModelItf {
 	 * @return {ThemeZone} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ThemeZone {
-		return new ThemeZone(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.background, jsonObject.font, jsonObject.opacity, jsonObject.border, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new ThemeZone(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.background, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.border, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

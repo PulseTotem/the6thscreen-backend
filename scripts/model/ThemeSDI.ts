@@ -55,6 +55,14 @@ class ThemeSDI extends ModelItf {
 	private _font : string;
 
 	/**
+	 * Color property.
+	 *
+	 * @property _color
+	 * @type string
+	 */
+	private _color : string;
+
+	/**
 	 * Opacity property.
 	 *
 	 * @property _opacity
@@ -92,7 +100,7 @@ class ThemeSDI extends ModelItf {
 	 * @param {string} createdAt - The ThemeSDI's createdAt.
 	 * @param {string} updatedAt - The ThemeSDI's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, background : string = "", font : string = "", opacity : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, background : string = "", font : string = "", color : string = "", opacity : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
@@ -100,6 +108,7 @@ class ThemeSDI extends ModelItf {
 		this.setDefaultTheme(defaultTheme);
 		this.setBackground(background);
 		this.setFont(font);
+		this.setColor(color);
 		this.setOpacity(opacity);
 
 		this._themeZone = null;
@@ -149,6 +158,15 @@ class ThemeSDI extends ModelItf {
 	 */
 	setFont(font : string) {
 		this._font = font;
+	}
+
+	/**
+	 * Set the ThemeSDI's color.
+	 *
+	 * @method setColor
+	 */
+	setColor(color : string) {
+		this._color = color;
 	}
 
 	/**
@@ -203,6 +221,15 @@ class ThemeSDI extends ModelItf {
 	 */
 	font() {
 		return this._font;
+	}
+
+	/**
+	 * Return the ThemeSDI's color.
+	 *
+	 * @method color
+	 */
+	color() {
+		return this._color;
 	}
 
 	/**
@@ -312,6 +339,7 @@ class ThemeSDI extends ModelItf {
 			"defaultTheme": this.defaultTheme(),
 			"background": this.background(),
 			"font": this.font(),
+			"color": this.color(),
 			"opacity": this.opacity(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
@@ -480,7 +508,7 @@ class ThemeSDI extends ModelItf {
 	 * @return {ThemeSDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ThemeSDI {
-		return new ThemeSDI(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.background, jsonObject.font, jsonObject.opacity, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new ThemeSDI(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.background, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

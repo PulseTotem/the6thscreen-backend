@@ -479,7 +479,7 @@ describe('SDI', function() {
 	describe('#linkTheme', function () {
 		it('should call the right request', function (done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var s = new ThemeSDI("toto", "truc", true, "black", "arial", "89%", 52);
+			var s = new ThemeSDI("toto", "truc", true, "black", "arial","black", "89%", 52);
 
 			var response1:SequelizeRestfulResponse = {
 				"status": "success",
@@ -529,7 +529,7 @@ describe('SDI', function() {
 	describe('#unlinkThemeZone', function () {
 		it('should call the right request', function (done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var s = new ThemeSDI("toto", "truc", true, "black", "arial", "89%", 52);
+			var s = new ThemeSDI("toto", "truc", true, "black", "arial","black", "89%", 52);
 
 			var response1:SequelizeRestfulResponse = {
 				"status": "success",
