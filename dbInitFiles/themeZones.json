@@ -1,0 +1,22 @@
+[
+  {
+    "name": "ThemeBasic",
+    "description": "CleanAndInit generated theme",
+    "defaultTheme": true,
+    "background": "black",
+    "opacity": "50%",
+    "font": "14px arial, sans-serif",
+    "color": "white",
+    "border": "1px solid gray"
+  },
+  {
+    "name": "PsychoTheme",
+    "description": "CleanAndInit generated theme",
+    "defaultTheme": true,
+    "background": "red",
+    "opacity": "20%",
+    "font": "14px arial, sans-serif",
+    "color": "black",
+    "border": "1px solid blue"
+  }
+]

@@ -475,4 +475,105 @@ describe('SDI', function() {
 			c.loadProfils(success, fail);
 		});
 	});
+
+	describe('#linkTheme', function () {
+		it('should call the right request', function (done) {
+			var c = new SDI("toto", "blabla", "toto", 52);
+			var s = new ThemeSDI("toto", "truc", true, "black", "arial","black", "89%", 52);
+
+			var response1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": []
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(SDI.getTableName(), c.getId().toString(), ThemeSDI.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function () {
+				var themeSDI = c.theme();
+				assert.equal(themeSDI, null, "The themeZone is not a null value: " + JSON.stringify(themeSDI));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+
+				var response2:SequelizeRestfulResponse = {
+					"status": "success",
+					"data": {}
+				};
+
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+					.put(DatabaseConnection.associatedObjectEndpoint(SDI.getTableName(), c.getId().toString(), ThemeSDI.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(response2));
+
+				var success2 = function () {
+					//assert.ok(retour, "The return of the setInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the service in database.");
+					done();
+				};
+
+				var fail2 = function (err) {
+					done(err);
+				};
+
+				c.linkTheme(s.getId(), success2, fail2);
+			};
+
+			var fail = function (err) {
+				done(err);
+			};
+
+			c.loadTheme(success, fail);
+		});
+
+	});
+
+	describe('#unlinkThemeZone', function () {
+		it('should call the right request', function (done) {
+			var c = new SDI("toto", "blabla", "toto", 52);
+			var s = new ThemeSDI("toto", "truc", true, "black", "arial","black", "89%", 52);
+
+			var response1:SequelizeRestfulResponse = {
+				"status": "success",
+				"data": s.toJSONObject()
+			};
+
+			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(SDI.getTableName(), c.getId().toString(), ThemeSDI.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var themeSDI = c.theme();
+				assert.deepEqual(themeSDI, s, "The themeSDI is not the expected value");
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+				var spy = sinon.spy(themeSDI, "desynchronize");
+
+				var response2:SequelizeRestfulResponse = {
+					"status": "success",
+					"data": {}
+				};
+
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+					.delete(DatabaseConnection.associatedObjectEndpoint(SDI.getTableName(), c.getId().toString(), ThemeSDI.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(response2));
+
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the unsetInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.unlinkTheme(s.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadTheme(success, fail);
+		});
+	});
 });

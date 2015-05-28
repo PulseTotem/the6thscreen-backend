@@ -106,13 +106,12 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteRelativeEvent', function(idRelativeEvent) { self.deleteObjectFromDescription(RelativeEvent, "relativeEventId", idRelativeEvent, "AnswerDeleteRelativeEvent"); });
 		this.addListenerToSocket('DeleteZoneContent', function(idZoneContent) { self.deleteObjectFromDescription(ZoneContent, "zoneContentId", idZoneContent, "AnswerDeleteZoneContent"); });
 
-
-	    this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "deletedSource"); });
+		this.addListenerToSocket('DeleteZone', function(idZone) { self.deleteObjectFromDescription(Zone, "zoneId", idZone, "deletedZone"); });
+		this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "deletedSource"); });
 	    this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteObjectFromDescription(CallType, "callTypeId", idCallType, "deletedCallType"); });
 	    this.addListenerToSocket('DeleteService', function(idService) { self.deleteObjectFromDescription(Service, "serviceId", idService, "deletedService"); });
 		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "deletedSDI"); });
 		this.addListenerToSocket('DeleteOAuthKey', function(idOAuthKey) { self.deleteObjectFromDescription(OAuthKey, "oauthKeyId", idOAuthKey, "deletedOAuthKey"); });
-		this.addListenerToSocket('DeleteZone', function(idZone) { self.deleteObjectFromDescription(Zone, "zoneId", idZone, "deletedZone"); });
 		this.addListenerToSocket('DeleteCall', function(idCall) { self.deleteObjectFromDescription(Call, "callId", idCall, "deletedCall"); });
 		this.addListenerToSocket('DeleteRenderer', function(idRenderer) { self.deleteObjectFromDescription(Renderer, "rendererId", idRenderer, "deletedRenderer"); });
 		this.addListenerToSocket('DeleteProfil', function(idProfil) { self.deleteObjectFromDescription(Profil, "profilId", idProfil, "deletedProfil"); });
@@ -128,7 +127,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveCompleteAbsoluteTimeline', function(timelineIdDescription) { self.sendCompleteAbsoluteTimeline(timelineIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteCallType', function(callTypeIdDescription) { self.sendCompleteCallType(callTypeIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteCall', function(callIdDescription) { self.sendCompleteCall(callIdDescription); });
+		this.addListenerToSocket('UpdateZonePosition', function(data) { self.updateZonePosition(data); });
 		this.addListenerToSocket('CreateEmptyParamValueForParamTypeId', function(paramTypeIdDescription) { self.createEmptyParamValue(paramTypeIdDescription); });
+
 
 
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
@@ -604,28 +605,40 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				callTypes.forEach( function (callType : CallType) {
 
 					var successLoadAssoCT : Function = function (dataCT) {
-						var sourceId : number = dataCT.source.id;
-
-						var rSource = retrieveSource(sourceId);
-
-						if (rSource === undefined) {
-							var successReadSource : Function = function (source : Source) {
-
-								var successLoadService : Function = function () {
-									sources.push(source);
-									dataCT.source.service = source.service().toJSONObject();
-									saveCallType(dataCT);
-								};
-
-								source.loadService(successLoadService, fail);
+						if (dataCT.source == null) {
+							var ctObject : CallType = CallType.fromJSONObject(dataCT);
+							var successDelete = function () {
+								Logger.debug("CallType deleted because the source is missing: "+JSON.stringify(dataCT));
 							};
 
-
-							Source.read(sourceId, successReadSource, fail);
-
+							var failDelete = function () {
+								Logger.debug("Error during delete of "+JSON.stringify(dataCT));
+							};
+							ctObject.delete(successDelete, failDelete);
 						} else {
-							dataCT.source.service = rSource.service().toJSONObject();
-							saveCallType(dataCT);
+							var sourceId : number = dataCT.source.id;
+
+							var rSource = retrieveSource(sourceId);
+
+							if (rSource === undefined) {
+								var successReadSource : Function = function (source : Source) {
+
+									var successLoadService : Function = function () {
+										sources.push(source);
+										dataCT.source.service = source.service().toJSONObject();
+										saveCallType(dataCT);
+									};
+
+									source.loadService(successLoadService, fail);
+								};
+
+
+								Source.read(sourceId, successReadSource, fail);
+
+							} else {
+								dataCT.source.service = rSource.service().toJSONObject();
+								saveCallType(dataCT);
+							}
 						}
 					};
 
@@ -966,6 +979,43 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage sendCompleteCallType //////////////////////
 
+////////////////// Begin: Manage updateZonePosition //////////////////////
+
+	/**
+	 * Update Zone with the new position informations
+	 * Send the result on the channel "CompleteCallDescription"
+	 *
+	 * @method updateZonePosition
+	 * @param {JSONObject} zoneDescription - Represents Zone to update
+	 */
+	updateZonePosition(zoneDescription : any) {
+		var self = this;
+
+		var zoneId = zoneDescription.id;
+
+		var fail : Function = function(error) {
+			self.socket.emit("AnswerZoneUpdate", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - updateZonePosition failed ");
+		};
+
+		var successRead = function (zone : Zone) {
+			zone.setPositionFromLeft(zoneDescription.positionFromLeft);
+			zone.setPositionFromTop(zoneDescription.positionFromTop);
+			zone.setWidth(zoneDescription.width);
+			zone.setHeight(zoneDescription.height);
+
+			var successUpdate = function () {
+				self.socket.emit("AnswerZoneUpdate", zone.toJSONObject());
+			};
+
+			zone.update(successUpdate, fail);
+		};
+
+		Zone.read(zoneId, successRead, fail);
+	}
+
+////////////////////// End: Manage updateZonePosition //////////////////////
+
 ////////////////// Begin: Manage createEmptyParamValue //////////////////////
 
 	/**
@@ -1016,4 +1066,5 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage createEmptyParamValue //////////////////////
+
 }

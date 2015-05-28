@@ -6,6 +6,9 @@
         "user" : {
             "username" : "christian"
         },
+        "theme": {
+          "name": "ThemeBasic"
+        },
         "zones" : [
             {
                 "name" : "LeftZone1",
@@ -71,6 +74,9 @@
         "allowedHost" : "*",
         "user" : {
             "username" : "simon"
+        },
+        "theme": {
+          "name": "ThemeBasic"
         },
         "zones" : [
             {
@@ -138,6 +144,9 @@
     "user" : {
       "username" : "christian"
     },
+    "theme": {
+      "name": "PsychoTheme"
+    },
     "zones" : [
       {
         "name" : "LeftZone3",
@@ -148,6 +157,9 @@
         "positionFromLeft" : 0,
         "behaviour" : {
           "name" : "Appearance"
+        },
+        "theme": {
+          "name": "ThemeBasic"
         }
       },
       {
