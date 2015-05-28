@@ -100,7 +100,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdatePolicyDescription', function(data) { self.updateObjectAttribute(Policy, data, "PolicyDescription"); });
 
 		// Delete object
-		this.addListenerToSocket('DeleteZone', function(idZone) { self.cascadingDeleteZone(idZone); });
+		this.addListenerToSocket('DeleteZone', function(idZone) { self.deleteObjectFromDescription(Zone, "zoneId", idZone, "deletedZone"); });
 
 
 		this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "deletedSource"); });
@@ -1063,61 +1063,4 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage createEmptyParamValue //////////////////////
 
-////////////////// Begin: Manage cascadingDeleteZone //////////////////////
-
-	/**
-	 * Create an empty ParamValue and associate it to ParamType in param.
-	 * Send the result on the channel "AnswerCreateEmptyParamValueForParamTypeId"
-	 *
-	 * @method createEmptyParamValue
-	 * @param {JSONObject} paramTypeIdDescription - Represents Call to retrieve
-	 */
-	cascadingDeleteZone(zoneDescription : any) {
-		// zoneDescription : { "zoneId": number }
-		var self = this;
-
-		var zoneId = zoneDescription.zoneId;
-
-		var fail : Function = function(error) {
-			self.socket.emit("deletedZone", self.formatResponse(false, error));
-			Logger.debug("SocketId: " + self.socket.id + " - cascadingDeleteZone failed ");
-		};
-
-		var successReadZone : Function = function (zone : Zone) {
-
-			var successLoadZone : Function = function () {
-				if (zone.zoneContents().length > 0) {
-					fail("You can't delete a zone containing some zone contents.");
-				} else {
-					var sizeCT = zone.callTypes().length;
-					var deleted = 0;
-
-					var successDeleteZone = function () {
-						self.socket.emit("deletedZone", self.formatResponse(true, zoneId));
-					};
-
-					var successDeleteCT:Function = function () {
-						deleted++;
-
-						if (deleted == sizeCT) {
-							zone.delete(successDeleteZone, fail);
-						}
-					};
-
-					for (var ctIndex in zone.callTypes()) {
-						var ct:CallType = zone.callTypes()[ctIndex];
-
-						ct.delete(successDeleteCT, fail);
-					}
-				}
-
-			};
-
-			zone.loadAssociations(successLoadZone, fail);
-		};
-
-		Zone.read(zoneId, successReadZone, fail);
-	}
-
-////////////////////// End: Manage cascadingDeleteZone //////////////////////
 }

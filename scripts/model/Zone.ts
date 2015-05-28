@@ -636,7 +636,9 @@ class Zone extends ModelItf {
     }
 
     /**
-     * Delete in database the model with current id.
+     * Delete in database the Zone with current id.
+     * This method also deletes all the containing CallTypes of the Zone.
+     * If the Zone contains some ZoneContents it fails with a message.
      *
      * @method delete
      * @param {Function} successCallback - The callback function when success.
@@ -644,7 +646,32 @@ class Zone extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Zone, this.getId(), successCallback, failCallback, attemptNumber);
+	    var self = this;
+
+	    var successLoadZone : Function = function () {
+		    if (self.zoneContents().length > 0) {
+			    failCallback("You can't delete a zone containing some zone contents.");
+		    } else {
+			    var sizeCT = self.callTypes().length;
+			    var deleted = 0;
+
+			    var successDeleteCT:Function = function () {
+				    deleted++;
+
+				    if (deleted == sizeCT) {
+					    ModelItf.deleteObject(Zone, this.getId(), successCallback, failCallback, attemptNumber);
+				    }
+			    };
+
+			    for (var ctIndex in self.callTypes()) {
+				    var ct:CallType = self.callTypes()[ctIndex];
+
+				    ct.delete(successDeleteCT, failCallback);
+			    }
+		    }
+	    };
+
+	    this.loadAssociations(successLoadZone, failCallback);
     }
 
     /**
