@@ -75,10 +75,49 @@ describe('ThemeZone', function(){
 	});
 
 	describe('#checkCompleteness', function() {
-		it('should specify the object is complete even if it is completely empty', function(done) {
-			var c = new ThemeZone("", "", false, "", "", "", "");
+		it('should specify the object is complete if it has a name and an ID', function(done) {
+			var c = new ThemeZone("toto", "", false, "", "", "", "",12);
 			var success = function () {
 				assert.equal(c.isComplete(), true, "The ThemeZone is not considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			c.checkCompleteness(success, fail);
+		});
+
+		it('should not specify the object is complete if it has no ID', function(done) {
+			var c = new ThemeZone("toto", "", false, "", "", "", "");
+			var success = function () {
+				assert.equal(c.isComplete(), false, "The ThemeZone is not considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			c.checkCompleteness(success, fail);
+		});
+
+		it('should not specify the object is complete if it has an empty name and an ID', function(done) {
+			var c = new ThemeZone("", "", false, "", "", "", "",12);
+			var success = function () {
+				assert.equal(c.isComplete(), false, "The ThemeZone is not considered as complete.");
+				done();
+			};
+
+			var fail = function (error) {
+				done(error);
+			};
+			c.checkCompleteness(success, fail);
+		});
+
+		it('should not specify the object is complete if it has a null name and an ID', function(done) {
+			var c = new ThemeZone(null, "", false, "", "", "", "",12);
+			var success = function () {
+				assert.equal(c.isComplete(), false, "The ThemeZone is not considered as complete.");
 				done();
 			};
 

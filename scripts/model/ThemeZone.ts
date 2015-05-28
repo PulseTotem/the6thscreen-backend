@@ -257,7 +257,7 @@ class ThemeZone extends ModelItf {
 		var self = this;
 
 		var succces : Function = function () {
-			self._complete = true;
+			self._complete = self._complete && (!!self.name());
 			successCallback();
 		};
 

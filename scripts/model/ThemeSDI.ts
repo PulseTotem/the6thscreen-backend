@@ -329,14 +329,17 @@ class ThemeSDI extends ModelItf {
 		var self = this;
 
 		var succces : Function = function () {
+			if (self.isComplete() && !!self.name()) {
+				var successLoadAsso : Function = function () {
+					self._complete = (self.themeZone() != null && self.themeZone().isComplete());
 
-			var successLoadAsso : Function = function () {
-				self._complete = (self.themeZone() != null);
-
+					successCallback();
+				};
+				self.loadAssociations(successLoadAsso, failCallback);
+			} else {
+				self._complete = false;
 				successCallback();
-			};
-
-			self.loadAssociations(successLoadAsso, failCallback);
+			}
 		};
 
 		super.checkCompleteness(succces, failCallback);
@@ -371,6 +374,28 @@ class ThemeSDI extends ModelItf {
 		this.loadAssociations(success, fail);
 	}
 
+	/**
+	 * Set the ThemeZone of the ThemeZone.
+	 *
+	 * @method linkThemeZone
+	 * @param {ThemeZone} it The ThemeZone to associate with the ThemeSDI.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkThemeZone(themeZoneID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(ThemeSDI, ThemeZone, themeZoneID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current ThemeZone from the ThemeSDI.
+	 *
+	 * @method unlinkThemeZone
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkThemeZone(themeZoneID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ThemeSDI, ThemeZone, themeZoneID, successCallback, failCallback);
+	}
 
 	/**
 	 * Create model in database.
