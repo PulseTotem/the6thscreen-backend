@@ -17,6 +17,8 @@
 /// <reference path="../model/InfoType.ts" />
 /// <reference path="../model/Policy.ts" />
 /// <reference path="../model/Behaviour.ts" />
+/// <reference path="../model/ThemeZone.ts" />
+/// <reference path="../model/ThemeSDI.ts" />
 
 
 class AdminsNamespaceManager extends ShareNamespaceManager {
@@ -62,6 +64,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveAllServiceDescription', function() { self.sendAllObjectDescription(Service, "AllServiceDescription"); });
 		this.addListenerToSocket('RetrieveAllBehaviourDescription', function() { self.sendAllObjectDescription(Behaviour, "AllBehaviourDescription"); });
 		this.addListenerToSocket('RetrieveAllPolicyDescription', function() { self.sendAllObjectDescription(Policy, "AllPolicyDescription"); });
+		this.addListenerToSocket('RetrieveAllThemeZoneDescription', function() { self.sendAllObjectDescription(ThemeZone, "AllThemeZoneDescription"); });
+		this.addListenerToSocket('RetrieveAllThemeSDIDescription', function() { self.sendAllObjectDescription(ThemeSDI, "AllThemeSDIDescription"); });
 
 		// Create object
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
