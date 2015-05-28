@@ -659,7 +659,7 @@ class Zone extends ModelItf {
 				    deleted++;
 
 				    if (deleted == sizeCT) {
-					    ModelItf.deleteObject(Zone, this.getId(), successCallback, failCallback, attemptNumber);
+					    ModelItf.deleteObject(Zone, self.getId(), successCallback, failCallback, attemptNumber);
 				    }
 			    };
 

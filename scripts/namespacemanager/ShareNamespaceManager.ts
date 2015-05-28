@@ -223,10 +223,19 @@ class ShareNamespaceManager extends NamespaceManager {
 
 		Logger.debug("SocketId: " + self.socket.id + " - createObject : deleteObject of Model with TableName: " + modelClass.getTableName());
 
-		var success = function (object) {
+		var successDelete = function (object) {
 			self.socket.emit(responseChannel, self.formatResponse(true, objectId));
 		};
-		ModelItf.deleteObject(modelClass, objectId, success, function (error) { self.deleteObjectFail(error, responseChannel); });
+
+        var fail = function (error) {
+            self.deleteObjectFail(error, responseChannel);
+        };
+
+        var successReadObject = function (object) {
+            object.delete(successDelete, fail);
+        };
+
+        modelClass.read(objectId, successReadObject, fail);
 	}
 
 	/**
