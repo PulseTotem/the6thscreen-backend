@@ -8,7 +8,7 @@
     },
     {
         "name" : "Positive",
-        "description" : "Ensure the number is >= 0",
+        "description" : "Ensure the number is > 0",
         "type" : {
             "name" : "Entier"
         }
