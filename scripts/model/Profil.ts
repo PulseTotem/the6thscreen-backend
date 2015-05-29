@@ -284,6 +284,44 @@ class Profil extends ModelItf {
 			successCallback();
 		};
 		super.checkCompleteness(success, failCallback);
+
+
+		var self = this;
+
+		var success : Function = function () {
+			if (self.isComplete() && !!self.name()) {
+				var fail:Function = function (error) {
+					failCallback(error);
+				};
+
+				var success:Function = function () {
+					if (self._zoneContents_loaded && self._sdi_loaded ) {
+						self._complete = self.isComplete() && self.sdi() != null;
+
+						var successSDILoadZones:Function = function () {
+							self._complete = self.isComplete() && self.sdi().zones().length == self.zoneContents().length;
+							successCallback();
+						}
+
+						if(self.isComplete()) {
+							self.sdi().loadZones(successSDILoadZones, fail);
+						} else {
+							successCallback();
+						}
+					}
+				};
+
+
+
+				self.loadZoneContents(success, fail);
+				self.loadSDI(success, fail);
+			} else {
+				self._complete = false;
+				successCallback();
+			}
+		};
+		super.checkCompleteness(success, failCallback);
+
 	}
 
     /**
@@ -334,6 +372,32 @@ class Profil extends ModelItf {
 	 */
 	removeZoneContent(zoneContentID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the SDI of the Profil.
+	 *
+	 * @method linkSDI
+	 * @param {number} sdiId - The SDI's Id to associate with the Profil.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkSDI(sdiId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Profil, SDI, sdiId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current SDI from the Profil.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A SDI must have been set before using it, else an exception is thrown.
+	 *
+	 * @method unlinkSDI
+	 * @param {number} sdiId - The SDI's Id to unset from the Profil.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkSDI(sdiId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Profil, SDI, sdiId, successCallback, failCallback);
 	}
 
     /**

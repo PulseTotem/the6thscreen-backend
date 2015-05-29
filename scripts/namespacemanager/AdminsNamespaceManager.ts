@@ -79,6 +79,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateParamValue', function(data) { self.createObject(ParamValue, data, "AnswerCreateParamValue"); });
 		this.addListenerToSocket('CreateZoneContent', function(data) { self.createObject(ZoneContent, data, "AnswerCreateZoneContent"); });
 		this.addListenerToSocket('CreateRelativeTimeline', function(data) { self.createObject(RelativeTimeline, data, "AnswerCreateRelativeTimeline"); });
+		this.addListenerToSocket('CreateProfil', function(data) { self.createObject(Profil, data, "AnswerCreateProfil"); });
 
 	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
 
@@ -98,9 +99,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateRelativeTimeline', function(data) { self.updateObjectAttribute(RelativeTimeline, data, "AnswerUpdateRelativeTimeline"); });
 		this.addListenerToSocket('UpdateParamValue', function(data) { self.updateObjectAttribute(ParamValue, data, "AnswerUpdateParamValue"); });
 		this.addListenerToSocket('UpdateZoneContent', function(data) { self.updateObjectAttribute(ZoneContent, data, "AnswerUpdateZoneContent"); });
+		this.addListenerToSocket('UpdateProfil', function(data) { self.updateObjectAttribute(Profil, data, "AnswerUpdateProfil"); });
 
 	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
-
 	    this.addListenerToSocket('UpdateServiceDescription', function(data) { self.updateObjectAttribute(Service, data, "ServiceDescription"); });
 		this.addListenerToSocket('UpdateCallDescription', function(data) { self.updateObjectAttribute(Call, data, "CallDescription"); });
 		this.addListenerToSocket('UpdateParamValueDescription', function(data) { self.updateObjectAttribute(ParamValue, data, "ParamValueDescription"); });
@@ -138,6 +139,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateEmptyParamValueForParamTypeId', function(paramTypeIdDescription) { self.createEmptyParamValue(paramTypeIdDescription); });
 		this.addListenerToSocket('RetrieveOAuthKeysFromServiceAndUser', function(serviceUserDescription) { self.sendOAuthKeysFromServiceAndUser(serviceUserDescription); });
 		this.addListenerToSocket('RetrieveCompleteProfilDescription', function(profilIdDescription) { self.sendCompleteProfil(profilIdDescription); });
+		this.addListenerToSocket('RetrieveZoneContentsFromZoneId', function(zoneIdDescription) { self.sendZoneContentsFromZoneId(zoneIdDescription); });
 
 
 
@@ -1189,6 +1191,60 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage sendCompleteProfil //////////////////////
 
+////////////////////// Begin: Manage sendZoneContentsFromZoneId //////////////////////
+
+	/**
+	 * Retrieve ZoneContents from a given Zone ID.
+	 * Send the result on the channel "ZoneContentsFromZoneId"
+	 *
+	 * @method sendZoneContentsFromZoneId
+	 * @param {JSONObject} zoneIdDescription - Zone description to retrieve
+	 */
+	sendZoneContentsFromZoneId(zoneIdDescription : any) {
+		// zoneIdDescription : { "zoneId": number }
+		var self = this;
+
+		var zoneId = zoneIdDescription.zoneId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("ZoneContentsFromZoneId", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendZoneContentsFromZoneId failed ");
+		};
+
+		var successRead = function (zone : Zone) {
+
+			var successZoneCompleteDescription : Function = function (zoneCompleteDesc) {
+				var zoneJSON = zoneCompleteDesc;
+
+				zoneJSON["zoneContents"] = [];
+
+				if(zone.zoneContents().length > 0) {
+					zone.zoneContents().forEach(function (zoneContent:ZoneContent) {
+
+						var successZoneContentCompleteDescription = function(zcCompleteDesc) {
+							zoneJSON["zoneContents"].push(zcCompleteDesc);
+
+							if(zoneJSON["zoneContents"].length == zone.zoneContents().length) {
+								self.socket.emit("ZoneContentsFromZoneId", self.formatResponse(true, zoneJSON));
+							}
+						};
+
+						zoneContent.toCompleteJSONObject(successZoneContentCompleteDescription, fail);
+					});
+				} else {
+					self.socket.emit("ZoneContentsFromZoneId", self.formatResponse(true, zoneJSON));
+				}
+
+			};
+
+			zone.toCompleteJSONObject(successZoneCompleteDescription, fail);
+
+		};
+
+		Zone.read(zoneId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendZoneContentsFromZoneId //////////////////////
 
 
 }
