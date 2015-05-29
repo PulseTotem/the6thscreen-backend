@@ -385,7 +385,7 @@ class RelativeTimeline extends ModelItf {
 			if (self.isComplete() && !!self.name()) {
 				var success:Function = function () {
 					if (self._relativeEvents_loaded && self._systemTrigger_loaded && self._timelineRunner_loaded) {
-						self._complete = (self._relativeEvents.length > 0) && self._systemTrigger.isComplete() && self._timelineRunner.isComplete();
+						self._complete = (self._relativeEvents.length > 0) && self._systemTrigger != null && self._timelineRunner != null && self._systemTrigger.isComplete() && self._timelineRunner.isComplete();
 
 						self._relativeEvents.forEach(function (relativeEvent : RelativeEvent) {
 							self._complete = self._complete && relativeEvent.isComplete();

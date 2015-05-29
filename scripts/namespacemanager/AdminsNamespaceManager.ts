@@ -66,6 +66,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveAllPolicyDescription', function() { self.sendAllObjectDescription(Policy, "AllPolicyDescription"); });
 		this.addListenerToSocket('RetrieveAllThemeZoneDescription', function() { self.sendAllObjectDescription(ThemeZone, "AllThemeZoneDescription"); });
 		this.addListenerToSocket('RetrieveAllThemeSDIDescription', function() { self.sendAllObjectDescription(ThemeSDI, "AllThemeSDIDescription"); });
+		this.addListenerToSocket('RetrieveAllTimelineRunnerDescription', function() { self.sendAllObjectDescription(TimelineRunner, "AllTimelineRunnerDescription"); });
+		this.addListenerToSocket('RetrieveAllSystemTriggerDescription', function() { self.sendAllObjectDescription(SystemTrigger, "AllSystemTriggerDescription"); });
+		this.addListenerToSocket('RetrieveAllUserTriggerDescription', function() { self.sendAllObjectDescription(UserTrigger, "AllUserTriggerDescription"); });
 
 		// Create object
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
@@ -133,6 +136,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveCompleteCall', function(callIdDescription) { self.sendCompleteCall(callIdDescription); });
 		this.addListenerToSocket('UpdateZonePosition', function(data) { self.updateZonePosition(data); });
 		this.addListenerToSocket('CreateEmptyParamValueForParamTypeId', function(paramTypeIdDescription) { self.createEmptyParamValue(paramTypeIdDescription); });
+		this.addListenerToSocket('RetrieveOAuthKeysFromServiceAndUser', function(serviceUserDescription) { self.sendOAuthKeysFromServiceAndUser(serviceUserDescription); });
+		this.addListenerToSocket('RetrieveCompleteProfilDescription', function(profilIdDescription) { self.sendCompleteProfil(profilIdDescription); });
 
 
 
@@ -681,9 +686,10 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		};
 
 		var successRead = function (relTimeline : RelativeTimeline) {
-			var timelineJSON = relTimeline.toJSONObject();
 
-			var successLoadAssociations = function() {
+			var successRelativeTimelineCompleteDescription = function(relTimelineDesc) {
+				var timelineJSON = relTimelineDesc;
+
 				timelineJSON["relativeEvents"] = [];
 
 				if(relTimeline.relativeEvents().length > 0) {
@@ -714,7 +720,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				}
 			};
 
-			relTimeline.loadAssociations(successLoadAssociations, fail);
+			relTimeline.toCompleteJSONObject(successRelativeTimelineCompleteDescription, fail);
 
 		};
 
@@ -859,9 +865,10 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 			var cTJSON = callType.toJSONObject();
 
 			var successLoadAssociations = function() {
-				cTJSON["source"] = callType.source().toJSONObject();
 
-				var successSourceLoadAssociations = function() {
+				var successSourceCompleteDescription = function(sourceCompleteDesc) {
+					cTJSON["source"] = sourceCompleteDesc;
+
 					cTJSON["source"]["paramTypes"] = [];
 					cTJSON["source"]["paramValues"] = [];
 
@@ -920,7 +927,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 					}
 				}
 
-				callType.source().loadAssociations(successSourceLoadAssociations, fail);
+				callType.source().toCompleteJSONObject(successSourceCompleteDescription, fail);
 			};
 
 			callType.loadAssociations(successLoadAssociations, fail);
@@ -1070,5 +1077,118 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage createEmptyParamValue //////////////////////
+
+////////////////// Begin: Manage sendOAuthKeysFromServiceAndUser //////////////////////
+
+	/**
+	 * Create an empty ParamValue and associate it to ParamType in param.
+	 * Send the result on the channel "OAuthKeysFromServiceAndUser"
+	 *
+	 * @method sendOAuthKeysFromServiceAndUser
+	 * @param {JSONObject} serviceUserDescription - Represents OAuthKey to retrieve
+	 */
+	sendOAuthKeysFromServiceAndUser(serviceUserDescription : any) {
+		// serviceUserDescription : { "userId": number, "serviceId": number }
+		var self = this;
+
+		var userId = serviceUserDescription.userId;
+		var serviceId = serviceUserDescription.serviceId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("OAuthKeysFromServiceAndUser", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendOAuthKeysFromServiceAndUser failed ");
+		};
+
+		var successReadUser = function(user : User) {
+
+			var successLoadUserAssociations = function() {
+				var oauthkeys = [];
+				if(user.oauthkeys().length > 0) {
+					var done = [];
+					user.oauthkeys().forEach(function(oauthkey : OAuthKey) {
+						var successLoadOAuthKeyCompleteDesc = function(oauthkeyDesc) {
+							done.push(oauthkeyDesc);
+
+							if(oauthkeyDesc.service.id == serviceId) {
+								oauthkeys.push(oauthkeyDesc);
+							}
+
+							if(done.length == user.oauthkeys().length) {
+								self.socket.emit("OAuthKeysFromServiceAndUser", self.formatResponse(true, oauthkeys));
+							}
+						};
+
+						oauthkey.toCompleteJSONObject(successLoadOAuthKeyCompleteDesc, fail);
+					});
+				} else {
+					self.socket.emit("OAuthKeysFromServiceAndUser", self.formatResponse(true, oauthkeys));
+				}
+			};
+
+			user.loadAssociations(successLoadUserAssociations, fail);
+		}
+
+		User.read(userId, successReadUser, fail);
+
+
+	}
+
+////////////////////// End: Manage sendOAuthKeysFromServiceAndUser //////////////////////
+
+////////////////////// Begin: Manage sendCompleteProfil //////////////////////
+
+	/**
+	 * Retrieve a complete Profil description.
+	 * Send the result on the channel "CompleteProfilDescription"
+	 *
+	 * @method sendCompleteRelativeTimeline
+	 * @param {JSONObject} profilIdDescription - Profil description to retrieve
+	 */
+	sendCompleteProfil(profilIdDescription : any) {
+		// profilIdDescription : { "profilId": number }
+		var self = this;
+
+		var profilId = profilIdDescription.profilId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("CompleteProfilDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendCompleteProfil failed ");
+		};
+
+		var successRead = function (profil : Profil) {
+
+			var successProfilCompleteDescription = function(profilDesc) {
+				var profilJSON = profilDesc;
+				profilJSON["zoneContents"] = [];
+
+				if(profil.zoneContents().length > 0) {
+					profil.zoneContents().forEach(function (zoneContent:ZoneContent) {
+
+						var successZoneContentCompleteDescription = function(zcCompleteDesc) {
+							profilJSON["zoneContents"].push(zcCompleteDesc);
+
+							if(profilJSON["zoneContents"].length == profil.zoneContents().length) {
+								self.socket.emit("CompleteProfilDescription", self.formatResponse(true, profilJSON));
+							}
+						};
+
+						zoneContent.toCompleteJSONObject(successZoneContentCompleteDescription, fail);
+					});
+				} else {
+					self.socket.emit("CompleteProfilDescription", self.formatResponse(true, profilJSON));
+				}
+
+			};
+
+			profil.toCompleteJSONObject(successProfilCompleteDescription, fail);
+
+		};
+
+		Profil.read(profilId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendCompleteProfil //////////////////////
+
+
 
 }
