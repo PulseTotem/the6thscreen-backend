@@ -137,7 +137,9 @@ describe('TypeParamType', function() {
 			var expected = {
 				"name": "toto",
 				"id": 52,
-				"complete": true
+				"complete": true,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 

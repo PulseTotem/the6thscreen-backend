@@ -63,9 +63,11 @@ class OAuthKey extends ModelItf {
      * @param {string} description - The OAuthKey's description.
      * @param {string} value - The OAuthKey's value.
      * @param {number} id - The OAuthKey's ID.
+	 * @param {string} createdAt - The OAuthKey's createdAt.
+	 * @param {string} updatedAt - The OAuthKey's updatedAt.
      */
-    constructor(name : string = "", description : string = "", value : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", value : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
         this.setDescription(description);
@@ -225,7 +227,9 @@ class OAuthKey extends ModelItf {
             "name": this.name(),
             "description": this.description(),
             "value": this.value(),
-            "complete": this.isComplete()
+            "complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
         };
         return data;
     }
@@ -398,7 +402,7 @@ class OAuthKey extends ModelItf {
      * @return {OAuthKey} The model instance.
      */
     static fromJSONObject(jsonObject : any) : OAuthKey {
-        return new OAuthKey(jsonObject.name, jsonObject.description, jsonObject.value, jsonObject.id, jsonObject.complete);
+        return new OAuthKey(jsonObject.name, jsonObject.description, jsonObject.value, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
 
     /**

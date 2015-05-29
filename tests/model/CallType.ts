@@ -82,7 +82,9 @@ describe('CallType', function(){
 				"name": "toto",
 				"description": "blabla",
 				"id": 52,
-				"complete": false
+				"complete": false,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 
@@ -149,7 +151,7 @@ describe('CallType', function(){
 			cpt.checkCompleteness(success, fail);
 		});
 
-		it('should not consider the object as complete if it has an ID, a name, a complete source, a complete renderer and an incomplete zone', function(done) {
+		it('should consider the object as complete if it has an ID, a name, a complete source, a complete renderer and an incomplete zone', function(done) {
 			var cpt = new CallType("toto","blabla", 52);
 
 			var responseSource : SequelizeRestfulResponse = {
@@ -196,7 +198,7 @@ describe('CallType', function(){
 				assert.ok(restClientMockS.isDone(), "The mock request has not been done to get the type");
 				assert.ok(restClientMockR.isDone(), "The mock request has not been done to get the type");
 				assert.ok(restClientMockZ.isDone(), "The mock request has not been done to get the type");
-				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
 				done();
 			};
 

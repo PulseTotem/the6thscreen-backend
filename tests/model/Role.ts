@@ -136,7 +136,9 @@ describe('Role', function() {
 			var expected = {
 				"name": "toto",
 				"id": 52,
-				"complete": false
+				"complete": false,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 

@@ -45,9 +45,11 @@ class ParamValue extends ModelItf {
      * @constructor
      * @param {string} value - The ParamValue's value.
      * @param {number} id - The ParamValue's ID.
+	 * @param {string} createdAt - The ParamValue's createdAt.
+	 * @param {string} updatedAt - The ParamValue's updatedAt.
      */
-    constructor(value : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(value : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setValue(value);
 
@@ -168,7 +170,9 @@ class ParamValue extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"value": this.value(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -344,7 +348,7 @@ class ParamValue extends ModelItf {
 	 * @return {ParamValue} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ParamValue {
-		return new ParamValue(jsonObject.value, jsonObject.id, jsonObject.complete);
+		return new ParamValue(jsonObject.value, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

@@ -38,9 +38,11 @@ class SystemTrigger extends ModelItf {
      * @param {string} name - The SystemTrigger's name.
      * @param {string} description - The SystemTrigger's description.
      * @param {number} id - The SystemTrigger's ID.
+	 * @param {string} createdAt - The SystemTrigger's createdAt.
+	 * @param {string} updatedAt - The SystemTrigger's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -95,7 +97,9 @@ class SystemTrigger extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": false
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -199,7 +203,7 @@ class SystemTrigger extends ModelItf {
 	 * @return {SystemTrigger} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : SystemTrigger {
-		return new SystemTrigger(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new SystemTrigger(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

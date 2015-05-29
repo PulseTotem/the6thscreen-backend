@@ -107,9 +107,11 @@ class ZoneContent extends ModelItf {
      * @param {string} name - The ZoneContent's name.
      * @param {string} description - The ZoneContent's description.
      * @param {number} id - The ZoneContent's ID.
+	 * @param {string} createdAt - The ZoneContent's createdAt.
+	 * @param {string} updatedAt - The ZoneContent's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
@@ -393,7 +395,9 @@ class ZoneContent extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -664,7 +668,7 @@ class ZoneContent extends ModelItf {
 	 * @return {ZoneContent} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ZoneContent {
-		return new ZoneContent(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new ZoneContent(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

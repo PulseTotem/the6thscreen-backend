@@ -53,9 +53,11 @@ class ConstraintParamType extends ModelItf {
 	 * @constructor
 	 * @param {string} name - The ConstraintParamType's name.
 	 * @param {number} id - The ConstraintParamType's ID.
+	 * @param {string} createdAt - The ConstraintParamType's createdAt.
+	 * @param {string} updatedAt - The ConstraintParamType's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-		super(id, complete);
+	constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
@@ -195,7 +197,9 @@ class ConstraintParamType extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -370,7 +374,7 @@ class ConstraintParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ConstraintParamType {
-		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

@@ -81,7 +81,9 @@ describe('Profil', function() {
 				"name": "toto",
 				"description": "blabla",
 				"id": 52,
-				"complete": true
+				"complete": true,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 

@@ -91,9 +91,11 @@ class ParamType extends ModelItf {
      * @param {string} name - The ParamType's name.
      * @param {string} description - The ParamType's description.
      * @param {number} id - The ParamType's ID.
+	 * @param {string} createdAt - The ParamType's createdAt.
+	 * @param {string} updatedAt - The ParamType's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -364,7 +366,9 @@ class ParamType extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -567,7 +571,7 @@ class ParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ParamType {
-		return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new ParamType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

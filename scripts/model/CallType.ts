@@ -122,9 +122,11 @@ class CallType extends ModelItf {
      * @param {string} name - The CallType's name.
      * @param {string} description - The CallType's description.
      * @param {number} id - The CallType's ID.
+	 * @param {string} createdAt - The CallType's createdAt.
+	 * @param {string} updatedAt - The CallType's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
@@ -454,7 +456,9 @@ class CallType extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -463,6 +467,7 @@ class CallType extends ModelItf {
 	 * Check whether the object is complete or not
 	 *
 	 * A CallType is complete if it has an ID, a name, a source, a renderer and a zone.
+     * It is not necessary that the zone is complete yet.
 	 *
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of failure.
@@ -473,7 +478,7 @@ class CallType extends ModelItf {
 			if (self.isComplete() && !!self.name()) {
 				var success:Function = function () {
 					if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
-						self._complete = (!!self.renderer() && self.renderer().isComplete()) && (!!self.zone() && self.zone().isComplete()) && (!!self.source() && self.source().isComplete());
+						self._complete = (!!self.renderer() && self.renderer().isComplete()) && !!self.zone() && (!!self.source() && self.source().isComplete());
 						successCallback();
 					}
 				};
@@ -720,7 +725,7 @@ class CallType extends ModelItf {
 	 * @return {CallType} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : CallType {
-		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

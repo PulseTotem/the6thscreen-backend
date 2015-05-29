@@ -23,6 +23,8 @@
 /// <reference path="./model/Service.ts" />
 /// <reference path="./model/User.ts" />
 /// <reference path="./model/Behaviour.ts" />
+/// <reference path="./model/ThemeSDI.ts" />
+/// <reference path="./model/ThemeZone.ts" />
 
 var crypto : any = require('crypto');
 
@@ -33,10 +35,10 @@ var crypto : any = require('crypto');
  */
 class CleanAndInitDatabase {
 
-    static toCleanSources : Array<any> = [Source, Service, ParamType, InfoType, TypeParamType, ConstraintParamType];
-    static toCleanUsers : Array<any> = [User];
+    static toCleanSources : Array<any> = [Source, Service, ParamType, ParamValue, InfoType, TypeParamType, ConstraintParamType];
+    static toCleanUsers : Array<any> = [User, ThemeZone, ThemeSDI];
     static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, Policy, TimelineRunner, SystemTrigger, UserTrigger];
-    static toCleanProfils : Array<any> = [ParamValue, Call, Profil, ZoneContent, RelativeTimeline, RelativeEvent];
+    static toCleanProfils : Array<any> = [Call, Profil, ZoneContent, RelativeTimeline, RelativeEvent];
 
     /**
      * Method to clean and fulfill database with some data.
@@ -169,8 +171,16 @@ class CleanAndInitDatabase {
             failCallback(err);
         };
 
+        var successFulfillThemeZone = function() {
+            self.fulfillThemeSDI(success, fail);
+        };
+
+        var successFulfillUsers = function() {
+            self.fulfillThemeZone(successFulfillThemeZone, fail);
+        };
+
         var successCleanAllUsers = function() {
-            self.fulfillUsers(success, fail);
+            self.fulfillUsers(successFulfillUsers, fail);
         };
         self.cleanAll(CleanAndInitDatabase.toCleanUsers, successCleanAllUsers, fail);
     }
@@ -371,7 +381,7 @@ class CleanAndInitDatabase {
                 failCallback(err);
             };
 
-            var service = new Service(serviceDesc.name, serviceDesc.description, serviceDesc.host, serviceDesc.oauth, serviceDesc.provider);
+            var service = new Service(serviceDesc.name, serviceDesc.description, serviceDesc.host, serviceDesc.oauth, serviceDesc.provider, serviceDesc.logo);
 
 	        var successUpdate = function () {
 		        Logger.info("Update service successfully.");
@@ -393,6 +403,118 @@ class CleanAndInitDatabase {
             };
 
             service.create(successServiceCreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with themeSDI.
+     *
+     * @method fulfillThemeSDI
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillThemeSDI(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var themeSDIsNb = 0;
+
+        var themeSDIs : any = require("../dbInitFiles/themeSDIs.json");
+
+        if(themeSDIs.length == 0) {
+            Logger.info("No themeSDIs to create.");
+            successCallback();
+            return;
+        }
+
+        themeSDIs.forEach(function(themeSDIsDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var themeSDI = new ThemeSDI(themeSDIsDesc.name, themeSDIsDesc.description, themeSDIsDesc.defaultTheme, themeSDIsDesc.background, themeSDIsDesc.font, themeSDIsDesc.color, themeSDIsDesc.opacity);
+
+            var successUpdate = function () {
+                Logger.info("Update infoType successfully.");
+                themeSDIsNb = themeSDIsNb + 1;
+
+                if(themeSDIsNb == themeSDIs.length) {
+                    successCallback();
+                }
+            };
+
+            var successCompleteness = function () {
+                Logger.info("Check themeSDI completeness successfully.");
+                themeSDI.update(successUpdate, fail);
+            };
+
+            var successLinkThemeZone = function () {
+                Logger.info("themeZone linked successfully.");
+                themeSDI.checkCompleteness(successCompleteness, fail);
+            };
+
+            var successRetrieveThemeZone = function(themeZone : ThemeZone) {
+                Logger.info("themeZone retrieved successfully.");
+                themeSDI.linkThemeZone(themeZone.getId(), successLinkThemeZone, fail);
+            };
+
+            var successThemeSDICreation = function() {
+                Logger.info("themeSDI created successfully.");
+                self.retrieveThemeZone(themeSDIsDesc.theme, successRetrieveThemeZone, fail);
+            };
+
+            themeSDI.create(successThemeSDICreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with themeZone.
+     *
+     * @method fulfillThemeZone
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillThemeZone(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var themeZonesNb = 0;
+
+        var themeZones : any = require("../dbInitFiles/themeZones.json");
+
+        if(themeZones.length == 0) {
+            Logger.info("No themeZones to create.");
+            successCallback();
+            return;
+        }
+
+        themeZones.forEach(function(themeZonesDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var themeZone = new ThemeZone(themeZonesDesc.name, themeZonesDesc.description, themeZonesDesc.defaultTheme, themeZonesDesc.background, themeZonesDesc.font, themeZonesDesc.color, themeZonesDesc.opacity, themeZonesDesc.border);
+
+            var successUpdate = function () {
+                Logger.info("Update infoType successfully.");
+                themeZonesNb = themeZonesNb + 1;
+
+                if(themeZonesNb == themeZones.length) {
+                    successCallback();
+                }
+            };
+
+            var successCompleteness = function () {
+                Logger.info("Check themeZones completeness successfully.");
+                themeZone.update(successUpdate, fail);
+            };
+
+            var successThemeZoneCreation = function() {
+                Logger.info("themeZones created successfully.");
+                themeZone.checkCompleteness(successCompleteness, fail);
+            };
+
+            themeZone.create(successThemeZoneCreation, fail);
 
         });
     }
@@ -491,7 +613,37 @@ class CleanAndInitDatabase {
 
             var successConstraintAssociation = function() {
                 Logger.info("Constraint associated to ParamType successfully.");
-	            paramType.checkCompleteness(successCompleteness, fail);
+
+
+				if(typeof(paramTypeDesc.paramValue) != "undefined" && typeof(paramTypeDesc.paramValue.value) != "undefined" && paramTypeDesc.paramValue.value != "") {
+					var paramValue = new ParamValue(paramTypeDesc.paramValue.value);
+
+					var successParamValueCreated = function() {
+						var successParamTypeAssociation = function() {
+							Logger.info("ParamType associated to ParamValue successfully.");
+
+							var successParamValueCompleteness = function() {
+								Logger.info("Check paramValue completeness successfully.");
+
+								var successParamValueAssociation = function() {
+									Logger.info("ParamValue associated to ParamType as DefaultValue successfully.");
+
+									paramType.checkCompleteness(successCompleteness, fail);
+								}
+
+								paramType.linkDefaultValue(paramValue.getId(), successParamValueAssociation, fail);
+							};
+
+							paramValue.checkCompleteness(successParamValueCompleteness, fail);
+						};
+
+						paramValue.linkParamType(paramType.getId(), successParamTypeAssociation, fail);
+					};
+
+					paramValue.create(successParamValueCreated, fail);
+				} else {
+					paramType.checkCompleteness(successCompleteness, fail);
+				}
             }
 
             var successConstraintRetrieve = function(newConstraint) {
@@ -792,10 +944,19 @@ class CleanAndInitDatabase {
                 user.addSDI(sdi.getId(), successUserAssociation, fail);
             };
 
+            var successThemeRetrieve = function (themeSDI) {
+                Logger.info("ThemeSDI retrieved successfully");
+
+                var successThemeAssociation = function () {
+                    Logger.info("SDI associated to ThemeSDI successfully");
+                    self.retrieveUser(sdiDesc.user, successUserRetrieve, fail);
+                };
+                sdi.linkTheme(themeSDI.getId(), successThemeAssociation, fail);
+            };
+
             var successSDICreate = function() {
                 Logger.info("SDI create successfully.");
-
-                self.retrieveUser(sdiDesc.user, successUserRetrieve, fail);
+                self.retrieveThemeSDI(sdiDesc.theme, successThemeRetrieve, fail);
             };
 
             sdi.create(successSDICreate, fail);
@@ -1350,6 +1511,72 @@ class CleanAndInitDatabase {
     }
 
     /**
+     * Method to retrieve ThemeSDI.
+     *
+     * @method retrieveThemeSDI
+     * @param {JSON Object} themeSDIDesc - The ThemeSDI's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveThemeSDI(themeSDIDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allThemeSDI) {
+            var themeSDI = null;
+            allThemeSDI.forEach(function(tz) {
+                if(tz.name() == themeSDIDesc.name) {
+                    themeSDI = tz;
+                }
+            });
+
+            if(themeSDI == null) {
+                failCallback(new Error("The themeZone '" + themeSDIDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(themeSDI);
+            }
+        };
+
+        ThemeSDI.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve ThemeZone.
+     *
+     * @method retrieveThemeZone
+     * @param {JSON Object} themeZoneDesc - The ThemeZone's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveThemeZone(themeZoneDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allThemeZones) {
+            var themeZone = null;
+            allThemeZones.forEach(function(tz) {
+                if(tz.name() == themeZoneDesc.name) {
+                    themeZone = tz;
+                }
+            });
+
+            if(themeZone == null) {
+                failCallback(new Error("The themeZone '" + themeZoneDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(themeZone);
+            }
+        };
+
+        ThemeZone.all(successAll, fail);
+    }
+
+    /**
      * Method to retrieve User.
      *
      * @method retrieveUser
@@ -1420,9 +1647,25 @@ class CleanAndInitDatabase {
             zone.linkBehaviour(newBehaviour.getId(), successBehaviourAssociation, fail);
         };
 
+        var successRetrieveTheme = function (theme) {
+            Logger.info("Theme retrieved successfully;");
+
+            var successThemeAssociation = function () {
+                Logger.info("Theme associated to zone successfully.");
+                self.retrieveBehaviour(zoneDesc.behaviour, successBehaviourRetrieved, fail);
+            };
+
+            zone.linkTheme(theme.getId(), successThemeAssociation, fail);
+        };
+
         var successZoneCreation = function() {
             Logger.info("Zone created successfully.");
-            self.retrieveBehaviour(zoneDesc.behaviour, successBehaviourRetrieved, fail);
+
+            if (zoneDesc.theme !== undefined) {
+                self.retrieveThemeZone(zoneDesc.theme, successRetrieveTheme, fail);
+            } else {
+                self.retrieveBehaviour(zoneDesc.behaviour, successBehaviourRetrieved, fail);
+            }
         };
 
         zone.create(successZoneCreation, fail);

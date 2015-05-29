@@ -3,6 +3,8 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./Renderer.ts" />
+/// <reference path="./Source.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -23,16 +25,56 @@ class InfoType extends ModelItf {
     private _name : string;
 
     /**
+     * Sources property
+     *
+     * @property _sources
+     * @type Array<Source>
+     */
+    private _sources : Array<Source>;
+
+    /**
+     * Lazy loading for sources property
+     *
+     * @property _sources_loaded
+     * @type boolean
+     */
+    private _sources_loaded : boolean;
+
+    /**
+     * Renderers property
+     *
+     * @property _renderers
+     * @type Array<Renderer>
+     */
+    private _renderers : Array<Renderer>;
+
+    /**
+     * Lazy loading for renderers property
+     *
+     * @property _renderers_loaded
+     * @type boolean
+     */
+    private _renderers_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
      * @param {string} name - The InfoType's name.
      * @param {number} id - The InfoType's ID.
+	 * @param {string} createdAt - The InfoType's createdAt.
+	 * @param {string} updatedAt - The InfoType's updatedAt.
      */
-    constructor(name : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
+
+        this._sources = new Array<Source>();
+        this._sources_loaded = false;
+
+        this._renderers = new Array<Renderer>();
+        this._renderers_loaded = false;
     }
 
 	/**
@@ -53,7 +95,123 @@ class InfoType extends ModelItf {
         return this._name;
     }
 
+    /**
+     * Return the Service's sources.
+     *
+     * @method sources
+     */
+    sources() {
+        return this._sources;
+    }
+
+    /**
+     * Load the InfoType's sources.
+     *
+     * @method loadSources
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadSources(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._sources_loaded) {
+            var self = this;
+            var success : Function = function(sources) {
+                self._sources = sources;
+                self._sources_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(InfoType, Source, success, fail);
+        }
+    }
+
+    /**
+     * Return the InfoType's renderers.
+     *
+     * @method sources
+     */
+    renderers() {
+        return this._renderers;
+    }
+
+    /**
+     * Load the InfoType's renderers.
+     *
+     * @method loadRenderers
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadRenderers(successCallback : Function = null, failCallback : Function = null) {
+        if(! this._renderers_loaded) {
+            var self = this;
+            var success : Function = function(renderers) {
+                self._renderers = renderers;
+                self._renderers_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(InfoType, Renderer, success, fail);
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._sources_loaded && self._renderers_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadSources(success, fail);
+        this.loadRenderers(success, fail);
+    }
+
+    /**
+     * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
+     */
+    desynchronize() : void {
+        super.desynchronize();
+        this._sources_loaded = false;
+        this._renderers_loaded = false;
+    }
 
 	/**
 	 * Return a InfoType instance as a JSON Object
@@ -65,7 +223,9 @@ class InfoType extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -85,6 +245,31 @@ class InfoType extends ModelItf {
 
 		super.checkCompleteness(success, failCallback);
 	}
+
+    /**
+     * Return a Call instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
+        var self = this;
+        var data = this.toJSONObject();
+
+        var success : Function = function() {
+            data["sources"] = self.serializeArray(self.sources(), onlyId);
+            data["renderers"] = self.serializeArray(self.renderers(), onlyId);
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
+    }
 
     /**
      * Create model in database.
@@ -169,7 +354,7 @@ class InfoType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : InfoType {
-		return new InfoType(jsonObject.name, jsonObject.id, jsonObject.complete);
+		return new InfoType(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

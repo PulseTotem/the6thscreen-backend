@@ -6,6 +6,7 @@
 /// <reference path="./User.ts" />
 /// <reference path="./Zone.ts" />
 /// <reference path="./Profil.ts" />
+/// <reference path="./ThemeSDI.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -90,6 +91,22 @@ class SDI extends ModelItf {
     private _profils_loaded : boolean;
 
     /**
+     * Theme property.
+     *
+     * @property _theme
+     * @type ThemeSDI
+     */
+    private _theme : ThemeSDI;
+
+    /**
+     * Lazy loading for the Theme property
+     *
+     * @property _theme_loaded
+     * @type boolean
+     */
+    private _theme_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -97,9 +114,11 @@ class SDI extends ModelItf {
      * @param {string} description - The SDI's description.
      * @param {string} allowedHost - The SDI's allowedHost.
      * @param {number} id - The SDI's ID.
+	 * @param {string} createdAt - The SDI's createdAt.
+	 * @param {string} updatedAt - The SDI's updatedAt.
      */
-    constructor(name : string = "", description : string = "", allowedHost : string = "*", id : number = null, complete: boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", allowedHost : string = "*", id : number = null, complete: boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -113,6 +132,9 @@ class SDI extends ModelItf {
 
         this._profils = new Array<Profil>();
         this._profils_loaded = false;
+
+        this._theme = null;
+        this._theme_loaded = false;
     }
 
 	/**
@@ -292,6 +314,47 @@ class SDI extends ModelItf {
         }
     }
 
+    /**
+     * Return the SDI's theme.
+     *
+     * @method theme
+     */
+    theme() {
+        return this._theme;
+    }
+
+    /**
+     * Load the SDI's theme.
+     *
+     * @method loadTheme
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadTheme(successCallback : Function, failCallback : Function) {
+        if(! this._theme_loaded) {
+            var self = this;
+            var success : Function = function(theme) {
+                self._theme = theme;
+                self._theme_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(SDI, ThemeSDI, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -306,7 +369,7 @@ class SDI extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._users_loaded && self._profils_loaded && self._zones_loaded) {
+            if(self._users_loaded && self._profils_loaded && self._zones_loaded && self._theme_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -324,6 +387,7 @@ class SDI extends ModelItf {
         this.loadUsers(success, fail);
         this.loadProfils(success, fail);
         this.loadZones(success, fail);
+        this.loadTheme(success, fail);
     }
 
 	/**
@@ -335,6 +399,7 @@ class SDI extends ModelItf {
 		this._profils_loaded = false;
 		this._users_loaded = false;
 		this._zones_loaded = false;
+        this._theme_loaded = false;
 	}
 
 	/**
@@ -349,7 +414,9 @@ class SDI extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"allowedHost": this.allowedHost(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -381,6 +448,13 @@ class SDI extends ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
+
+            if (onlyId) {
+                data["theme"] = (self.theme() !== null) ? self.theme().getId() : null;
+            } else {
+                data["theme"] = (self.theme() !== null) ? self.theme().toJSONObject() : null;
+            }
+
             data["profils"] = self.serializeArray(self.profils(), onlyId);
             data["users"] = self.serializeArray(self.users(), onlyId);
             data["zones"] = self.serializeArray(self.zones(), onlyId);
@@ -473,6 +547,29 @@ class SDI extends ModelItf {
 		this.deleteObjectAssociation(SDI, Profil, profilID, successCallback, failCallback);
 	}
 
+    /**
+     * Set the Theme of the SDI.
+     *
+     * @method linkTheme
+     * @param {ThemeSDI} it The Theme to associate with the SDI.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    linkTheme(themeSDIID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(SDI, ThemeSDI, themeSDIID, successCallback, failCallback);
+    }
+
+    /**
+     * Unset the current Theme from the SDI.
+     *
+     * @method unlinkTheme
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    unlinkTheme(themeSDIID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(SDI, ThemeSDI, themeSDIID, successCallback, failCallback);
+    }
+
 	/**
      * Create model in database.
      *
@@ -556,7 +653,7 @@ class SDI extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : SDI {
-		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id, jsonObject.complete);
+		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**
