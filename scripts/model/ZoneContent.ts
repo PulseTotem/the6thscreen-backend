@@ -733,19 +733,19 @@ class ZoneContent extends ModelItf {
 			} else {
 				if(self.relativeTimeline() != null) {
 					var successDeleteRelativeTimeline = function() {
-						ModelItf.deleteObject(ZoneContent, this.getId(), successCallback, failCallback, attemptNumber);
+						ModelItf.deleteObject(ZoneContent, self.getId(), successCallback, failCallback, attemptNumber);
 					};
 
 					self.relativeTimeline().delete(successDeleteRelativeTimeline, fail);
 				} else {
 					if(self.absoluteTimeline() != null) {
 						var successDeleteAbsoluteTimeline = function() {
-							ModelItf.deleteObject(ZoneContent, this.getId(), successCallback, failCallback, attemptNumber);
+							ModelItf.deleteObject(ZoneContent, self.getId(), successCallback, failCallback, attemptNumber);
 						};
 
 						self.absoluteTimeline().delete(successDeleteAbsoluteTimeline, fail);
 					} else {
-						ModelItf.deleteObject(ZoneContent, this.getId(), successCallback, failCallback, attemptNumber);
+						ModelItf.deleteObject(ZoneContent, self.getId(), successCallback, failCallback, attemptNumber);
 					}
 				}
 			}

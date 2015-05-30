@@ -463,14 +463,14 @@ class Profil extends ModelItf {
 						 zoneContentsUnlinkNumber++;
 
 						 if(zoneContentsUnlinkNumber == zoneContentsNumber) {
-							 ModelItf.deleteObject(Profil, this.getId(), successCallback, failCallback, attemptNumber);
+							 ModelItf.deleteObject(Profil, self.getId(), successCallback, failCallback, attemptNumber);
 						 }
 					 }
-					
+
 					self.removeZoneContent(zoneContent.getId(), successUnlink, fail);
 				});
 			} else {
-				ModelItf.deleteObject(Profil, this.getId(), successCallback, failCallback, attemptNumber);
+				ModelItf.deleteObject(Profil, self.getId(), successCallback, failCallback, attemptNumber);
 			}
 		};
 

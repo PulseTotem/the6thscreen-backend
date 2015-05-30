@@ -498,7 +498,31 @@ class Call extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Call, this.getId(), successCallback, failCallback, attemptNumber);
+		var self = this;
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		var successLoadParamValues = function() {
+
+			if(self.paramValues().length > 0) {
+				var nbDeletedParamValues = 0;
+				var nbTotal = self.paramValues().length;
+
+				self.paramValues().forEach(function (paramValue) {
+					nbDeletedParamValues++;
+
+					if(nbDeletedParamValues == nbTotal) {
+						ModelItf.deleteObject(Call, self.getId(), successCallback, failCallback, attemptNumber);
+					}
+				});
+			} else {
+				ModelItf.deleteObject(Call, self.getId(), successCallback, failCallback, attemptNumber);
+			}
+		}
+
+		this.loadParamValues(successLoadParamValues, fail);
     }
 
     /**

@@ -365,7 +365,21 @@ class RelativeEvent extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(RelativeEvent, this.getId(), successCallback, failCallback, attemptNumber);
+		var self = this;
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		var successLoadCall = function() {
+			var successDeleteCall = function() {
+				ModelItf.deleteObject(RelativeEvent, self.getId(), successCallback, failCallback, attemptNumber);
+			}
+
+			self.call().delete(successDeleteCall, fail);
+		};
+
+		this.loadCall(successLoadCall, fail);
     }
 
     /**

@@ -584,7 +584,36 @@ class RelativeTimeline extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(RelativeTimeline, this.getId(), successCallback, failCallback, attemptNumber);
+		var self = this;
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		var successLoadRelativeEvents = function() {
+
+			if(self.relativeEvents().length > 0) {
+				var nbDeletedRelEvents = 0;
+				var nbTotal = self.relativeEvents().length;
+
+				self.relativeEvents().forEach(function (relativeEvent) {
+
+					var successDeleteRelEvent = function () {
+						nbDeletedRelEvents++;
+
+						if(nbDeletedRelEvents == nbTotal) {
+							ModelItf.deleteObject(RelativeTimeline, self.getId(), successCallback, failCallback, attemptNumber);
+						}
+					}
+
+					relativeEvent.delete(successDeleteRelEvent, fail);
+				});
+			} else {
+				ModelItf.deleteObject(RelativeTimeline, self.getId(), successCallback, failCallback, attemptNumber);
+			}
+		};
+
+		this.loadRelativeEvents(successLoadRelativeEvents, fail);
     }
 
     /**
