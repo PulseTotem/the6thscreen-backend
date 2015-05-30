@@ -721,7 +721,37 @@ class ZoneContent extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(ZoneContent, this.getId(), successCallback, failCallback, attemptNumber);
+		var self = this;
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		var successLoadAssociations = function() {
+			if(self.profils().length > 0) {
+				fail("You can't delete a ZoneContent that belongs to some Profils.");
+			} else {
+				if(self.relativeTimeline() != null) {
+					var successDeleteRelativeTimeline = function() {
+						ModelItf.deleteObject(ZoneContent, this.getId(), successCallback, failCallback, attemptNumber);
+					};
+
+					self.relativeTimeline().delete(successDeleteRelativeTimeline, fail);
+				} else {
+					if(self.absoluteTimeline() != null) {
+						var successDeleteAbsoluteTimeline = function() {
+							ModelItf.deleteObject(ZoneContent, this.getId(), successCallback, failCallback, attemptNumber);
+						};
+
+						self.absoluteTimeline().delete(successDeleteAbsoluteTimeline, fail);
+					} else {
+						ModelItf.deleteObject(ZoneContent, this.getId(), successCallback, failCallback, attemptNumber);
+					}
+				}
+			}
+		};
+
+		this.loadAssociations(successLoadAssociations, fail);
     }
 
     /**
