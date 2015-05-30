@@ -511,11 +511,16 @@ class Call extends ModelItf {
 				var nbTotal = self.paramValues().length;
 
 				self.paramValues().forEach(function (paramValue) {
-					nbDeletedParamValues++;
 
-					if(nbDeletedParamValues == nbTotal) {
-						ModelItf.deleteObject(Call, self.getId(), successCallback, failCallback, attemptNumber);
-					}
+					var successDeleteParamValue = function() {
+						nbDeletedParamValues++;
+
+						if (nbDeletedParamValues == nbTotal) {
+							ModelItf.deleteObject(Call, self.getId(), successCallback, failCallback, attemptNumber);
+						}
+					};
+
+					paramValue.delete(successDeleteParamValue, fail);
 				});
 			} else {
 				ModelItf.deleteObject(Call, self.getId(), successCallback, failCallback, attemptNumber);
