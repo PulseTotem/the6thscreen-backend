@@ -99,6 +99,21 @@ class ZoneContent extends ModelItf {
 	 */
 	private _relativeTimeline_loaded : boolean;
 
+	/**
+	 * Profils property.
+	 *
+	 * @property _profils
+	 * @type Array<Profil>
+	 */
+	private _profils : Array<Profil>;
+
+	/**
+	 * Lazy loading for Profils property.
+	 *
+	 * @property _profils_loaded
+	 * @type boolean
+	 */
+	private _profils_loaded : boolean;
 
     /**
      * Constructor.
@@ -127,6 +142,9 @@ class ZoneContent extends ModelItf {
 
 	    this._relativeTimeline = null;
 	    this._relativeTimeline_loaded = false;
+
+		this._profils = new Array<Profil>();
+		this._profils_loaded = false;
     }
 
 	/**
@@ -337,6 +355,47 @@ class ZoneContent extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the ZoneContent's profils.
+	 *
+	 * @method profils
+	 */
+	profils() {
+		return this._profils;
+	}
+
+	/**
+	 * Load the ZoneContent's profils.
+	 *
+	 * @method loadProfils
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadProfils(successCallback : Function, failCallback : Function) {
+		if(! this._profils_loaded) {
+			var self = this;
+			var success : Function = function(profils) {
+				self._profils = profils;
+				self._profils_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getAssociatedObjects(ZoneContent, Profil, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -351,7 +410,7 @@ class ZoneContent extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._absoluteTimeline_loaded && self._relativeTimeline_loaded && self._widget_loaded && self._zone_loaded) {
+            if(self._absoluteTimeline_loaded && self._relativeTimeline_loaded && self._widget_loaded && self._zone_loaded && self._profils_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -370,6 +429,7 @@ class ZoneContent extends ModelItf {
         this.loadRelativeTimeline(success, fail);
         this.loadWidget(success, fail);
         this.loadZone(success, fail);
+		this.loadProfils(success, fail);
     }
 
 	/**
@@ -382,6 +442,7 @@ class ZoneContent extends ModelItf {
 		this._relativeTimeline_loaded = false;
 		this._widget_loaded = false;
 		this._zone_loaded = false;
+		this._profils_loaded = false;
 	}
 
 	/**
@@ -472,6 +533,8 @@ class ZoneContent extends ModelItf {
 		        data["absoluteTimeline"] = (self.absoluteTimeline() !== null) ? self.absoluteTimeline().toJSONObject() : null;
 		        data["relativeTimeline"] = (self.relativeTimeline() !== null) ? self.relativeTimeline().toJSONObject() : null;
 	        }
+
+			data["profils"] = self.serializeArray(self.profils(), onlyId);
 
             successCallback(data);
         };
@@ -584,6 +647,32 @@ class ZoneContent extends ModelItf {
 		this.deleteObjectAssociation(ZoneContent, RelativeTimeline, relativeTimelineID, successCallback, failCallback);
 	}
 
+	/**
+	 * Add a new Profil to the ZoneContent and associate it in the database.
+	 * A Profil can only be added once.
+	 *
+	 * @method addProfil
+	 * @param {number} profilId - The Profil Id to add inside the ZoneContent. It cannot be a null value.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	addProfil(profilID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(ZoneContent, Profil, profilID, successCallback, failCallback);
+	}
+
+	/**
+	 * Remove a Profil from the ZoneContent: the association is removed both in the object and in database.
+	 * The Profil can only be removed if it exists first in the list of associated Profils, else an exception is thrown.
+	 *
+	 * @method removeProfil
+	 * @param {number} profilId - The Profil to remove from that ZoneContent
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	removeProfil(profilID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ZoneContent, Profil, profilID, successCallback, failCallback);
+	}
+
 
 	/**
      * Create model in database.
@@ -632,7 +721,37 @@ class ZoneContent extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(ZoneContent, this.getId(), successCallback, failCallback, attemptNumber);
+		var self = this;
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		var successLoadAssociations = function() {
+			if(self.profils().length > 0) {
+				fail("You can't delete a ZoneContent that belongs to some Profils.");
+			} else {
+				if(self.relativeTimeline() != null) {
+					var successDeleteRelativeTimeline = function() {
+						ModelItf.deleteObject(ZoneContent, self.getId(), successCallback, failCallback, attemptNumber);
+					};
+
+					self.relativeTimeline().delete(successDeleteRelativeTimeline, fail);
+				} else {
+					if(self.absoluteTimeline() != null) {
+						var successDeleteAbsoluteTimeline = function() {
+							ModelItf.deleteObject(ZoneContent, self.getId(), successCallback, failCallback, attemptNumber);
+						};
+
+						self.absoluteTimeline().delete(successDeleteAbsoluteTimeline, fail);
+					} else {
+						ModelItf.deleteObject(ZoneContent, self.getId(), successCallback, failCallback, attemptNumber);
+					}
+				}
+			}
+		};
+
+		this.loadAssociations(successLoadAssociations, fail);
     }
 
     /**
