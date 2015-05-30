@@ -447,7 +447,34 @@ class Profil extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Profil, this.getId(), successCallback, failCallback, attemptNumber);
+        var self = this;
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		var successLoadZoneContents = function() {
+			if(self.zoneContents().length > 0) {
+				var zoneContentsUnlinkNumber = 0;
+				var zoneContentsNumber = self.zoneContents().length;
+
+				self.zoneContents().forEach(function(zoneContent : ZoneContent) {
+					 var successUnlink = function() {
+						 zoneContentsUnlinkNumber++;
+
+						 if(zoneContentsUnlinkNumber == zoneContentsNumber) {
+							 ModelItf.deleteObject(Profil, this.getId(), successCallback, failCallback, attemptNumber);
+						 }
+					 }
+					
+					self.removeZoneContent(zoneContent.getId(), successUnlink, fail);
+				});
+			} else {
+				ModelItf.deleteObject(Profil, this.getId(), successCallback, failCallback, attemptNumber);
+			}
+		};
+
+		this.loadZoneContents(successLoadZoneContents, fail);
     }
 
     /**
