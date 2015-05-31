@@ -113,6 +113,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		// Delete object
 		this.addListenerToSocket('DeleteRelativeEvent', function(idRelativeEvent) { self.deleteObjectFromDescription(RelativeEvent, "relativeEventId", idRelativeEvent, "AnswerDeleteRelativeEvent"); });
 		this.addListenerToSocket('DeleteZoneContent', function(idZoneContent) { self.deleteObjectFromDescription(ZoneContent, "zoneContentId", idZoneContent, "AnswerDeleteZoneContent"); });
+		this.addListenerToSocket('DeleteProfil', function(idProfil) { self.deleteObjectFromDescription(Profil, "profilId", idProfil, "AnswerDeleteProfil"); });
 
 		this.addListenerToSocket('DeleteZone', function(idZone) { self.deleteObjectFromDescription(Zone, "zoneId", idZone, "deletedZone"); });
 		this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "deletedSource"); });
@@ -122,7 +123,6 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteOAuthKey', function(idOAuthKey) { self.deleteObjectFromDescription(OAuthKey, "oauthKeyId", idOAuthKey, "deletedOAuthKey"); });
 		this.addListenerToSocket('DeleteCall', function(idCall) { self.deleteObjectFromDescription(Call, "callId", idCall, "deletedCall"); });
 		this.addListenerToSocket('DeleteRenderer', function(idRenderer) { self.deleteObjectFromDescription(Renderer, "rendererId", idRenderer, "deletedRenderer"); });
-		this.addListenerToSocket('DeleteProfil', function(idProfil) { self.deleteObjectFromDescription(Profil, "profilId", idProfil, "deletedProfil"); });
 		this.addListenerToSocket('DeleteInfoType', function(idInfoType) { self.deleteObjectFromDescription(InfoType, "infoTypeId", idInfoType, "deletedInfoType"); });
 		this.addListenerToSocket('DeletePolicy', function(idPolicy) { self.deleteObjectFromDescription(Policy, "policyId", idPolicy, "deletedPolicy"); });
 
