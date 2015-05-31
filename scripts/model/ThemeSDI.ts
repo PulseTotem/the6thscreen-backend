@@ -39,12 +39,20 @@ class ThemeSDI extends ModelItf {
 	private _defaultTheme : boolean;
 
 	/**
-	 * Background property.
+	 * BackgroundImageURL property.
 	 *
-	 * @property _background
+	 * @property _backgroundImageURL
 	 * @type string
 	 */
-	private _background : string;
+	private _backgroundImageURL : string;
+
+	/**
+	 * BackgroundColor property.
+	 *
+	 * @property _backgroundColor
+	 * @type string
+	 */
+	private _backgroundColor : string;
 
 	/**
 	 * Font property.
@@ -93,20 +101,24 @@ class ThemeSDI extends ModelItf {
 	 * @constructor
 	 * @param name The name of the themeSDI
 	 * @param description A description of the themeSDI
-	 * @param host The host to reach the themeSDI
-	 * @param {boolean} oauth - To set if ThemeSDI needs authentication or not
-	 * @param {string} provider - The OAuthD provider's name
+	 * @param {boolean} defaultTheme - The ThemeSDI's defaultTheme status
+	 * @param {string} backgroundImageURL - The ThemeSDI's backgroundImageURL
+	 * @param {string} backgroundColor - The ThemeSDI's backgroundColor
+	 * @param {string} font - The ThemeSDI's font
+	 * @param {string} color - The ThemeSDI's color
+	 * @param {string} opacity - The ThemeSDI's opacity
 	 * @param id The DB id of the themeSDI
 	 * @param {string} createdAt - The ThemeSDI's createdAt.
 	 * @param {string} updatedAt - The ThemeSDI's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, background : string = "", font : string = "", color : string = "", opacity : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, backgroundImageURL : string = "", backgroundColor : string = "", font : string = "", color : string = "", opacity : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
 		this.setDefaultTheme(defaultTheme);
-		this.setBackground(background);
+		this.setBackgroundImageURL(backgroundImageURL);
+		this.setBackgroundColor(backgroundColor);
 		this.setFont(font);
 		this.setColor(color);
 		this.setOpacity(opacity);
@@ -143,12 +155,23 @@ class ThemeSDI extends ModelItf {
 	}
 
 	/**
-	 * Set the ThemeSDI's background.
+	 * Set the ThemeSDI's backgroundImageURL.
 	 *
-	 * @method setBackground
+	 * @method setBackgroundImageURL
+	 * @param {string} backgroundImageURL - The ThemeSDI's backgroundImageURL to set
 	 */
-	setBackground(background : string) {
-		this._background = background;
+	setBackgroundImageURL(backgroundImageURL : string) {
+		this._backgroundImageURL = backgroundImageURL;
+	}
+
+	/**
+	 * Set the ThemeSDI's backgroundColor.
+	 *
+	 * @method setBackgroundColor
+	 * @param {string} backgroundColor - The ThemeSDI's backgroundColor to set
+	 */
+	setBackgroundColor(backgroundColor : string) {
+		this._backgroundColor = backgroundColor;
 	}
 
 	/**
@@ -206,12 +229,21 @@ class ThemeSDI extends ModelItf {
 	}
 
 	/**
-	 * Return the ThemeSDI's background.
+	 * Return the ThemeSDI's backgroundImageURL.
 	 *
-	 * @method background
+	 * @method backgroundImageURL
 	 */
-	background() {
-		return this._background;
+	backgroundImageURL() {
+		return this._backgroundImageURL;
+	}
+
+	/**
+	 * Return the ThemeSDI's backgroundColor.
+	 *
+	 * @method backgroundColor
+	 */
+	backgroundColor() {
+		return this._backgroundColor;
 	}
 
 	/**
@@ -337,7 +369,8 @@ class ThemeSDI extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"defaultTheme": this.defaultTheme(),
-			"background": this.background(),
+			"backgroundImageURL": this.backgroundImageURL(),
+			"backgroundColor": this.backgroundColor(),
 			"font": this.font(),
 			"color": this.color(),
 			"opacity": this.opacity(),
@@ -387,9 +420,9 @@ class ThemeSDI extends ModelItf {
 		var success : Function = function() {
 			var data = self.toJSONObject();
 			if (onlyId) {
-				data["infoType"] = (self.themeZone() !== null) ? self.themeZone().getId() : null;
+				data["themeZone"] = (self.themeZone() !== null) ? self.themeZone().getId() : null;
 			} else {
-				data["infoType"] = (self.themeZone() !== null) ? self.themeZone().toJSONObject() : null;
+				data["themeZone"] = (self.themeZone() !== null) ? self.themeZone().toJSONObject() : null;
 			}
 
 			successCallback(data);
@@ -508,7 +541,7 @@ class ThemeSDI extends ModelItf {
 	 * @return {ThemeSDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ThemeSDI {
-		return new ThemeSDI(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.background, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new ThemeSDI(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.backgroundImageURL, jsonObject.backgroundColor, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

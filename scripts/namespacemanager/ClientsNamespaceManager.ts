@@ -68,44 +68,57 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var profilDesc = {};
 
 		var successLoadAssoSDI = function () {
-			var zones : Array<Zone> = sdi.zones();
 
-			var nbZones = 0;
+			var successThemeCompleteDescription = function(themeCompleteDesc) {
+				sdiDesc["theme"] = themeCompleteDesc;
 
-			zones.forEach(function (zone) {
-				var zoneDesc = zone.toJSONObject();
+				var zones : Array<Zone> = sdi.zones();
 
-				var successLoadAssoZone = function () {
-					var behaviour : Behaviour = zone.behaviour();
+				var nbZones = 0;
 
-					zoneDesc["behaviour"] = behaviour.toJSONObject();
+				zones.forEach(function (zone) {
+					var zoneDesc = zone.toJSONObject();
 
-					zoneDesc["callTypes"] = [];
+					var successLoadAssoZone = function () {
+						zoneDesc["theme"] = null;
 
-					var callTypes : Array<CallType> = zone.callTypes();
-					var nbCT = 0;
+						if(zone.theme() != null) {
+							zoneDesc["theme"] = zone.theme().toJSONObject();
+						}
 
-					callTypes.forEach( function (callType) {
+						var behaviour : Behaviour = zone.behaviour();
 
-						var successCallTypeToCompleteJSON = function (data) {
-							zoneDesc["callTypes"].push(data);
-							nbCT++;
-							if (nbCT == callTypes.length) {
-								nbZones++;
+						zoneDesc["behaviour"] = behaviour.toJSONObject();
 
-								sdiDesc["zones"].push(zoneDesc);
+						zoneDesc["callTypes"] = [];
 
-								if (nbZones == zones.length) {
-									self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
+						var callTypes : Array<CallType> = zone.callTypes();
+						var nbCT = 0;
+
+						callTypes.forEach( function (callType) {
+
+							var successCallTypeToCompleteJSON = function (data) {
+								zoneDesc["callTypes"].push(data);
+								nbCT++;
+								if (nbCT == callTypes.length) {
+									nbZones++;
+
+									sdiDesc["zones"].push(zoneDesc);
+
+									if (nbZones == zones.length) {
+										self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
+									}
 								}
-							}
-						};
+							};
 
-						callType.toCompleteJSONObject(successCallTypeToCompleteJSON, fail);
-					})
-				};
-				zone.loadAssociations(successLoadAssoZone, fail);
-			});
+							callType.toCompleteJSONObject(successCallTypeToCompleteJSON, fail);
+						})
+					};
+					zone.loadAssociations(successLoadAssoZone, fail);
+				});
+			};
+
+			sdi.theme().toCompleteJSONObject(successThemeCompleteDescription, fail);
 		};
 
 		var successLoadAssoProfil = function () {

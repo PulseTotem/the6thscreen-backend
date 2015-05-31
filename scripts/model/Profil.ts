@@ -280,15 +280,6 @@ class Profil extends ModelItf {
 		var self = this;
 
 		var success : Function = function () {
-			self._complete = (self._complete && !!self.name());
-			successCallback();
-		};
-		super.checkCompleteness(success, failCallback);
-
-
-		var self = this;
-
-		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 				var fail:Function = function (error) {
 					failCallback(error);

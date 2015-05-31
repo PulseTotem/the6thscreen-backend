@@ -105,9 +105,56 @@ describe('Profil', function() {
 			b.checkCompleteness(success, fail);
 		});
 
-		it('should return true if the object has a name and an ID but no description', function(done) {
+		it('should return true if the object has a name and an ID but no description and number of ZoneContent equals to number of SDI\'s zones', function(done) {
 			var b = new Profil("toto", null, 52);
+
+			var responseSDI : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id": 42,
+					"name": null,
+					"description": "blabla",
+					"allowedHost": "",
+					"complete": true
+				}
+			};
+
+			var restClientMockSDI = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), b.getId().toString(), SDI.getTableName()))
+				.reply(200, JSON.stringify(responseSDI));
+
+			var responseZoneContents : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": [{
+					"id": 32,
+					"name": null,
+					"description": "blabla",
+					"complete": true
+				}]
+			};
+
+			var restClientMockZoneContents = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), b.getId().toString(), ZoneContent.getTableName()))
+				.reply(200, JSON.stringify(responseZoneContents));
+
+			var responseZones : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": [{
+					"id": 22,
+					"name": null,
+					"description": "blabla",
+					"complete": true
+				}]
+			};
+
+			var restClientMockZones = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(SDI.getTableName(), "42", Zone.getTableName()))
+				.reply(200, JSON.stringify(responseZones));
+
 			var success = function () {
+				assert.ok(restClientMockSDI.isDone(), "The mock request has not been done to retrieve the SDI in database.");
+				assert.ok(restClientMockZoneContents.isDone(), "The mock request has not been done to retrieve zoneContents in database.");
+				assert.ok(restClientMockZones.isDone(), "The mock request has not been done to retrieve zones in database.");
 				assert.equal(b.isComplete(), true, "The Profil should be complete.");
 				done();
 			};
