@@ -228,5 +228,27 @@
       "infoType" : {
         "name" : "VideoPlaylist"
       }
-    }
+    },
+    {
+      "name" : "PictureAlbumFromJSON",
+      "description" : "Récupération d'un album photos à partir d'un JSON descriptif",
+      "service" : {
+        "name" : "Hackathon"
+      },
+      "method" : "PictureAlbumFromJSON",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        },
+        {
+          "name": "URL"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+  }
 ]
