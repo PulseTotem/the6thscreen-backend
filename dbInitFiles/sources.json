@@ -206,5 +206,27 @@
       "infoType" : {
         "name" : "UserList"
       }
+    },
+    {
+      "name" : "VideoFromJSON",
+      "description" : "Récupération de vidéos à partir d'un JSON descriptif",
+      "service" : {
+        "name" : "Hackathon"
+      },
+      "method" : "VideoFromJSON",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        },
+        {
+          "name": "FeedURL"
+        }
+      ],
+      "infoType" : {
+        "name" : "VideoPlaylist"
+      }
     }
 ]
