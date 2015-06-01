@@ -18,7 +18,7 @@
                 "positionFromTop" : 0,
                 "positionFromLeft" : 0,
                 "behaviour" : {
-                    "name" : "Appearance"
+                    "name" : "AppearanceBehaviour"
                 }
             },
             {
@@ -29,7 +29,7 @@
                 "positionFromTop" : 0,
                 "positionFromLeft" : 55,
                 "behaviour" : {
-                    "name" : "Appearance"
+                    "name" : "AppearanceBehaviour"
                 }
             }
         ],
@@ -87,7 +87,7 @@
                 "positionFromTop" : 0,
                 "positionFromLeft" : 0,
                 "behaviour" : {
-                    "name" : "Appearance"
+                    "name" : "AppearanceBehaviour"
                 }
             },
             {
@@ -98,7 +98,7 @@
                 "positionFromTop" : 0,
                 "positionFromLeft" : 51,
                 "behaviour" : {
-                    "name" : "Appearance"
+                    "name" : "AppearanceBehaviour"
                 }
             }
         ],
@@ -156,7 +156,7 @@
         "positionFromTop" : 0,
         "positionFromLeft" : 0,
         "behaviour" : {
-          "name" : "Appearance"
+          "name" : "AppearanceBehaviour"
         },
         "theme": {
           "name": "ThemeBasic"
@@ -170,7 +170,7 @@
         "positionFromTop" : 0,
         "positionFromLeft" : 51,
         "behaviour" : {
-          "name" : "Appearance"
+          "name" : "AppearanceBehaviour"
         }
       }
     ],

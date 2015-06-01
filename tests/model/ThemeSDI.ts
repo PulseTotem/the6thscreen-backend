@@ -33,51 +33,57 @@ describe('ThemeSDI', function(){
 			assert.equal(c.defaultTheme(), defaultTheme, "The defaultTheme is not stored correctly.");
 		});
 
-		it('should store the background', function(){
-			var background = "red";
-			var c = new ThemeSDI("", "", false, background);
-			assert.equal(c.background(), background, "The background is not stored correctly.");
+		it('should store the backgroundImageURL', function(){
+			var backgroundImageURL = "http://example.com/background.png";
+			var c = new ThemeSDI("", "", false, backgroundImageURL);
+			assert.equal(c.backgroundImageURL(), backgroundImageURL, "The backgroundImageURL is not stored correctly.");
+		});
+
+		it('should store the backgroundColor', function(){
+			var backgroundColor = "red";
+			var c = new ThemeSDI("", "", false, "", backgroundColor);
+			assert.equal(c.backgroundColor(), backgroundColor, "The backgroundColor is not stored correctly.");
 		});
 
 		it('should store the font', function(){
 			var font = "arial";
-			var c = new ThemeSDI("", "", false, "", font);
+			var c = new ThemeSDI("", "", false, "", "", font);
 			assert.equal(c.font(), font, "The font is not stored correctly.");
 		});
 
 		it('should store the color', function(){
 			var color = "black";
-			var c = new ThemeSDI("", "", false, "", "", color);
+			var c = new ThemeSDI("", "", false, "", "", "", color);
 			assert.equal(c.color(), color, "The color is not stored correctly.");
 		});
 
 		it('should store the opacity', function(){
 			var opacity = "10%";
-			var c = new ThemeSDI("", "", false, "", "", "", opacity);
+			var c = new ThemeSDI("", "", false, "", "", "", "", opacity);
 			assert.equal(c.opacity(), opacity, "The opacity is not stored correctly.");
 		});
 
 
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new ThemeSDI("", "", false, "", "", "", "", id);
+			var c = new ThemeSDI("", "", false, "", "", "", "", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete value', function() {
-			var c = new ThemeSDI("", "", false, "", "", "", "", 12, true);
+			var c = new ThemeSDI("", "", false, "", "", "", "", "", 12, true);
 			assert.equal(c.isComplete(), true, "The complete attribute is not stored.");
 		});
 
 		it('should assign a default value to the complete attribute', function() {
-			var c = new ThemeSDI("", "", false, "", "", "", "", 12, false);
+			var c = new ThemeSDI("", "", false, "", "", "", "", "", 12, false);
 			assert.equal(c.isComplete(), false, "The complete attribute is not stored.");
 		});
 	});
 
 	describe('#checkCompleteness', function() {
 		it('should consider the object as complete if it has an ID, a name and a complete ThemeZone', function(done) {
-			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "", 12);
+			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "", "", 12);
 
 			var response : SequelizeRestfulResponse = {
 				"status": "success",
@@ -106,7 +112,7 @@ describe('ThemeSDI', function(){
 		});
 
 		it('should not consider the object as complete if it has an ID, a name and a ThemeZone which is not complete', function(done) {
-			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "", 12);
+			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "", "", 12);
 
 			var response : SequelizeRestfulResponse = {
 				"status": "success",
@@ -135,7 +141,7 @@ describe('ThemeSDI', function(){
 		});
 
 		it('should not consider the object as complete if it has no linked ThemeZone', function(done) {
-			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "", 43);
+			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "", "", 43);
 
 			var response : SequelizeRestfulResponse = {
 				"status": "success",
@@ -162,7 +168,7 @@ describe('ThemeSDI', function(){
 		it('should not consider the object as complete if it has no id', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "");
+			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "", "");
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -179,7 +185,7 @@ describe('ThemeSDI', function(){
 		it('should not consider the object as complete if it has an empty name', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new ThemeSDI("", "", false, "", "", "", "", 12);
+			var cpt = new ThemeSDI("", "", false, "", "", "", "", "", 12);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -196,7 +202,7 @@ describe('ThemeSDI', function(){
 		it('should not consider the object as complete if it has a null name', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new ThemeSDI(null, "", false, "", "", "","", 12);
+			var cpt = new ThemeSDI(null, "", false, "", "", "", "","", 12);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -212,14 +218,15 @@ describe('ThemeSDI', function(){
 
 	});
 
-	describe('#fromJSONobject', function() {
+	describe('#fromJSONObject', function() {
 		it('should create the right object', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
 				"description": "tata",
 				"defaultTheme": true,
-				"background": "red",
+				"backgroundImageURL": "http://example.com/background.png",
+				"backgroundColor": "red",
 				"font": "arial",
 				"color": "black",
 				"opacity": "24%",
@@ -227,7 +234,7 @@ describe('ThemeSDI', function(){
 			};
 
 			var callRetrieve = ThemeSDI.fromJSONObject(json);
-			var callExpected = new ThemeSDI("toto", "tata", true, "red", "arial", "black", "24%", 42, true);
+			var callExpected = new ThemeSDI("toto", "tata", true, "http://example.com/background.png", "red", "arial", "black", "24%", 42, true);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve themeSDI ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -238,7 +245,8 @@ describe('ThemeSDI', function(){
 				"name": "toto",
 				"description": "tata",
 				"defaultTheme": false,
-				"background": "red",
+				"backgroundImageURL": "http://example.com/background.png",
+				"backgroundColor": "red",
 				"font": "arial",
 				"color": "black",
 				"opacity": "24%",
@@ -246,7 +254,7 @@ describe('ThemeSDI', function(){
 			};
 
 			var callRetrieve = ThemeSDI.fromJSONObject(json);
-			var callExpected = new ThemeSDI("toto", "tata", false, "red", "arial","black", "24%", 42);
+			var callExpected = new ThemeSDI("toto", "tata", false, "http://example.com/background.png", "red", "arial","black", "24%", 42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve themeSDI ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -254,13 +262,14 @@ describe('ThemeSDI', function(){
 
 	describe('#toJsonObject', function() {
 		it('should create the expected JSON Object', function() {
-			var c = new ThemeSDI("toto", "truc", true, "black", "arial","red", "89%", 52, true);
+			var c = new ThemeSDI("toto", "truc", true, "http://example.com/background.png", "black", "arial", "red", "89%", 52, true);
 			var expected = {
 				"id": 52,
 				"name": "toto",
 				"description": "truc",
 				"defaultTheme": true,
-				"background": "black",
+				"backgroundImageURL": "http://example.com/background.png",
+				"backgroundColor": "black",
 				"font": "arial",
 				"color": "red",
 				"opacity": "89%",
@@ -276,8 +285,8 @@ describe('ThemeSDI', function(){
 
 	describe('#linkThemeZone', function () {
 		it('should call the right request', function (done) {
-			var c = new ThemeSDI("toto", "truc", true, "black", "arial","black", "89%", 52);
-			var s = new ThemeZone("toto", "truc", true, "black", "arial","black", "89%", "14px", 52);
+			var c = new ThemeSDI("toto", "truc", true, "http://example.com/background.png", "black", "arial","black", "89%", 52);
+			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "black", "arial","black", "89%", "14px", 52);
 
 			var response1:SequelizeRestfulResponse = {
 				"status": "success",
@@ -326,8 +335,8 @@ describe('ThemeSDI', function(){
 
 	describe('#unlinkThemeZone', function () {
 		it('should call the right request', function (done) {
-			var c = new ThemeSDI("toto", "truc", true, "black", "arial","black", "89%", 52);
-			var s = new ThemeZone("toto", "truc", true, "black", "arial","black", "89%", "14px", 52);
+			var c = new ThemeSDI("toto", "truc", true, "http://example.com/background.png", "black", "arial","black", "89%", 52);
+			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "black", "arial","black", "89%", "14px", 52);
 
 			var response1:SequelizeRestfulResponse = {
 				"status": "success",

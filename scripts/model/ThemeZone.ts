@@ -38,12 +38,20 @@ class ThemeZone extends ModelItf {
 	private _defaultTheme : boolean;
 
 	/**
-	 * Background property.
+	 * BackgroundImageURL property.
 	 *
-	 * @property _background
+	 * @property _backgroundImageURL
 	 * @type string
 	 */
-	private _background : string;
+	private _backgroundImageURL : string;
+
+	/**
+	 * BackgroundColor property.
+	 *
+	 * @property _backgroundColor
+	 * @type string
+	 */
+	private _backgroundColor : string;
 
 	/**
 	 * Font property.
@@ -83,20 +91,25 @@ class ThemeZone extends ModelItf {
 	 * @constructor
 	 * @param name The name of the themeZone
 	 * @param description A description of the themeZone
-	 * @param host The host to reach the themeZone
-	 * @param {boolean} oauth - To set if ThemeZone needs authentication or not
-	 * @param {string} provider - The OAuthD provider's name
+	 * @param {boolean} defaultTheme - The ThemeZone's defaultTheme status
+	 * @param {string} backgroundImageURL - The ThemeZone's backgroundImageURL
+	 * @param {string} backgroundColor - The ThemeZone's backgroundColor
+	 * @param {string} font - The ThemeZone's font
+	 * @param {string} color - The ThemeZone's color
+	 * @param {string} opacity - The ThemeZone's opacity
+	 * @param {string} border - The ThemeZone's border
 	 * @param id The DB id of the themeZone
 	 * @param {string} createdAt - The ThemeZone's createdAt.
 	 * @param {string} updatedAt - The ThemeZone's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, background : string = "", font : string = "", color : string = "", opacity : string = "", border : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, backgroundImageURL : string = "", backgroundColor : string = "", font : string = "", color : string = "", opacity : string = "", border : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
 		this.setDefaultTheme(defaultTheme);
-		this.setBackground(background);
+		this.setBackgroundImageURL(backgroundImageURL);
+		this.setBackgroundColor(backgroundColor);
 		this.setFont(font);
 		this.setColor(color);
 		this.setOpacity(opacity);
@@ -131,12 +144,23 @@ class ThemeZone extends ModelItf {
 	}
 
 	/**
-	 * Set the ThemeZone's background.
+	 * Set the ThemeZone's backgroundImageURL.
 	 *
-	 * @method setBackground
+	 * @method setBackgroundImageURL
+	 * @param {string} backgroundImageURL - The ThemeZone's backgroundImageURL to set
 	 */
-	setBackground(background : string) {
-		this._background = background;
+	setBackgroundImageURL(backgroundImageURL : string) {
+		this._backgroundImageURL = backgroundImageURL;
+	}
+
+	/**
+	 * Set the ThemeZone's backgroundColor.
+	 *
+	 * @method setBackgroundColor
+	 * @param {string} backgroundColor - The ThemeZone's backgroundColor to set
+	 */
+	setBackgroundColor(backgroundColor : string) {
+		this._backgroundColor = backgroundColor;
 	}
 
 	/**
@@ -203,12 +227,21 @@ class ThemeZone extends ModelItf {
 	}
 
 	/**
-	 * Return the ThemeZone's background.
+	 * Return the ThemeZone's backgroundImageURL.
 	 *
-	 * @method background
+	 * @method backgroundImageURL
 	 */
-	background() {
-		return this._background;
+	backgroundImageURL() {
+		return this._backgroundImageURL;
+	}
+
+	/**
+	 * Return the ThemeZone's backgroundColor.
+	 *
+	 * @method backgroundColor
+	 */
+	backgroundColor() {
+		return this._backgroundColor;
 	}
 
 	/**
@@ -264,7 +297,8 @@ class ThemeZone extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"defaultTheme": this.defaultTheme(),
-			"background": this.background(),
+			"backgroundImageURL": this.backgroundImageURL(),
+			"backgroundColor": this.backgroundColor(),
 			"font": this.font(),
 			"color": this.color(),
 			"opacity": this.opacity(),
@@ -375,7 +409,7 @@ class ThemeZone extends ModelItf {
 	 * @return {ThemeZone} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ThemeZone {
-		return new ThemeZone(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.background, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.border, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new ThemeZone(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.backgroundImageURL, jsonObject.backgroundColor, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.border, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

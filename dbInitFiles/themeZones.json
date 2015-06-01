@@ -3,20 +3,22 @@
     "name": "ThemeBasic",
     "description": "CleanAndInit generated theme",
     "defaultTheme": true,
-    "background": "black",
-    "opacity": "50%",
+    "backgroundImageURL": "",
+    "backgroundColor": "#FFFFFF",
+    "opacity": "0.6",
     "font": "14px arial, sans-serif",
-    "color": "white",
+    "color": "#FFFFFF",
     "border": "1px solid gray"
   },
   {
     "name": "PsychoTheme",
     "description": "CleanAndInit generated theme",
     "defaultTheme": true,
-    "background": "red",
-    "opacity": "20%",
+    "backgroundImageURL": "",
+    "backgroundColor": "#FF0000",
+    "opacity": "0.2",
     "font": "14px arial, sans-serif",
-    "color": "black",
+    "color": "#000000",
     "border": "1px solid blue"
   }
 ]

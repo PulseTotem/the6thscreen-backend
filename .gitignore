@@ -16,3 +16,5 @@ package-tmp.json
 heroku
 herokuDBInit
 compileWebstorm/
+dbInitFiles/servicesBackup.json
+dbInitFiles/servicesProd.json

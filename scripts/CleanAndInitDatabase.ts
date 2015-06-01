@@ -432,7 +432,7 @@ class CleanAndInitDatabase {
                 failCallback(err);
             };
 
-            var themeSDI = new ThemeSDI(themeSDIsDesc.name, themeSDIsDesc.description, themeSDIsDesc.defaultTheme, themeSDIsDesc.background, themeSDIsDesc.font, themeSDIsDesc.color, themeSDIsDesc.opacity);
+            var themeSDI = new ThemeSDI(themeSDIsDesc.name, themeSDIsDesc.description, themeSDIsDesc.defaultTheme, themeSDIsDesc.backgroundImageURL, themeSDIsDesc.backgroundColor, themeSDIsDesc.font, themeSDIsDesc.color, themeSDIsDesc.opacity);
 
             var successUpdate = function () {
                 Logger.info("Update infoType successfully.");
@@ -493,7 +493,7 @@ class CleanAndInitDatabase {
                 failCallback(err);
             };
 
-            var themeZone = new ThemeZone(themeZonesDesc.name, themeZonesDesc.description, themeZonesDesc.defaultTheme, themeZonesDesc.background, themeZonesDesc.font, themeZonesDesc.color, themeZonesDesc.opacity, themeZonesDesc.border);
+            var themeZone = new ThemeZone(themeZonesDesc.name, themeZonesDesc.description, themeZonesDesc.defaultTheme, themeZonesDesc.backgroundImageURL, themeZonesDesc.backgroundColor, themeZonesDesc.font, themeZonesDesc.color, themeZonesDesc.opacity, themeZonesDesc.border);
 
             var successUpdate = function () {
                 Logger.info("Update infoType successfully.");
