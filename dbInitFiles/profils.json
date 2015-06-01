@@ -36,7 +36,7 @@
                       {
                         "value": "http://filuns.unice.fr/accueil/atom.xml",
                         "paramType": {
-                          "name": "FeedURL"
+                          "name": "URL"
                         }
                       },
                       {
@@ -67,7 +67,7 @@
                       {
                         "value": "http://www.lemonde.fr/rss/une.xml",
                         "paramType": {
-                          "name": "FeedURL"
+                          "name": "URL"
                         }
                       },
                       {
