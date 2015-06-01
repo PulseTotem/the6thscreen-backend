@@ -24,8 +24,8 @@
       }
     },
     {
-        "name" : "FeedURL",
-        "description" : "Lien du flux RSS",
+        "name" : "URL",
+        "description" : "URL",
         "type" : {
             "name" : "String"
         },

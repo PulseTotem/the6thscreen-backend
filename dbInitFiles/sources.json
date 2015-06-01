@@ -8,7 +8,7 @@
         "method" : "RetrieveFeedContent",
         "paramTypes" : [
             {
-                "name" : "FeedURL"
+                "name" : "URL"
             },
             {
                 "name" : "Limit"
@@ -222,7 +222,7 @@
           "name" : "InfoDuration"
         },
         {
-          "name": "FeedURL"
+          "name": "URL"
         }
       ],
       "infoType" : {
