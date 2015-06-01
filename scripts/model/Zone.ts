@@ -5,6 +5,7 @@
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Behaviour.ts" />
 /// <reference path="./CallType.ts" />
+/// <reference path="./ZoneContent.ts" />
 
 /// <reference path="../customizedTypes/Percentage.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
@@ -97,6 +98,38 @@ class Zone extends ModelItf {
 	 */
 	private _callTypes_loaded : boolean;
 
+	/**
+	 * ZoneContents property.
+	 *
+	 * @property _zoneContents
+	 * @type Array<ZoneContent>
+	 */
+	private _zoneContents : Array<ZoneContent>;
+
+	/**
+	 * Lazy loading for _zoneContents property.
+	 *
+	 * @property _zoneContents_loaded
+	 * @type boolean
+	 */
+	private _zoneContents_loaded : boolean;
+
+	/**
+	 * Theme property.
+	 *
+	 * @property _theme
+	 * @type ThemeZone
+	 */
+	private _theme : ThemeZone;
+
+	/**
+	 * Lazy loading for the Theme property
+	 *
+	 * @property _theme_loaded
+	 * @type boolean
+	 */
+	private _theme_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -105,9 +138,11 @@ class Zone extends ModelItf {
      * @param {string} description - The Zone's description.
      * @param {string} position - The Zone's position.
      * @param {number} id - The Zone's ID.
+	 * @param {string} createdAt - The Zone's createdAt.
+	 * @param {string} updatedAt - The Zone's updatedAt.
      */
-    constructor(name : string = "", description : string = "", width : number = 0, height : number = 0, positionFromTop : number = 0, positionFromLeft : number = 0, id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", width : number = 0, height : number = 0, positionFromTop : number = 0, positionFromLeft : number = 0, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -121,6 +156,12 @@ class Zone extends ModelItf {
 
 	    this._callTypes = null;
 	    this._callTypes_loaded = false;
+
+		this._zoneContents = null;
+		this._zoneContents_loaded = false;
+
+	    this._theme = null;
+	    this._theme_loaded = false;
     }
 
 	/**
@@ -321,7 +362,90 @@ class Zone extends ModelItf {
 		}
 	}
 
-    //////////////////// Methods managing model. Connections to database. ///////////////////////////
+	/**
+	 * Return the ZoneContents owned by the Zone.
+	 *
+	 * @method zoneContents
+	 */
+	zoneContents() {
+		return this._zoneContents;
+	}
+
+	/**
+	 * Load the ZoneContents owned by the Zone.
+	 *
+	 * @method loadZoneContents
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadZoneContents(successCallback : Function, failCallback : Function) {
+		if(! this._zoneContents_loaded) {
+			var self = this;
+			var success : Function = function(zoneContents) {
+				self._zoneContents = zoneContents;
+				self._zoneContents_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getAssociatedObjects(Zone, ZoneContent, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
+	/**
+	 * Return the Zone's theme.
+	 *
+	 * @method theme
+	 */
+	theme() {
+		return this._theme;
+	}
+
+	/**
+	 * Load the Zone's theme.
+	 *
+	 * @method loadTheme
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadTheme(successCallback : Function, failCallback : Function) {
+		if(! this._theme_loaded) {
+			var self = this;
+			var success : Function = function(theme) {
+				self._theme = theme;
+				self._theme_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Zone, ThemeZone, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
+
+	//////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
      * Load all the lazy loading properties of the object.
@@ -335,7 +459,7 @@ class Zone extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._behaviour_loaded && self._callTypes_loaded) {
+            if(self._behaviour_loaded && self._callTypes_loaded && self._zoneContents_loaded && self._theme_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -352,6 +476,8 @@ class Zone extends ModelItf {
 
         this.loadBehaviour(success, fail);
 	    this.loadCallTypes(success, fail);
+		this.loadZoneContents(success, fail);
+	    this.loadTheme(success, fail);
     }
 
 	/**
@@ -362,6 +488,8 @@ class Zone extends ModelItf {
 	desynchronize() : void {
 		this._behaviour_loaded = false;
 		this._callTypes_loaded = false;
+		this._zoneContents_loaded = false;
+		this._theme_loaded = false;
 	}
 
 
@@ -380,7 +508,9 @@ class Zone extends ModelItf {
 			"height": this.height(),
 			"positionFromTop": this.positionFromTop(),
 			"positionFromLeft": this.positionFromLeft(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -434,10 +564,13 @@ class Zone extends ModelItf {
             var data = self.toJSONObject();
 	        if (onlyId) {
 		        data["behaviour"] = (self.behaviour() !== null) ? self.behaviour().getId() : null;
+		        data["theme"] = (self.theme() !== null) ? self.theme().getId() : null;
 	        } else {
 		        data["behaviour"] = (self.behaviour() !== null) ? self.behaviour().toJSONObject() : null;
+		        data["theme"] = (self.theme() !== null) ? self.theme().toJSONObject() : null;
 	        }
             data["callTypes"] = self.serializeArray(self.callTypes(), onlyId);
+			data["zoneContents"] = self.serializeArray(self.zoneContents(), onlyId);
 
             successCallback(data);
         };
@@ -502,6 +635,55 @@ class Zone extends ModelItf {
 		this.deleteObjectAssociation(Zone, CallType, ctID, successCallback, failCallback);
 	}
 
+	/**
+	 * Add a new ZoneContent to the Zone and associate it in the database.
+	 * A ZoneContent can only be added once.
+	 *
+	 * @method addZoneContent
+	 * @param {ZoneContent} zcID The ZoneContent's id to link with the Zone. It cannot be a null value.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	addZoneContent(zcID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Zone, ZoneContent, zcID, successCallback, failCallback);
+	}
+
+	/**
+	 * Remove a ZoneContent from the Zone: the association is removed both in the object and in database.
+	 * The ZoneContent can only be removed if it exists first in the list of associated ZoneContents, else an exception is thrown.
+	 *
+	 * @method removeZoneContent
+	 * @param {ZoneContent} zcID The ZoneContent to remove from that Zone
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	removeZoneContent(zcID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Zone, ZoneContent, zcID, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the Theme of the Zone.
+	 *
+	 * @method linkTheme
+	 * @param {ThemeZone} it The Theme to associate with the Zone.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkTheme(themeZoneID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Zone, ThemeZone, themeZoneID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current Theme from the Zone.
+	 *
+	 * @method unlinkTheme
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkTheme(themeZoneID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Zone, ThemeZone, themeZoneID, successCallback, failCallback);
+	}
+
 
 	/**
      * Create model in database.
@@ -542,7 +724,9 @@ class Zone extends ModelItf {
     }
 
     /**
-     * Delete in database the model with current id.
+     * Delete in database the Zone with current id.
+     * This method also deletes all the containing CallTypes of the Zone.
+     * If the Zone contains some ZoneContents it fails with a message.
      *
      * @method delete
      * @param {Function} successCallback - The callback function when success.
@@ -550,7 +734,32 @@ class Zone extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Zone, this.getId(), successCallback, failCallback, attemptNumber);
+	    var self = this;
+
+	    var successLoadZone : Function = function () {
+		    if (self.zoneContents().length > 0) {
+			    failCallback("You can't delete a zone containing some zone contents.");
+		    } else {
+			    var sizeCT = self.callTypes().length;
+			    var deleted = 0;
+
+			    var successDeleteCT:Function = function () {
+				    deleted++;
+
+				    if (deleted == sizeCT) {
+					    ModelItf.deleteObject(Zone, self.getId(), successCallback, failCallback, attemptNumber);
+				    }
+			    };
+
+			    for (var ctIndex in self.callTypes()) {
+				    var ct:CallType = self.callTypes()[ctIndex];
+
+				    ct.delete(successDeleteCT, failCallback);
+			    }
+		    }
+	    };
+
+	    this.loadAssociations(successLoadZone, failCallback);
     }
 
     /**
@@ -586,7 +795,7 @@ class Zone extends ModelItf {
 	 * @return {Zone} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Zone {
-		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id, jsonObject.complete);
+		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

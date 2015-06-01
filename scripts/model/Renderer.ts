@@ -7,6 +7,7 @@
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
+
 /**
  * Model : Renderer
  *
@@ -54,9 +55,11 @@ class Renderer extends ModelItf {
      * @param {string} name - The Renderer's name.
      * @param {string} description - The Renderer's description.
      * @param {number} id - The Renderer's ID.
+	 * @param {string} createdAt - The Renderer's createdAt.
+	 * @param {string} updatedAt - The Renderer's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -196,7 +199,9 @@ class Renderer extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -374,7 +379,7 @@ class Renderer extends ModelItf {
 	 * @return {Renderer} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Renderer {
-		return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new Renderer(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

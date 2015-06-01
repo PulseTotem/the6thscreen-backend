@@ -28,9 +28,11 @@ class TypeParamType extends ModelItf {
 	 * @constructor
 	 * @param {string} name - The TypeParamType's name.
 	 * @param {number} id - The TypeParamType's ID.
+	 * @param {string} createdAt - The TypeParamType's createdAt.
+	 * @param {string} updatedAt - The TypeParamType's updatedAt.
 	 */
-	constructor(name : string = "", id : number = null, complete : boolean = false) {
-		super(id, complete);
+	constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 	}
@@ -65,7 +67,9 @@ class TypeParamType extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -169,7 +173,7 @@ class TypeParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : TypeParamType {
-		return new TypeParamType(jsonObject.name, jsonObject.id, jsonObject.complete);
+		return new TypeParamType(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

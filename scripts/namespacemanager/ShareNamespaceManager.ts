@@ -2,6 +2,7 @@
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
  */
 
+/// <reference path="../model/ModelItf.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/server/NamespaceManager.ts" />
 
@@ -140,13 +141,13 @@ class ShareNamespaceManager extends NamespaceManager {
 	 * @param {ModelItf Class} modelClass - The model.
 	 * @param {string} responseChannel - The channel to send response
 	 */
-	updateObjectAttribute(modelClass : any, informations : any, responseChannel : string) {
+	updateObjectAttribute(modelClass : any, informations : any, responseChannel : string, retrieveOnlyId : boolean = true) {
 		var self = this;
 
 		Logger.debug("SocketId: " + self.socket.id + " - updateObjectAttribute : updateObject of Model with TableName: " + modelClass.getTableName());
 
 		var success = function () {
-			self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel, true);
+			self.sendObjectDescriptionFromId(modelClass, informations.id, responseChannel, retrieveOnlyId);
 		};
 
 		ModelItf.updateAttribute(modelClass, informations, success, function (error) { self.updateObjectAttributeFail(error, responseChannel); });
@@ -222,10 +223,19 @@ class ShareNamespaceManager extends NamespaceManager {
 
 		Logger.debug("SocketId: " + self.socket.id + " - createObject : deleteObject of Model with TableName: " + modelClass.getTableName());
 
-		var success = function (object) {
+		var successDelete = function (object) {
 			self.socket.emit(responseChannel, self.formatResponse(true, objectId));
 		};
-		ModelItf.deleteObject(modelClass, objectId, success, function (error) { self.deleteObjectFail(error, responseChannel); });
+
+        var fail = function (error) {
+            self.deleteObjectFail(error, responseChannel);
+        };
+
+        var successReadObject = function (object) {
+            object.delete(successDelete, fail);
+        };
+
+        modelClass.read(objectId, successReadObject, fail);
 	}
 
 	/**

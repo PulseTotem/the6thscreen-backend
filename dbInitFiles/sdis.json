@@ -6,6 +6,9 @@
         "user" : {
             "username" : "christian"
         },
+        "theme": {
+          "name": "ThemeBasic"
+        },
         "zones" : [
             {
                 "name" : "LeftZone1",
@@ -15,7 +18,7 @@
                 "positionFromTop" : 0,
                 "positionFromLeft" : 0,
                 "behaviour" : {
-                    "name" : "Appearance"
+                    "name" : "AppearanceBehaviour"
                 }
             },
             {
@@ -26,7 +29,7 @@
                 "positionFromTop" : 0,
                 "positionFromLeft" : 55,
                 "behaviour" : {
-                    "name" : "Appearance"
+                    "name" : "AppearanceBehaviour"
                 }
             }
         ],
@@ -43,11 +46,8 @@
                 "renderer" : {
                     "name" : "FeedNodeRendererGeneric"
                 },
-                "renderPolicy" : {
-                    "name" : "FeedContentDumbRenderPolicy"
-                },
-                "receivePolicy" : {
-                    "name" : "DumbReceivePolicy"
+                "policy" : {
+                    "name" : "IdemPolicy"
                 }
             },
             {
@@ -62,11 +62,8 @@
                 "renderer" : {
                     "name" : "DiscountRenderer"
                 },
-                "renderPolicy" : {
-                    "name" : "FeedContentDumbRenderPolicy"
-                },
-                "receivePolicy" : {
-                    "name" : "DumbReceivePolicy"
+                "policy" : {
+                    "name" : "IdemPolicy"
                 }
             }
         ]
@@ -78,6 +75,9 @@
         "user" : {
             "username" : "simon"
         },
+        "theme": {
+          "name": "ThemeBasic"
+        },
         "zones" : [
             {
                 "name" : "LeftZone2",
@@ -87,7 +87,7 @@
                 "positionFromTop" : 0,
                 "positionFromLeft" : 0,
                 "behaviour" : {
-                    "name" : "Appearance"
+                    "name" : "AppearanceBehaviour"
                 }
             },
             {
@@ -98,7 +98,7 @@
                 "positionFromTop" : 0,
                 "positionFromLeft" : 51,
                 "behaviour" : {
-                    "name" : "Appearance"
+                    "name" : "AppearanceBehaviour"
                 }
             }
         ],
@@ -115,11 +115,8 @@
                 "renderer" : {
                     "name" : "FeedNodeRendererGeneric"
                 },
-                "renderPolicy" : {
-                    "name" : "FeedContentDumbRenderPolicy"
-                },
-                "receivePolicy" : {
-                    "name" : "DumbReceivePolicy"
+                "policy" : {
+                    "name" : "IdemPolicy"
                 }
             },
             {
@@ -134,21 +131,21 @@
                 "renderer" : {
                     "name" : "FeedNodeRendererGeneric"
                 },
-                "renderPolicy" : {
-                    "name" : "FeedContentDumbRenderPolicy"
-                },
-                "receivePolicy" : {
-                    "name" : "DumbReceivePolicy"
+                "policy" : {
+                    "name" : "IdemPolicy"
                 }
             }
         ]
     },
   {
-    "name" : "SDITwitterOnly",
+    "name" : "SDISocialWall",
     "description" : "SDI avec 2 zones, 2 calls Twitter, un par zone",
     "allowedHost" : "*",
     "user" : {
       "username" : "christian"
+    },
+    "theme": {
+      "name": "PsychoTheme"
     },
     "zones" : [
       {
@@ -159,7 +156,10 @@
         "positionFromTop" : 0,
         "positionFromLeft" : 0,
         "behaviour" : {
-          "name" : "Appearance"
+          "name" : "AppearanceBehaviour"
+        },
+        "theme": {
+          "name": "ThemeBasic"
         }
       },
       {
@@ -170,7 +170,7 @@
         "positionFromTop" : 0,
         "positionFromLeft" : 51,
         "behaviour" : {
-          "name" : "Appearance"
+          "name" : "AppearanceBehaviour"
         }
       }
     ],
@@ -187,11 +187,8 @@
         "renderer" : {
           "name" : "TweetRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -206,11 +203,8 @@
         "renderer" : {
           "name" : "PictureAlbumRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -225,11 +219,8 @@
         "renderer" : {
           "name" : "EventListRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -244,11 +235,8 @@
         "renderer" : {
           "name" : "PictureAlbumRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -263,11 +251,8 @@
         "renderer" : {
           "name" : "PictureAlbumRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -282,11 +267,8 @@
         "renderer" : {
           "name" : "PictureAlbumRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "IdemPolicy"
         }
       },
       {
@@ -301,11 +283,8 @@
         "renderer" : {
           "name" : "PictureAlbumRenderer"
         },
-        "renderPolicy" : {
-          "name" : "FeedContentDumbRenderPolicy"
-        },
-        "receivePolicy" : {
-          "name" : "DumbReceivePolicy"
+        "policy" : {
+          "name" : "IdemPolicy"
         }
       }
     ]

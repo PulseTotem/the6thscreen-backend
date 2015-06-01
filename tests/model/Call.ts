@@ -39,7 +39,7 @@ describe('Call', function(){
 	});
 
 	describe('#checkCompleteness', function() {
-		it('should consider the object as complete if it has an ID, a name, a complete callType, and a complete profil', function(done) {
+		it('should consider the object as complete if it has an ID, a name, a complete callType', function(done) {
 			var cpt = new Call("tete",52);
 
 			var responseCallType : SequelizeRestfulResponse = {
@@ -51,26 +51,12 @@ describe('Call', function(){
 				}
 			};
 
-			var responseProfil : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
-					"id":12,
-					"name": "profil",
-					"complete": true
-				}
-			};
-
 			var restClientMockCT = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), CallType.getTableName()))
 				.reply(200, JSON.stringify(responseCallType));
 
-			var restClientMockP = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), Profil.getTableName()))
-				.reply(200, JSON.stringify(responseProfil));
-
 			var success = function() {
 				assert.ok(restClientMockCT.isDone(), "The mock request has not been done to get the type");
-				assert.ok(restClientMockP.isDone(), "The mock request has not been done to get the profil");
 				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
 				done();
 			};
@@ -82,7 +68,7 @@ describe('Call', function(){
 			cpt.checkCompleteness(success, fail);
 		});
 
-		it('should not consider the object as complete if it has an ID, a name, a complete profil and an incomplete calltype', function(done) {
+		it('should not consider the object as complete if it has an ID, a name and an incomplete calltype', function(done) {
 			var cpt = new Call("tete",52);
 
 			var responseCallType : SequelizeRestfulResponse = {
@@ -94,26 +80,12 @@ describe('Call', function(){
 				}
 			};
 
-			var responseProfil : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
-					"id":12,
-					"name": "profil",
-					"complete": true
-				}
-			};
-
 			var restClientMockCT = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), CallType.getTableName()))
 				.reply(200, JSON.stringify(responseCallType));
 
-			var restClientMockP = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), Profil.getTableName()))
-				.reply(200, JSON.stringify(responseProfil));
-
 			var success = function() {
 				assert.ok(restClientMockCT.isDone(), "The mock request has not been done to get the type");
-				assert.ok(restClientMockP.isDone(), "The mock request has not been done to get the profil");
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
 				done();
 			};
@@ -125,48 +97,6 @@ describe('Call', function(){
 			cpt.checkCompleteness(success, fail);
 		});
 
-		it('should not consider the object as complete if it has an ID, a name, a complete calltype and an incomplete profil', function(done) {
-			var cpt = new Call("tete",52);
-
-			var responseCallType : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
-					"id":12,
-					"name": "calltype",
-					"complete": true
-				}
-			};
-
-			var responseProfil : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
-					"id":12,
-					"name": "profil",
-					"complete": false
-				}
-			};
-
-			var restClientMockCT = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), CallType.getTableName()))
-				.reply(200, JSON.stringify(responseCallType));
-
-			var restClientMockP = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), cpt.getId().toString(), Profil.getTableName()))
-				.reply(200, JSON.stringify(responseProfil));
-
-			var success = function() {
-				assert.ok(restClientMockCT.isDone(), "The mock request has not been done to get the type");
-				assert.ok(restClientMockP.isDone(), "The mock request has not been done to get the type");
-				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
-				done();
-			};
-
-			var fail = function(err) {
-				done(err);
-			};
-
-			cpt.checkCompleteness(success, fail);
-		});
 
 		it('should not consider the object as complete if it has no id', function(done) {
 			nock.disableNetConnect();
@@ -271,7 +201,9 @@ describe('Call', function(){
 			var expected = {
 				"name": "toto",
 				"id": 52,
-				"complete": false
+				"complete": false,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 
@@ -386,113 +318,6 @@ describe('Call', function(){
             c.loadParamValues(success, fail);
 		});
 
-	});
-
-	describe('#linkProfil', function() {
-		it('should call the right request', function(done) {
-			var c = new Call("toto", 52);
-			var p = new Profil("toto", "machin", 42);
-			var spy = sinon.spy(p, "desynchronize");
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var profil = c.profil();
-                assert.equal(profil, null, "The profil is not a null value: "+JSON.stringify(profil));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
-
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
-
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName(), p.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
-
-                var success2 = function() {
-                    //assert.ok(retour, "The return of the linkProfil is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
-                    done();
-                };
-
-                var fail2 = function(err) {
-                    done(err);
-                };
-
-                c.linkProfil(p.getId(), success2, fail2);
-
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadProfil(success, fail);
-
-		});
-
-	});
-
-	describe('#unlinkProfil', function() {
-		it('should call the right request', function(done) {
-			var c = new Call("toto", 52);
-			var p = new Profil("toto", "machin", 42);
-
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": p.toJSONObject()
-			};
-
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-
-                var profil = c.profil();
-                assert.deepEqual(profil, p, "The profil is not the expected value");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profil");
-
-                var spy = sinon.spy(profil, "desynchronize");
-
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
-
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(Call.getTableName(), c.getId().toString(), Profil.getTableName(), p.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
-
-
-                var success2 = function() {
-                    //assert.ok(retour, "The return of the unlinkProfil is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
-					done();
-                };
-
-                var fail2 = function(err) {
-                    done(err);
-                };
-
-                c.unlinkProfil(p.getId(), success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-            c.loadProfil(success, fail);
-
-		});
 	});
 
 	describe('#linkCallType', function() {

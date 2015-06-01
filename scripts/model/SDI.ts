@@ -6,7 +6,7 @@
 /// <reference path="./User.ts" />
 /// <reference path="./Zone.ts" />
 /// <reference path="./Profil.ts" />
-/// <reference path="./Timeline.ts" />
+/// <reference path="./ThemeSDI.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -91,20 +91,20 @@ class SDI extends ModelItf {
     private _profils_loaded : boolean;
 
     /**
-     * Timelines property.
+     * Theme property.
      *
-     * @property _timelines
-     * @type Array<Timeline>
+     * @property _theme
+     * @type ThemeSDI
      */
-    private _timelines : Array<Timeline>;
+    private _theme : ThemeSDI;
 
     /**
-     * Lazy loading for Timelines property.
+     * Lazy loading for the Theme property
      *
-     * @property _timelines_loaded
+     * @property _theme_loaded
      * @type boolean
      */
-    private _timelines_loaded : boolean;
+    private _theme_loaded : boolean;
 
     /**
      * Constructor.
@@ -114,9 +114,11 @@ class SDI extends ModelItf {
      * @param {string} description - The SDI's description.
      * @param {string} allowedHost - The SDI's allowedHost.
      * @param {number} id - The SDI's ID.
+	 * @param {string} createdAt - The SDI's createdAt.
+	 * @param {string} updatedAt - The SDI's updatedAt.
      */
-    constructor(name : string = "", description : string = "", allowedHost : string = "*", id : number = null, complete: boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", allowedHost : string = "*", id : number = null, complete: boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
@@ -131,8 +133,8 @@ class SDI extends ModelItf {
         this._profils = new Array<Profil>();
         this._profils_loaded = false;
 
-        this._timelines = new Array<Timeline>();
-        this._timelines_loaded = false;
+        this._theme = null;
+        this._theme_loaded = false;
     }
 
 	/**
@@ -313,27 +315,27 @@ class SDI extends ModelItf {
     }
 
     /**
-     * Return the SDI's timelines.
+     * Return the SDI's theme.
      *
-     * @method timelines
+     * @method theme
      */
-    timelines() {
-        return this._timelines;
+    theme() {
+        return this._theme;
     }
 
     /**
-     * Load the SDI's timelines.
+     * Load the SDI's theme.
      *
-     * @method loadTimelines
+     * @method loadTheme
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadTimelines(successCallback : Function, failCallback : Function) {
-        if(! this._timelines_loaded) {
+    loadTheme(successCallback : Function, failCallback : Function) {
+        if(! this._theme_loaded) {
             var self = this;
-            var success : Function = function(timelines) {
-                self._timelines = timelines;
-                self._timelines_loaded = true;
+            var success : Function = function(theme) {
+                self._theme = theme;
+                self._theme_loaded = true;
                 if(successCallback != null) {
                     successCallback();
                 }
@@ -345,7 +347,7 @@ class SDI extends ModelItf {
                 }
             };
 
-            this.getAssociatedObjects(SDI, Timeline, success, fail);
+            this.getUniquelyAssociatedObject(SDI, ThemeSDI, success, fail);
         } else {
             if(successCallback != null) {
                 successCallback();
@@ -367,7 +369,7 @@ class SDI extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._users_loaded && self._profils_loaded && self._zones_loaded && self._timelines_loaded) {
+            if(self._users_loaded && self._profils_loaded && self._zones_loaded && self._theme_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -385,7 +387,7 @@ class SDI extends ModelItf {
         this.loadUsers(success, fail);
         this.loadProfils(success, fail);
         this.loadZones(success, fail);
-        this.loadTimelines(success, fail);
+        this.loadTheme(success, fail);
     }
 
 	/**
@@ -395,9 +397,9 @@ class SDI extends ModelItf {
 	 */
 	desynchronize() : void {
 		this._profils_loaded = false;
-		this._timelines_loaded = false;
 		this._users_loaded = false;
 		this._zones_loaded = false;
+        this._theme_loaded = false;
 	}
 
 	/**
@@ -412,7 +414,9 @@ class SDI extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"allowedHost": this.allowedHost(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -444,8 +448,14 @@ class SDI extends ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
+
+            if (onlyId) {
+                data["theme"] = (self.theme() !== null) ? self.theme().getId() : null;
+            } else {
+                data["theme"] = (self.theme() !== null) ? self.theme().toJSONObject() : null;
+            }
+
             data["profils"] = self.serializeArray(self.profils(), onlyId);
-            data["timelines"] = self.serializeArray(self.timelines(), onlyId);
             data["users"] = self.serializeArray(self.users(), onlyId);
             data["zones"] = self.serializeArray(self.zones(), onlyId);
 
@@ -537,31 +547,28 @@ class SDI extends ModelItf {
 		this.deleteObjectAssociation(SDI, Profil, profilID, successCallback, failCallback);
 	}
 
-	/**
-	 * Add a new Timeline to the SDI and associate it in the database.
-	 * A Timeline can only be added once.
-	 *
-     * @method addTimeline
-	 * @param {Timeline} t The Timeline to add inside the SDI. It cannot be a null value.
-	 * @param {Function} successCallback - The callback function when success.
+    /**
+     * Set the Theme of the SDI.
+     *
+     * @method linkTheme
+     * @param {ThemeSDI} it The Theme to associate with the SDI.
+     * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
-	 */
-	addTimeline(tlID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(SDI, Timeline, tlID, successCallback, failCallback);
-	}
+     */
+    linkTheme(themeSDIID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(SDI, ThemeSDI, themeSDIID, successCallback, failCallback);
+    }
 
-	/**
-	 * Remove a Timeline from the SDI: the association is removed both in the object and in database.
-	 * The Timeline can only be removed if it exists first in the list of associated Timelines, else an exception is thrown.
-	 *
-     * @method removeTimeline
-	 * @param {Timeline} t The Timeline to remove from that SDI
-	 * @param {Function} successCallback - The callback function when success.
+    /**
+     * Unset the current Theme from the SDI.
+     *
+     * @method unlinkTheme
+     * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
-	 */
-	removeTimeline(tlID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(SDI, Timeline, tlID, successCallback, failCallback);
-	}
+     */
+    unlinkTheme(themeSDIID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(SDI, ThemeSDI, themeSDIID, successCallback, failCallback);
+    }
 
 	/**
      * Create model in database.
@@ -646,7 +653,7 @@ class SDI extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : SDI {
-		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id, jsonObject.complete);
+		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

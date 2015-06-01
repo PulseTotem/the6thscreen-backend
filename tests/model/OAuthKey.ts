@@ -89,7 +89,9 @@ describe('OAuthKey', function() {
                 "description": "blabla",
                 "value": "heyhey",
                 "id": 52,
-                "complete": true
+                "complete": true,
+				"createdAt":null,
+				"updatedAt":null
             };
             var json = c.toJSONObject();
 
@@ -236,7 +238,7 @@ describe('OAuthKey', function() {
     describe('#linkService', function () {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
-            var s = new Service("service", "serviceDesc", "serviceHost", true, "provider", 42);
+            var s = new Service("service", "serviceDesc", "serviceHost", true, "provider", "logo", 42);
             var spy = sinon.spy(s, "desynchronize");
 
             var response1:SequelizeRestfulResponse = {
@@ -286,7 +288,7 @@ describe('OAuthKey', function() {
     describe('#unlinkService', function () {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
-            var s = new Service("service", "serviceDesc", "serviceHost", true, "provider", 42);
+            var s = new Service("service", "serviceDesc", "serviceHost", true, "provider", "logo", 42);
 
             var response1:SequelizeRestfulResponse = {
                 "status": "success",

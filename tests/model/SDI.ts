@@ -131,7 +131,9 @@ describe('SDI', function() {
 				"description": "blabla",
 				"allowedHost": "tata",
 				"id": 52,
-				"complete": true
+				"complete": true,
+				"createdAt":null,
+				"updatedAt":null
 			};
 			var json = c.toJSONObject();
 
@@ -474,116 +476,104 @@ describe('SDI', function() {
 		});
 	});
 
-	describe('#addTimeline', function() {
-		it('should call the right request', function(done) {
+	describe('#linkTheme', function () {
+		it('should call the right request', function (done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new Timeline("mavaleur", "toto", 12);
-			var spy = sinon.spy(pv, "desynchronize");
+			var s = new ThemeSDI("toto", "truc", true, "http://example.com/background.png", "black", "arial","black", "89%", 52);
 
-			var response1 : SequelizeRestfulResponse = {
+			var response1:SequelizeRestfulResponse = {
 				"status": "success",
 				"data": []
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(SDI.getTableName(), c.getId().toString(), Timeline.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(SDI.getTableName(), c.getId().toString(), ThemeSDI.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
-            var success = function() {
-                var timelines = c.timelines();
+			var success = function () {
+				var themeSDI = c.theme();
+				assert.equal(themeSDI, null, "The themeZone is not a null value: " + JSON.stringify(themeSDI));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
 
-                assert.deepEqual(timelines, [], "The timeline is not an empty array: "+JSON.stringify(timelines));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the timelines");
+				var response2:SequelizeRestfulResponse = {
+					"status": "success",
+					"data": {}
+				};
 
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+					.put(DatabaseConnection.associatedObjectEndpoint(SDI.getTableName(), c.getId().toString(), ThemeSDI.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(response2));
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(SDI.getTableName(), c.getId().toString(), Timeline.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+				var success2 = function () {
+					//assert.ok(retour, "The return of the setInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the service in database.");
+					done();
+				};
 
+				var fail2 = function (err) {
+					done(err);
+				};
 
-                var success2 = function() {
-                    //assert.ok(retour, "The return of the addTimeline is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the timeline in database.");
-                    done();
-                };
+				c.linkTheme(s.getId(), success2, fail2);
+			};
 
-                var fail2 = function(err) {
-                    done(err);
-                };
+			var fail = function (err) {
+				done(err);
+			};
 
-                c.addTimeline(pv.getId(), success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadTimelines(success, fail);
+			c.loadTheme(success, fail);
 		});
+
 	});
 
-	describe('#removeTimeline', function() {
-		it('should call the right request', function(done) {
+	describe('#unlinkThemeZone', function () {
+		it('should call the right request', function (done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new Timeline("mavaleur","uneautre",12);
+			var s = new ThemeSDI("toto", "truc", true, "http://example.com/background.png", "black", "arial","black", "89%", 52);
 
-			var response1 : SequelizeRestfulResponse = {
+			var response1:SequelizeRestfulResponse = {
 				"status": "success",
-				"data": [
-					{
-						"name": "mavaleur",
-						"description": "uneautre",
-						"id": 12,
-						"complete": false
-					}
-				]
+				"data": s.toJSONObject()
 			};
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(SDI.getTableName(), c.getId().toString(), Timeline.getTableName()))
+				.get(DatabaseConnection.associationEndpoint(SDI.getTableName(), c.getId().toString(), ThemeSDI.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
-            var success = function() {
-                var timelines = c.timelines();
+			var success = function() {
+				var themeSDI = c.theme();
+				assert.deepEqual(themeSDI, s, "The themeSDI is not the expected value");
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+				var spy = sinon.spy(themeSDI, "desynchronize");
 
-                assert.deepEqual(timelines, [pv], "The timeline array is not an array fill only with PV: "+JSON.stringify(timelines));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the timelines");
+				var response2:SequelizeRestfulResponse = {
+					"status": "success",
+					"data": {}
+				};
 
-                var spy = sinon.spy(pv, "desynchronize");
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
-
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(SDI.getTableName(), c.getId().toString(), Timeline.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+					.delete(DatabaseConnection.associatedObjectEndpoint(SDI.getTableName(), c.getId().toString(), ThemeSDI.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(response2));
 
 
-                var success2 = function() {
-                    //assert.ok(retour, "The return of the removeTimeline is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the timeline in database.");
-                    done();
-                };
+				var success2 = function() {
+					//assert.ok(retour, "The return of the unsetInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+					done();
+				};
 
-                var fail2 = function(err) {
-                    done(err);
-                };
+				var fail2 = function(err) {
+					done(err);
+				};
 
-                c.removeTimeline(pv.getId(), success2, fail2);
+				c.unlinkTheme(s.getId(), success2, fail2);
+			};
 
-            };
+			var fail = function(err) {
+				done(err);
+			};
 
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadTimelines(success, fail);
+			c.loadTheme(success, fail);
 		});
-
 	});
 });

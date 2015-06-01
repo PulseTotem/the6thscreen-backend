@@ -32,7 +32,184 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
         this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
         this.addListenerToSocket('RetrieveCallDescription', function(description) { self.sendCallDescription(description); });
         this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
+
+
+		this.addListenerToSocket('HashDescription', function(description) { self.manageHashDescription(description); });
     }
+
+
+////////////////////// Begin: Manage HashDescription //////////////////////
+
+	/**
+	 * Manage Hash description and send corresponding SDI structure and Profil description to client.
+	 *
+	 * @method manageHashDescription
+	 * @param {any} hashDescription - The Hash Description.
+	 * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
+	 */
+	manageHashDescription(hashDescription : any, self : ClientsNamespaceManager = null) {
+		// hashDescription : {"hash" : string}
+		var self = this;
+
+		var hash = hashDescription.hash;
+
+		//TODO : Manage Hash
+		var sdiId = 1;
+		var profilId = hash;
+
+		var fail = function (err) {
+			Logger.debug("SocketId: " + self.socket.id + " - manageHashDescription : send done with fail status for Profil with Id : " + profilId + " : "+err);
+			self.socket.emit("SDIDescription", self.formatResponse(false, err));
+		};
+
+		var profil : Profil = null;
+		var sdiDesc = {};
+		var sdi : SDI = null;
+		var profilDesc = {};
+
+		var successLoadAssoSDI = function () {
+
+			var successThemeCompleteDescription = function(themeCompleteDesc) {
+				sdiDesc["theme"] = themeCompleteDesc;
+
+				var zones : Array<Zone> = sdi.zones();
+
+				var nbZones = 0;
+
+				zones.forEach(function (zone) {
+					var zoneDesc = zone.toJSONObject();
+
+					var successLoadAssoZone = function () {
+						zoneDesc["theme"] = null;
+
+						if(zone.theme() != null) {
+							zoneDesc["theme"] = zone.theme().toJSONObject();
+						}
+
+						var behaviour : Behaviour = zone.behaviour();
+
+						zoneDesc["behaviour"] = behaviour.toJSONObject();
+
+						zoneDesc["callTypes"] = [];
+
+						var callTypes : Array<CallType> = zone.callTypes();
+						var nbCT = 0;
+
+						callTypes.forEach( function (callType) {
+
+							var successCallTypeToCompleteJSON = function (data) {
+								zoneDesc["callTypes"].push(data);
+								nbCT++;
+								if (nbCT == callTypes.length) {
+									nbZones++;
+
+									sdiDesc["zones"].push(zoneDesc);
+
+									if (nbZones == zones.length) {
+										self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
+									}
+								}
+							};
+
+							callType.toCompleteJSONObject(successCallTypeToCompleteJSON, fail);
+						})
+					};
+					zone.loadAssociations(successLoadAssoZone, fail);
+				});
+			};
+
+			sdi.theme().toCompleteJSONObject(successThemeCompleteDescription, fail);
+		};
+
+		var successLoadAssoProfil = function () {
+			sdi = profil.sdi();
+
+			sdiDesc = sdi.toJSONObject();
+			sdiDesc["zones"] = [];
+
+			sdi.loadAssociations(successLoadAssoSDI, fail);
+
+			profilDesc = profil.toJSONObject();
+			profilDesc["zoneContents"] = [];
+
+			var zoneContents : Array<ZoneContent> = profil.zoneContents();
+			var nbZC = 0;
+
+			zoneContents.forEach(function (zoneContent) {
+				var zcDesc = zoneContent.toJSONObject();
+
+
+				var successZCLoadAsso = function () {
+					zcDesc["zone"] = zoneContent.zone().toJSONObject();
+					zcDesc["widget"] = null;
+					zcDesc["absoluteTimeline"] = null;
+
+					var relativeTL : RelativeTimeline = zoneContent.relativeTimeline();
+
+					zcDesc["relativeTimeline"] = relativeTL.toJSONObject();
+					zcDesc["relativeTimeline"]["relativeEvents"] = [];
+
+					var successRelativeTLLoadAsso = function () {
+						zcDesc["relativeTimeline"]["timelineRunner"] = relativeTL.timelineRunner().toJSONObject();
+						zcDesc["relativeTimeline"]["systemTrigger"] = relativeTL.systemTrigger().toJSONObject();
+						zcDesc["relativeTimeline"]["userTrigger"] = relativeTL.userTrigger().toJSONObject();
+
+						var relativeEvents : Array<RelativeEvent> = relativeTL.relativeEvents();
+
+						var nbRelEv = 0;
+						relativeEvents.forEach(function (relativeEvent) {
+
+							var relEvDesc = relativeEvent.toJSONObject();
+
+							var successRelativeEventLoadAsso = function () {
+								var call : Call = relativeEvent.call();
+
+								var callDesc = call.toJSONObject();
+
+								var successCallLoadAsso = function () {
+									callDesc["callType"] = {
+										"id": call.callType().getId()
+									};
+
+									relEvDesc["call"] = callDesc;
+									zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+									nbRelEv++;
+
+									if (nbRelEv == relativeEvents.length) {
+										profilDesc["zoneContents"].push(zcDesc);
+										nbZC++;
+
+										if (nbZC == zoneContents.length) {
+											self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+										}
+									}
+								};
+
+								call.loadAssociations(successCallLoadAsso, fail);
+							}
+
+							relativeEvent.loadAssociations(successRelativeEventLoadAsso, fail);
+						});
+					};
+
+					relativeTL.loadAssociations(successRelativeTLLoadAsso, fail);
+				};
+
+				zoneContent.loadAssociations(successZCLoadAsso, fail);
+			});
+		};
+
+		var successReadProfil = function (pro : Profil) {
+			profil = pro;
+
+			profil.loadAssociations(successLoadAssoProfil, fail);
+		};
+
+		Profil.read(profilId, successReadProfil, fail);
+
+	}
+
+////////////////////// End: Manage HashDescription //////////////////////
 
 ////////////////////// Begin: Manage SendProfilDescription //////////////////////
 

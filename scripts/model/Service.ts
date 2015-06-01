@@ -3,6 +3,7 @@
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./Source.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
@@ -54,6 +55,30 @@ class Service extends ModelItf {
 	private _provider : string;
 
 	/**
+	 * Logo property.
+	 *
+	 * @property _logo
+	 * @type string
+	 */
+	private _logo : string;
+
+	/**
+	 * Sources property
+	 *
+	 * @property _sources
+	 * @type Array<Source>
+	 */
+	private _sources : Array<Source>;
+
+	/**
+	 * Lazy loading for sources property
+	 *
+	 * @property _sources_loaded
+	 * @type boolean
+	 */
+	private _sources_loaded : boolean;
+
+	/**
 	 * Constructor
 	 *
 	 * @constructor
@@ -63,14 +88,21 @@ class Service extends ModelItf {
 	 * @param {boolean} oauth - To set if Service needs authentication or not
 	 * @param {string} provider - The OAuthD provider's name
 	 * @param id The DB id of the service
+	 * @param {string} createdAt - The Service's createdAt.
+	 * @param {string} updatedAt - The Service's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", host : string = "", oauth : boolean = false, provider : string = "", id : number = null, complete : boolean = false) {
-		super(id, complete);
+	constructor(name : string = "", description : string = "", host : string = "", oauth : boolean = false, provider : string = "", logo : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
+
 		this.setName(name);
 		this.setDescription(description);
 		this.setHost(host);
 		this.setOAuth(oauth);
 		this.setProvider(provider);
+		this.setLogo(logo);
+
+		this._sources = new Array<Source>();
+		this._sources_loaded = false;
 	}
 
 	/**
@@ -119,6 +151,15 @@ class Service extends ModelItf {
 	}
 
 	/**
+	 * Set the Service's logo.
+	 *
+	 * @method setLogo
+	 */
+	setLogo(logo : string) {
+		this._logo = logo;
+	}
+
+	/**
 	 * Return the Service's name.
 	 *
 	 * @method name
@@ -163,7 +204,94 @@ class Service extends ModelItf {
 		return this._provider;
 	}
 
+	/**
+	 * Return the Service's logo.
+	 *
+	 * @method logo
+	 */
+	logo() {
+		return this._logo;
+	}
+
+	/**
+	 * Return the Service's sources.
+	 *
+	 * @method sources
+	 */
+	sources() {
+		return this._sources;
+	}
+
+	/**
+	 * Load the Service's sources.
+	 *
+	 * @method loadSources
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadSources(successCallback : Function = null, failCallback : Function = null) {
+		if(! this._sources_loaded) {
+			var self = this;
+			var success : Function = function(sources) {
+				self._sources = sources;
+				self._sources_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getAssociatedObjects(Service, Source, success, fail);
+		}
+	}
+
+
 	//////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+	/**
+	 * Load all the lazy loading properties of the object.
+	 * Useful when you want to get a complete object.
+	 *
+	 * @method loadAssociations
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadAssociations(successCallback : Function = null, failCallback : Function = null) {
+		var self = this;
+
+		var success : Function = function(models) {
+			if(self._sources_loaded) {
+				if (successCallback != null) {
+					successCallback();
+				} // else //Nothing to do ?
+			}
+		};
+
+		var fail : Function = function(error) {
+			if(failCallback != null) {
+				failCallback(error);
+			} else {
+				Logger.error(JSON.stringify(error));
+			}
+		};
+
+		this.loadSources(success, fail);
+	}
+
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 *
+	 * @method desynchronize
+	 */
+	desynchronize() : void {
+		super.desynchronize();
+		this._sources_loaded = false;
+	}
 
 
 	/**
@@ -180,7 +308,10 @@ class Service extends ModelItf {
 			"host": this.host(),
 			"oauth": this.oauth(),
 			"provider": this.provider(),
-			"complete": this.isComplete()
+			"logo": this.logo(),
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -202,6 +333,31 @@ class Service extends ModelItf {
 		};
 
 		super.checkCompleteness(succces, failCallback);
+	}
+
+	/**
+	 * Return a Call instance as a JSON Object including associated object.
+	 * However the method should not be recursive due to cycle in the model.
+	 *
+	 * @method toCompleteJSONObject
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
+		var self = this;
+		var data = this.toJSONObject();
+
+		var success : Function = function() {
+			data["sources"] = self.serializeArray(self.sources(), onlyId);
+
+			successCallback(data);
+		};
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		this.loadAssociations(success, fail);
 	}
 
 	/**
@@ -287,7 +443,7 @@ class Service extends ModelItf {
 	 * @return {Service} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Service {
-		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.oauth, jsonObject.provider, jsonObject.id, jsonObject.complete);
+		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.oauth, jsonObject.provider, jsonObject.logo, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

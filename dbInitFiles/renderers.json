@@ -33,5 +33,19 @@
       "infoType" : {
         "name" : "EventList"
       }
+    },
+    {
+      "name" : "UserRenderer",
+      "description" : "Renderer pour les infos de type User.",
+      "infoType" : {
+        "name" : "UserList"
+      }
+    },
+    {
+      "name" : "VideoPlaylistRenderer",
+      "description" : "Renderer pour les infos de type VideoPlaylist.",
+      "infoType" : {
+        "name" : "VideoPlaylist"
+      }
     }
 ]

@@ -1,4 +1,5 @@
 /**
+ * @author Simon Urli <simon@the6thscreen.fr>
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
  */
 
@@ -7,12 +8,12 @@
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
- * Model : RenderPolicy
+ * Model : Widget
  *
- * @class RenderPolicy
+ * @class Widget
  * @extends ModelItf
  */
-class RenderPolicy extends ModelItf {
+class Widget extends ModelItf {
 
     /**
      * Name property.
@@ -34,19 +35,20 @@ class RenderPolicy extends ModelItf {
      * Constructor.
      *
      * @constructor
-     * @param {string} name - The RenderPolicy's name.
-     * @param {string} description - The RenderPolicy's description.
-     * @param {number} id - The RenderPolicy's ID.
+     * @param {string} name - The Widget's name.
+     * @param {number} id - The Widget's ID.
+	 * @param {string} createdAt - The Widget's createdAt.
+	 * @param {string} updatedAt - The Widget's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
-	    this.setDescription(description);
+        this.setDescription(description);
     }
 
 	/**
-	 * Set the RenderPolicy's name.
+	 * Set the Widget's name.
 	 *
 	 * @method setName
 	 */
@@ -54,17 +56,8 @@ class RenderPolicy extends ModelItf {
 		this._name = name;
 	}
 
-	/**
-	 * Set the RenderPolicy's description.
-	 *
-	 * @method setDescription
-	 */
-	setDescription(description : string) {
-		this._description = description;
-	}
-
     /**
-     * Return the RenderPolicy's name.
+     * Return the Widget's name.
      *
      * @method name
      */
@@ -73,7 +66,16 @@ class RenderPolicy extends ModelItf {
     }
 
     /**
-     * Return the RenderPolicy's description.
+     * Set the Widget's description.
+     *
+     * @method setDescription
+     */
+    setDescription(description : string) {
+        this._description = description;
+    }
+
+    /**
+     * Return the Widget's description.
      *
      * @method description
      */
@@ -84,7 +86,7 @@ class RenderPolicy extends ModelItf {
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Return a RenderPolicy instance as a JSON Object
+	 * Return a Widget instance as a JSON Object
 	 *
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
@@ -93,26 +95,27 @@ class RenderPolicy extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"description": this.description(),
-			"complete": false
+            "description": this.description(),
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
 
 	/**
-	 * Check if the object is complete.
-	 *
-	 * A RendererPolicy is complete if it has an ID and a name.
+	 * Compute the completeness of a Widget.
+	 * The completeness is given by the presence of an ID and a name.
 	 */
 	checkCompleteness(successCallback : Function, failCallback : Function) : void {
 		var self = this;
 
-		var success : Function = function() {
+		var success : Function = function () {
 			self._complete = (self._complete && !!self.name());
 			successCallback();
 		}
-		super.checkCompleteness(success, failCallback);
 
+		super.checkCompleteness(success,failCallback);
 	}
 
     /**
@@ -124,7 +127,7 @@ class RenderPolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        this.createObject(RenderPolicy, this.toJSONObject(), successCallback, failCallback);
+        this.createObject(Widget, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -138,7 +141,7 @@ class RenderPolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        ModelItf.readObject(RenderPolicy, id, successCallback, failCallback, attemptNumber);
+        ModelItf.readObject(Widget, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -150,7 +153,7 @@ class RenderPolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.updateObject(RenderPolicy, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+        return this.updateObject(Widget, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -162,7 +165,7 @@ class RenderPolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(RenderPolicy, this.getId(), successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(Widget, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -174,31 +177,31 @@ class RenderPolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.allObjects(RenderPolicy, successCallback, failCallback, attemptNumber);
+        return this.allObjects(Widget, successCallback, failCallback, attemptNumber);
     }
 
 	/**
-	 * Return a RenderPolicy instance from a JSON string.
+	 * Return a Widget instance from a JSON string.
 	 *
 	 * @method parseJSON
 	 * @static
 	 * @param {string} json - The JSON string
-	 * @return {RenderPolicy} The model instance.
+	 * @return {Widget} The model instance.
 	 */
-	static parseJSON(jsonString : string) : RenderPolicy {
-		return RenderPolicy.fromJSONObject(JSON.parse(jsonString));
+	static parseJSON(jsonString : string) : Widget {
+		return Widget.fromJSONObject(JSON.parse(jsonString));
 	}
 
 	/**
-	 * Return a RenderPolicy instance from a JSON Object.
+	 * Return a Widget instance from a JSON Object.
 	 *
 	 * @method fromJSONObject
 	 * @static
 	 * @param {JSONObject} json - The JSON Object
-	 * @return {RenderPolicy} The model instance.
+	 * @return {Widget} The model instance.
 	 */
-	static fromJSONObject(jsonObject : any) : RenderPolicy {
-		return new RenderPolicy(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+	static fromJSONObject(jsonObject : any) : Widget {
+		return new Widget(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**
@@ -208,6 +211,6 @@ class RenderPolicy extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "RenderPolicies";
+        return "Widgets";
     }
 }

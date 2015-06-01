@@ -34,17 +34,38 @@ class ModelItf {
 	 */
 	_complete : boolean;
 
+	/**
+	 * CreatedAt property.
+	 *
+	 * @property _createdAt
+	 * @type string
+	 */
+	_createdAt : string;
+
+	/**
+	 * UpdatedAt property.
+	 *
+	 * @property _updatedAt
+	 * @type string
+	 */
+	_updatedAt : string;
+
     /**
      * Constructor.
      *
      * @param {number} id - The model ID.
+	 * @param {boolean} complete - Indicates if model is complete or not.
+	 * @param {string} createdAt - The model createdAt.
+	 * @param {string} updatedAt - The model updatedAt.
      */
-    constructor(id : number = null, complete : boolean = false) {
+    constructor(id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 	    if (!id && id !== null) {
 		    throw new ModelException("The ID cannot be undefined");
 	    }
         this._id = id;
 	    this._complete = complete;
+		this._createdAt = createdAt;
+		this._updatedAt = updatedAt;
     }
 
     /**
@@ -64,6 +85,26 @@ class ModelItf {
 	 */
 	isComplete() : boolean {
 		return this._complete;
+	}
+
+	/**
+	 * Returns CreatedAt property of model.
+	 *
+	 * @method getCreatedAt
+	 * @return {string} The model's CreatedAt property.
+	 */
+	getCreatedAt() : string {
+		return this._createdAt;
+	}
+
+	/**
+	 * Returns UpdatedAt property of model.
+	 *
+	 * @method getUpdatedAt
+	 * @return {string} The model's UpdatedAt property.
+	 */
+	getUpdatedAt() : string {
+		return this._updatedAt;
 	}
 
 	/**
@@ -105,6 +146,8 @@ class ModelItf {
                     failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when creating an object with URL: "+urlCreateObject+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
                 } else {
                     self._id = response.data.id;
+					self._createdAt = response.data.createdAt;
+					self._updatedAt = response.data.updatedAt;
                     successCallback(response.data);
                 }
             } else {
@@ -277,6 +320,8 @@ class ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
      updateObject(modelClass : any, data : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+		var self = this;
+
         if (!modelClass || !data) {
             failCallback(new ModelException("To update an object, the modelClass and the datas must be given."), attemptNumber);
             return;
@@ -294,6 +339,7 @@ class ModelItf {
                 if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
                     failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when updating an object with URL: "+urlUpdate+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
                 } else {
+					self._updatedAt = response.data.updatedAt;
                     successCallback();
                 }
             } else {
@@ -808,7 +854,9 @@ class ModelItf {
 	toJSONObject() : Object {
 		var data = {
 			"id": this.getId(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -859,7 +907,7 @@ class ModelItf {
      */
     static fromJSONObject(jsonObject : any) : ModelItf {
         Logger.warn("ModelItf - fromJSONObject : Method need to be implemented.");
-        var model = new ModelItf(jsonObject.id, jsonObject.complete); // for passing the tests with modelItf
+        var model = new ModelItf(jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt); // for passing the tests with modelItf
 	    return model;
     }
 

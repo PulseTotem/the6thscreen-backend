@@ -7,6 +7,7 @@
 /// <reference path="./ParamValue.ts" />
 /// <reference path="./CallType.ts" />
 /// <reference path="./Profil.ts" />
+/// <reference path="./OAuthKey.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -42,22 +43,6 @@ class Call extends ModelItf {
 	 */
 	private _call_type_loaded : boolean;
 
-	/**
-	 * Profil property.
-	 *
-	 * @property _profil
-	 * @type Profil
-	 */
-	private _profil : Profil;
-
-	/**
-	 * Lazy loading for Profil property.
-	 *
-	 * @property _profil_loaded
-	 * @type boolean
-	 */
-	private _profil_loaded : boolean;
-
     /**
      * ParamValues property.
      *
@@ -74,15 +59,33 @@ class Call extends ModelItf {
      */
     private _param_values_loaded : boolean;
 
+	/**
+	 * OAuthKey property.
+	 *
+	 * @property _oauthkey
+	 * @type OAuthKey
+	 */
+	private _oauthkey : OAuthKey;
+
+	/**
+	 * Lazy loading for OAuthKey property.
+	 *
+	 * @property _oauthkey_loaded
+	 * @type boolean
+	 */
+	private _oauthkey_loaded : boolean;
+
     /**
      * Constructor.
      *
      * @constructor
      * @param {string} name - The Call's name.
      * @param {number} id - The Call's ID.
+	 * @param {string} createdAt - The Call's createdAt.
+	 * @param {string} updatedAt - The Call's updatedAt.
      */
-    constructor(name : string = "", id : number = null, complete : boolean = false) {
-        super(id,complete);
+    constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 
@@ -92,8 +95,8 @@ class Call extends ModelItf {
 	    this._call_type = null;
 	    this._call_type_loaded = false;
 
-	    this._profil = null;
-	    this._profil_loaded = false;
+		this._oauthkey = null;
+		this._oauthkey_loaded = false;
     }
 
     /**
@@ -152,49 +155,6 @@ class Call extends ModelItf {
     }
 
 	/**
-	 * Return the Call's profil.
-     *
-     * @method profil
-	 */
-	profil() {
-		return this._profil;
-	}
-
-    /**
-     * Load the Call's profil.
-     *
-     * @method loadProfil
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    loadProfil(successCallback : Function = null, failCallback : Function = null) {
-        if(! this._profil_loaded) {
-            var self = this;
-            var success : Function = function(profil) {
-                if(!!profil) {
-                    self._profil = profil;
-                }
-                self._profil_loaded = true;
-                if(successCallback != null) {
-                    successCallback();
-                }
-            };
-
-            var fail : Function = function(error) {
-                if(failCallback != null) {
-                    failCallback(error);
-                }
-            };
-
-            this.getUniquelyAssociatedObject(Call, Profil, success, fail);
-        } else {
-            if(successCallback != null) {
-                successCallback();
-            }
-        }
-    }
-
-	/**
 	 * Return the Call's type.
      *
      * @method callType
@@ -237,6 +197,49 @@ class Call extends ModelItf {
         }
     }
 
+	/**
+	 * Return the Call's oAuthKey.
+	 *
+	 * @method oAuthKey
+	 */
+	oAuthKey() {
+		return this._oauthkey;
+	}
+
+	/**
+	 * Load the Call's oAuthKey.
+	 *
+	 * @method loadOAuthKey
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadOAuthKey(successCallback : Function = null, failCallback : Function = null) {
+		if(! this._oauthkey_loaded) {
+			var self = this;
+			var success : Function = function(oAuthKey) {
+				if(!!oAuthKey) {
+					self._oauthkey = oAuthKey;
+				}
+				self._oauthkey_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Call, OAuthKey, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -251,7 +254,7 @@ class Call extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._param_values_loaded && self._profil_loaded && self._call_type_loaded) {
+            if(self._param_values_loaded && self._call_type_loaded && self._oauthkey_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -267,8 +270,8 @@ class Call extends ModelItf {
         };
 
         this.loadParamValues(success, fail);
-        this.loadProfil(success, fail);
         this.loadCallType(success, fail);
+		this.loadOAuthKey(success, fail);
     }
 
 	/**
@@ -280,7 +283,7 @@ class Call extends ModelItf {
 		super.desynchronize();
 		this._call_type_loaded = false;
 		this._param_values_loaded = false;
-		this._profil_loaded = false;
+		this._oauthkey_loaded = false;
 	}
 
 	/**
@@ -297,8 +300,8 @@ class Call extends ModelItf {
 		var success = function () {
 			if (self.isComplete() && !!self.name()) {
 				var success : Function = function () {
-					if (self._call_type_loaded && self._profil_loaded) {
-						self._complete = (!!self.callType() && self.callType().isComplete()) && (!!self.profil() && self.profil().isComplete());
+					if (self._call_type_loaded) {
+						self._complete = (!!self.callType() && self.callType().isComplete());
 						successCallback();
 					}
 				};
@@ -308,7 +311,6 @@ class Call extends ModelItf {
 				};
 
 				self.loadCallType(success,fail);
-				self.loadProfil(success,fail);
 			} else {
 				self._complete = false;
 				successCallback();
@@ -328,7 +330,9 @@ class Call extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -349,10 +353,10 @@ class Call extends ModelItf {
 
 	        if (onlyId) {
 		        data["callType"] = (self.callType() !== null) ? self.callType().getId() : null;
-		        data["profil"] = (self.profil() !== null) ? self.profil().getId() : null;
+				data["oAuthKey"] = (self.oAuthKey() !== null) ? self.oAuthKey().getId() : null;
 	        } else {
 		        data["callType"] = (self.callType() !== null) ? self.callType().toJSONObject() : null;
-		        data["profil"] = (self.profil() !== null) ? self.profil().toJSONObject() : null;
+				data["oAuthKey"] = (self.oAuthKey() !== null) ? self.oAuthKey().toJSONObject() : null;
 	        }
 	        data["paramValues"] = self.serializeArray(self.paramValues(), onlyId);
 
@@ -393,33 +397,6 @@ class Call extends ModelItf {
 	}
 
 	/**
-	 * Set the Profil of the Call.
-	 * As a Call can only have one Profil, if the value is already set, this method throws an exception: you need first to unset the profil.
-	 * Moreover the given Profil must be created in database.
-	 *
-     * @method linkProfil
-	 * @param {Profil} p The Profil to associate with the Call.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	linkProfil(profilID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(Call, Profil, profilID, successCallback, failCallback);
-	}
-
-	/**
-	 * Unset the current Profil from the Call.
-	 * It both sets a null value for the object property and remove the association in database.
-	 * A Profil must have been set before using it, else an exception is thrown.
-	 *
-     * @method unlinkProfil
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	unlinkProfil(profilID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(Call, Profil, profilID, successCallback, failCallback);
-	}
-
-	/**
 	 * Set the CallType of the Call.
 	 * As a Call can only have one CallType, if the value is already set, this method throws an exception: you need first to unset the CallType.
 	 * Moreover the given CallType must be created in database.
@@ -444,6 +421,34 @@ class Call extends ModelItf {
 	 */
 	unlinkCallType(callTypeId : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Call, CallType, callTypeId, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the OAuthKey of the Call.
+	 * As a Call can only have one OAuthKey, if the value is already set, this method throws an exception: you need first to unset the OAuthKey.
+	 * Moreover the given OAuthKey must be created in database.
+	 *
+	 * @method linkOAuthKey
+	 * @param {number} oAuthKeyId - The OAuthKey to associate with the Call.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkOAuthKey(oAuthKeyId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Call, OAuthKey, oAuthKeyId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current OAuthKey from the Call.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A OAuthKey must have been set before using it, else an exception is thrown.
+	 *
+	 * @method unlinkOAuthKey
+	 * @param {number} oAuthKeyId - The OAuthKey to unset from the Call.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkOAuthKey(oAuthKeyId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Call, OAuthKey, oAuthKeyId, successCallback, failCallback);
 	}
 
     /**
@@ -493,7 +498,36 @@ class Call extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Call, this.getId(), successCallback, failCallback, attemptNumber);
+		var self = this;
+
+		var fail : Function = function(error) {
+			failCallback(error);
+		};
+
+		var successLoadParamValues = function() {
+
+			if(self.paramValues().length > 0) {
+				var nbDeletedParamValues = 0;
+				var nbTotal = self.paramValues().length;
+
+				self.paramValues().forEach(function (paramValue) {
+
+					var successDeleteParamValue = function() {
+						nbDeletedParamValues++;
+
+						if (nbDeletedParamValues == nbTotal) {
+							ModelItf.deleteObject(Call, self.getId(), successCallback, failCallback, attemptNumber);
+						}
+					};
+
+					paramValue.delete(successDeleteParamValue, fail);
+				});
+			} else {
+				ModelItf.deleteObject(Call, self.getId(), successCallback, failCallback, attemptNumber);
+			}
+		}
+
+		this.loadParamValues(successLoadParamValues, fail);
     }
 
     /**
@@ -529,7 +563,7 @@ class Call extends ModelItf {
      * @return {Call} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Call {
-	    return new Call(jsonObject.name, jsonObject.id, jsonObject.complete);
+	    return new Call(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
 
     /**

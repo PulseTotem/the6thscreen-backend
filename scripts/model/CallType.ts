@@ -5,9 +5,9 @@
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Source.ts" />
 /// <reference path="./Renderer.ts" />
-/// <reference path="./ReceivePolicy.ts" />
-/// <reference path="./RenderPolicy.ts" />
 /// <reference path="./Zone.ts" />
+/// <reference path="./Policy.ts" />
+/// <reference path="./Call.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -68,36 +68,20 @@ class CallType extends ModelItf {
     private _renderer_loaded : boolean;
 
     /**
-     * ReceivePolicy property.
+     * Policy property.
      *
-     * @property _receive_policy
-     * @type ReceivePolicy
+     * @property _policy
+     * @type Policy
      */
-    private _receive_policy : ReceivePolicy;
+    private _policy : Policy;
 
     /**
-     * Lazy loading for ReceivePolicy property.
+     * Lazy loading for Policy property.
      *
-     * @property _receive_policy_loaded
+     * @property _policy_loaded
      * @type boolean
      */
-    private _receive_policy_loaded : boolean;
-
-    /**
-     * RenderPolicy property.
-     *
-     * @property _render_policy
-     * @type RenderPolicy
-     */
-    private _render_policy : RenderPolicy;
-
-    /**
-     * Lazy loading for RenderPolicy property.
-     *
-     * @property _render_policy_loaded
-     * @type boolean
-     */
-    private _render_policy_loaded : boolean;
+    private _policy_loaded : boolean;
 
 	/**
 	 * Zone property
@@ -138,9 +122,11 @@ class CallType extends ModelItf {
      * @param {string} name - The CallType's name.
      * @param {string} description - The CallType's description.
      * @param {number} id - The CallType's ID.
+	 * @param {string} createdAt - The CallType's createdAt.
+	 * @param {string} updatedAt - The CallType's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
@@ -151,11 +137,8 @@ class CallType extends ModelItf {
         this._renderer = null;
         this._renderer_loaded = false;
 
-        this._receive_policy = null;
-        this._receive_policy_loaded = false;
-
-        this._render_policy = null;
-        this._render_policy_loaded = false;
+        this._policy = null;
+        this._policy_loaded = false;
 
 	    this._zone = null;
 	    this._zone_loaded = false;
@@ -287,29 +270,29 @@ class CallType extends ModelItf {
     }
 
     /**
-     * Return the CallType's receivePolicy.
+     * Return the CallType's policy.
      *
-     * @method receivePolicy
+     * @method policy
      */
-    receivePolicy() {
-        return this._receive_policy;
+    policy() {
+        return this._policy;
     }
 
     /**
-     * Load the CallType's receivePolicy.
+     * Load the CallType's policy.
      *
-     * @method loadReceivePolicy
+     * @method loadPolicy
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadReceivePolicy(successCallback : Function, failCallback : Function) {
-        if(! this._receive_policy_loaded) {
+    loadPolicy(successCallback : Function, failCallback : Function) {
+        if(! this._policy_loaded) {
             var self = this;
-            var success : Function = function(receivePolicy) {
-                if(!!receivePolicy) {
-                    self._receive_policy = receivePolicy;
+            var success : Function = function(policy) {
+                if(!!policy) {
+                    self._policy = policy;
                 }
-                self._receive_policy_loaded = true;
+                self._policy_loaded = true;
                 if(successCallback != null) {
                     successCallback();
                 }
@@ -321,50 +304,7 @@ class CallType extends ModelItf {
                 }
             };
 
-            this.getUniquelyAssociatedObject(CallType, ReceivePolicy, success, fail);
-        } else {
-            if(successCallback != null) {
-                successCallback();
-            }
-        }
-    }
-
-    /**
-     * Return the CallType's renderPolicy.
-     *
-     * @method renderPolicy
-     */
-    renderPolicy() {
-        return this._render_policy;
-    }
-
-    /**
-     * Load the CallType's renderPolicy.
-     *
-     * @method loadRenderPolicy
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    loadRenderPolicy(successCallback : Function, failCallback : Function) {
-        if(! this._render_policy_loaded) {
-            var self = this;
-            var success : Function = function(renderPolicy) {
-                if(!!renderPolicy) {
-                    self._render_policy = renderPolicy;
-                }
-                self._render_policy_loaded = true;
-                if(successCallback != null) {
-                    successCallback();
-                }
-            };
-
-            var fail : Function = function(error) {
-                if(failCallback != null) {
-                    failCallback(error);
-                }
-            };
-
-            this.getUniquelyAssociatedObject(CallType, RenderPolicy, success, fail);
+            this.getUniquelyAssociatedObject(CallType, Policy, success, fail);
         } else {
             if(successCallback != null) {
                 successCallback();
@@ -470,7 +410,7 @@ class CallType extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._source_loaded && self._renderer_loaded && self._receive_policy_loaded && self._render_policy_loaded && self._zone_loaded && self._calls_loaded) {
+            if(self._source_loaded && self._renderer_loaded && self._policy_loaded && self._zone_loaded && self._calls_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -487,8 +427,7 @@ class CallType extends ModelItf {
 
         this.loadSource(success, fail);
         this.loadRenderer(success, fail);
-        this.loadReceivePolicy(success, fail);
-        this.loadRenderPolicy(success, fail);
+        this.loadPolicy(success, fail);
         this.loadZone(success, fail);
         this.loadCalls(success, fail);
     }
@@ -500,8 +439,7 @@ class CallType extends ModelItf {
 	 */
 	desynchronize() : void {
 		this._source_loaded = false;
-		this._receive_policy_loaded = false;
-		this._render_policy_loaded = false;
+		this._policy_loaded = false;
 		this._renderer_loaded = false;
 		this._zone_loaded = false;
         this._calls_loaded = false;
@@ -518,7 +456,9 @@ class CallType extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
-			"complete": this.isComplete()
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
@@ -527,6 +467,7 @@ class CallType extends ModelItf {
 	 * Check whether the object is complete or not
 	 *
 	 * A CallType is complete if it has an ID, a name, a source, a renderer and a zone.
+     * It is not necessary that the zone is complete yet.
 	 *
 	 * @param successCallback The function to call in case of success.
 	 * @param failCallback The function to call in case of failure.
@@ -537,7 +478,7 @@ class CallType extends ModelItf {
 			if (self.isComplete() && !!self.name()) {
 				var success:Function = function () {
 					if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
-						self._complete = (!!self.renderer() && self.renderer().isComplete()) && (!!self.zone() && self.zone().isComplete()) && (!!self.source() && self.source().isComplete());
+						self._complete = (!!self.renderer() && self.renderer().isComplete()) && !!self.zone() && (!!self.source() && self.source().isComplete());
 						successCallback();
 					}
 				};
@@ -574,14 +515,12 @@ class CallType extends ModelItf {
 		        data["source"] = (self.source() !== null) ? self.source().getId() : null;
 		        data["renderer"] = (self.renderer() !== null) ? self.renderer().getId() : null;
 		        data["zone"] = (self.zone() !== null) ? self.zone().getId() : null;
-		        data["receivePolicy"] = (self.receivePolicy() !== null) ? self.receivePolicy().getId() : null;
-		        data["renderPolicy"] = (self.renderPolicy() !== null) ? self.renderPolicy().getId() : null;
+		        data["policy"] = (self.policy() !== null) ? self.policy().getId() : null;
 	        } else {
 		        data["source"] = (self.source() !== null) ? self.source().toJSONObject() : null;
 		        data["renderer"] = (self.renderer() !== null) ? self.renderer().toJSONObject() : null;
 		        data["zone"] = (self.zone() !== null) ? self.zone().toJSONObject() : null;
-		        data["receivePolicy"] = (self.receivePolicy() !== null) ? self.receivePolicy().toJSONObject() : null;
-		        data["renderPolicy"] = (self.renderPolicy() !== null) ? self.renderPolicy().toJSONObject() : null;
+                data["policy"] = (self.policy() !== null) ? self.policy().toJSONObject() : null;
 	        }
 
             data["calls"] = self.serializeArray(self.calls(), onlyId);
@@ -650,57 +589,30 @@ class CallType extends ModelItf {
 	}
 
 	/**
-	 * Set the ReceivePolicy of the CallType.
-	 * As a CallType can only have one ReceivePolicy, if the value is already set, this method throws an exception: you need first to unset the ReceivePolicy.
-	 * Moreover the given ReceivePolicy must be created in database.
+	 * Set the Policy of the CallType.
+	 * As a CallType can only have one Policy, if the value is already set, this method throws an exception: you need first to unset the Policy.
+	 * Moreover the given Policy must be created in database.
 	 *
-     * @method linkReceivePolicy
-	 * @param {ReceivePolicy} rp The ReceivePolicy to associate with the CallType.
+     * @method linkPolicy
+	 * @param {number} policyId The policy id of the policy to associate with the CallType.
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	linkReceivePolicy(rpID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(CallType, ReceivePolicy, rpID, successCallback, failCallback);
+	linkPolicy(policyID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(CallType, Policy, policyID, successCallback, failCallback);
 	}
 
 	/**
-	 * Unset the current ReceivePolicy from the CallType.
+	 * Unset the current Policy from the CallType.
 	 * It both sets a null value for the object property and remove the association in database.
 	 * A ReceivePolicy must have been set before using it, else an exception is thrown.
 	 *
-     * @method unlinkReceivePolicy
+     * @method unlinkPolicy
 	 * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
 	 */
-	unlinkReceivePolicy(rpID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(CallType, ReceivePolicy, rpID, successCallback, failCallback);
-	}
-
-	/**
-	 * Set the RenderPolicy of the CallType.
-	 * As a CallType can only have one RenderPolicy, if the value is already set, this method throws an exception: you need first to unset the RenderPolicy.
-	 * Moreover the given RenderPolicy must be created in database.
-	 *
-     * @method linkRenderPolicy
-	 * @param {RenderPolicy} rp The RenderPolicy to associate with the CallType.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	linkRenderPolicy(rpID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(CallType, RenderPolicy, rpID, successCallback, failCallback);
-	}
-
-	/**
-	 * Unset the current RenderPolicy from the CallType.
-	 * It both sets a null value for the object property and remove the association in database.
-	 * A RenderPolicy must have been set before using it, else an exception is thrown.
-	 *
-     * @method unlinkRenderPolicy
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	unlinkRenderPolicy(rpID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(CallType, RenderPolicy, rpID, successCallback, failCallback);
+	unlinkPolicy(policyID : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(CallType, Policy, policyID, successCallback, failCallback);
 	}
 
 	/**
@@ -813,7 +725,7 @@ class CallType extends ModelItf {
 	 * @return {CallType} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : CallType {
-		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete);
+		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

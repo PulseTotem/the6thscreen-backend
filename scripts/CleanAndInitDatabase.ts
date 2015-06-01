@@ -11,20 +11,20 @@
 /// <reference path="./model/Call.ts" />
 /// <reference path="./model/CallType.ts" />
 /// <reference path="./model/Profil.ts" />
-/// <reference path="./model/Timeline.ts" />
 /// <reference path="./model/InfoType.ts" />
 /// <reference path="./model/ParamValue.ts" />
 /// <reference path="./model/ParamType.ts" />
 /// <reference path="./model/TypeParamType.ts" />
 /// <reference path="./model/ConstraintParamType.ts" />
-/// <reference path="./model/ReceivePolicy.ts" />
+/// <reference path="./model/Policy.ts" />
 /// <reference path="./model/Renderer.ts"/>
-/// <reference path="./model/RenderPolicy.ts" />
 /// <reference path="./model/Role.ts" />
 /// <reference path="./model/Source.ts" />
 /// <reference path="./model/Service.ts" />
 /// <reference path="./model/User.ts" />
 /// <reference path="./model/Behaviour.ts" />
+/// <reference path="./model/ThemeSDI.ts" />
+/// <reference path="./model/ThemeZone.ts" />
 
 var crypto : any = require('crypto');
 
@@ -35,10 +35,10 @@ var crypto : any = require('crypto');
  */
 class CleanAndInitDatabase {
 
-    static toCleanSources : Array<any> = [Source, Service, ParamType, InfoType, TypeParamType, ConstraintParamType];
-    static toCleanUsers : Array<any> = [User];
-    static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, RenderPolicy, ReceivePolicy];
-    static toCleanProfils : Array<any> = [ParamValue, Call, Profil];
+    static toCleanSources : Array<any> = [Source, Service, ParamType, ParamValue, InfoType, TypeParamType, ConstraintParamType];
+    static toCleanUsers : Array<any> = [User, ThemeZone, ThemeSDI];
+    static toCleanSDIs : Array<any> = [SDI, Zone, CallType, Behaviour, Renderer, Policy, TimelineRunner, SystemTrigger, UserTrigger];
+    static toCleanProfils : Array<any> = [Call, Profil, ZoneContent, RelativeTimeline, RelativeEvent];
 
     /**
      * Method to clean and fulfill database with some data.
@@ -171,8 +171,16 @@ class CleanAndInitDatabase {
             failCallback(err);
         };
 
+        var successFulfillThemeZone = function() {
+            self.fulfillThemeSDI(success, fail);
+        };
+
+        var successFulfillUsers = function() {
+            self.fulfillThemeZone(successFulfillThemeZone, fail);
+        };
+
         var successCleanAllUsers = function() {
-            self.fulfillUsers(success, fail);
+            self.fulfillUsers(successFulfillUsers, fail);
         };
         self.cleanAll(CleanAndInitDatabase.toCleanUsers, successCleanAllUsers, fail);
     }
@@ -195,16 +203,24 @@ class CleanAndInitDatabase {
             failCallback(err);
         };
 
-        var successFulfillReceivePolicies = function() {
+        var successFulfillUserTriggers = function() {
             self.fulfillSDIs(success, fail);
         };
 
-        var successFulfillRenderPolicies = function() {
-            self.fulfillReceivePolicies(successFulfillReceivePolicies, fail);
+        var successFulfillSystemTriggers = function() {
+            self.fulfillUserTriggers(successFulfillUserTriggers, fail);
+        };
+
+        var successFulfillRunners = function() {
+            self.fulfillSystemTriggers(successFulfillSystemTriggers, fail);
+        };
+
+        var successFulfillPolicies = function() {
+            self.fulfillTimelineRunners(successFulfillRunners, fail);
         };
 
         var successFulfillRenderers = function() {
-            self.fulfillRenderPolicies(successFulfillRenderPolicies, fail);
+	        self.fulfillPolicies(successFulfillPolicies, fail);
         };
 
         var successFulfillBehaviours = function() {
@@ -365,7 +381,7 @@ class CleanAndInitDatabase {
                 failCallback(err);
             };
 
-            var service = new Service(serviceDesc.name, serviceDesc.description, serviceDesc.host, serviceDesc.oauth, serviceDesc.provider);
+            var service = new Service(serviceDesc.name, serviceDesc.description, serviceDesc.host, serviceDesc.oauth, serviceDesc.provider, serviceDesc.logo);
 
 	        var successUpdate = function () {
 		        Logger.info("Update service successfully.");
@@ -387,6 +403,118 @@ class CleanAndInitDatabase {
             };
 
             service.create(successServiceCreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with themeSDI.
+     *
+     * @method fulfillThemeSDI
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillThemeSDI(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var themeSDIsNb = 0;
+
+        var themeSDIs : any = require("../dbInitFiles/themeSDIs.json");
+
+        if(themeSDIs.length == 0) {
+            Logger.info("No themeSDIs to create.");
+            successCallback();
+            return;
+        }
+
+        themeSDIs.forEach(function(themeSDIsDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var themeSDI = new ThemeSDI(themeSDIsDesc.name, themeSDIsDesc.description, themeSDIsDesc.defaultTheme, themeSDIsDesc.backgroundImageURL, themeSDIsDesc.backgroundColor, themeSDIsDesc.font, themeSDIsDesc.color, themeSDIsDesc.opacity);
+
+            var successUpdate = function () {
+                Logger.info("Update infoType successfully.");
+                themeSDIsNb = themeSDIsNb + 1;
+
+                if(themeSDIsNb == themeSDIs.length) {
+                    successCallback();
+                }
+            };
+
+            var successCompleteness = function () {
+                Logger.info("Check themeSDI completeness successfully.");
+                themeSDI.update(successUpdate, fail);
+            };
+
+            var successLinkThemeZone = function () {
+                Logger.info("themeZone linked successfully.");
+                themeSDI.checkCompleteness(successCompleteness, fail);
+            };
+
+            var successRetrieveThemeZone = function(themeZone : ThemeZone) {
+                Logger.info("themeZone retrieved successfully.");
+                themeSDI.linkThemeZone(themeZone.getId(), successLinkThemeZone, fail);
+            };
+
+            var successThemeSDICreation = function() {
+                Logger.info("themeSDI created successfully.");
+                self.retrieveThemeZone(themeSDIsDesc.theme, successRetrieveThemeZone, fail);
+            };
+
+            themeSDI.create(successThemeSDICreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with themeZone.
+     *
+     * @method fulfillThemeZone
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillThemeZone(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var themeZonesNb = 0;
+
+        var themeZones : any = require("../dbInitFiles/themeZones.json");
+
+        if(themeZones.length == 0) {
+            Logger.info("No themeZones to create.");
+            successCallback();
+            return;
+        }
+
+        themeZones.forEach(function(themeZonesDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var themeZone = new ThemeZone(themeZonesDesc.name, themeZonesDesc.description, themeZonesDesc.defaultTheme, themeZonesDesc.backgroundImageURL, themeZonesDesc.backgroundColor, themeZonesDesc.font, themeZonesDesc.color, themeZonesDesc.opacity, themeZonesDesc.border);
+
+            var successUpdate = function () {
+                Logger.info("Update infoType successfully.");
+                themeZonesNb = themeZonesNb + 1;
+
+                if(themeZonesNb == themeZones.length) {
+                    successCallback();
+                }
+            };
+
+            var successCompleteness = function () {
+                Logger.info("Check themeZones completeness successfully.");
+                themeZone.update(successUpdate, fail);
+            };
+
+            var successThemeZoneCreation = function() {
+                Logger.info("themeZones created successfully.");
+                themeZone.checkCompleteness(successCompleteness, fail);
+            };
+
+            themeZone.create(successThemeZoneCreation, fail);
 
         });
     }
@@ -485,7 +613,37 @@ class CleanAndInitDatabase {
 
             var successConstraintAssociation = function() {
                 Logger.info("Constraint associated to ParamType successfully.");
-	            paramType.checkCompleteness(successCompleteness, fail);
+
+
+				if(typeof(paramTypeDesc.paramValue) != "undefined" && typeof(paramTypeDesc.paramValue.value) != "undefined" && paramTypeDesc.paramValue.value != "") {
+					var paramValue = new ParamValue(paramTypeDesc.paramValue.value);
+
+					var successParamValueCreated = function() {
+						var successParamTypeAssociation = function() {
+							Logger.info("ParamType associated to ParamValue successfully.");
+
+							var successParamValueCompleteness = function() {
+								Logger.info("Check paramValue completeness successfully.");
+
+								var successParamValueAssociation = function() {
+									Logger.info("ParamValue associated to ParamType as DefaultValue successfully.");
+
+									paramType.checkCompleteness(successCompleteness, fail);
+								}
+
+								paramType.linkDefaultValue(paramValue.getId(), successParamValueAssociation, fail);
+							};
+
+							paramValue.checkCompleteness(successParamValueCompleteness, fail);
+						};
+
+						paramValue.linkParamType(paramType.getId(), successParamTypeAssociation, fail);
+					};
+
+					paramValue.create(successParamValueCreated, fail);
+				} else {
+					paramType.checkCompleteness(successCompleteness, fail);
+				}
             }
 
             var successConstraintRetrieve = function(newConstraint) {
@@ -786,10 +944,19 @@ class CleanAndInitDatabase {
                 user.addSDI(sdi.getId(), successUserAssociation, fail);
             };
 
+            var successThemeRetrieve = function (themeSDI) {
+                Logger.info("ThemeSDI retrieved successfully");
+
+                var successThemeAssociation = function () {
+                    Logger.info("SDI associated to ThemeSDI successfully");
+                    self.retrieveUser(sdiDesc.user, successUserRetrieve, fail);
+                };
+                sdi.linkTheme(themeSDI.getId(), successThemeAssociation, fail);
+            };
+
             var successSDICreate = function() {
                 Logger.info("SDI create successfully.");
-
-                self.retrieveUser(sdiDesc.user, successUserRetrieve, fail);
+                self.retrieveThemeSDI(sdiDesc.theme, successThemeRetrieve, fail);
             };
 
             sdi.create(successSDICreate, fail);
@@ -914,104 +1081,209 @@ class CleanAndInitDatabase {
     }
 
     /**
-     * Method to fulfill database with RenderPolicies.
+     * Method to fulfill database with Policies.
      *
-     * @method fulfillRenderPolicies
+     * @method fulfillPolicies
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    fulfillRenderPolicies(successCallback : Function = null, failCallback : Function = null) {
+    fulfillPolicies(successCallback : Function = null, failCallback : Function = null) {
         var self = this;
 
-        var renderPoliciesNb = 0;
+        var policiesNb = 0;
 
-        var renderPolicies : any = require("../dbInitFiles/renderpolicies.json");
+        var policies : any = require("../dbInitFiles/policies.json");
 
-        if(renderPolicies.length == 0) {
-            Logger.info("No RenderPolicy to create.");
+        if(policies.length == 0) {
+            Logger.info("No Policy to create.");
             successCallback();
             return;
         }
 
-        renderPolicies.forEach(function(renderPolicyDesc) {
+	    policies.forEach(function(policyDesc) {
             var fail = function (err) {
                 failCallback(err);
             };
 
-            var renderPolicy = new RenderPolicy(renderPolicyDesc.name, renderPolicyDesc.description);
-
-	        var successUpdate = function () {
-		        Logger.info("Update RenderPolicy successfully.");
-		        renderPoliciesNb = renderPoliciesNb + 1;
-
-		        if(renderPoliciesNb == renderPolicies.length) {
-			        successCallback();
-		        }
-	        };
-
-	        var successCompleteness = function () {
-		        Logger.info("Check RenderPolicy completeness successfully.");
-		        renderPolicy.update(successUpdate, fail);
-	        };
-
-            var successRenderPolicyCreation = function() {
-                Logger.info("RenderPolicy created successfully.");
-	            renderPolicy.checkCompleteness(successCompleteness, fail);
-            };
-
-            renderPolicy.create(successRenderPolicyCreation, fail);
-
-        });
-    }
-
-    /**
-     * Method to fulfill database with ReceivePolicies.
-     *
-     * @method fulfillReceivePolicies
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    fulfillReceivePolicies(successCallback : Function = null, failCallback : Function = null) {
-        var self = this;
-
-        var receivePoliciesNb = 0;
-
-        var receivePolicies : any = require("../dbInitFiles/receivepolicies.json");
-
-        if(receivePolicies.length == 0) {
-            Logger.info("No ReceivePolicy to create.");
-            successCallback();
-            return;
-        }
-
-	    receivePolicies.forEach(function(receivePolicyDesc) {
-            var fail = function (err) {
-                failCallback(err);
-            };
-
-            var receivePolicy = new ReceivePolicy(receivePolicyDesc.name);
+            var policy = new Policy(policyDesc.name);
 
 		    var successUpdate = function () {
-			    Logger.info("Update ReceivePolicy successfully.");
-			    receivePoliciesNb = receivePoliciesNb + 1;
+			    Logger.info("Update Policy successfully.");
+			    policiesNb = policiesNb + 1;
 
-			    if(receivePoliciesNb == receivePolicies.length) {
+			    if(policiesNb == policies.length) {
 				    successCallback();
 			    }
 		    };
 
 		    var successCompleteness = function () {
-			    Logger.info("Check ReceivePolicy completeness successfully.");
-			    receivePolicy.update(successUpdate, fail);
+			    Logger.info("Check Policy completeness successfully.");
+			    policy.update(successUpdate, fail);
 		    };
 
 
-		    var successReceivePolicyCreation = function() {
-                Logger.info("ReceivePolicy created successfully.");
-			    receivePolicy.checkCompleteness(successCompleteness, fail);
+		    var successPolicyCreation = function() {
+                Logger.info("Policy created successfully.");
+			    policy.checkCompleteness(successCompleteness, fail);
             };
 
-            receivePolicy.create(successReceivePolicyCreation, fail);
+            policy.create(successPolicyCreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with TimelineRunners.
+     *
+     * @method fulfillTimelineRunners
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillTimelineRunners(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var timelineRunnersNb = 0;
+
+        var timelineRunners : any = require("../dbInitFiles/timelineRunners.json");
+
+        if(timelineRunners.length == 0) {
+            Logger.info("No TimelineRunner to create.");
+            successCallback();
+            return;
+        }
+
+        timelineRunners.forEach(function(timelineRunnerDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var timelineRunner = new TimelineRunner(timelineRunnerDesc.name);
+
+            var successUpdate = function () {
+                Logger.info("Update TimelineRunner successfully.");
+                timelineRunnersNb = timelineRunnersNb + 1;
+
+                if(timelineRunnersNb == timelineRunners.length) {
+                    successCallback();
+                }
+            };
+
+            var successCompleteness = function () {
+                Logger.info("Check TimelineRunner completeness successfully.");
+                timelineRunner.update(successUpdate, fail);
+            };
+
+
+            var successTimelineRunnerCreation = function() {
+                Logger.info("TimelineRunner created successfully.");
+                timelineRunner.checkCompleteness(successCompleteness, fail);
+            };
+
+            timelineRunner.create(successTimelineRunnerCreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with SystemTriggers.
+     *
+     * @method fulfillSystemTriggers
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillSystemTriggers(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var systemTriggersNb = 0;
+
+        var systemTriggers : any = require("../dbInitFiles/systemTriggers.json");
+
+        if(systemTriggers.length == 0) {
+            Logger.info("No SystemTrigger to create.");
+            successCallback();
+            return;
+        }
+
+        systemTriggers.forEach(function(systemTriggerDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var systemTrigger = new SystemTrigger(systemTriggerDesc.name);
+
+            var successUpdate = function () {
+                Logger.info("Update SystemTrigger successfully.");
+                systemTriggersNb = systemTriggersNb + 1;
+
+                if(systemTriggersNb == systemTriggers.length) {
+                    successCallback();
+                }
+            };
+
+            var successCompleteness = function () {
+                Logger.info("Check SystemTrigger completeness successfully.");
+                systemTrigger.update(successUpdate, fail);
+            };
+
+
+            var successSystemTriggerCreation = function() {
+                Logger.info("SystemTrigger created successfully.");
+                systemTrigger.checkCompleteness(successCompleteness, fail);
+            };
+
+            systemTrigger.create(successSystemTriggerCreation, fail);
+
+        });
+    }
+
+    /**
+     * Method to fulfill database with UserTriggers.
+     *
+     * @method fulfillUserTriggers
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    fulfillUserTriggers(successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var userTriggersNb = 0;
+
+        var userTriggers : any = require("../dbInitFiles/userTriggers.json");
+
+        if(userTriggers.length == 0) {
+            Logger.info("No UserTrigger to create.");
+            successCallback();
+            return;
+        }
+
+        userTriggers.forEach(function(userTriggerDesc) {
+            var fail = function (err) {
+                failCallback(err);
+            };
+
+            var userTrigger = new UserTrigger(userTriggerDesc.name);
+
+            var successUpdate = function () {
+                Logger.info("Update UserTrigger successfully.");
+                userTriggersNb = userTriggersNb + 1;
+
+                if(userTriggersNb == userTriggers.length) {
+                    successCallback();
+                }
+            };
+
+            var successCompleteness = function () {
+                Logger.info("Check UserTrigger completeness successfully.");
+                userTrigger.update(successUpdate, fail);
+            };
+
+
+            var successUserTriggerCreation = function() {
+                Logger.info("UserTrigger created successfully.");
+                userTrigger.checkCompleteness(successCompleteness, fail);
+            };
+
+            userTrigger.create(successUserTriggerCreation, fail);
 
         });
     }
@@ -1070,25 +1342,25 @@ class CleanAndInitDatabase {
                 newSDI.addProfil(profil.getId(), successSDIAssociation, fail);
             };
 
-            var createdCalls = new Array();
+            var createdZoneContents = new Array();
 
-            var successCallCreate = function(newCall) {
-                createdCalls.push(newCall);
-                Logger.info("Call created successfully.");
+            var successZoneContentCreate = function(newZoneContent) {
+	            createdZoneContents.push(newZoneContent);
+                Logger.info("ZoneContent created successfully.");
 
-                if(createdCalls.length == profilDesc.calls.length) {
+                if(createdZoneContents.length == profilDesc.zoneContents.length) {
                     var nbAssociation = 0;
-                    var successCallAssociation = function() {
-                        Logger.info("Call associated to Profil successfully.");
+                    var successZoneContentAssociation = function() {
+                        Logger.info("ZoneContent associated to Profil successfully.");
                         nbAssociation = nbAssociation + 1;
 
-                        if(nbAssociation == createdCalls.length) {
+                        if (nbAssociation == createdZoneContents.length) {
                             self.retrieveSDI(profilDesc.sdi, successSDIRetrieve, fail);
                         }
                     };
 
-                    createdCalls.forEach(function(call) {
-                        profil.addCall(call.getId(), successCallAssociation, fail);
+	                createdZoneContents.forEach(function(zoneContent) {
+                        profil.addZoneContent(zoneContent.getId(), successZoneContentAssociation, fail);
                     });
                 }
             };
@@ -1096,8 +1368,8 @@ class CleanAndInitDatabase {
             var successProfilCreate = function() {
                 Logger.info("Profil create successfully.");
 
-                profilDesc.calls.forEach(function(call) {
-                    self.manageCallCreation(call, successCallCreate, fail);
+                profilDesc.zoneContents.forEach(function(zoneContent) {
+                    self.manageZoneContentCreation(zoneContent, successZoneContentCreate, fail);
                 });
             };
 
@@ -1239,6 +1511,72 @@ class CleanAndInitDatabase {
     }
 
     /**
+     * Method to retrieve ThemeSDI.
+     *
+     * @method retrieveThemeSDI
+     * @param {JSON Object} themeSDIDesc - The ThemeSDI's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveThemeSDI(themeSDIDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allThemeSDI) {
+            var themeSDI = null;
+            allThemeSDI.forEach(function(tz) {
+                if(tz.name() == themeSDIDesc.name) {
+                    themeSDI = tz;
+                }
+            });
+
+            if(themeSDI == null) {
+                failCallback(new Error("The themeZone '" + themeSDIDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(themeSDI);
+            }
+        };
+
+        ThemeSDI.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve ThemeZone.
+     *
+     * @method retrieveThemeZone
+     * @param {JSON Object} themeZoneDesc - The ThemeZone's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveThemeZone(themeZoneDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allThemeZones) {
+            var themeZone = null;
+            allThemeZones.forEach(function(tz) {
+                if(tz.name() == themeZoneDesc.name) {
+                    themeZone = tz;
+                }
+            });
+
+            if(themeZone == null) {
+                failCallback(new Error("The themeZone '" + themeZoneDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(themeZone);
+            }
+        };
+
+        ThemeZone.all(successAll, fail);
+    }
+
+    /**
      * Method to retrieve User.
      *
      * @method retrieveUser
@@ -1275,7 +1613,7 @@ class CleanAndInitDatabase {
      * Method to manage creation of Zone.
      *
      * @method manageZoneCreation
-     * @param {JSON Object} zoneDesc - The Zone's description
+     * @param {JSON} zoneDesc - The Zone's description
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
@@ -1309,9 +1647,25 @@ class CleanAndInitDatabase {
             zone.linkBehaviour(newBehaviour.getId(), successBehaviourAssociation, fail);
         };
 
+        var successRetrieveTheme = function (theme) {
+            Logger.info("Theme retrieved successfully;");
+
+            var successThemeAssociation = function () {
+                Logger.info("Theme associated to zone successfully.");
+                self.retrieveBehaviour(zoneDesc.behaviour, successBehaviourRetrieved, fail);
+            };
+
+            zone.linkTheme(theme.getId(), successThemeAssociation, fail);
+        };
+
         var successZoneCreation = function() {
             Logger.info("Zone created successfully.");
-            self.retrieveBehaviour(zoneDesc.behaviour, successBehaviourRetrieved, fail);
+
+            if (zoneDesc.theme !== undefined) {
+                self.retrieveThemeZone(zoneDesc.theme, successRetrieveTheme, fail);
+            } else {
+                self.retrieveBehaviour(zoneDesc.behaviour, successBehaviourRetrieved, fail);
+            }
         };
 
         zone.create(successZoneCreation, fail);
@@ -1346,26 +1700,15 @@ class CleanAndInitDatabase {
 		    callType.update(successUpdate, fail);
 	    };
 
-        var successReceivePolicyRetrieved = function(newReceivePolicy) {
-            Logger.info("ReceivePolicy retrieved successfully.");
+        var successPolicyRetrieved = function(newPolicy) {
+            Logger.info("Policy retrieved successfully.");
 
-            var successReceivePolicyAssociation = function() {
-                Logger.info("ReceivePolicy associated to CallType successfully.");
+            var successPolicyAssociation = function() {
+                Logger.info("Policy associated to CallType successfully.");
 	            callType.checkCompleteness(successCompleteness, fail);
             };
 
-            callType.linkReceivePolicy(newReceivePolicy.getId(), successReceivePolicyAssociation, fail);
-        };
-
-        var successRenderPolicyRetrieved = function(newRenderPolicy) {
-            Logger.info("RenderPolicy retrieved successfully.");
-
-            var successRenderPolicyAssociation = function() {
-                Logger.info("RenderPolicy associated to CallType successfully.");
-                self.retrieveReceivePolicy(callTypeDesc.receivePolicy, successReceivePolicyRetrieved, fail);
-            };
-
-            callType.linkRenderPolicy(newRenderPolicy.getId(), successRenderPolicyAssociation, fail);
+            callType.linkPolicy(newPolicy.getId(), successPolicyAssociation, fail);
         };
 
         var successRendererRetrieved = function(newRenderer) {
@@ -1373,7 +1716,7 @@ class CleanAndInitDatabase {
 
             var successRendererAssociation = function() {
                 Logger.info("Renderer associated to CallType successfully.");
-                self.retrieveRenderPolicy(callTypeDesc.renderPolicy, successRenderPolicyRetrieved, fail);
+                self.retrievePolicy(callTypeDesc.policy, successPolicyRetrieved, fail);
             };
 
             callType.linkRenderer(newRenderer.getId(), successRendererAssociation, fail);
@@ -1409,6 +1752,182 @@ class CleanAndInitDatabase {
         callType.create(successCallTypeCreation, fail);
 
     }
+
+	manageRelativeEventCreation(relativeEventDesc : any, successCallback : Function = null, failCallback : Function = null) {
+		var self = this;
+
+		var fail = function (err) {
+			failCallback(err);
+		};
+
+		var relativeEvent = new RelativeEvent(relativeEventDesc.name, relativeEventDesc.position, relativeEventDesc.duration);
+
+		var successUpdate = function() {
+			Logger.info("RelativeEvent update successfully");
+
+			successCallback(relativeEvent);
+		};
+
+		var successCheck = function () {
+			Logger.info("RelativeEvent check sucessfully");
+
+			relativeEvent.update(successUpdate, fail);
+		};
+
+		var successLinkCall = function () {
+			Logger.info("Call linked successfully");
+
+			relativeEvent.checkCompleteness(successCheck, fail);
+		};
+
+		var successCallCreation = function (call) {
+			Logger.info("Call creation successfully");
+
+			relativeEvent.linkCall(call.getId(), successLinkCall, fail);
+		};
+
+		var successRelativeEventCreation = function () {
+			Logger.info("Relative event creation successfully");
+
+			self.manageCallCreation(relativeEventDesc.call, successCallCreation, fail);
+		};
+
+		relativeEvent.create(successRelativeEventCreation, fail);
+	}
+
+	manageRelativeTimelineCreation(relativeTimelineDesc : any, successCallback : Function = null, failCallback : Function = null) {
+		var self = this;
+
+		var fail = function (err) {
+			failCallback(err);
+		};
+
+		var relativeTL = new RelativeTimeline(relativeTimelineDesc.name);
+
+		var linkedRelativeEvent = 0;
+
+		var successUpdate = function () {
+			Logger.info("Update successfully");
+			successCallback(relativeTL);
+		};
+
+		var sucessCheckCompleteness = function () {
+			Logger.info("Check completeness successfully");
+			relativeTL.update(successUpdate, fail);
+		};
+
+		var successLinkRelativeEvent = function () {
+			Logger.info("Relative Event added successfully");
+
+			linkedRelativeEvent++;
+
+			if (linkedRelativeEvent == relativeTimelineDesc.relativeEvents.length) {
+				relativeTL.checkCompleteness(sucessCheckCompleteness, fail);
+			}
+		};
+
+		var successRelativeEventCreation = function (relativeEvent) {
+			Logger.info("Relative Event created successfully");
+
+			relativeTL.addRelativeEvent(relativeEvent.getId(), successLinkRelativeEvent, fail);
+		};
+
+        var successLinkUserTrigger = function () {
+            Logger.info("UserTrigger linked successfully");
+
+            relativeTimelineDesc.relativeEvents.forEach( function (relativeEventDesc) {
+                self.manageRelativeEventCreation(relativeEventDesc, successRelativeEventCreation, fail);
+            });
+        };
+
+        var successRetrieveUserTrigger = function (userTrigger) {
+            Logger.info("UserTrigger retrieved successfully");
+
+            relativeTL.linkUserTrigger(userTrigger.getId(), successLinkUserTrigger, fail);
+        };
+
+        var successLinkSystemTrigger = function () {
+            Logger.info("SystemTrigger linked successfully");
+
+            self.retrieveUserTrigger(relativeTimelineDesc.userTrigger, successRetrieveUserTrigger, fail);
+        };
+
+        var successRetrieveSystemTrigger = function (systemTrigger) {
+            Logger.info("SystemTrigger retrieved successfully");
+
+            relativeTL.linkSystemTrigger(systemTrigger.getId(), successLinkSystemTrigger, fail);
+        };
+
+        var successLinkTLRunner = function () {
+            Logger.info("TimelineRunner linked successfully");
+
+            self.retrieveSystemTrigger(relativeTimelineDesc.systemTrigger, successRetrieveSystemTrigger, fail);
+        };
+
+        var successRetrieveTimelineRunner = function (timelineRunner) {
+            Logger.info("TimelineRunner retrieved successfully");
+
+            relativeTL.linkTimelineRunner(timelineRunner.getId(), successLinkTLRunner, fail);
+        };
+
+		var successRelativeTLCreation = function () {
+			Logger.info("Relative TL created successfully");
+
+            self.retrieveTimelineRunner(relativeTimelineDesc.timelineRunner, successRetrieveTimelineRunner, fail);
+		};
+
+		relativeTL.create(successRelativeTLCreation, fail);
+	}
+
+	manageZoneContentCreation(zoneContentDesc : any, successCallback : Function = null, failCallback : Function = null) {
+		var self = this;
+
+		var fail = function (err) {
+			failCallback(err);
+		};
+
+		var zonec = new ZoneContent(zoneContentDesc.name);
+
+		var successUpdate = function () {
+			Logger.info("ZoneCOntent Update successfully.");
+			successCallback(zonec);
+		};
+
+		var successCheck = function () {
+			Logger.info("ZoneContent Check completeness successfully.");
+			zonec.update(successUpdate, fail);
+		};
+
+		var successLinkRelativeTimeline = function () {
+			Logger.info("Relative timeline linked successfully.");
+			zonec.checkCompleteness(successCheck, fail);
+		};
+
+		var successCreateRelativeTimeline = function (relativeTimeline) {
+			Logger.info("Relative timeline created successfully.");
+			zonec.linkRelativeTimeline(relativeTimeline.getId(), successLinkRelativeTimeline, fail);
+		};
+
+		var successLinkZone = function() {
+			Logger.info("Zone linked successfully.");
+
+			self.manageRelativeTimelineCreation(zoneContentDesc.relativeTimeline, successCreateRelativeTimeline, fail);
+		};
+
+
+		var sucessRetrieveZone = function (zone) {
+			Logger.info("Zone retrieved successfully.");
+			zonec.linkZone(zone.getId(), successLinkZone, fail);
+		};
+
+
+		var successZoneContentCreation = function() {
+			Logger.info("ZoneContent created successfully.");
+
+			self.retrieveZone(zoneContentDesc.zone, sucessRetrieveZone, fail);
+		}
+		zonec.create(successZoneContentCreation, fail);
+	}
 
     /**
      * Method to manage creation of Call.
@@ -1628,6 +2147,105 @@ class CleanAndInitDatabase {
     }
 
     /**
+     * Method to retrieve TimelineRunner.
+     *
+     * @method retrieveTimelineRunner
+     * @param {JSON Object} timelineRunnerDesc - The TimelineRunner's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveTimelineRunner(timelineRunnerDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allTimelineRunners) {
+            var timelineRunner = null;
+            allTimelineRunners.forEach(function(z) {
+                if(z.name() == timelineRunnerDesc.name) {
+                    timelineRunner = z;
+                }
+            });
+
+            if(timelineRunner == null) {
+                failCallback(new Error("The TimelineRunner '" + timelineRunnerDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(timelineRunner);
+            }
+        };
+
+        TimelineRunner.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve UserTrigger.
+     *
+     * @method retrieveUserTrigger
+     * @param {JSON Object} userTriggerDesc - The UserTrigger's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveUserTrigger(userTriggerDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allUserTriggers) {
+            var userTrigger = null;
+            allUserTriggers.forEach(function(z) {
+                if(z.name() == userTriggerDesc.name) {
+                    userTrigger = z;
+                }
+            });
+
+            if(userTrigger == null) {
+                failCallback(new Error("The UserTrigger '" + userTriggerDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(userTrigger);
+            }
+        };
+
+        UserTrigger.all(successAll, fail);
+    }
+
+    /**
+     * Method to retrieve SystemTrigger.
+     *
+     * @method retrieveSystemTrigger
+     * @param {JSON Object} systemTriggerDesc - The SystemTrigger's description
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    retrieveSystemTrigger(systemTriggerDesc : any, successCallback : Function = null, failCallback : Function = null) {
+        var self = this;
+
+        var fail = function (err) {
+            failCallback(err);
+        };
+
+        var successAll = function(allSystemTriggers) {
+            var systemTrigger = null;
+            allSystemTriggers.forEach(function(z) {
+                if(z.name() == systemTriggerDesc.name) {
+                    systemTrigger = z;
+                }
+            });
+
+            if(systemTrigger == null) {
+                failCallback(new Error("The SystemTrigger '" + systemTriggerDesc.name + "' doesn't exist !"));
+            } else {
+                successCallback(systemTrigger);
+            }
+        };
+
+        SystemTrigger.all(successAll, fail);
+    }
+
+    /**
      * Method to retrieve Source.
      *
      * @method retrieveSource
@@ -1760,69 +2378,36 @@ class CleanAndInitDatabase {
     }
 
     /**
-     * Method to retrieve RenderPolicy.
+     * Method to retrieve Policy.
      *
-     * @method retrieveRenderPolicy
-     * @param {JSON Object} renderPolicyDesc - The RenderPolicy's description
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    retrieveRenderPolicy(renderPolicyDesc : any, successCallback : Function = null, failCallback : Function = null) {
-        var self = this;
-
-        var fail = function (err) {
-            failCallback(err);
-        };
-
-        var successAll = function(allRenderPolicies) {
-            var renderPolicy = null;
-            allRenderPolicies.forEach(function(rp) {
-                if(rp.name() == renderPolicyDesc.name) {
-                    renderPolicy = rp;
-                }
-            });
-
-            if(renderPolicy == null) {
-                failCallback(new Error("The RenderPolicy '" + renderPolicyDesc.name + "' doesn't exist !"));
-            } else {
-                successCallback(renderPolicy);
-            }
-        };
-
-        RenderPolicy.all(successAll, fail);
-    }
-
-    /**
-     * Method to retrieve ReceivePolicy.
-     *
-     * @method retrieveReceivePolicy
+     * @method retrievePolicy
      * @param {JSON Object} receivePolicyDesc - The ReceivePolicy's description
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    retrieveReceivePolicy(receivePolicyDesc : any, successCallback : Function = null, failCallback : Function = null) {
+    retrievePolicy(policyDesc : any, successCallback : Function = null, failCallback : Function = null) {
         var self = this;
 
         var fail = function (err) {
             failCallback(err);
         };
 
-        var successAll = function(allReceivePolicies) {
-            var receivePolicy = null;
-            allReceivePolicies.forEach(function(rp) {
-                if(rp.name() == receivePolicyDesc.name) {
-                    receivePolicy = rp;
+        var successAll = function(allpolicies) {
+            var policy = null;
+	        allpolicies.forEach(function(rp) {
+                if(rp.name() == policyDesc.name) {
+	                policy = rp;
                 }
             });
 
-            if(receivePolicy == null) {
-                failCallback(new Error("The ReceivePolicy '" + receivePolicyDesc.name + "' doesn't exist !"));
+            if (policy == null) {
+                failCallback(new Error("The ReceivePolicy '" + policyDesc.name + "' doesn't exist !"));
             } else {
-                successCallback(receivePolicy);
+                successCallback(policy);
             }
         };
 
-        ReceivePolicy.all(successAll, fail);
+        Policy.all(successAll, fail);
     }
 
     /**

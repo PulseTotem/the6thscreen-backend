@@ -1,4 +1,5 @@
 /**
+ * @author Simon Urli <simon@the6thscreen.fr>
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
  */
 
@@ -7,12 +8,12 @@
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
- * Model : ReceivePolicy
+ * Model : TimelineRunner
  *
- * @class ReceivePolicy
+ * @class TimelineRunner
  * @extends ModelItf
  */
-class ReceivePolicy extends ModelItf {
+class TimelineRunner extends ModelItf {
 
     /**
      * Name property.
@@ -23,19 +24,32 @@ class ReceivePolicy extends ModelItf {
     private _name : string;
 
     /**
+     * Description property.
+     *
+     * @property _description
+     * @type string
+     */
+    private _description : string;
+
+    /**
      * Constructor.
      *
      * @constructor
-     * @param {string} name - The ReceivePolicy's name.
-     * @param {number} id - The ReceivePolicy's ID.
+     * @param {string} name - The TimelineRunner's name.
+     * @param {string} description - The TimelineRunner's description.
+     * @param {number} id - The TimelineRunner's ID.
+	 * @param {string} createdAt - The TimelineRunner's createdAt.
+	 * @param {string} updatedAt - The TimelineRunner's updatedAt.
      */
-    constructor(name : string = "", id : number = null, complete : boolean = false) {
-        super(id, complete);
-	    this.setName(name);
+    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+		super(id, complete, createdAt, updatedAt);
+
+        this.setName(name);
+	    this.setDescription(description);
     }
 
 	/**
-	 * Set the ReceivePolicy's name.
+	 * Set the TimelineRunner's name.
 	 *
 	 * @method setName
 	 */
@@ -43,8 +57,17 @@ class ReceivePolicy extends ModelItf {
 		this._name = name;
 	}
 
+	/**
+	 * Set the TimelineRunner's description.
+	 *
+	 * @method setDescription
+	 */
+	setDescription(description : string) {
+		this._description = description;
+	}
+
     /**
-     * Return the ReceivePolicy's name.
+     * Return the TimelineRunner's name.
      *
      * @method name
      */
@@ -52,10 +75,19 @@ class ReceivePolicy extends ModelItf {
         return this._name;
     }
 
+    /**
+     * Return the TimelineRunner's description.
+     *
+     * @method description
+     */
+    description() {
+        return this._description;
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Return a ReceivePolicy instance as a JSON Object
+	 * Return a TimelineRunner instance as a JSON Object
 	 *
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
@@ -64,26 +96,27 @@ class ReceivePolicy extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-			"complete": this.isComplete()
+			"description": this.description(),
+			"complete": this.isComplete(),
+			"createdAt" : this.getCreatedAt(),
+			"updatedAt" : this.getUpdatedAt()
 		};
 		return data;
 	}
 
 	/**
-	 * Check if the ReceivePolicy is complete or not.
+	 * Check if the object is complete.
 	 *
-	 * A ReceivePolicy is complete if it has an ID and a name.
+	 * A TimelineRunner is complete if it has an ID and a name.
 	 */
-	checkCompleteness(successCallback : Function, failCallback : Function) : void  {
+	checkCompleteness(successCallback : Function, failCallback : Function) : void {
 		var self = this;
 
-		var success : Function = function () {
+		var success : Function = function() {
 			self._complete = (self._complete && !!self.name());
 			successCallback();
-		};
-
+		}
 		super.checkCompleteness(success, failCallback);
-
 
 	}
 
@@ -96,7 +129,7 @@ class ReceivePolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        this.createObject(ReceivePolicy, this.toJSONObject(), successCallback, failCallback);
+        this.createObject(TimelineRunner, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -110,7 +143,7 @@ class ReceivePolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        ModelItf.readObject(ReceivePolicy, id, successCallback, failCallback, attemptNumber);
+        ModelItf.readObject(TimelineRunner, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -122,7 +155,7 @@ class ReceivePolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.updateObject(ReceivePolicy, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+        return this.updateObject(TimelineRunner, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -134,7 +167,7 @@ class ReceivePolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(ReceivePolicy, this.getId(), successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(TimelineRunner, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -146,31 +179,31 @@ class ReceivePolicy extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.allObjects(ReceivePolicy, successCallback, failCallback, attemptNumber);
+        return this.allObjects(TimelineRunner, successCallback, failCallback, attemptNumber);
     }
 
 	/**
-	 * Return a ReceivePolicy instance from a JSON string.
+	 * Return a TimelineRunner instance from a JSON string.
 	 *
 	 * @method parseJSON
 	 * @static
 	 * @param {string} json - The JSON string
-	 * @return {ReceivePolicy} The model instance.
+	 * @return {TimelineRunner} The model instance.
 	 */
-	static parseJSON(jsonString : string) : ReceivePolicy {
-		return ReceivePolicy.fromJSONObject(JSON.parse(jsonString));
+	static parseJSON(jsonString : string) : TimelineRunner {
+		return TimelineRunner.fromJSONObject(JSON.parse(jsonString));
 	}
 
 	/**
-	 * Return a ReceivePolicy instance from a JSON Object.
+	 * Return a TimelineRunner instance from a JSON Object.
 	 *
 	 * @method fromJSONObject
 	 * @static
 	 * @param {JSONObject} json - The JSON Object
-	 * @return {ReceivePolicy} The model instance.
+	 * @return {TimelineRunner} The model instance.
 	 */
-	static fromJSONObject(jsonObject : any) : ReceivePolicy {
-		return new ReceivePolicy(jsonObject.name, jsonObject.id, jsonObject.complete);
+	static fromJSONObject(jsonObject : any) : TimelineRunner {
+		return new TimelineRunner(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**
@@ -180,6 +213,6 @@ class ReceivePolicy extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "ReceivePolicies";
+        return "TimelineRunners";
     }
 }
