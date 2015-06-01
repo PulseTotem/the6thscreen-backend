@@ -1,0 +1,60 @@
+[
+    {
+      "name" : "Limit",
+      "description" : "Limiter le nombre de résultats",
+      "type" : {
+        "name" : "Entier"
+      },
+      "constraint" : {
+        "name" : "Positive"
+      },
+      "paramValue": {
+        "value": "10"
+      }
+    },
+    {
+      "name" : "InfoDuration",
+      "description" : "Durée d'affichage de chacune des informations",
+      "type" : {
+        "name" : "Duration"
+      },
+      "constraint" : null,
+      "paramValue": {
+        "value": "10"
+      }
+    },
+    {
+        "name" : "URL",
+        "description" : "URL",
+        "type" : {
+            "name" : "String"
+        },
+        "constraint" : {
+            "name" : "URL"
+        }
+    },
+    {
+      "name" : "SearchQuery",
+      "description" : "Description de la recherche à effectuer",
+      "type" : {
+        "name" : "String"
+      },
+      "constraint" : null
+    },
+    {
+      "name" : "AlbumID",
+      "description" : "Identifiant d'un album photo",
+      "type" : {
+        "name" : "String"
+      },
+      "constraint" : null
+    },
+    {
+      "name" : "PageName",
+      "description" : "Identifiant d'une page facebook publique",
+      "type" : {
+        "name" : "String"
+      },
+      "constraint" : null
+    }
+]

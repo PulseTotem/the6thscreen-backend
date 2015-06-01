@@ -1,0 +1,28 @@
+[
+  {
+    "name": "ThemeBasic",
+    "description": "CleanAndInit generated theme",
+    "defaultTheme": true,
+    "backgroundImageURL": "",
+    "backgroundColor": "#D3D3D3",
+    "opacity": "1",
+    "font": "15px arial, sans-serif",
+    "color": "#000000",
+    "theme": {
+      "name": "ThemeBasic"
+    }
+  },
+  {
+    "name": "PsychoTheme",
+    "description": "CleanAndInit generated theme",
+    "defaultTheme": true,
+    "backgroundImageURL" : "",
+    "backgroundColor": "#FFFF00",
+    "opacity": "1",
+    "font": "20px Palatino, serif",
+    "color": "#0000FF",
+    "theme": {
+      "name": "PsychoTheme"
+    }
+  }
+]

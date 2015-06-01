@@ -1,0 +1,254 @@
+[
+    {
+        "name" : "RetrieveFeedContent",
+        "description" : "Récupération d'un flux RSS",
+        "service" : {
+            "name" : "RSSFeedReader"
+        },
+        "method" : "RetrieveFeedContent",
+        "paramTypes" : [
+            {
+                "name" : "URL"
+            },
+            {
+                "name" : "Limit"
+            },
+            {
+              "name" : "InfoDuration"
+            }
+        ],
+        "infoType" : {
+            "name" : "FeedContent"
+        }
+    },
+    {
+        "name" : "RetrieveDiscounts",
+        "description" : "Récupération des discounts du SmartShopping",
+        "service" : {
+            "name" : "SmartShopping"
+        },
+        "method" : "RetrieveDiscounts",
+        "paramTypes" : [
+            {
+              "name" : "Limit"
+            },
+            {
+              "name" : "InfoDuration"
+            }
+        ],
+        "infoType" : {
+            "name" : "DiscountsList"
+        }
+    },
+    {
+      "name" : "LastTweetsFromSearch",
+      "description" : "Récupération des derniers tweets à partir d'une recherche",
+      "service" : {
+        "name" : "Twitter"
+      },
+      "method" : "LastTweetsFromSearch",
+      "paramTypes" : [
+        {
+          "name" : "SearchQuery"
+        },
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        }
+      ],
+      "infoType" : {
+        "name" : "TweetList"
+      }
+    },
+    {
+      "name" : "LastPicturesFromSearch",
+      "description" : "Récupération des dernieres photos à partir d'une recherche",
+      "service" : {
+        "name" : "Flickr"
+      },
+      "method" : "LastPicturesFromSearch",
+      "paramTypes" : [
+        {
+          "name" : "SearchQuery"
+        },
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+    },
+    {
+      "name" : "PicturesFromLoggedUser",
+      "description" : "Récupération des dernieres photos d'un user",
+      "service" : {
+        "name" : "Facebook"
+      },
+      "method" : "PicturesFromLoggedUser",
+      "paramTypes" : [
+          {
+            "name" : "Limit"
+          },
+          {
+            "name" : "InfoDuration"
+          }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+    },
+    {
+      "name" : "PicturesFromPage",
+      "description" : "Récupération des dernieres photos d'une page facebook",
+      "service" : {
+        "name" : "Facebook"
+      },
+      "method" : "PicturesFromPage",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        },
+        {
+          "name" : "PageName"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+    },
+    {
+      "name" : "PicturesFromAlbum",
+      "description" : "Récupération des photos d'un album",
+      "service" : {
+        "name" : "Facebook"
+      },
+      "method" : "PicturesFromAlbum",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        },
+        {
+          "name" : "AlbumID"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+    },
+    {
+      "name" : "TaggedPictures",
+      "description" : "Récupération des photos à partir d'un tag",
+      "service" : {
+        "name" : "Instagram"
+      },
+      "method" : "TaggedPictures",
+      "paramTypes" : [
+        {
+          "name" : "SearchQuery"
+        },
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+    },
+    {
+      "name" : "PublicEvents",
+      "description" : "Récupération des evenements",
+      "service" : {
+        "name" : "Hackathon"
+      },
+      "method" : "PublicEvents",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        }
+      ],
+      "infoType" : {
+        "name" : "EventList"
+      }
+    },
+    {
+      "name" : "Subscribe",
+      "description" : "Souscription aux messages",
+      "service" : {
+        "name" : "Notifier"
+      },
+      "method" : "Subscribe",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        }
+      ],
+      "infoType" : {
+        "name" : "UserList"
+      }
+    },
+    {
+      "name" : "VideoFromJSON",
+      "description" : "Récupération de vidéos à partir d'un JSON descriptif",
+      "service" : {
+        "name" : "Hackathon"
+      },
+      "method" : "VideoFromJSON",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        },
+        {
+          "name": "URL"
+        }
+      ],
+      "infoType" : {
+        "name" : "VideoPlaylist"
+      }
+    },
+    {
+      "name" : "PictureAlbumFromJSON",
+      "description" : "Récupération d'un album photos à partir d'un JSON descriptif",
+      "service" : {
+        "name" : "Hackathon"
+      },
+      "method" : "PictureAlbumFromJSON",
+      "paramTypes" : [
+        {
+          "name" : "Limit"
+        },
+        {
+          "name" : "InfoDuration"
+        },
+        {
+          "name": "URL"
+        }
+      ],
+      "infoType" : {
+        "name" : "PictureAlbum"
+      }
+  }
+]

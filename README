@@ -1,0 +1,3 @@
+Construction BD : 
+
+node build/js/CleanAndInitDatabase.js loglevel=debug step=all

@@ -1,0 +1,16 @@
+[
+    {
+        "name" : "URL",
+        "description" : "Ensure the string is an URL",
+        "type" : {
+            "name" : "String"
+        }
+    },
+    {
+        "name" : "Positive",
+        "description" : "Ensure the number is > 0",
+        "type" : {
+            "name" : "Entier"
+        }
+    }
+]
