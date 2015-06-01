@@ -751,6 +751,11 @@ class Zone extends ModelItf {
 				    }
 			    };
 
+			    if (sizeCT == 0) {
+				    deleted = -1;
+				    successDeleteCT();
+			    }
+
 			    for (var ctIndex in self.callTypes()) {
 				    var ct:CallType = self.callTypes()[ctIndex];
 
