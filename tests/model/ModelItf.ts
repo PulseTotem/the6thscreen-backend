@@ -2470,4 +2470,75 @@ describe('ModelItf', function() {
 			ModelItf.updateAttribute(ModelItf, info, success, fail);
 		});
 	});
+
+    describe('#cloneObject', function () {
+        it('should launch an exception if the modelClass is undefined.', function (done) {
+            var model : ModelItf = new ModelItf(12);
+            var success = function () {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function (err) {
+                assert.throws(function () {
+                        if (err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The DataException has not been thrown.");
+                done();
+            };
+
+            model.cloneObject(undefined, success, fail);
+        });
+
+        it('should launch an exception if the modelClass is null.', function (done) {
+            var model : ModelItf = new ModelItf(12);
+            var success = function () {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function (err) {
+                assert.throws(function () {
+                        if (err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The DataException has not been thrown.");
+                done();
+            };
+
+            model.cloneObject(null, success, fail);
+        });
+
+        it('should create an object with a different id.', function (done) {
+
+            var emptyModel = new ModelItf();
+            var model = new ModelItf(12);
+            var id = 42;
+
+            var response : SequelizeRestfulResponse = {
+                "status": "success",
+                "data": model.toJSONObject()
+            };
+            response.data['id'] = id;
+
+            var restClientMock = nock(DatabaseConnection.getBaseURL())
+                .post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), emptyModel.toJSONObject())
+                .reply(200, JSON.stringify(response));
+
+            var success = function(obtainedData : any) {
+                //assert.ok(retour, "The creation did not return true");
+                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+                assert.equal(obtainedData.id, id, "The ID is not recorded in the object : "+obtainedData.id);
+                assert.notEqual(model.getId(), obtainedData._id, "The ID of original object and created one are different.");
+                done();
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            model.cloneObject(ModelItf, success, fail);
+        });
+    });
 });
