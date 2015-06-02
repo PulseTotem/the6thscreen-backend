@@ -207,4 +207,36 @@ describe('ThemeZone', function(){
 			assert.deepEqual(json, expected, "The JSON object ("+JSON.stringify(json)+") and the expected JSON ("+JSON.stringify(expected)+") do not match.");
 		})
 	});
+
+	describe("#clone", function() {
+		it('should create the same object with a different ID', function (done) {
+			var toClone = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "black", "arial", "black", "89%", "14px", 52, true);
+			var toCloneJSON : any = toClone.toJSONObject();
+			toCloneJSON.id = null;
+			var expected = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "black", "arial", "black", "89%", "14px", 98, true);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": expected.toJSONObject()
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.post(DatabaseConnection.modelEndpoint(ThemeZone.getTableName()), toCloneJSON)
+				.reply(200, JSON.stringify(response));
+
+			var success = function(obtainedData : any) {
+				//assert.ok(retour, "The creation did not return true");
+				assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+				assert.equal(obtainedData.id, expected.getId(), "The ID is not recorded in the object : "+obtainedData.id);
+				assert.notEqual(toClone.getId(), obtainedData.id, "The ID of original object and created one are different.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			toClone.clone(success, fail)
+		})
+	})
 });

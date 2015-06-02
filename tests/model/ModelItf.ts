@@ -2530,7 +2530,7 @@ describe('ModelItf', function() {
                 //assert.ok(retour, "The creation did not return true");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 assert.equal(obtainedData.id, id, "The ID is not recorded in the object : "+obtainedData.id);
-                assert.notEqual(model.getId(), obtainedData._id, "The ID of original object and created one are different.");
+                assert.notEqual(model.getId(), obtainedData.id, "The ID of original object and created one are different.");
                 done();
             };
 
