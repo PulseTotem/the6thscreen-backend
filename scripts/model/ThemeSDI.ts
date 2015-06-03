@@ -47,6 +47,14 @@ class ThemeSDI extends ModelItf {
 	private _backgroundImageURL : string;
 
 	/**
+	 * BackgroundVideoURL property.
+	 *
+	 * @property _backgroundVideoURL
+	 * @type string
+	 */
+	private _backgroundVideoURL : string;
+
+	/**
 	 * BackgroundColor property.
 	 *
 	 * @property _backgroundColor
@@ -111,13 +119,14 @@ class ThemeSDI extends ModelItf {
 	 * @param {string} createdAt - The ThemeSDI's createdAt.
 	 * @param {string} updatedAt - The ThemeSDI's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, backgroundImageURL : string = "", backgroundColor : string = "", font : string = "", color : string = "", opacity : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, backgroundImageURL : string = "", backgroundVideoURL : string = "", backgroundColor : string = "", font : string = "", color : string = "", opacity : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
 		this.setDefaultTheme(defaultTheme);
 		this.setBackgroundImageURL(backgroundImageURL);
+		this.setBackgroundVideoURL(backgroundVideoURL);
 		this.setBackgroundColor(backgroundColor);
 		this.setFont(font);
 		this.setColor(color);
@@ -162,6 +171,16 @@ class ThemeSDI extends ModelItf {
 	 */
 	setBackgroundImageURL(backgroundImageURL : string) {
 		this._backgroundImageURL = backgroundImageURL;
+	}
+
+	/**
+	 * Set the ThemeSDI's backgroundVideoURL.
+	 *
+	 * @method setBackgroundVideoURL
+	 * @param {string} backgroundVideoURL - The ThemeSDI's backgroundVideoURL to set
+	 */
+	setBackgroundVideoURL(backgroundVideoURL : string) {
+		this._backgroundVideoURL = backgroundVideoURL;
 	}
 
 	/**
@@ -235,6 +254,15 @@ class ThemeSDI extends ModelItf {
 	 */
 	backgroundImageURL() {
 		return this._backgroundImageURL;
+	}
+
+	/**
+	 * Return the ThemeSDI's backgroundVideoURL.
+	 *
+	 * @method backgroundVideoURL
+	 */
+	backgroundVideoURL() {
+		return this._backgroundVideoURL;
 	}
 
 	/**
@@ -370,6 +398,7 @@ class ThemeSDI extends ModelItf {
 			"description": this.description(),
 			"defaultTheme": this.defaultTheme(),
 			"backgroundImageURL": this.backgroundImageURL(),
+			"backgroundVideoURL": this.backgroundVideoURL(),
 			"backgroundColor": this.backgroundColor(),
 			"font": this.font(),
 			"color": this.color(),
@@ -541,7 +570,7 @@ class ThemeSDI extends ModelItf {
 	 * @return {ThemeSDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ThemeSDI {
-		return new ThemeSDI(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.backgroundImageURL, jsonObject.backgroundColor, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new ThemeSDI(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.backgroundImageURL, jsonObject.backgroundVideoURL, jsonObject.backgroundColor, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

@@ -46,6 +46,14 @@ class ThemeZone extends ModelItf {
 	private _backgroundImageURL : string;
 
 	/**
+	 * BackgroundVideoURL property.
+	 *
+	 * @property _backgroundVideoURL
+	 * @type string
+	 */
+	private _backgroundVideoURL : string;
+
+	/**
 	 * BackgroundColor property.
 	 *
 	 * @property _backgroundColor
@@ -86,6 +94,14 @@ class ThemeZone extends ModelItf {
 	private _color : string;
 
 	/**
+	 * Z-Index property.
+	 *
+	 * @property _zindex
+	 * @type number
+	 */
+	private _zindex : number;
+
+	/**
 	 * Constructor
 	 *
 	 * @constructor
@@ -102,18 +118,20 @@ class ThemeZone extends ModelItf {
 	 * @param {string} createdAt - The ThemeZone's createdAt.
 	 * @param {string} updatedAt - The ThemeZone's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, backgroundImageURL : string = "", backgroundColor : string = "", font : string = "", color : string = "", opacity : string = "", border : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, backgroundImageURL : string = "", backgroundVideoURL : string = "", backgroundColor : string = "", font : string = "", color : string = "", opacity : string = "", border : string = "", zindex : number = null, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
 		this.setDefaultTheme(defaultTheme);
 		this.setBackgroundImageURL(backgroundImageURL);
+		this.setBackgroundVideoURL(backgroundVideoURL);
 		this.setBackgroundColor(backgroundColor);
 		this.setFont(font);
 		this.setColor(color);
 		this.setOpacity(opacity);
 		this.setBorder(border);
+		this.setZindex(zindex);
 	}
 
 	/**
@@ -151,6 +169,16 @@ class ThemeZone extends ModelItf {
 	 */
 	setBackgroundImageURL(backgroundImageURL : string) {
 		this._backgroundImageURL = backgroundImageURL;
+	}
+
+	/**
+	 * Set the ThemeZone's backgroundVideoURL.
+	 *
+	 * @method backgroundVideoURL
+	 * @param {string} backgroundVideoURL - The ThemeZone's backgroundVideoURL to set
+	 */
+	setBackgroundVideoURL(backgroundVideoURL : string) {
+		this._backgroundVideoURL = backgroundVideoURL;
 	}
 
 	/**
@@ -200,6 +228,15 @@ class ThemeZone extends ModelItf {
 	}
 
 	/**
+	 * Set the ThemeZone's z-index.
+	 *
+	 * @method setZindex
+	 */
+	setZindex(zindex : number) {
+		this._zindex = zindex;
+	}
+
+	/**
 	 * Return the ThemeZone's name.
 	 *
 	 * @method name
@@ -233,6 +270,15 @@ class ThemeZone extends ModelItf {
 	 */
 	backgroundImageURL() {
 		return this._backgroundImageURL;
+	}
+
+	/**
+	 * Return the ThemeZone's backgroundVideoURL.
+	 *
+	 * @method backgroundVideoURL
+	 */
+	backgroundVideoURL() {
+		return this._backgroundVideoURL;
 	}
 
 	/**
@@ -280,6 +326,15 @@ class ThemeZone extends ModelItf {
 		return this._border;
 	}
 
+	/**
+	 * Return the ThemeZone's z-index.
+	 *
+	 * @method z-index
+	 */
+	zindex() {
+		return this._zindex;
+	}
+
 
 	//////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -298,11 +353,13 @@ class ThemeZone extends ModelItf {
 			"description": this.description(),
 			"defaultTheme": this.defaultTheme(),
 			"backgroundImageURL": this.backgroundImageURL(),
+			"backgroundVideoURL": this.backgroundVideoURL(),
 			"backgroundColor": this.backgroundColor(),
 			"font": this.font(),
 			"color": this.color(),
 			"opacity": this.opacity(),
 			"border": this.border(),
+			"zindex": this.zindex(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
 			"updatedAt" : this.getUpdatedAt()
@@ -409,7 +466,7 @@ class ThemeZone extends ModelItf {
 	 * @return {ThemeZone} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ThemeZone {
-		return new ThemeZone(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.backgroundImageURL, jsonObject.backgroundColor, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.border, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new ThemeZone(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.backgroundImageURL, jsonObject.backgroundVideoURL, jsonObject.backgroundColor, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.border, jsonObject.zindex, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**
