@@ -545,6 +545,49 @@ class ThemeSDI extends ModelItf {
 	}
 
 	/**
+	 * Clone the object
+	 *
+	 * @method clone
+	 * @param {Function} successCallback - The callback function when success
+	 * @param {Function} failCallback - The callback function when fail
+	 */
+	clone(successCallback : Function, failCallback : Function) {
+
+		var self = this;
+
+		var successCloneThemeSDI : Function = function (themeSDI : any) {
+
+			var newThemeSDI : ThemeSDI = ThemeSDI.parseJSON(themeSDI);
+
+			var finalSuccess = function () {
+				successCallback(newThemeSDI.toJSONObject());
+			};
+
+			var successLoad : Function = function () {
+
+				var themeZone : ThemeZone = self.themeZone();
+
+				if (themeZone == null) {
+					finalSuccess();
+				} else {
+
+					var successCloneTZ : Function = function (tzData : any) {
+						var newThemeZone : ThemeZone = ThemeZone.parseJSON(tzData);
+
+						newThemeSDI.linkThemeZone(newThemeZone.getId(), finalSuccess, failCallback);
+					};
+
+					themeZone.clone(successCloneTZ, failCallback);
+				}
+			};
+			self.loadAssociations(successLoad, failCallback);
+		};
+
+
+		this.cloneObject(ThemeSDI, successCloneThemeSDI, failCallback);
+	}
+
+	/**
 	 * Retrieve DataBase Table Name.
 	 *
 	 * @method getTableName

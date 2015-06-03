@@ -735,6 +735,7 @@ class ModelItf {
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - create : Method need to be implemented.");
+        this.createObject(ModelItf, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -851,7 +852,7 @@ class ModelItf {
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
 	 */
-	toJSONObject() : Object {
+	toJSONObject() : any {
 		var data = {
 			"id": this.getId(),
 			"complete": this.isComplete(),
@@ -909,6 +910,18 @@ class ModelItf {
         Logger.warn("ModelItf - fromJSONObject : Method need to be implemented.");
         var model = new ModelItf(jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt); // for passing the tests with modelItf
 	    return model;
+    }
+
+    cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+        if (!modelClass) {
+            failCallback(new ModelException("The modelClasse argument must be given to clone the object."));
+            return;
+        }
+
+        var jsonInfo : any = this.toJSONObject();
+        jsonInfo.id = null;
+        var clone : ModelItf = modelClass.fromJSONObject(jsonInfo);
+        clone.create(successCallback, failCallback);
     }
 
     /**

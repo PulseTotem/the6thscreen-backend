@@ -413,6 +413,17 @@ class ThemeZone extends ModelItf {
 	}
 
 	/**
+	 * Clone the object
+	 *
+	 * @method clone
+	 * @param {Function} successCallback - The callback function when success
+	 * @param {Function} failCallback - The callback function when fail
+	 */
+	clone(successCallback : Function, failCallback : Function) {
+		this.cloneObject(ThemeZone, successCallback, failCallback);
+	}
+
+	/**
 	 * Retrieve DataBase Table Name.
 	 *
 	 * @method getTableName
