@@ -53,6 +53,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveProfilDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Profil, "profilId", description, "ProfilDescription"); });
 		this.addListenerToSocket('RetrieveInfoTypeDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(InfoType, "infoTypeId", description, "InfoTypeDescription"); });
 		this.addListenerToSocket('RetrievePolicyDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Policy, "PolicyId", description, "PolicyDescription"); });
+		this.addListenerToSocket('RetrieveThemeZoneDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(ThemeZone, "themeZoneId", description, "ThemeZoneDescription"); });
+		this.addListenerToSocket('RetrieveThemeSDIDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(ThemeSDI, "themeSDIId", description, "ThemeSDIDescription"); });
 
 		// Retrieve all objects
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
@@ -80,6 +82,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateZoneContent', function(data) { self.createObject(ZoneContent, data, "AnswerCreateZoneContent"); });
 		this.addListenerToSocket('CreateRelativeTimeline', function(data) { self.createObject(RelativeTimeline, data, "AnswerCreateRelativeTimeline"); });
 		this.addListenerToSocket('CreateProfil', function(data) { self.createObject(Profil, data, "AnswerCreateProfil"); });
+		this.addListenerToSocket('CreateThemeZone', function(data) { self.createObject(ThemeZone, data, "AnswerCreateThemeZone"); });
+		this.addListenerToSocket('CreateThemeSDI', function(data) { self.createObject(ThemeSDI, data, "AnswerCreateThemeSDI"); });
 
 	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
 
@@ -100,6 +104,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateParamValue', function(data) { self.updateObjectAttribute(ParamValue, data, "AnswerUpdateParamValue"); });
 		this.addListenerToSocket('UpdateZoneContent', function(data) { self.updateObjectAttribute(ZoneContent, data, "AnswerUpdateZoneContent"); });
 		this.addListenerToSocket('UpdateProfil', function(data) { self.updateObjectAttribute(Profil, data, "AnswerUpdateProfil"); });
+		this.addListenerToSocket('UpdateThemeZone', function(data) { self.updateObjectAttribute(ThemeZone, data, "AnswerUpdateThemeZone"); });
+		this.addListenerToSocket('UpdateThemeSDI', function(data) { self.updateObjectAttribute(ThemeSDI, data, "AnswerUpdateThemeSDI"); });
 
 	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
 	    this.addListenerToSocket('UpdateServiceDescription', function(data) { self.updateObjectAttribute(Service, data, "ServiceDescription"); });
@@ -114,6 +120,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteRelativeEvent', function(idRelativeEvent) { self.deleteObjectFromDescription(RelativeEvent, "relativeEventId", idRelativeEvent, "AnswerDeleteRelativeEvent"); });
 		this.addListenerToSocket('DeleteZoneContent', function(idZoneContent) { self.deleteObjectFromDescription(ZoneContent, "zoneContentId", idZoneContent, "AnswerDeleteZoneContent"); });
 		this.addListenerToSocket('DeleteProfil', function(idProfil) { self.deleteObjectFromDescription(Profil, "profilId", idProfil, "AnswerDeleteProfil"); });
+		this.addListenerToSocket('DeleteThemeZone', function(idThemeZone) { self.deleteObjectFromDescription(ThemeZone, "themeZoneId", idThemeZone, "AnswerDeleteThemeZone"); });
+		this.addListenerToSocket('DeleteThemeSDI', function(idThemeSDI) { self.deleteObjectFromDescription(ThemeSDI, "themeSDIId", idThemeSDI, "AnswerDeleteThemeSDI"); });
 
 		this.addListenerToSocket('DeleteZone', function(idZone) { self.deleteObjectFromDescription(Zone, "zoneId", idZone, "deletedZone"); });
 		this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "deletedSource"); });
