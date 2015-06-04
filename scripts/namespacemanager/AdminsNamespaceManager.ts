@@ -71,6 +71,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveAllTimelineRunnerDescription', function() { self.sendAllObjectDescription(TimelineRunner, "AllTimelineRunnerDescription"); });
 		this.addListenerToSocket('RetrieveAllSystemTriggerDescription', function() { self.sendAllObjectDescription(SystemTrigger, "AllSystemTriggerDescription"); });
 		this.addListenerToSocket('RetrieveAllUserTriggerDescription', function() { self.sendAllObjectDescription(UserTrigger, "AllUserTriggerDescription"); });
+		this.addListenerToSocket('RetrieveAllTypeParamTypeDescription', function() { self.sendAllObjectDescription(TypeParamType, "AllTypeParamTypeDescription"); });
+		this.addListenerToSocket('RetrieveAllConstraintParamTypeDescription', function() { self.sendAllObjectDescription(ConstraintParamType, "AllConstraintParamTypeDescription"); });
+
 
 		// Create object
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
