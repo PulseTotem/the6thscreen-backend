@@ -190,7 +190,7 @@ class ParamValue extends ModelItf {
 		var success : Function = function () {
 			if (self.isComplete() && !!self.value()) {
 				var success:Function = function () {
-					self._complete = (self.paramType() !== undefined && self.paramType().isComplete());
+					self._complete = (self.paramType() !== null && self.paramType().isComplete());
 					successCallback();
 				};
 
