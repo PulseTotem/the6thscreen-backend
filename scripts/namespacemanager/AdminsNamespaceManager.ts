@@ -95,6 +95,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateSource', function(data) { self.createObject(Source, data, "AnswerCreateSource"); });
 		this.addListenerToSocket('CreateRenderer', function(data) { self.createObject(Renderer, data, "AnswerCreateRenderer"); });
 		this.addListenerToSocket('CreateBehaviour', function(data) { self.createObject(Behaviour, data, "AnswerCreateBehaviour"); });
+		this.addListenerToSocket('CreatePolicy', function(data) { self.createObject(Policy, data, "AnswerCreatePolicy"); });
 
 		// Update object
 		this.addListenerToSocket('UpdateSDI', function(data) { self.updateObjectAttribute(SDI, data, "AnswerUpdateSDI"); });
@@ -115,6 +116,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateSource', function(data) { self.updateObjectAttribute(Source, data, "AnswerUpdateSource"); });
 		this.addListenerToSocket('UpdateRenderer', function(data) { self.updateObjectAttribute(Renderer, data, "AnswerUpdateRenderer"); });
 		this.addListenerToSocket('UpdateBehaviour', function(data) { self.updateObjectAttribute(Behaviour, data, "AnswerUpdateBehaviour"); });
+		this.addListenerToSocket('UpdatePolicy', function(data) { self.updateObjectAttribute(Policy, data, "AnswerUpdatePolicy"); });
 
 		// Delete object
 		this.addListenerToSocket('DeleteRelativeEvent', function(idRelativeEvent) { self.deleteObjectFromDescription(RelativeEvent, "relativeEventId", idRelativeEvent, "AnswerDeleteRelativeEvent"); });
@@ -133,6 +135,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteObjectFromDescription(CallType, "callTypeId", idCallType, "AnswerDeleteCallType"); });
 		this.addListenerToSocket('DeleteOAuthKey', function(idOAuthKey) { self.deleteObjectFromDescription(OAuthKey, "oauthKeyId", idOAuthKey, "AnswerDeleteOAuthKey"); });
 		this.addListenerToSocket('DeleteBehaviour', function(idBehaviour) { self.deleteObjectFromDescription(Behaviour, "behaviourId", idBehaviour, "AnswerDeleteBehaviour"); });
+		this.addListenerToSocket('DeletePolicy', function(idPolicy) { self.deleteObjectFromDescription(Policy, "policyId", idPolicy, "AnswerDeletePolicy"); });
 
 		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "AnswerDeleteSDI"); });
 
