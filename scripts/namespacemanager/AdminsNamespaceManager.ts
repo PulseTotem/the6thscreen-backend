@@ -92,8 +92,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateTypeParamType', function(data) { self.createObject(TypeParamType, data, "AnswerCreateTypeParamType"); });
 		this.addListenerToSocket('CreateInfoType', function(data) { self.createObject(InfoType, data, "AnswerCreateInfoType"); });
 		this.addListenerToSocket('CreateService', function(data) { self.createObject(Service, data, "AnswerCreateService"); });
-
-		this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
+		this.addListenerToSocket('CreateSource', function(data) { self.createObject(Source, data, "AnswerCreateSource"); });
 
 	    this.addListenerToSocket('CreateCallDescription', function(data) { self.createObject(Call, data, "CallDescription"); });
 		this.addListenerToSocket('CreateRendererDescription', function(data) { self.createObject(Renderer, data, "RendererDescription"); });
@@ -116,10 +115,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateTypeParamType', function(data) { self.updateObjectAttribute(TypeParamType, data, "AnswerUpdateTypeParamType"); });
 		this.addListenerToSocket('UpdateInfoType', function(data) { self.updateObjectAttribute(InfoType, data, "AnswerUpdateInfoType"); });
 		this.addListenerToSocket('UpdateService', function(data) { self.updateObjectAttribute(Service, data, "AnswerUpdateService"); });
+		this.addListenerToSocket('UpdateSource', function(data) { self.updateObjectAttribute(Source, data, "AnswerUpdateSource"); });
 
-
-		this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
-	    this.addListenerToSocket('UpdateCallDescription', function(data) { self.updateObjectAttribute(Call, data, "CallDescription"); });
+		this.addListenerToSocket('UpdateCallDescription', function(data) { self.updateObjectAttribute(Call, data, "CallDescription"); });
 		this.addListenerToSocket('UpdateParamValueDescription', function(data) { self.updateObjectAttribute(ParamValue, data, "ParamValueDescription"); });
 		this.addListenerToSocket('UpdateRendererDescription', function(data) { self.updateObjectAttribute(Renderer, data, "RendererDescription"); });
 		this.addListenerToSocket('UpdateProfilDescription', function(data) { self.updateObjectAttribute(Profil, data, "ProfilDescription"); });
@@ -136,11 +134,11 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteTypeParamType', function(idTypeParamType) { self.deleteObjectFromDescription(TypeParamType, "typeParamTypeId", idTypeParamType, "AnswerDeleteTypeParamType"); });
 		this.addListenerToSocket('DeleteInfoType', function(idInfoType) { self.deleteObjectFromDescription(InfoType, "infoTypeId", idInfoType, "AnswerDeleteInfoType"); });
 		this.addListenerToSocket('DeleteService', function(idService) { self.deleteObjectFromDescription(Service, "serviceId", idService, "AnswerDeleteService"); });
+		this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "AnswerDeleteSource"); });
 
 
 		this.addListenerToSocket('DeleteZone', function(idZone) { self.deleteObjectFromDescription(Zone, "zoneId", idZone, "deletedZone"); });
-		this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "deletedSource"); });
-	    this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteObjectFromDescription(CallType, "callTypeId", idCallType, "deletedCallType"); });
+		 this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteObjectFromDescription(CallType, "callTypeId", idCallType, "deletedCallType"); });
 	    this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "deletedSDI"); });
 		this.addListenerToSocket('DeleteOAuthKey', function(idOAuthKey) { self.deleteObjectFromDescription(OAuthKey, "oauthKeyId", idOAuthKey, "deletedOAuthKey"); });
 		this.addListenerToSocket('DeleteCall', function(idCall) { self.deleteObjectFromDescription(Call, "callId", idCall, "deletedCall"); });
