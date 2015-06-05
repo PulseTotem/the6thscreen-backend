@@ -535,6 +535,23 @@ class ParamType extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+
+        var self = this;
+
+        var successLoadDefaultValue = function () {
+            if (self.defaultValue() == null) {
+                ModelItf.deleteObject(ParamType, self.getId(), successCallback, failCallback, attemptNumber);
+            } else {
+                var successDeleteParamValue = function () {
+                    ModelItf.deleteObject(ParamType, self.getId(), successCallback, failCallback, attemptNumber);
+                };
+
+                self.defaultValue().delete(successDeleteParamValue, failCallback);
+            }
+        };
+
+
+        this.loadDefaultValue(successLoadDefaultValue, failCallback);
         return ModelItf.deleteObject(ParamType, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
