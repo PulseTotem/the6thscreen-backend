@@ -472,17 +472,17 @@ class ParamType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	linkDefaultValue(defaultValueId : number, successCallback : Function, failCallback : Function) {
-
+        var self = this;
         var successReadParamValue = function (paramValue : ParamValue) {
             var successLinkParamType = function () {
                 var successCheck = function () {
-                    this.associateObject(ParamType, ParamValue, defaultValueId, successCallback, failCallback);
+                    self.associateObject(ParamType, ParamValue, defaultValueId, successCallback, failCallback);
                 };
 
                 paramValue.checkCompleteness(successCheck, failCallback);
             };
 
-            paramValue.linkParamType(this.getId(), successLinkParamType, failCallback);
+            paramValue.linkParamType(self.getId(), successLinkParamType, failCallback);
         };
         ParamValue.read(defaultValueId, successReadParamValue, failCallback);
 	}
