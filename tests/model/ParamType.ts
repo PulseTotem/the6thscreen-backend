@@ -434,28 +434,55 @@ describe('ParamType', function() {
 				"data": []
 			};
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
+			var restClientMockAsso = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
                 var defaultValue = c.defaultValue();
                 assert.equal(defaultValue, null, "The defaultValue is not a null value: "+JSON.stringify(defaultValue));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the defaultValue");
+                assert.ok(restClientMockAsso.isDone(), "The mock request has not been done to get the defaultValue");
 
                 var response2 : SequelizeRestfulResponse = {
                     "status": "success",
                     "data": {}
                 };
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName(), s.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+	            var responseRead : SequelizeRestfulResponse = {
+		            "status": "success",
+		            "data": s.toJSONObject()
+	            };
+
+	            var responseReadAsso : SequelizeRestfulResponse = {
+		            "status": "success",
+		            "data": c.toJSONObject()
+	            };
+
+	            var restClientMockReadParamValue = nock(DatabaseConnection.getBaseURL())
+		            .get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), s.getId().toString(), ParamType.getTableName()))
+		            .reply(200, JSON.stringify(responseReadAsso));
+
+	            var restClientMockRead = nock(DatabaseConnection.getBaseURL())
+		            .get(DatabaseConnection.objectEndpoint(ParamValue.getTableName(), s.getId().toString()))
+		            .reply(200, JSON.stringify(responseRead));
+
+	            var restClientMockAssoType = nock(DatabaseConnection.getBaseURL())
+		            .put(DatabaseConnection.associatedObjectEndpoint(ParamValue.getTableName(), s.getId().toString(), ParamType.getTableName(), c.getId().toString()))
+		            .reply(200, JSON.stringify(response2));
+
+	            var restClientMockAssoDefaultValue = nock(DatabaseConnection.getBaseURL())
+		            .put(DatabaseConnection.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName(), s.getId().toString()))
+		            .reply(200, JSON.stringify(response2));
+
+
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the setParamValue is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the defaultValue in database.");
-                    done();
+                    assert.ok(restClientMockRead.isDone(), "The mock request has not been done to associate the defaultValue in database.");
+	                assert.ok(restClientMockAssoType.isDone(), "The mock request has not been done to associate the defaultValue in database.");
+	                assert.ok(restClientMockAssoDefaultValue.isDone(), "The mock request has not been done to associate the defaultValue in database.");
+	                assert.ok(restClientMockReadParamValue.isDone(), "The mock request has not been done to associate the defaultValue in database.");
+	                done();
                 };
 
                 var fail2 = function(err) {
