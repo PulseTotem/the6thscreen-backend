@@ -7,6 +7,7 @@
 /// <reference path="./Zone.ts" />
 /// <reference path="./Profil.ts" />
 /// <reference path="./ThemeSDI.ts" />
+/// <reference path="./SDIStatus.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -107,6 +108,22 @@ class SDI extends ModelItf {
     private _theme_loaded : boolean;
 
     /**
+     * Statuses property
+     *
+     * @property _statuses
+     * @type Array<SDIStatus>
+     */
+    private _statuses : Array<SDIStatus>;
+
+    /**
+     * Lazy loading for statuses property
+     *
+     * @property _statuses_loaded
+     * @type boolean
+     */
+    private _statuses_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -135,6 +152,9 @@ class SDI extends ModelItf {
 
         this._theme = null;
         this._theme_loaded = false;
+
+        this._statuses = new Array<SDIStatus>();
+        this._statuses_loaded = false;
     }
 
 	/**
@@ -355,10 +375,51 @@ class SDI extends ModelItf {
         }
     }
 
+    /**
+     * Return the SDI's statuses.
+     *
+     * @method statuses
+     */
+    statuses() {
+        return this._statuses;
+    }
+
+    /**
+     * Load the SDI's profils.
+     *
+     * @method loadProfils
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadStatuses(successCallback : Function, failCallback : Function) {
+        if(! this._statuses_loaded) {
+            var self = this;
+            var success : Function = function(statuses) {
+                self._statuses = statuses;
+                self._statuses_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(SDI, SDIStatus, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
-     * Load all the lazy loading properties of the object.
+     * Load all the lazy loading properties of the object except statuses.
      * Useful when you want to get a complete object.
      *
      * @method loadAssociations

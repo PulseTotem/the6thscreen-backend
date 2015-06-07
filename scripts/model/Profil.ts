@@ -6,7 +6,7 @@
 /// <reference path="./Call.ts" />
 /// <reference path="./ZoneContent.ts" />
 /// <reference path="./SDI.ts" />
-
+/// <reference path="./SDIStatus.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
@@ -65,6 +65,22 @@ class Profil extends ModelItf {
      */
     private _sdi_loaded : boolean;
 
+	/**
+	 * Statuses property.
+	 *
+	 * @property _statuses
+	 * @type Array<SDIStatus>
+	 */
+	private _statuses : Array<SDIStatus>;
+
+	/**
+	 * Lazy loading for statuses property.
+	 *
+	 * @property _statuses_loaded
+	 * @type boolean
+	 */
+	private _statuses_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -86,6 +102,9 @@ class Profil extends ModelItf {
 
 	    this._sdi = null;
 	    this._sdi_loaded = false;
+
+	    this._statuses = new Array<SDIStatus>();
+	    this._statuses_loaded = false;
     }
 
     /**
@@ -211,10 +230,52 @@ class Profil extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the Profil's statuses.
+	 *
+	 * @method statuses
+	 * @return {Array<SDIStatus>} The Profil's statuses.
+	 */
+	statuses() : Array<SDIStatus> {
+		return this._statuses;
+	}
+
+	/**
+	 * Load the Profil's statuses.
+	 *
+	 * @method loadStatuses
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadStatuses(successCallback : Function, failCallback : Function) {
+		if(! this._statuses_loaded) {
+			var self = this;
+			var success : Function = function(statuses) {
+				self._statuses = statuses;
+				self._statuses_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getAssociatedObjects(Profil, SDIStatus, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Load all the lazy loading properties of the object.
+	 * Load all the lazy loading properties of the object except statuses
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
