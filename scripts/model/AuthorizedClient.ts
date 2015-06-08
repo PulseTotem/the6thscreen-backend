@@ -9,12 +9,12 @@
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
- * Model : SDIStatus
+ * Model : AuthorizedClient
  *
- * @class SDIStatus
+ * @class AuthorizedClient
  * @extends ModelItf
  */
-class SDIStatus extends ModelItf {
+class AuthorizedClient extends ModelItf {
 
     /**
      * IP property.
@@ -83,10 +83,10 @@ class SDIStatus extends ModelItf {
      * Constructor.
      *
      * @constructor
-     * @param {string} ip - The SDIStatus's name.
-     * @param {number} id - The SDIStatus's ID.
-	 * @param {string} createdAt - The SDIStatus's createdAt.
-	 * @param {string} updatedAt - The SDIStatus's updatedAt.
+     * @param {string} ip - The AuthorizedClient's name.
+     * @param {number} id - The AuthorizedClient's ID.
+	 * @param {string} createdAt - The AuthorizedClient's createdAt.
+	 * @param {string} updatedAt - The AuthorizedClient's updatedAt.
      */
     constructor(ip : string = "", name : string = "", online : boolean = false, lastOnline : Date = null, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
@@ -104,7 +104,7 @@ class SDIStatus extends ModelItf {
     }
 
 	/**
-	 * Set the SDIStatus's ip.
+	 * Set the AuthorizedClient's ip.
 	 *
 	 * @method setIP
 	 */
@@ -113,7 +113,7 @@ class SDIStatus extends ModelItf {
 	}
 
     /**
-     * Return the SDIStatus's ip.
+     * Return the AuthorizedClient's ip.
      *
      * @method name
      */
@@ -122,7 +122,7 @@ class SDIStatus extends ModelItf {
     }
 
     /**
-     * Set the SDIStatus' name
+     * Set the AuthorizedClient' name
      *
      * @method setName
      * @param name the name
@@ -132,7 +132,7 @@ class SDIStatus extends ModelItf {
     }
 
     /**
-     * Return the SDIStatus' name
+     * Return the AuthorizedClient' name
      * @method name
      * @returns {string}
      */
@@ -141,7 +141,7 @@ class SDIStatus extends ModelItf {
     }
 
     /**
-     * Set the SDIStatus' online status
+     * Set the AuthorizedClient' online status
      * @method setOnline
      * @param online
      */
@@ -150,7 +150,7 @@ class SDIStatus extends ModelItf {
     }
 
     /**
-     * Return the SDIStatus' online status
+     * Return the AuthorizedClient' online status
      * @method online
      */
     online() {
@@ -158,7 +158,7 @@ class SDIStatus extends ModelItf {
     }
 
     /**
-     * Set the SDIStatus' last online property
+     * Set the AuthorizedClient' last online property
      *
      * @method setLastOnline
      * @param lastOnline
@@ -168,7 +168,7 @@ class SDIStatus extends ModelItf {
     }
 
     /**
-     * Return the SDIStatus' last online property
+     * Return the AuthorizedClient' last online property
      * @method lastOnline
      * @returns {Date}
      */
@@ -177,7 +177,7 @@ class SDIStatus extends ModelItf {
     }
 
     /**
-     * Return the SDIStatus's SDI.
+     * Return the AuthorizedClient's SDI.
      *
      * @method sdi
      */
@@ -186,7 +186,7 @@ class SDIStatus extends ModelItf {
     }
 
     /**
-     * Load the SDIStatus's sdi.
+     * Load the AuthorizedClient's sdi.
      *
      * @method loadSDI
      * @param {Function} successCallback - The callback function when success.
@@ -209,12 +209,12 @@ class SDIStatus extends ModelItf {
                 }
             };
 
-            this.getUniquelyAssociatedObject(SDIStatus, SDI, success, fail);
+            this.getUniquelyAssociatedObject(AuthorizedClient, SDI, success, fail);
         }
     }
 
     /**
-     * Return the SDIStatus's profil.
+     * Return the AuthorizedClient's profil.
      *
      * @method profil
      */
@@ -223,7 +223,7 @@ class SDIStatus extends ModelItf {
     }
 
     /**
-     * Load the SDIStatus's profil.
+     * Load the AuthorizedClient's profil.
      *
      * @method loadProfil
      * @param {Function} successCallback - The callback function when success.
@@ -246,7 +246,7 @@ class SDIStatus extends ModelItf {
                 }
             };
 
-            this.getUniquelyAssociatedObject(SDIStatus, Profil, success, fail);
+            this.getUniquelyAssociatedObject(AuthorizedClient, Profil, success, fail);
         }
     }
 
@@ -295,7 +295,7 @@ class SDIStatus extends ModelItf {
     }
 
 	/**
-	 * Return a SDIStatus instance as a JSON Object
+	 * Return a AuthorizedClient instance as a JSON Object
 	 *
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
@@ -315,7 +315,7 @@ class SDIStatus extends ModelItf {
 	}
 
 	/**
-	 * Compute the completeness of an SDIStatus.
+	 * Compute the completeness of an AuthorizedClient.
 	 * The completeness is given by the presence of an ID and a name.
 	 */
 	checkCompleteness(successCallback : Function, failCallback : Function) : void {
@@ -361,21 +361,21 @@ class SDIStatus extends ModelItf {
     }
 
     /**
-     * Set the SDI of the SDIStatus.
-     * As a SDIStatus can only have one SDI, if the value is already set, this method throws an exception: you need first to unset the SDI.
+     * Set the SDI of the AuthorizedClient.
+     * As a AuthorizedClient can only have one SDI, if the value is already set, this method throws an exception: you need first to unset the SDI.
      * Moreover the given type must be created in database.
      *
      * @method linkSDI
-     * @param {SDI} it The SDI to associate with the SDIStatus.
+     * @param {SDI} it The SDI to associate with the AuthorizedClient.
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
     linkSDI(typeID : number, successCallback : Function, failCallback : Function) {
-        this.associateObject(SDIStatus, SDI, typeID, successCallback, failCallback);
+        this.associateObject(AuthorizedClient, SDI, typeID, successCallback, failCallback);
     }
 
     /**
-     * Unset the current SDI from the SDIStatus.
+     * Unset the current SDI from the AuthorizedClient.
      * It both sets a null value for the object property and remove the association in database.
      * An SDI must have been set before using it, else an exception is thrown.
      *
@@ -384,25 +384,25 @@ class SDIStatus extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      */
     unlinkSDI(typeID : number, successCallback : Function, failCallback : Function) {
-        this.deleteObjectAssociation(SDIStatus, SDI, typeID, successCallback, failCallback);
+        this.deleteObjectAssociation(AuthorizedClient, SDI, typeID, successCallback, failCallback);
     }
 
     /**
-     * Set the Profil of the SDIStatus.
-     * As a SDIStatus can only have one Profil, if the value is already set, this method throws an exception: you need first to unset the Profil.
+     * Set the Profil of the AuthorizedClient.
+     * As a AuthorizedClient can only have one Profil, if the value is already set, this method throws an exception: you need first to unset the Profil.
      * Moreover the given type must be created in database.
      *
      * @method linkProfil
-     * @param {Profil} it The Profil to associate with the SDIStatus.
+     * @param {Profil} it The Profil to associate with the AuthorizedClient.
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
     linkProfil(typeID : number, successCallback : Function, failCallback : Function) {
-        this.associateObject(SDIStatus, Profil, typeID, successCallback, failCallback);
+        this.associateObject(AuthorizedClient, Profil, typeID, successCallback, failCallback);
     }
 
     /**
-     * Unset the current Profil from the SDIStatus.
+     * Unset the current Profil from the AuthorizedClient.
      * It both sets a null value for the object property and remove the association in database.
      * An Profil must have been set before using it, else an exception is thrown.
      *
@@ -411,7 +411,7 @@ class SDIStatus extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      */
     unlinkProfil(typeID : number, successCallback : Function, failCallback : Function) {
-        this.deleteObjectAssociation(SDIStatus, Profil, typeID, successCallback, failCallback);
+        this.deleteObjectAssociation(AuthorizedClient, Profil, typeID, successCallback, failCallback);
     }
 
     /**
@@ -423,7 +423,7 @@ class SDIStatus extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        this.createObject(SDIStatus, this.toJSONObject(), successCallback, failCallback);
+        this.createObject(AuthorizedClient, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -437,7 +437,7 @@ class SDIStatus extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        ModelItf.readObject(SDIStatus, id, successCallback, failCallback, attemptNumber);
+        ModelItf.readObject(AuthorizedClient, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -449,7 +449,7 @@ class SDIStatus extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.updateObject(SDIStatus, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+        return this.updateObject(AuthorizedClient, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -461,7 +461,7 @@ class SDIStatus extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(SDIStatus, this.getId(), successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(AuthorizedClient, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -473,31 +473,31 @@ class SDIStatus extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.allObjects(SDIStatus, successCallback, failCallback, attemptNumber);
+        return this.allObjects(AuthorizedClient, successCallback, failCallback, attemptNumber);
     }
 
 	/**
-	 * Return an SDIStatus instance from a JSON string.
+	 * Return an AuthorizedClient instance from a JSON string.
 	 *
 	 * @method parseJSON
 	 * @static
 	 * @param {string} json - The JSON string
 	 * @return {Call} The model instance.
 	 */
-	static parseJSON(jsonString : string) : SDIStatus {
-		return SDIStatus.fromJSONObject(JSON.parse(jsonString));
+	static parseJSON(jsonString : string) : AuthorizedClient {
+		return AuthorizedClient.fromJSONObject(JSON.parse(jsonString));
 	}
 
 	/**
-	 * Return an SDIStatus instance from a JSON Object.
+	 * Return an AuthorizedClient instance from a JSON Object.
 	 *
 	 * @method fromJSONObject
 	 * @static
 	 * @param {JSONObject} json - The JSON Object
 	 * @return {Call} The model instance.
 	 */
-	static fromJSONObject(jsonObject : any) : SDIStatus {
-		return new SDIStatus(jsonObject.IP, jsonObject.name, jsonObject.online, jsonObject.lastOnline, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+	static fromJSONObject(jsonObject : any) : AuthorizedClient {
+		return new AuthorizedClient(jsonObject.IP, jsonObject.name, jsonObject.online, jsonObject.lastOnline, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**
@@ -507,6 +507,6 @@ class SDIStatus extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "SDIStatuses";
+        return "AuthorizedClients";
     }
 }

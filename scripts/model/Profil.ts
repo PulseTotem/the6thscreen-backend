@@ -6,7 +6,7 @@
 /// <reference path="./Call.ts" />
 /// <reference path="./ZoneContent.ts" />
 /// <reference path="./SDI.ts" />
-/// <reference path="./SDIStatus.ts" />
+/// <reference path="./AuthorizedClient.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
@@ -69,9 +69,9 @@ class Profil extends ModelItf {
 	 * Statuses property.
 	 *
 	 * @property _statuses
-	 * @type Array<SDIStatus>
+	 * @type Array<AuthorizedClient>
 	 */
-	private _statuses : Array<SDIStatus>;
+	private _statuses : Array<AuthorizedClient>;
 
 	/**
 	 * Lazy loading for statuses property.
@@ -103,7 +103,7 @@ class Profil extends ModelItf {
 	    this._sdi = null;
 	    this._sdi_loaded = false;
 
-	    this._statuses = new Array<SDIStatus>();
+	    this._statuses = new Array<AuthorizedClient>();
 	    this._statuses_loaded = false;
     }
 
@@ -234,9 +234,9 @@ class Profil extends ModelItf {
 	 * Return the Profil's statuses.
 	 *
 	 * @method statuses
-	 * @return {Array<SDIStatus>} The Profil's statuses.
+	 * @return {Array<AuthorizedClient>} The Profil's statuses.
 	 */
-	statuses() : Array<SDIStatus> {
+	statuses() : Array<AuthorizedClient> {
 		return this._statuses;
 	}
 
@@ -264,7 +264,7 @@ class Profil extends ModelItf {
 				}
 			};
 
-			this.getAssociatedObjects(Profil, SDIStatus, success, fail);
+			this.getAssociatedObjects(Profil, AuthorizedClient, success, fail);
 		} else {
 			if(successCallback != null) {
 				successCallback();

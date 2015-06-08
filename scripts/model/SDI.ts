@@ -7,7 +7,7 @@
 /// <reference path="./Zone.ts" />
 /// <reference path="./Profil.ts" />
 /// <reference path="./ThemeSDI.ts" />
-/// <reference path="./SDIStatus.ts" />
+/// <reference path="./AuthorizedClient.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -111,9 +111,9 @@ class SDI extends ModelItf {
      * Statuses property
      *
      * @property _statuses
-     * @type Array<SDIStatus>
+     * @type Array<AuthorizedClient>
      */
-    private _statuses : Array<SDIStatus>;
+    private _statuses : Array<AuthorizedClient>;
 
     /**
      * Lazy loading for statuses property
@@ -153,7 +153,7 @@ class SDI extends ModelItf {
         this._theme = null;
         this._theme_loaded = false;
 
-        this._statuses = new Array<SDIStatus>();
+        this._statuses = new Array<AuthorizedClient>();
         this._statuses_loaded = false;
     }
 
@@ -408,7 +408,7 @@ class SDI extends ModelItf {
                 }
             };
 
-            this.getAssociatedObjects(SDI, SDIStatus, success, fail);
+            this.getAssociatedObjects(SDI, AuthorizedClient, success, fail);
         } else {
             if(successCallback != null) {
                 successCallback();
