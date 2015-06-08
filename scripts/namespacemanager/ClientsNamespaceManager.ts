@@ -12,6 +12,7 @@
 /// <reference path="../model/Zone.ts" />
 /// <reference path="../model/Call.ts" />
 /// <reference path="../model/CallType.ts" />
+/// <reference path="../model/Client.ts" />
 
 class ClientsNamespaceManager extends ShareNamespaceManager {
 
@@ -35,7 +36,23 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 
 		this.addListenerToSocket('HashDescription', function(description) { self.manageHashDescription(description); });
+
+	    this.createClient();
     }
+
+	private createClient() {
+		var ip : string = this.socket.request.connection.remoteAddress;
+		var socketId : string = this.socket.id;
+		var c : Client = new Client(ip, socketId);
+		var success : Function = function () {
+			Logger.debug("Client save : "+c.toJSONObject());
+		};
+
+		var fail : Function = function () {
+			Logger.error("Error while creating the client : "+c.toJSONObject());
+		}
+		c.create(success, fail);
+	}
 
 
 ////////////////////// Begin: Manage HashDescription //////////////////////
