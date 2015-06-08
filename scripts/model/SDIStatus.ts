@@ -25,6 +25,29 @@ class SDIStatus extends ModelItf {
     private _ip : string;
 
     /**
+     * Name property
+     *
+     * @property _name
+     * @type string
+     */
+    private _name : string;
+
+    /**
+     * Online property
+     *
+     * @property _online
+     * @type boolean
+     */
+    private _online : boolean;
+
+    /**
+     * LastOnline property
+     *
+     * @property _lastOnline
+     * @type boolean
+     */
+    private _lastOnline : Date;
+    /**
      * SDI property
      *
      * @property _sdi
@@ -65,10 +88,13 @@ class SDIStatus extends ModelItf {
 	 * @param {string} createdAt - The SDIStatus's createdAt.
 	 * @param {string} updatedAt - The SDIStatus's updatedAt.
      */
-    constructor(ip : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(ip : string = "", name : string = "", online : boolean = false, lastOnline : Date = null, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setIP(ip);
+        this.setName(name);
+        this.setOnline(online);
+        this.setLastOnline(lastOnline);
 
         this._sdi = null;
         this._sdi_loaded = false;
@@ -93,6 +119,61 @@ class SDIStatus extends ModelItf {
      */
     IP() {
         return this._ip;
+    }
+
+    /**
+     * Set the SDIStatus' name
+     *
+     * @method setName
+     * @param name the name
+     */
+    setName(name : string) {
+        this._name = name;
+    }
+
+    /**
+     * Return the SDIStatus' name
+     * @method name
+     * @returns {string}
+     */
+    name() {
+        return this._name;
+    }
+
+    /**
+     * Set the SDIStatus' online status
+     * @method setOnline
+     * @param online
+     */
+    setOnline(online : boolean) {
+        this._online = online;
+    }
+
+    /**
+     * Return the SDIStatus' online status
+     * @method online
+     */
+    online() {
+        return this._online;
+    }
+
+    /**
+     * Set the SDIStatus' last online property
+     *
+     * @method setLastOnline
+     * @param lastOnline
+     */
+    setLastOnline(lastOnline : Date) {
+        this._lastOnline = lastOnline;
+    }
+
+    /**
+     * Return the SDIStatus' last online property
+     * @method lastOnline
+     * @returns {Date}
+     */
+    lastOnline() {
+        return this._lastOnline;
     }
 
     /**
@@ -223,6 +304,9 @@ class SDIStatus extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"IP": this.IP(),
+            "name": this.name(),
+            "online": this.online(),
+            "lastOnline": this.lastOnline(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
 			"updatedAt" : this.getUpdatedAt()
@@ -413,7 +497,7 @@ class SDIStatus extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : SDIStatus {
-		return new SDIStatus(jsonObject.IP, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new SDIStatus(jsonObject.IP, jsonObject.name, jsonObject.online, jsonObject.lastOnline, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

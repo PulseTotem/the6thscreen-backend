@@ -24,14 +24,32 @@ describe('SDIStatus', function(){
 			assert.equal(c.IP(), IP, "The IP is not stored correctly.");
 		});
 
+		it('should store the name', function(){
+			var name = "toto";
+			var c = new SDIStatus("", name);
+			assert.equal(c.name(), name, "The name is not stored correctly.");
+		});
+
+		it('should store the online status', function(){
+			var online = true;
+			var c = new SDIStatus("", "", online);
+			assert.equal(c.online(), online, "The online property is not stored correctly.");
+		});
+
+		it('should store the last online property', function(){
+			var lastOnline = new Date();
+			var c = new SDIStatus("", "", false, lastOnline);
+			assert.equal(c.lastOnline(), lastOnline, "The lastOnline property is not stored correctly.");
+		});
+
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new SDIStatus("",52);
+			var c = new SDIStatus("", "", false, new Date(), 52);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete value', function() {
-			var c = new SDIStatus("",52,true);
+			var c = new SDIStatus("", "", false, new Date(), 52,true);
 			assert.equal(c.isComplete(), true, "The complete value is not stored.");
 		});
 
@@ -43,7 +61,7 @@ describe('SDIStatus', function(){
 
 	describe('#checkCompleteness', function() {
 		it('should specify the object is complete if a IP and an ID are given', function(done) {
-			var i = new SDIStatus("vlab",324);
+			var i = new SDIStatus("vlab", "", false, new Date(), 324);
 			var success = function () {
 				assert.equal(i.isComplete(), true, "The SDIStatus is not considered as complete.");
 				done();
@@ -56,7 +74,7 @@ describe('SDIStatus', function(){
 		});
 
 		it('should not specify the object is complete if the IP is an empty string', function(done) {
-			var i = new SDIStatus("",324);
+			var i = new SDIStatus("", "", false, new Date(), 324);
 			var success = function () {
 				assert.equal(i.isComplete(), false, "The SDIStatus is considered as complete.");
 				done();
@@ -69,7 +87,7 @@ describe('SDIStatus', function(){
 		});
 
 		it('should not specify the object is complete if the IP is null', function(done) {
-			var i = new SDIStatus(null,324);
+			var i = new SDIStatus(null, "", false, new Date(), 324);
 			var success = function () {
 				assert.equal(i.isComplete(), false, "The SDIStatus is considered as complete.");
 				done();
@@ -110,14 +128,18 @@ describe('SDIStatus', function(){
 
 	describe('#fromJSONobject', function() {
 		it('should create the right object', function() {
+			var date = new Date();
 			var json = {
 				"id": 42,
 				"IP": "toto",
+				"name": "bub",
+				"online": true,
+				"lastOnline": date,
 				"complete": true
 			};
 
 			var callRetrieve = SDIStatus.fromJSONObject(json);
-			var callExpected = new SDIStatus("toto",42,true);
+			var callExpected = new SDIStatus("toto", "bub", true, date, 42,true);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve call ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -126,11 +148,14 @@ describe('SDIStatus', function(){
 			var json = {
 				"id": 42,
 				"IP": "",
+				"name": "toto",
+				"online": false,
+				"lastOnline": null,
 				"complete": false
 			};
 
 			var callRetrieve = SDIStatus.fromJSONObject(json);
-			var callExpected = new SDIStatus("",42);
+			var callExpected = new SDIStatus("","toto", false, null, 42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve call ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -138,9 +163,13 @@ describe('SDIStatus', function(){
 
 	describe('#toJsonObject', function() {
 		it('should create the expected JSON Object', function() {
-			var c = new SDIStatus("toto", 52);
+			var date = new Date();
+			var c = new SDIStatus("toto", "tutu", true, date, 52);
 			var expected = {
 				"IP": "toto",
+				"name": "tutu",
+				"online": true,
+				"lastOnline": date,
 				"id": 52,
 				"complete": false,
 				"createdAt":null,
@@ -154,7 +183,7 @@ describe('SDIStatus', function(){
 
 	describe('#linkProfil', function () {
 		it('should call the right request', function (done) {
-			var c = new SDIStatus("toto", 52);
+			var c = new SDIStatus("toto","", false, new Date(), 52);
 			var s = new Profil("toto", "machin", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
@@ -204,7 +233,7 @@ describe('SDIStatus', function(){
 
 	describe('#unlinkProfil', function () {
 		it('should call the right request', function (done) {
-			var c = new SDIStatus("toto", 52);
+			var c = new SDIStatus("toto","", false, new Date(), 52);
 			var s = new Profil("toto","machin", 42);
 
 			var response1:SequelizeRestfulResponse = {
@@ -256,7 +285,7 @@ describe('SDIStatus', function(){
 
 	describe('#linkSDI', function () {
 		it('should call the right request', function (done) {
-			var c = new SDIStatus("toto", 52);
+			var c = new SDIStatus("toto","", false, new Date(), 52);
 			var s = new SDI("toto", "machin", "", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
@@ -306,7 +335,7 @@ describe('SDIStatus', function(){
 
 	describe('#unlinkSDI', function () {
 		it('should call the right request', function (done) {
-			var c = new SDIStatus("toto", 52);
+			var c = new SDIStatus("toto","", false, new Date(), 52);
 			var s = new SDI("toto","machin", "", 42);
 
 			var response1:SequelizeRestfulResponse = {
