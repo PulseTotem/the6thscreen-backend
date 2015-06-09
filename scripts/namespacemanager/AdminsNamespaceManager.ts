@@ -155,7 +155,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveZoneContentsFromZoneId', function(zoneIdDescription) { self.sendZoneContentsFromZoneId(zoneIdDescription); });
 
 
-
+		this.addListenerToSocket('RetrieveConnectedClientOfProfil', function (profilIdDescription) { self.sendConnectedClients(profilIdDescription); });
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
 		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
@@ -1258,6 +1258,30 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage sendZoneContentsFromZoneId //////////////////////
+
+////////////////////// Begin: Manage sendConnectedClients //////////////////////
+
+	sendConnectedClients(profilIdDescription : any) {
+		// profilIdDescription : { "profilId": number }
+
+		var self = this;
+		var profilId = profilIdDescription.profilId;
+
+		var fail : Function = function (error) {
+			self.socket.emit("ConnectedClientOfProfil", self.formatResponse(false, error));
+		};
+
+		var successRead : Function = function (profil : Profil) {
+
+			var successLoad : Function = function () {
+				self.socket.emit("ConnectedClientOfProfil", self.formatResponse(true, ModelItf.completeArraySerialization(profil.connectedClients())));
+			};
+
+			profil.loadConnectedClients(successLoad, fail);
+		};
+
+		Profil.read(profilId, successRead, fail);
+	}
 
 
 }

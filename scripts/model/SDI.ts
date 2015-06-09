@@ -108,20 +108,20 @@ class SDI extends ModelItf {
     private _theme_loaded : boolean;
 
     /**
-     * Statuses property
+     * AuthorizedClients property
      *
-     * @property _statuses
+     * @property _authorizedClients
      * @type Array<AuthorizedClient>
      */
-    private _statuses : Array<AuthorizedClient>;
+    private _authorizedClients : Array<AuthorizedClient>;
 
     /**
-     * Lazy loading for statuses property
+     * Lazy loading for authorizedClients property
      *
-     * @property _statuses_loaded
+     * @property _authorizedClients_loaded
      * @type boolean
      */
-    private _statuses_loaded : boolean;
+    private _authorizedClients_loaded : boolean;
 
     /**
      * Constructor.
@@ -153,8 +153,8 @@ class SDI extends ModelItf {
         this._theme = null;
         this._theme_loaded = false;
 
-        this._statuses = new Array<AuthorizedClient>();
-        this._statuses_loaded = false;
+        this._authorizedClients = new Array<AuthorizedClient>();
+        this._authorizedClients_loaded = false;
     }
 
 	/**
@@ -376,27 +376,27 @@ class SDI extends ModelItf {
     }
 
     /**
-     * Return the SDI's statuses.
+     * Return the SDI's authorized clients.
      *
-     * @method statuses
+     * @method authorizedClients
      */
-    statuses() {
-        return this._statuses;
+    authorizedClients() {
+        return this._authorizedClients;
     }
 
     /**
-     * Load the SDI's profils.
+     * Load the SDI's authorizedClients.
      *
-     * @method loadProfils
+     * @method loadAuthorizedClients
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadStatuses(successCallback : Function, failCallback : Function) {
-        if(! this._statuses_loaded) {
+    loadAuthorizedClients(successCallback : Function, failCallback : Function) {
+        if(! this._authorizedClients_loaded) {
             var self = this;
-            var success : Function = function(statuses) {
-                self._statuses = statuses;
-                self._statuses_loaded = true;
+            var success : Function = function(authorizedClients) {
+                self._authorizedClients = authorizedClients;
+                self._authorizedClients_loaded = true;
                 if(successCallback != null) {
                     successCallback();
                 }
