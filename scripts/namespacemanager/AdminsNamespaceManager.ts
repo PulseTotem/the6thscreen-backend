@@ -1274,7 +1274,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		var successRead : Function = function (profil : Profil) {
 
 			var successLoad : Function = function () {
-				self.socket.emit("ConnectedClientOfProfil", self.formatResponse(true, ModelItf.completeArraySerialization(profil.connectedClients())));
+				self.socket.emit("ConnectedClientOfProfil", self.formatResponse(true, profil.serializeArray(profil.connectedClients())));
 			};
 
 			profil.loadConnectedClients(successLoad, fail);

@@ -45,13 +45,33 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var socketId : string = this.socket.id;
 		var c : Client = new Client(ip, socketId);
 		var success : Function = function () {
-			Logger.debug("Client save : "+c.toJSONObject());
+			Logger.debug("Client save : ");
+			Logger.debug(JSON.stringify(c));
+			Logger.debug("IP value "+ip);
 		};
 
 		var fail : Function = function () {
 			Logger.error("Error while creating the client : "+c.toJSONObject());
-		}
+		};
 		c.create(success, fail);
+	}
+
+	public onDisconnection() {
+		var socketId : string = this.socket.id;
+
+		var successDelete : Function = function () {
+			Logger.debug("Delete the client for socketId "+socketId);
+		};
+
+		var success : Function = function (client : Client) {
+			client.delete(successDelete, fail);
+		};
+
+		var fail : Function = function () {
+			Logger.error("Error while deleting the client for the following socketId: "+socketId);
+		};
+
+		Client.findOneBySocketId(socketId, success, fail);
 	}
 
 

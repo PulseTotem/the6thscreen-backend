@@ -192,8 +192,8 @@ class Client extends ModelItf {
 	toJSONObject() : Object {
 		var data = {
 			"id": this.getId(),
-			"IP": this.IP(),
-            "socketID": this.socketID(),
+			"ip": this.IP(),
+            "socketId": this.socketID(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
 			"updatedAt" : this.getUpdatedAt()
@@ -332,6 +332,18 @@ class Client extends ModelItf {
      */
     static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(Client, successCallback, failCallback, attemptNumber);
+    }
+
+    /**
+     * Find One Client by socketId.
+     *
+     * @method findOneBySocketId
+     * @param {string} socketId - The Client's socketId
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    static findOneBySocketId(socketId : string, successCallback : Function, failCallback : Function) {
+        return this.findOneBy(Client, "socketId", socketId, successCallback, failCallback);
     }
 
 	/**
