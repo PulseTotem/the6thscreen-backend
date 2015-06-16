@@ -379,7 +379,6 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage SendCallTypeDescription //////////////////////
 
-////////////////////// Begin: Manage SendCallTypeDescription //////////////////////
 
 	/**
 	 * Send command to refresh the client
@@ -391,7 +390,16 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		self.socket.emit("RefreshClient", self.formatResponse(true, ""));
 	}
 
-////////////////////// End: Manage SendCallTypeDescription //////////////////////
+	/**
+	 * Send command to identify the client
+	 */
+	identifyClient(clientId : string) {
+		// callTypeDescription : {"callTypeId" : string}
+		var self = this;
+
+		self.socket.emit("IdentifyClient", self.formatResponse(true, clientId.toString()));
+	}
+
 
 
 

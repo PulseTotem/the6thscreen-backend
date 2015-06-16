@@ -163,7 +163,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateParamValueDescription', function (paramValueDescription) { self.createParamValueDescription(paramValueDescription); });
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
 
+		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
+		this.addListenerToSocket('IdentifyCommand', function (clientDescription) { self.sendIdentifyCommandToClient(clientDescription); });
 
 	}
 
@@ -1309,7 +1311,12 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				self.socket.emit("AnswerRefreshCommand", self.formatResponse(true, ""));
 				nms['refreshClient']();
 			} else {
-				fail("Unable to retrieve namespace manager associated to client");
+				fail("Unable to retrieve namespace manager associated to client, this one will be deleted.");
+
+				var successDelete : Function = function () {
+					Logger.debug("Client successfully deleted.");
+				}
+				client.delete(successDelete, fail);
 			}
 		};
 
@@ -1317,6 +1324,42 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// Begin: Manage sendRefreshCommandToClient //////////////////////
+
+////////////////////// Begin: Manage sendIdentifyCommandToClient //////////////////////
+
+	sendIdentifyCommandToClient(clientIdDescription : any) {
+		// clientIdDescription : { "clientId": number }
+
+		var self = this;
+		var clientId = clientIdDescription.clientId;
+
+		var fail : Function = function (error) {
+			Logger.error("Error when identifying the client : "+clientId);
+			self.socket.emit("AnswerIdentifyCommand", self.formatResponse(false, error));
+		};
+
+		var successRead : Function = function (client : Client) {
+
+			var nms : NamespaceManager = self.server().retrieveNamespaceManagerFromSocketId(client.socketID());
+
+			if (nms !== undefined && nms['identifyClient'] !== undefined) {
+				Logger.debug("Send command to identify client : "+clientId);
+				self.socket.emit("AnswerIdentifyCommand", self.formatResponse(true, ""));
+				nms['identifyClient'](clientId);
+			} else {
+				fail("Unable to retrieve namespace manager associated to client, this one will be deleted.");
+
+				var successDelete : Function = function () {
+					Logger.debug("Client successfully deleted.");
+				}
+				client.delete(successDelete, fail);
+			}
+		};
+
+		Client.read(clientId, successRead, fail);
+	}
+
+////////////////////// Begin: Manage sendIdentifyCommandToClient //////////////////////
 
 
 }
