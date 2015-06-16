@@ -397,7 +397,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		// callTypeDescription : {"callTypeId" : string}
 		var self = this;
 
-		self.socket.emit("IdentifyClient", self.formatResponse(true, clientId));
+		self.socket.emit("IdentifyClient", self.formatResponse(true, clientId.toString()));
 	}
 
 
