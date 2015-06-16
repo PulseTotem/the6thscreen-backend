@@ -49,7 +49,7 @@ describe('Client', function(){
 
 	describe('#checkCompleteness', function() {
 		it('should specify the object is complete if a IP and an ID are given', function(done) {
-			var i = new Client("vlab", "", 324);
+			var i = new Client("::1", "", 324);
 			var success = function () {
 				assert.equal(i.isComplete(), true, "The Client is not considered as complete.");
 				done();
@@ -118,8 +118,8 @@ describe('Client', function(){
 		it('should create the right object', function() {
 			var json = {
 				"id": 42,
-				"IP": "toto",
-				"socketID": "bub",
+				"ip": "toto",
+				"socketId": "bub",
 				"complete": true
 			};
 
@@ -132,8 +132,8 @@ describe('Client', function(){
 		it('should create the right object even if it is partial', function() {
 			var json = {
 				"id": 42,
-				"IP": "",
-				"socketID": "toto",
+				"ip": "",
+				"socketId": "toto",
 				"complete": false
 			};
 
@@ -149,8 +149,8 @@ describe('Client', function(){
 			var date = new Date();
 			var c = new Client("toto", "tutu", 52);
 			var expected = {
-				"IP": "toto",
-				"socketID": "tutu",
+				"ip": "toto",
+				"socketId": "tutu",
 				"id": 52,
 				"complete": false,
 				"createdAt":null,

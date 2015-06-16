@@ -16,6 +16,14 @@
 
 class ClientsNamespaceManager extends ShareNamespaceManager {
 
+	/**
+	 * Client attribute of the ClientNameSpaceManager
+	 *
+	 * @property _client
+	 * @type Client
+	 */
+	private _client : Client;
+
     /**
      * Constructor.
      *
@@ -26,6 +34,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
         super(socket);
 
         var self = this;
+	    this._client = null;
 
         this.addListenerToSocket('RetrieveProfilDescription', function(description) { self.sendProfilDescription(description); });
         this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
@@ -41,37 +50,34 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
     }
 
 	private createClient() {
+		var self = this;
 		var ip : string = this.socket.request.connection.remoteAddress;
 		var socketId : string = this.socket.id;
-		var c : Client = new Client(ip, socketId);
+		this._client = new Client(ip, socketId);
 		var success : Function = function () {
 			Logger.debug("Client save : ");
-			Logger.debug(JSON.stringify(c));
-			Logger.debug("IP value "+ip);
+			Logger.debug(JSON.stringify(self._client.toJSONObject()));
 		};
 
 		var fail : Function = function () {
-			Logger.error("Error while creating the client : "+c.toJSONObject());
+			Logger.error("Error while creating the client : "+JSON.stringify(self._client.toJSONObject()));
 		};
-		c.create(success, fail);
+
+		this._client.create(success, fail);
 	}
 
 	public onDisconnection() {
-		var socketId : string = this.socket.id;
+		var self = this;
 
 		var successDelete : Function = function () {
-			Logger.debug("Delete the client for socketId "+socketId);
-		};
-
-		var success : Function = function (client : Client) {
-			client.delete(successDelete, fail);
+			Logger.debug("Delete the client for socketId "+self._client.socketID());
 		};
 
 		var fail : Function = function () {
-			Logger.error("Error while deleting the client for the following socketId: "+socketId);
+			Logger.error("Error while deleting the client for the following socketId: "+self._client.socketID());
 		};
 
-		Client.findOneBySocketId(socketId, success, fail);
+		this._client.delete(successDelete, fail);
 	}
 
 
@@ -158,7 +164,12 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 			sdi.theme().toCompleteJSONObject(successThemeCompleteDescription, fail);
 		};
 
+		var successLinkProfil : Function = function () {
+			Logger.debug("Link Client object with Profil successfully");
+		};
+
 		var successLoadAssoProfil = function () {
+			self._client.linkProfil(profil.getId(), successLinkProfil, fail);
 			sdi = profil.sdi();
 
 			sdiDesc = sdi.toJSONObject();

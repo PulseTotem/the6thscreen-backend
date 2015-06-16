@@ -367,7 +367,7 @@ class Client extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Client {
-		return new Client(jsonObject.IP, jsonObject.socketID, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new Client(jsonObject.ip, jsonObject.socketId, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**
