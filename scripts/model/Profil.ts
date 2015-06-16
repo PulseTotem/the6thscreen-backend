@@ -6,7 +6,8 @@
 /// <reference path="./Call.ts" />
 /// <reference path="./ZoneContent.ts" />
 /// <reference path="./SDI.ts" />
-
+/// <reference path="./AuthorizedClient.ts" />
+/// <reference path="./Client.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
@@ -65,6 +66,38 @@ class Profil extends ModelItf {
      */
     private _sdi_loaded : boolean;
 
+	/**
+	 * AuthorizedClients property.
+	 *
+	 * @property _authorizedClients
+	 * @type Array<AuthorizedClient>
+	 */
+	private _authorizedClients : Array<AuthorizedClient>;
+
+	/**
+	 * Lazy loading for authorizedClients property.
+	 *
+	 * @property _authorizedClients_loaded
+	 * @type boolean
+	 */
+	private _authorizedClients_loaded : boolean;
+
+	/**
+	 * ConnectedClients property
+	 *
+	 * @property _connectedClients
+	 * @type Array<Client>
+	 */
+	private _connectedClients : Array<Client>;
+
+	/**
+	 * Lazy loading for connectedClients property
+	 *
+	 * @property _connectedClients_loaded
+	 * @type boolean
+	 */
+	private _connectedClients_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -86,6 +119,12 @@ class Profil extends ModelItf {
 
 	    this._sdi = null;
 	    this._sdi_loaded = false;
+
+	    this._authorizedClients = new Array<AuthorizedClient>();
+	    this._authorizedClients_loaded = false;
+
+	    this._connectedClients = new Array<Client>();
+	    this._connectedClients_loaded = false;
     }
 
     /**
@@ -211,10 +250,94 @@ class Profil extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the Profil's authorizedClients.
+	 *
+	 * @method authorizedClients
+	 * @return {Array<AuthorizedClient>} The Profil's authorizedClients.
+	 */
+	authorizedClients() : Array<AuthorizedClient> {
+		return this._authorizedClients;
+	}
+
+	/**
+	 * Load the Profil's authorizedClients.
+	 *
+	 * @method loadAuthorizedClients
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadAuthorizedClients(successCallback : Function, failCallback : Function) {
+		if(! this._authorizedClients_loaded) {
+			var self = this;
+			var success : Function = function(authorizedClients) {
+				self._authorizedClients = authorizedClients;
+				self._authorizedClients_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getAssociatedObjects(Profil, AuthorizedClient, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
+	/**
+	 * Return the Profil's connectedClients.
+	 *
+	 * @method connectedClients
+	 * @return {Array<Client>} The Profil's connectedClients.
+	 */
+	connectedClients() : Array<Client> {
+		return this._connectedClients;
+	}
+
+	/**
+	 * Load the Profil's connectedClients.
+	 *
+	 * @method loadConnectedClients
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadConnectedClients(successCallback : Function, failCallback : Function) {
+		if(! this._connectedClients_loaded) {
+			var self = this;
+			var success : Function = function(connectedClients) {
+				self._connectedClients = connectedClients;
+				self._connectedClients_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getAssociatedObjects(Profil, Client, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Load all the lazy loading properties of the object.
+	 * Load all the lazy loading properties of the object except statuses
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations

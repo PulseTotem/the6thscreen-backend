@@ -12,8 +12,17 @@
 /// <reference path="../model/Zone.ts" />
 /// <reference path="../model/Call.ts" />
 /// <reference path="../model/CallType.ts" />
+/// <reference path="../model/Client.ts" />
 
 class ClientsNamespaceManager extends ShareNamespaceManager {
+
+	/**
+	 * Client attribute of the ClientNameSpaceManager
+	 *
+	 * @property _client
+	 * @type Client
+	 */
+	private _client : Client;
 
     /**
      * Constructor.
@@ -25,6 +34,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
         super(socket);
 
         var self = this;
+	    this._client = null;
 
         this.addListenerToSocket('RetrieveProfilDescription', function(description) { self.sendProfilDescription(description); });
         this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
@@ -35,7 +45,40 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 
 		this.addListenerToSocket('HashDescription', function(description) { self.manageHashDescription(description); });
+
+	    this.createClient();
     }
+
+	private createClient() {
+		var self = this;
+		var ip : string = this.socket.request.connection.remoteAddress;
+		var socketId : string = this.socket.id;
+		this._client = new Client(ip, socketId);
+		var success : Function = function () {
+			Logger.debug("Client save : ");
+			Logger.debug(JSON.stringify(self._client.toJSONObject()));
+		};
+
+		var fail : Function = function () {
+			Logger.error("Error while creating the client : "+JSON.stringify(self._client.toJSONObject()));
+		};
+
+		this._client.create(success, fail);
+	}
+
+	public onDisconnection() {
+		var self = this;
+
+		var successDelete : Function = function () {
+			Logger.debug("Delete the client for socketId "+self._client.socketID());
+		};
+
+		var fail : Function = function () {
+			Logger.error("Error while deleting the client for the following socketId: "+self._client.socketID());
+		};
+
+		this._client.delete(successDelete, fail);
+	}
 
 
 ////////////////////// Begin: Manage HashDescription //////////////////////
@@ -121,7 +164,12 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 			sdi.theme().toCompleteJSONObject(successThemeCompleteDescription, fail);
 		};
 
+		var successLinkProfil : Function = function () {
+			Logger.debug("Link Client object with Profil successfully");
+		};
+
 		var successLoadAssoProfil = function () {
+			self._client.linkProfil(profil.getId(), successLinkProfil, fail);
 			sdi = profil.sdi();
 
 			sdiDesc = sdi.toJSONObject();
@@ -328,6 +376,20 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
         self.sendObjectDescriptionFromId(CallType, callTypeId, "CallTypeDescription");
     }
+
+////////////////////// End: Manage SendCallTypeDescription //////////////////////
+
+////////////////////// Begin: Manage SendCallTypeDescription //////////////////////
+
+	/**
+	 * Send command to refresh the client
+	 */
+	refreshClient() {
+		// callTypeDescription : {"callTypeId" : string}
+		var self = this;
+
+		self.socket.emit("RefreshClient", self.formatResponse(true, ""));
+	}
 
 ////////////////////// End: Manage SendCallTypeDescription //////////////////////
 

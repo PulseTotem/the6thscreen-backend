@@ -7,6 +7,7 @@
 /// <reference path="./Zone.ts" />
 /// <reference path="./Profil.ts" />
 /// <reference path="./ThemeSDI.ts" />
+/// <reference path="./AuthorizedClient.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -107,6 +108,22 @@ class SDI extends ModelItf {
     private _theme_loaded : boolean;
 
     /**
+     * AuthorizedClients property
+     *
+     * @property _authorizedClients
+     * @type Array<AuthorizedClient>
+     */
+    private _authorizedClients : Array<AuthorizedClient>;
+
+    /**
+     * Lazy loading for authorizedClients property
+     *
+     * @property _authorizedClients_loaded
+     * @type boolean
+     */
+    private _authorizedClients_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -135,6 +152,9 @@ class SDI extends ModelItf {
 
         this._theme = null;
         this._theme_loaded = false;
+
+        this._authorizedClients = new Array<AuthorizedClient>();
+        this._authorizedClients_loaded = false;
     }
 
 	/**
@@ -355,10 +375,51 @@ class SDI extends ModelItf {
         }
     }
 
+    /**
+     * Return the SDI's authorized clients.
+     *
+     * @method authorizedClients
+     */
+    authorizedClients() {
+        return this._authorizedClients;
+    }
+
+    /**
+     * Load the SDI's authorizedClients.
+     *
+     * @method loadAuthorizedClients
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAuthorizedClients(successCallback : Function, failCallback : Function) {
+        if(! this._authorizedClients_loaded) {
+            var self = this;
+            var success : Function = function(authorizedClients) {
+                self._authorizedClients = authorizedClients;
+                self._authorizedClients_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(SDI, AuthorizedClient, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
-     * Load all the lazy loading properties of the object.
+     * Load all the lazy loading properties of the object except statuses.
      * Useful when you want to get a complete object.
      *
      * @method loadAssociations
