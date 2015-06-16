@@ -379,6 +379,20 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage SendCallTypeDescription //////////////////////
 
+////////////////////// Begin: Manage SendCallTypeDescription //////////////////////
+
+	/**
+	 * Send command to refresh the client
+	 */
+	refreshClient() {
+		// callTypeDescription : {"callTypeId" : string}
+		var self = this;
+
+		self.socket.emit("RefreshClient", self.formatResponse(true, ""));
+	}
+
+////////////////////// End: Manage SendCallTypeDescription //////////////////////
+
 
 
 }

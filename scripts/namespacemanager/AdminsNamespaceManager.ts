@@ -163,6 +163,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateParamValueDescription', function (paramValueDescription) { self.createParamValueDescription(paramValueDescription); });
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
 
+		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
+
 	}
 
 	/**
@@ -1282,6 +1284,39 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 		Profil.read(profilId, successRead, fail);
 	}
+
+////////////////////// End: Manage sendConnectedClients //////////////////////
+
+////////////////////// Begin: Manage sendRefreshCommandToClient //////////////////////
+
+	sendRefreshCommandToClient(clientIdDescription : any) {
+		// clientIdDescription : { "clientId": number }
+
+		var self = this;
+		var clientId = clientIdDescription.clientId;
+
+		var fail : Function = function (error) {
+			Logger.error("Error when refreshing the client : "+clientId);
+			self.socket.emit("AnswerRefreshCommand", self.formatResponse(false, error));
+		};
+
+		var successRead : Function = function (client : Client) {
+
+			var nms : NamespaceManager = self.server().retrieveNamespaceManagerFromSocketId(client.socketID());
+
+			if (nms !== undefined && nms['refreshClient'] !== undefined) {
+				Logger.debug("Send command to refresh client : "+clientId);
+				self.socket.emit("AnswerRefreshCommand", self.formatResponse(true, ""));
+				nms['refreshClient']();
+			} else {
+				fail("Unable to retrieve namespace manager associated to client");
+			}
+		};
+
+		Client.read(clientId, successRead, fail);
+	}
+
+////////////////////// Begin: Manage sendRefreshCommandToClient //////////////////////
 
 
 }
