@@ -35,12 +35,20 @@ class Source extends ModelItf {
     private _description : string;
 
 	/**
-	 * Methode property.
+	 * Method property.
 	 *
 	 * @property _method
 	 * @type string
 	 */
 	private _method : string;
+
+	/**
+	 * RefreshTime property.
+	 *
+	 * @property _refreshTime
+	 * @type number
+	 */
+	private _refreshTime : number;
 
 	/**
 	 * Service property
@@ -111,20 +119,20 @@ class Source extends ModelItf {
      *
      * @constructor
      * @param {string} name - The Source's name.
-     * @param {string} service - The Source's service.
      * @param {string} description - The Source's description.
-     * @param {string} host - The Source's host.
-     * @param {number} port - The Source's port.
-     * @param {number} id - The Source's ID.
+	 * @param {string} method - The Source's method.
+	 * @param {number} id - The Source's ID.
+     * @param {number} refreshTime - The Source's refreshTime.
 	 * @param {string} createdAt - The Source's createdAt.
 	 * @param {string} updatedAt - The Source's updatedAt.
      */
-    constructor(name : string = "", description : string = "", method : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", description : string = "", method : string = "", refreshTime : number = 60, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
 	    this.setMethod(method);
+		this.setRefreshTime(refreshTime);
 
 	    this._service = null;
 	    this._service_loaded = false;
@@ -167,6 +175,16 @@ class Source extends ModelItf {
 	}
 
 	/**
+	 * Set the Source's refreshTime.
+	 *
+	 * @method setRefreshTime
+	 * @param {number} refreshTime - New Source's refreshTime.
+	 */
+	setRefreshTime(refreshTime : number) {
+		this._refreshTime = refreshTime;
+	}
+
+	/**
      * Return the Source's name.
      *
      * @method name
@@ -191,6 +209,15 @@ class Source extends ModelItf {
 	 */
 	method() {
 		return this._method;
+	}
+
+	/**
+	 * Return the Source's refreshTime.
+	 *
+	 * @method refreshTime
+	 */
+	refreshTime() {
+		return this._refreshTime;
 	}
 
 	/**
@@ -421,6 +448,7 @@ class Source extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"method": this.method(),
+			"refreshTime": this.refreshTime(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
 			"updatedAt" : this.getUpdatedAt()
@@ -682,7 +710,7 @@ class Source extends ModelItf {
 	 * @return {Source} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Source {
-		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.refreshTime, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**
