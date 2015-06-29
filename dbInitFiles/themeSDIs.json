@@ -24,5 +24,18 @@
     "theme": {
       "name": "PsychoTheme"
     }
+  },
+  {
+    "name": "PandaPeroTheme",
+    "description": "CleanAndInit generated theme for PandaPero #3",
+    "defaultTheme": true,
+    "backgroundImageURL" : "http://www.the6thscreen.fr/pandaevents/pandapero3/pa15_background.png",
+    "backgroundColor": "#FFFFFF",
+    "opacity": "1",
+    "font": "20px Palatino, serif",
+    "color": "#000000",
+    "theme": {
+      "name": "PandaPeroTheme"
+    }
   }
 ]

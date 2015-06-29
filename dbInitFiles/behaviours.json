@@ -2,5 +2,9 @@
     {
         "name" : "AppearanceBehaviour",
         "description" : "Défilement des informations sans effet."
+    },
+    {
+      "name" : "SlickCarouselBehaviour",
+      "description" : "Défilement version carousel."
     }
 ]

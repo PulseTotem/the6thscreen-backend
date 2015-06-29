@@ -20,5 +20,16 @@
     "font": "14px arial, sans-serif",
     "color": "#000000",
     "border": "1px solid blue"
+  },
+  {
+    "name": "PandaPeroTheme",
+    "description": "CleanAndInit generated theme for PandaPero #3",
+    "defaultTheme": true,
+    "backgroundImageURL": "",
+    "backgroundColor": "#FFFFFF",
+    "opacity": "1",
+    "font": "14px arial, sans-serif",
+    "color": "#000000",
+    "border": "1px solid black"
   }
 ]
