@@ -23,10 +23,6 @@ class SourcesNamespaceManager extends ShareNamespaceManager {
         var self = this;
 
         this.addListenerToSocket('RetrieveCallDescription', function(description) { self.sendCallDescription(description); });
-        this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
-        this.addListenerToSocket('RetrieveSourceDescription', function(description) { self.sendSourceDescription(description); });
-        this.addListenerToSocket('RetrieveParamValueDescription', function(description) { self.sendParamValueDescription(description); });
-		this.addListenerToSocket('RetrieveOAuthKeyDescription', function(description) { self.sendOAuthKeyDescription(description); });
     }
 
 ////////////////////// Begin: Manage SendCallDescription //////////////////////
@@ -44,118 +40,49 @@ class SourcesNamespaceManager extends ShareNamespaceManager {
 
         var callId = callDescription.callId;
 
-        self.sendObjectDescriptionFromId(Call, callId, "CallDescription");
-    }
-
-////////////////////// End: Manage SendCallDescription //////////////////////
-
-////////////////////// Begin: Manage SendCallTypeDescription //////////////////////
-
-    /**
-     * Retrieve CallType instance description and send it to client.
-     *
-     * @method sendCallTypeDescription
-     * @param {any} callTypeDescription - The CallType Description
-     * @param {SourcesNamespaceManager} self - The SourcesNamespaceManager instance.
-     */
-    sendCallTypeDescription(callTypeDescription : any, self : SourcesNamespaceManager = null) {
-        // callTypeDescription : {"callTypeId" : string}
-        var self = this;
-
-        var callTypeId = callTypeDescription.callTypeId;
-
-        self.sendObjectDescriptionFromId(CallType, callTypeId, "CallTypeDescription");
-    }
-
-////////////////////// End: Manage SendCallTypeDescription //////////////////////
-
-////////////////////// Begin: Manage SendSourceDescription //////////////////////
-
-    /**
-     * Retrieve Source instance description and send it to sourcesServer.
-     *
-     * @method sendSourceDescription
-     * @param {any} sourceDescription - The Source Description.
-     * @param {SourcesNamespaceManager} self - The SourcesNamespaceManager instance.
-     */
-    sendSourceDescription(sourceDescription : any, self : SourcesNamespaceManager = null) {
-        // sourceDescription : {"sourceId" : string}
-        var self = this;
-
-        var sourceId = sourceDescription.sourceId;
-
-        self.sendObjectDescriptionFromId(Source, sourceId, "SourceDescription");
-    }
-
-////////////////////// End: Manage SendSourceDescription //////////////////////
-
-////////////////////// Begin: Manage SendParamValueDescription //////////////////////
-
-    /**
-     * Retrieve ParamValue instance description and send it to sourcesServer.
-     *
-     * @method sendParamValueDescription
-     * @param {any} paramValueDescription - The ParamValue Description.
-     * @param {SourcesNamespaceManager} self - The SourcesNamespaceManager instance.
-     */
-    sendParamValueDescription(paramValueDescription : any, self : SourcesNamespaceManager = null) {
-        // paramValueDescription : {"paramValueId" : string}
-        var self = this;
-
-        var paramValueId = paramValueDescription.paramValueId;
-
-        self.sendObjectDescriptionFromId(ParamValue, paramValueId, "ParamValueDescription");
-    }
-
-////////////////////// End: Manage SendParamValueDescription //////////////////////
-
-////////////////////// Begin: Manage SendOAuthKeyDescription //////////////////////
-
-	/**
-	 * Retrieve OAuthKey instance description and send it to sourcesServer.
-	 *
-	 * @method sendOAuthKeyDescription
-	 * @param {any} oauthKeyDescription - The OAuthKey Description.
-	 * @param {SourcesNamespaceManager} self - The SourcesNamespaceManager instance.
-	 */
-	sendOAuthKeyDescription(oauthKeyDescription : any, self : SourcesNamespaceManager = null) {
-		// oauthKeyDescription : {"userId" : string, "serviceId" : string}
-		var self = this;
-
-		var fail = function(error) {
-			self.socket.emit("OAuthKeyDescription", self.formatResponse(false, error));
+		var fail : Function = function(error) {
+			self.socket.emit("CallDescription", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendCallDescription : send done with fail status for Object with Id : " + callId);
 		};
 
-		var successUser = function(user) {
+		var successRead : Function = function(call : Call) {
 
-			var successUserComplete = function(userComplete) {
-				var serviceId = oauthKeyDescription.serviceId;
+			var successCallComplete : Function = function(callCompleteDesc) {
+				var callDesc = callCompleteDesc;
 
-				userComplete.oauthkeys.forEach(function(oauthKeyJSON) {
+				var successCallTypeComplete : Function = function(callTypeCompleteDesc) {
+					callDesc["callType"] = callTypeCompleteDesc;
 
-					var successOAuthKey = function(oauthKey) {
-						var successOAuthKeyComplete = function(oauthKeyComplete) {
-							if(oauthKeyComplete.service.id == serviceId) {
-								self.socket.emit("OAuthKeyDescription", self.formatResponse(true, oauthKeyComplete));
+					var successSourceComplete : Function = function(sourceCompleteDesc) {
+						callDesc["callType"]["source"] = sourceCompleteDesc;
+
+						callDesc["paramValues"] = [];
+
+						var successParamValueComplete = function(paramValueComplete) {
+							callDesc["paramValues"].push(paramValueComplete);
+
+							if(callDesc["paramValues"].length == call.paramValues().length) {
+								self.socket.emit("CallDescription", self.formatResponse(true, callDesc));
 							}
 						};
 
-						oauthKey.toCompleteJSONObject(successOAuthKeyComplete, fail);
+						call.paramValues().forEach(function(paramValue : ParamValue) {
+							paramValue.toCompleteJSONObject(successParamValueComplete, fail);
+						});
 					};
 
-					OAuthKey.read(oauthKeyJSON.id, successOAuthKey, fail);
+					call.callType().source().toCompleteJSONObject(successSourceComplete, fail);
+				};
 
-				});
-			};
+				call.callType().toCompleteJSONObject(successCallTypeComplete, fail);
+			}
 
-			user.toCompleteJSONObject(successUserComplete, fail);
+			call.toCompleteJSONObject(successCallComplete, fail);
 		};
 
-		var userId = oauthKeyDescription.userId;
+		Call.read(callId, successRead, fail);
+    }
 
-		User.read(userId, successUser, fail);
-	}
-
-////////////////////// End: Manage SendOAuthKeyDescription //////////////////////
+////////////////////// End: Manage SendCallDescription //////////////////////
 
 }

@@ -12,7 +12,7 @@ then
   exit 1
 fi
 
-heroku login
+#heroku login
 grunt heroku
 current=$(pwd)
 herokuDir="$current-heroku"
@@ -28,7 +28,7 @@ commitMess=`date +"%D %T"`
 git add .
 git commit -m "v $commitMess"
 heroku config:set NPM_CONFIG_PRODUCTION=false
-heroku config:set T6S_DATABASE_HOST=t6s-database.herokuapp.com
+heroku config:set T6S_DATABASE_HOST=t6s-database-test.herokuapp.com
 heroku config:set T6S_JWT_SECRET=$2
 git push heroku master
 heroku ps:scale web=1
