@@ -50,6 +50,14 @@ class Source extends ModelItf {
 	 */
 	private _refreshTime : number;
 
+    /**
+     * IsStatic property.
+     *
+     * @property _isStatic
+     * @type boolean
+     */
+    private _isStatic : boolean;
+
 	/**
 	 * Service property
 	 *
@@ -126,13 +134,14 @@ class Source extends ModelItf {
 	 * @param {string} createdAt - The Source's createdAt.
 	 * @param {string} updatedAt - The Source's updatedAt.
      */
-    constructor(name : string = "", description : string = "", method : string = "", refreshTime : number = 60, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", description : string = "", method : string = "", refreshTime : number = 60, isStatic : boolean = false, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
 	    this.setMethod(method);
 		this.setRefreshTime(refreshTime);
+        this.setIsStatic(isStatic);
 
 	    this._service = null;
 	    this._service_loaded = false;
@@ -184,6 +193,16 @@ class Source extends ModelItf {
 		this._refreshTime = refreshTime;
 	}
 
+    /**
+     * Set the Source's isStatic property
+     *
+     * @method setIsStatic
+     * @param isStatic
+     */
+    setIsStatic(isStatic : boolean) {
+        this._isStatic = isStatic;
+    }
+
 	/**
      * Return the Source's name.
      *
@@ -228,6 +247,15 @@ class Source extends ModelItf {
 	service() {
 		return this._service;
 	}
+
+    /**
+     * Return the source's isStatic property
+     *
+     * @returns {boolean}
+     */
+    isStatic() {
+        return this._isStatic;
+    }
 
 	/**
 	 * Load the Source's service.
@@ -448,6 +476,7 @@ class Source extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"method": this.method(),
+            "isStatic": this.isStatic(),
 			"refreshTime": this.refreshTime(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
@@ -472,7 +501,11 @@ class Source extends ModelItf {
 
 				var success:Function = function () {
 					if (self._info_type_loaded && self._service_loaded) {
-						self._complete = (!!self.infoType() && self.infoType().isComplete() && !!self.service() && self.service().isComplete());
+						self._complete = (!!self.infoType() && self.infoType().isComplete());
+                        if (!self.isStatic()) {
+                           self._complete = self._complete && !!self.service() && self.service().isComplete();
+                        }
+
 						successCallback();
 					}
 				};
@@ -710,7 +743,7 @@ class Source extends ModelItf {
 	 * @return {Source} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Source {
-		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.refreshTime, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.refreshTime, jsonObject.isStatic, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**
