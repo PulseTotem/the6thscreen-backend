@@ -49,6 +49,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 	    this.createClient();
     }
 
+
 	private createClient() {
 		var self = this;
 		var ip : string = this.socket.request.connection.remoteAddress;

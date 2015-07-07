@@ -5,7 +5,6 @@
 
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Zone.ts" />
-/// <reference path="./Widget.ts" />
 /// <reference path="./AbsoluteTimeline.ts" />
 /// <reference path="./RelativeTimeline.ts" />
 
@@ -50,22 +49,6 @@ class ZoneContent extends ModelItf {
 	 * @type boolean
 	 */
 	private _zone_loaded : boolean;
-
-	/**
-	 * Widget property
-	 *
-	 * @property _widget
-	 * @type Widget
-	 */
-	private _widget : Widget;
-
-	/**
-	 * Lazy loading for Widget property
-	 *
-	 * @property _widget_loaded
-	 * @type boolean
-	 */
-	private _widget_loaded : boolean;
 
 	/**
 	 * AbsoluteTimeline property
@@ -133,9 +116,6 @@ class ZoneContent extends ModelItf {
 
 	    this._zone = null;
 	    this._zone_loaded = false;
-
-	    this._widget = null;
-	    this._widget_loaded = false;
 
 	    this._absoluteTimeline = null;
 	    this._absoluteTimeline_loaded = false;
@@ -225,49 +205,6 @@ class ZoneContent extends ModelItf {
             }
         }
     }
-
-	/**
-	 * Return the ZoneContent's widget.
-	 *
-	 * @method widget
-	 */
-	widget() {
-		return this._widget;
-	}
-
-	/**
-	 * Load the ZoneContent's widget.
-	 *
-	 * @method loadWidget
-	 * @param {Function} successCallback - The callback function when success.
-	 * @param {Function} failCallback - The callback function when fail.
-	 */
-	loadWidget(successCallback : Function, failCallback : Function) {
-		if(! this._widget_loaded) {
-			var self = this;
-			var success : Function = function(widget) {
-				if(!!widget) {
-					self._widget = widget;
-				}
-				self._widget_loaded = true;
-				if(successCallback != null) {
-					successCallback();
-				}
-			};
-
-			var fail : Function = function(error) {
-				if(failCallback != null) {
-					failCallback(error);
-				}
-			};
-
-			this.getUniquelyAssociatedObject(ZoneContent, Widget, success, fail);
-		} else {
-			if(successCallback != null) {
-				successCallback();
-			}
-		}
-	}
 
 	/**
 	 * Return the ZoneContent's absoluteTimeline.
@@ -410,7 +347,7 @@ class ZoneContent extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._absoluteTimeline_loaded && self._relativeTimeline_loaded && self._widget_loaded && self._zone_loaded && self._profils_loaded) {
+            if(self._absoluteTimeline_loaded && self._relativeTimeline_loaded && self._zone_loaded && self._profils_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -427,7 +364,6 @@ class ZoneContent extends ModelItf {
 
         this.loadAbsoluteTimeline(success, fail);
         this.loadRelativeTimeline(success, fail);
-        this.loadWidget(success, fail);
         this.loadZone(success, fail);
 		this.loadProfils(success, fail);
     }
@@ -440,7 +376,6 @@ class ZoneContent extends ModelItf {
 	desynchronize() : void {
 		this._absoluteTimeline_loaded = false;
 		this._relativeTimeline_loaded = false;
-		this._widget_loaded = false;
 		this._zone_loaded = false;
 		this._profils_loaded = false;
 	}
@@ -476,11 +411,9 @@ class ZoneContent extends ModelItf {
 		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 				var success:Function = function () {
-					if (self._zone_loaded && self._widget_loaded && self._absoluteTimeline_loaded && self._relativeTimeline_loaded) {
+					if (self._zone_loaded && self._absoluteTimeline_loaded && self._relativeTimeline_loaded) {
 						var link : ModelItf = null;
-						if (!!self.widget()) {
-							link = self.widget();
-						} else if (!!self.absoluteTimeline()) {
+						if (!!self.absoluteTimeline()) {
 							link = self.absoluteTimeline();
 						} else if (!!self.relativeTimeline()) {
 							link = self.relativeTimeline();
@@ -500,7 +433,6 @@ class ZoneContent extends ModelItf {
 				self.loadZone(success, fail);
 				self.loadAbsoluteTimeline(success, fail);
 				self.loadRelativeTimeline(success, fail);
-				self.loadWidget(success, fail);
 			} else {
 				self._complete = false;
 				successCallback();
@@ -524,12 +456,10 @@ class ZoneContent extends ModelItf {
             var data = self.toJSONObject();
 	        if (onlyId) {
 		        data["zone"] = (self.zone() !== null) ? self.zone().getId() : null;
-		        data["widget"] = (self.widget() !== null) ? self.widget().getId() : null;
 		        data["absoluteTimeline"] = (self.absoluteTimeline() !== null) ? self.absoluteTimeline().getId() : null;
 		        data["relativeTimeline"] = (self.relativeTimeline() !== null) ? self.relativeTimeline().getId() : null;
 	        } else {
 		        data["zone"] = (self.zone() !== null) ? self.zone().toJSONObject() : null;
-		        data["widget"] = (self.widget() !== null) ? self.widget().toJSONObject() : null;
 		        data["absoluteTimeline"] = (self.absoluteTimeline() !== null) ? self.absoluteTimeline().toJSONObject() : null;
 		        data["relativeTimeline"] = (self.relativeTimeline() !== null) ? self.relativeTimeline().toJSONObject() : null;
 	        }
@@ -567,32 +497,6 @@ class ZoneContent extends ModelItf {
 	 */
 	unlinkZone(zoneID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(ZoneContent, Zone, zoneID, successCallback, failCallback);
-	}
-
-	/**
-	 * Set the Widget of the ZoneContent.
-	 *
-	 * @method linkWidget
-	 * @param {number} widgetID The widget ID of the widget to associate with the ZoneContent.
-	 * @param {Function} successCallback - The callback function when success.
-	 * @param {Function} failCallback - The callback function when fail.
-	 */
-	linkWidget(widgetID : number, successCallback : Function, failCallback : Function) {
-		if (this.isComplete()) {
-			throw new ModelException("This ZoneContent is already complete ! You cannot link a widget.");
-		}
-		this.associateObject(ZoneContent, Widget, widgetID, successCallback, failCallback);
-	}
-
-	/**
-	 * Unset the current Widget from the ZoneContent.
-	 *
-	 * @method unlinkWidget
-	 * @param {Function} successCallback - The callback function when success.
-	 * @param {Function} failCallback - The callback function when fail.
-	 */
-	unlinkWidget(widgetID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(ZoneContent, Widget, widgetID, successCallback, failCallback);
 	}
 
 	/**
