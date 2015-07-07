@@ -32,14 +32,26 @@ describe('Source', function() {
 			assert.equal(c.method(), method, "The method is not stored correctly.");
 		});
 
+		it('should store the refresh time', function () {
+			var refreshTime = 34;
+			var c = new Source("", "", "", refreshTime);
+			assert.equal(c.refreshTime(), refreshTime, "The refreshTime is not stored correctly.");
+		});
+
+		it('should store the isStatic value', function () {
+			var isStatic = true;
+			var c = new Source("", "", "", 0, isStatic);
+			assert.equal(c.isStatic(), isStatic, "The isStatic is not stored correctly.");
+		});
+
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Source("", "", "", id);
+			var c = new Source("", "", "", 12, true, id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete value', function () {
-			var c = new Source("a", "v", "c", 234, true);
+			var c = new Source("a", "v", "c", 12, true, 234, true);
 			assert.equal(c.isComplete(), true, "The complete value is not stored.");
 		});
 
@@ -56,11 +68,13 @@ describe('Source', function() {
 				"name": "machin",
 				"description": "desc",
 				"method": "method",
+				"refreshTime": 42,
+				"isStatic": true,
 				"complete": true
 			};
 
 			var userRetrieve = Source.fromJSONObject(json);
-			var userExpected = new Source("machin", "desc", "method", 28, true);
+			var userExpected = new Source("machin", "desc", "method", 42, true, 28, true);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
@@ -71,11 +85,13 @@ describe('Source', function() {
 				"name": null,
 				"description": "desc",
 				"method": "",
+				"refreshTime": 10,
+				"isStatic": false,
 				"complete": false
 			};
 
 			var userRetrieve = Source.fromJSONObject(json);
-			var userExpected = new Source(null, "desc", "", 28, false);
+			var userExpected = new Source(null, "desc", "", 10, false, 28, false);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
@@ -83,13 +99,15 @@ describe('Source', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Source("machin", "desc", "method", 28, true);
+			var c = new Source("machin", "desc", "method", 32, true, 28, true);
 			var expected = {
 				"id": 28,
 				"name": "machin",
 				"description": "desc",
 				"method": "method",
 				"complete": true,
+				"refreshTime": 32,
+				"isStatic": true,
 				"createdAt":null,
 				"updatedAt":null
 			};
@@ -101,7 +119,7 @@ describe('Source', function() {
 
 	describe('#checkCompleteness', function() {
 		it('should consider the object as complete if it has an ID, a name, a method, a complete infotype and a complete service', function(done) {
-			var cpt = new Source("machin", null, "method", 28);
+			var cpt = new Source("machin", null, "method", 42, false, 28);
 
 			var response : SequelizeRestfulResponse = {
 				"status": "success",
@@ -135,7 +153,7 @@ describe('Source', function() {
 		});
 
 		it('should not consider the object as complete if it has an ID, a name, a method, a complete service and an infotype which is not complete itself', function(done) {
-			var cpt = new Source("machin", null, "method", 28);
+			var cpt = new Source("machin", null, "method", 42, false, 28);
 
 			var response : SequelizeRestfulResponse = {
 				"status": "success",
@@ -178,7 +196,7 @@ describe('Source', function() {
 		});
 
 		it('should not consider the object as complete if it has an ID, a name, a method, a complete infotype and a service which is not complete itself', function(done) {
-			var cpt = new Source("machin", null, "method", 28);
+			var cpt = new Source("machin", null, "method", 42, false, 28);
 
 			var response : SequelizeRestfulResponse = {
 				"status": "success",
@@ -223,7 +241,7 @@ describe('Source', function() {
 		it('should not consider the object as complete if it has no id', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new Source("machin", null, "method");
+			var cpt = new Source("machin", null, "method", 43, false);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -240,7 +258,7 @@ describe('Source', function() {
 		it('should not consider the object as complete if it has an empty name', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new Source("", null, "method", 28);
+			var cpt = new Source("", null, "method", 43, false, 28);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -257,7 +275,7 @@ describe('Source', function() {
 		it('should not consider the object as complete if it has a null name', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new Source(null, null, "method", 28);
+			var cpt = new Source(null, null, "method", 43, false, 28);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -274,7 +292,7 @@ describe('Source', function() {
 		it('should not consider the object as complete if it has an empty method', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new Source("test", null, "", 28);
+			var cpt = new Source("test", null, "", 43, false, 28);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -291,7 +309,7 @@ describe('Source', function() {
 		it('should not consider the object as complete if it has a null method', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new Source("test", null, null, 28);
+			var cpt = new Source("test", null, null, 43, false, 28);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -325,7 +343,7 @@ describe('Source', function() {
 
 	describe('#linkService', function () {
 		it('should call the right request', function (done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var s = new Service("toto", "machin", "blabla", true, "provider", "", 42);
 
 			var response1:SequelizeRestfulResponse = {
@@ -375,7 +393,7 @@ describe('Source', function() {
 
 	describe('#unlinkService', function () {
 		it('should call the right request', function (done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var response1:SequelizeRestfulResponse = {
@@ -426,7 +444,7 @@ describe('Source', function() {
 
 	describe('#linkInfoType', function () {
 		it('should call the right request', function (done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var s = new InfoType("toto", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
@@ -477,7 +495,7 @@ describe('Source', function() {
 
 	describe('#unlinkInfoType', function () {
 		it('should call the right request', function (done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var s = new InfoType("toto", 42);
 
 			var response1:SequelizeRestfulResponse = {
@@ -529,7 +547,7 @@ describe('Source', function() {
 
 	describe('#addParamType', function() {
 		it('should call the right request', function(done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var pv = new ParamType("mavaleur", "toto", 12);
 			var spy = sinon.spy(pv, "desynchronize");
 
@@ -581,7 +599,7 @@ describe('Source', function() {
 
 	describe('#removeParamType', function() {
 		it('should call the right request', function(done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var pv = new ParamType("mavaleur", "machin", 12);
 
 			var response1 : SequelizeRestfulResponse = {
@@ -640,7 +658,7 @@ describe('Source', function() {
 
     describe('#addParamValue', function() {
         it('should call the right request', function(done) {
-	        var c = new Source("machin", "desc", "method", 28);
+	        var c = new Source("machin", "desc", "method", 43, false, 28);
             var pv = new ParamValue("mavaleur",12);
             var spy = sinon.spy(pv, "desynchronize");
 
@@ -690,7 +708,7 @@ describe('Source', function() {
 
 	describe('#removeParamValue', function() {
 		it('should call the right request', function(done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var pv = new ParamValue("mavaleur", 12);
 
 			var reponse1 : SequelizeRestfulResponse = {
@@ -748,7 +766,7 @@ describe('Source', function() {
 
 	describe('#updateAttribute', function () {
 		it('should update the service when asking but not the object as it remains not complete', function (done) {
-			var model = new Source("toto", "bla", "method", 12);
+			var model = new Source("toto", "bla", "method", 43, false, 12);
 			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var newInfo = {
@@ -804,8 +822,8 @@ describe('Source', function() {
 		});
 
 		it('should update the source to link a service when asking and update the source if it becomes complete', function (done) {
-			var model = new Source("toto", "bla", "method", 12);
-			var modelUpdated = new Source("toto", "bla", "method", 12, true);
+			var model = new Source("toto", "bla", "method", 43, false, 12);
+			var modelUpdated = new Source("toto", "bla", "method", 43, false, 12, true);
 			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var newInfo = {
@@ -871,7 +889,7 @@ describe('Source', function() {
 		});
 
 		it('should update the source to unlink a service when asking and do not update the source', function (done) {
-			var model = new Source("toto", "bla", "method", 12);
+			var model = new Source("toto", "bla", "method", 43, false, 12);
 			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var newInfo = {
@@ -928,7 +946,7 @@ describe('Source', function() {
 		});
 
 		it('should launch an exception if the information method does not exist', function (done) {
-			var model = new Source("toto", "bla", "method", 12);
+			var model = new Source("toto", "bla", "method", 43, false, 12);
 
 			var responseReadSource : SequelizeRestfulResponse = {
 				"status": "success",
@@ -963,7 +981,7 @@ describe('Source', function() {
 		});
 
 		it('should update the source to add a ParamType when asking', function (done) {
-			var model = new Source("toto", "bla", "method", 12);
+			var model = new Source("toto", "bla", "method", 43, false, 12);
 			var s = new ParamType("toto", "machin", 42);
 
 			var newInfo = {

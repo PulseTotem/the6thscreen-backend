@@ -397,7 +397,7 @@ describe('CallType', function(){
 	describe('#linkSource', function() {
 		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi", 42);
+			var s = new Source("toto", "machin","titi", 12, false, 42);
 			var spy = sinon.spy(s, "desynchronize");
 
 			var response1 : SequelizeRestfulResponse = {
@@ -448,7 +448,7 @@ describe('CallType', function(){
 	describe('#unlinkSource', function() {
 		it('should  call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
-			var s = new Source("toto", "machin","titi", 42);
+			var s = new Source("toto", "machin","titi", 12, false, 42);
 
 			var response1 : SequelizeRestfulResponse = {
 				"status": "success",
