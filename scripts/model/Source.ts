@@ -497,13 +497,13 @@ class Source extends ModelItf {
 		var self = this;
 
 		var success : Function = function () {
-			if (self.isComplete() && !!self.name() && !!self.method()) {
+			if (self.isComplete() && !!self.name()) {
 
 				var success:Function = function () {
 					if (self._info_type_loaded && self._service_loaded) {
-						self._complete = (!!self.infoType() && self.infoType().isComplete());
+						self._complete = (!!self.infoType() && self.infoType().isComplete()) ;
                         if (!self.isStatic()) {
-                           self._complete = self._complete && !!self.service() && self.service().isComplete();
+                           self._complete = self._complete && !!self.service() && self.service().isComplete() && !!self.method();
                         }
 
 						successCallback();
