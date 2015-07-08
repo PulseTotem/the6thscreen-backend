@@ -216,22 +216,71 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 								var callDesc = call.toJSONObject();
 
 								var successCallLoadAsso = function () {
-									callDesc["callType"] = {
-										"id": call.callType().getId()
-									};
 
-									relEvDesc["call"] = callDesc;
-									zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
-									nbRelEv++;
+									var successCallTypeLoadAsso = function () {
+										callDesc["callType"] = {
+											"id": call.callType().getId()
+										};
 
-									if (nbRelEv == relativeEvents.length) {
-										profilDesc["zoneContents"].push(zcDesc);
-										nbZC++;
+										if(call.callType().source().isStatic()) {
+											callDesc["paramValues"] = [];
 
-										if (nbZC == zoneContents.length) {
-											self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+											var successParamValueComplete = function(paramValueComplete) {
+												callDesc["paramValues"].push(paramValueComplete);
+
+												if(callDesc["paramValues"].length == call.paramValues().length) {
+
+													relEvDesc["call"] = callDesc;
+													zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+													nbRelEv++;
+
+													if (nbRelEv == relativeEvents.length) {
+														profilDesc["zoneContents"].push(zcDesc);
+														nbZC++;
+
+														if (nbZC == zoneContents.length) {
+															self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+														}
+													}
+
+												}
+											};
+
+											if(call.paramValues().length > 0) {
+												call.paramValues().forEach(function (paramValue:ParamValue) {
+													paramValue.toCompleteJSONObject(successParamValueComplete, fail);
+												});
+											} else {
+												relEvDesc["call"] = callDesc;
+												zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+												nbRelEv++;
+
+												if (nbRelEv == relativeEvents.length) {
+													profilDesc["zoneContents"].push(zcDesc);
+													nbZC++;
+
+													if (nbZC == zoneContents.length) {
+														self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+													}
+												}
+											}
+										} else {
+											relEvDesc["call"] = callDesc;
+											zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+											nbRelEv++;
+
+											if (nbRelEv == relativeEvents.length) {
+												profilDesc["zoneContents"].push(zcDesc);
+												nbZC++;
+
+												if (nbZC == zoneContents.length) {
+													self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+												}
+											}
 										}
 									}
+
+									call.callType().loadAssociations(successCallTypeLoadAsso, fail);
 								};
 
 								call.loadAssociations(successCallLoadAsso, fail);
