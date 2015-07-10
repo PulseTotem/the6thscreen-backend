@@ -66,9 +66,14 @@ class SourcesNamespaceManager extends ShareNamespaceManager {
 							}
 						};
 
-						call.paramValues().forEach(function(paramValue : ParamValue) {
-							paramValue.toCompleteJSONObject(successParamValueComplete, fail);
-						});
+
+						if(call.paramValues().length > 0) {
+							call.paramValues().forEach(function (paramValue:ParamValue) {
+								paramValue.toCompleteJSONObject(successParamValueComplete, fail);
+							});
+						} else {
+							self.socket.emit("CallDescription", self.formatResponse(true, callDesc));
+						}
 					};
 
 					call.callType().source().toCompleteJSONObject(successSourceComplete, fail);
