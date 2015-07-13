@@ -184,68 +184,127 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 			var zoneContents : Array<ZoneContent> = profil.zoneContents();
 			var nbZC = 0;
 
-			zoneContents.forEach(function (zoneContent) {
-				var zcDesc = zoneContent.toJSONObject();
+			if(zoneContents.length > 0) {
+
+				zoneContents.forEach(function (zoneContent) {
+					var zcDesc = zoneContent.toJSONObject();
 
 
-				var successZCLoadAsso = function () {
-					zcDesc["zone"] = zoneContent.zone().toJSONObject();
-					zcDesc["widget"] = null;
-					zcDesc["absoluteTimeline"] = null;
+					var successZCLoadAsso = function () {
+						zcDesc["zone"] = zoneContent.zone().toJSONObject();
+						zcDesc["widget"] = null;
+						zcDesc["absoluteTimeline"] = null;
 
-					var relativeTL : RelativeTimeline = zoneContent.relativeTimeline();
+						var relativeTL:RelativeTimeline = zoneContent.relativeTimeline();
 
-					zcDesc["relativeTimeline"] = relativeTL.toJSONObject();
-					zcDesc["relativeTimeline"]["relativeEvents"] = [];
+						zcDesc["relativeTimeline"] = relativeTL.toJSONObject();
+						zcDesc["relativeTimeline"]["relativeEvents"] = [];
 
-					var successRelativeTLLoadAsso = function () {
-						zcDesc["relativeTimeline"]["timelineRunner"] = relativeTL.timelineRunner().toJSONObject();
-						zcDesc["relativeTimeline"]["systemTrigger"] = relativeTL.systemTrigger().toJSONObject();
-						zcDesc["relativeTimeline"]["userTrigger"] = relativeTL.userTrigger().toJSONObject();
+						var successRelativeTLLoadAsso = function () {
+							zcDesc["relativeTimeline"]["timelineRunner"] = relativeTL.timelineRunner().toJSONObject();
+							zcDesc["relativeTimeline"]["systemTrigger"] = relativeTL.systemTrigger().toJSONObject();
+							zcDesc["relativeTimeline"]["userTrigger"] = relativeTL.userTrigger().toJSONObject();
 
-						var relativeEvents : Array<RelativeEvent> = relativeTL.relativeEvents();
+							var relativeEvents:Array<RelativeEvent> = relativeTL.relativeEvents();
 
-						var nbRelEv = 0;
-						relativeEvents.forEach(function (relativeEvent) {
+							var nbRelEv = 0;
 
-							var relEvDesc = relativeEvent.toJSONObject();
+							if (relativeEvents.length > 0) {
 
-							var successRelativeEventLoadAsso = function () {
-								var call : Call = relativeEvent.call();
+								relativeEvents.forEach(function (relativeEvent) {
 
-								var callDesc = call.toJSONObject();
+									var relEvDesc = relativeEvent.toJSONObject();
 
-								var successCallLoadAsso = function () {
-									callDesc["callType"] = {
-										"id": call.callType().getId()
+									var successRelativeEventLoadAsso = function () {
+										var call:Call = relativeEvent.call();
+
+										var callDesc = call.toJSONObject();
+
+										var successCallLoadAsso = function () {
+
+											var successCallTypeLoadAsso = function () {
+												callDesc["callType"] = {
+													"id": call.callType().getId()
+												};
+
+												if (call.callType().source().isStatic()) {
+													callDesc["paramValues"] = [];
+
+													if (call.paramValues().length > 0) {
+														var successParamValueComplete = function (paramValueComplete) {
+															callDesc["paramValues"].push(paramValueComplete);
+
+															if (callDesc["paramValues"].length == call.paramValues().length) {
+
+																relEvDesc["call"] = callDesc;
+																zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+																nbRelEv++;
+
+																if (nbRelEv == relativeEvents.length) {
+																	profilDesc["zoneContents"].push(zcDesc);
+																	nbZC++;
+
+																	if (nbZC == zoneContents.length) {
+																		self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+																	}
+																}
+															}
+														};
+
+														call.paramValues().forEach(function (paramValue:ParamValue) {
+															paramValue.toCompleteJSONObject(successParamValueComplete, fail);
+														});
+													} else {
+														relEvDesc["call"] = callDesc;
+														zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+														nbRelEv++;
+
+														if (nbRelEv == relativeEvents.length) {
+															profilDesc["zoneContents"].push(zcDesc);
+															nbZC++;
+
+															if (nbZC == zoneContents.length) {
+																self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+															}
+														}
+													}
+												} else {
+													relEvDesc["call"] = callDesc;
+													zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+													nbRelEv++;
+
+													if (nbRelEv == relativeEvents.length) {
+														profilDesc["zoneContents"].push(zcDesc);
+														nbZC++;
+
+														if (nbZC == zoneContents.length) {
+															self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+														}
+													}
+												}
+											};
+
+											call.callType().loadAssociations(successCallTypeLoadAsso, fail);
+										};
+
+										call.loadAssociations(successCallLoadAsso, fail);
 									};
 
-									relEvDesc["call"] = callDesc;
-									zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
-									nbRelEv++;
-
-									if (nbRelEv == relativeEvents.length) {
-										profilDesc["zoneContents"].push(zcDesc);
-										nbZC++;
-
-										if (nbZC == zoneContents.length) {
-											self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
-										}
-									}
-								};
-
-								call.loadAssociations(successCallLoadAsso, fail);
+									relativeEvent.loadAssociations(successRelativeEventLoadAsso, fail);
+								});
+							} else {
+								fail(new Error("RelativeTimeline have NO events !"));
 							}
+						};
 
-							relativeEvent.loadAssociations(successRelativeEventLoadAsso, fail);
-						});
+						relativeTL.loadAssociations(successRelativeTLLoadAsso, fail);
 					};
 
-					relativeTL.loadAssociations(successRelativeTLLoadAsso, fail);
-				};
-
-				zoneContent.loadAssociations(successZCLoadAsso, fail);
-			});
+					zoneContent.loadAssociations(successZCLoadAsso, fail);
+				});
+			} else {
+				fail(new Error("Profil has NO ZoneContent !"));
+			}
 		};
 
 		var successReadProfil = function (pro : Profil) {
