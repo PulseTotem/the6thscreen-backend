@@ -7,6 +7,7 @@
 /// <reference path="./ParamType.ts" />
 /// <reference path="./ParamValue.ts" />
 /// <reference path="./Service.ts" />
+/// <reference path="./CallType.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -123,6 +124,22 @@ class Source extends ModelItf {
     private _param_values_loaded : boolean;
 
     /**
+     * CallTypes property
+     *
+     * @property _call_types
+     * @type Array<CallType>
+     */
+    private _call_types : Array<CallType>;
+
+    /**
+     * Lazy loading for CallType property
+     *
+     * @property _call_types_loaded
+     * @type boolean
+     */
+    private _call_types_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -154,6 +171,9 @@ class Source extends ModelItf {
 
         this._param_values = new Array<ParamValue>();
         this._param_values_loaded = false;
+
+        this._call_types = new Array<CallType>();
+        this._call_types_loaded = false;
     }
 
 	/**
@@ -416,6 +436,46 @@ class Source extends ModelItf {
         }
     }
 
+    /**
+     * Return the Source's callTypes
+     *
+     * @method callTypes
+     * @returns {Array<CallType>}
+     */
+    callTypes() {
+        return this._call_types;
+    }
+
+    /**
+     * Load the source's callTypes
+     * @param successCallback
+     * @param failCallback
+     */
+    loadCallTypes(successCallback : Function, failCallback : Function) {
+        if(! this._call_types_loaded) {
+            var self = this;
+            var success : Function = function(callTypes) {
+                self._call_types = callTypes;
+                self._call_types_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Source, CallType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -631,6 +691,58 @@ class Source extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	removeParamType(paramID : number, successCallback : Function, failCallback : Function) {
+        var self = this;
+
+        var fail : Function = function (error) {
+            failCallback(error);
+        };
+
+        var successLoadCT : Function = function () {
+            var ctSize = self.callTypes().length;
+            var ctCount = 0;
+
+
+
+            for (var ctKey in self.callTypes()) {
+                var ct : CallType = self.callTypes()[ctKey];
+
+                var successLoadCall : Function = function() {
+                    for (var callKey in ct.calls()) {
+                        var call : Call = ct.calls()[callKey];
+
+                        var successLoadParamValues : Function = function () {
+                            var pvSize = call.paramValues().length;
+                            var pvCount = 0;
+
+                            for (var pvKey in call.paramValues()) {
+                                var param : ParamValue = call.paramValues()[pvKey];
+
+                                var successLoadPT : Function = function () {
+                                    if (param.paramType().getId() === paramID) {
+                                        var successDelete : Function = function () {
+                                            Logger.debug("Delete successfully obsolete ParamValue");
+                                        };
+                                        param.delete(successDelete, fail);
+                                        pvCount++;
+
+                                        if (pvCount == pvSize) {
+
+                                        }
+                                    }
+                                };
+
+                                param.loadParamType(successLoadPT, fail);
+                            }
+                        };
+
+                        call.loadParamValues(successLoadParamValues, fail);
+                    }
+                };
+
+                ct.loadCalls(successLoadCall, fail);
+            }
+        };
+        this.loadCallTypes(successLoadCT, fail);
 		this.deleteObjectAssociation(Source, ParamType, paramID, successCallback, failCallback);
 	}
 
