@@ -698,52 +698,54 @@ class Source extends ModelItf {
         };
 
         var successLoadCT : Function = function () {
-            var ctSize = self.callTypes().length;
             var ctCount = 0;
+            var callTypes : Array<CallType> = self.callTypes();
 
-
-
-            for (var ctKey in self.callTypes()) {
-                var ct : CallType = self.callTypes()[ctKey];
-
+            callTypes.forEach(function (ct) {
                 var successLoadCall : Function = function() {
-                    for (var callKey in ct.calls()) {
-                        var call : Call = ct.calls()[callKey];
+                    var callCount = 0;
+                    var calls : Array<Call> = ct.calls();
 
+                    calls.forEach(function (call) {
                         var successLoadParamValues : Function = function () {
-                            var pvSize = call.paramValues().length;
                             var pvCount = 0;
+                            var params : Array<ParamValue> = call.paramValues();
 
-                            for (var pvKey in call.paramValues()) {
-                                var param : ParamValue = call.paramValues()[pvKey];
+                            params.forEach(function (param) {
 
                                 var successLoadPT : Function = function () {
                                     if (param.paramType().getId() === paramID) {
-                                        var successDelete : Function = function () {
+                                        var successDelete:Function = function () {
                                             Logger.debug("Delete successfully obsolete ParamValue");
                                         };
                                         param.delete(successDelete, fail);
-                                        pvCount++;
+                                    }
+                                    pvCount++;
 
-                                        if (pvCount == pvSize) {
-
+                                    if (pvCount == params.length) {
+                                        callCount++;
+                                        if (callCount == calls.length) {
+                                            ctCount++;
+                                            if (ctCount == callTypes.length) {
+                                                self.deleteObjectAssociation(Source, ParamType, paramID, successCallback, failCallback);
+                                            }
                                         }
                                     }
                                 };
 
                                 param.loadParamType(successLoadPT, fail);
-                            }
+                            });
+
                         };
 
                         call.loadParamValues(successLoadParamValues, fail);
-                    }
+                    });
                 };
 
                 ct.loadCalls(successLoadCall, fail);
-            }
+            });
         };
         this.loadCallTypes(successLoadCT, fail);
-		this.deleteObjectAssociation(Source, ParamType, paramID, successCallback, failCallback);
 	}
 
     /**
