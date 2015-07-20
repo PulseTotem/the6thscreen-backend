@@ -701,10 +701,18 @@ class Source extends ModelItf {
             var ctCount = 0;
             var callTypes : Array<CallType> = self.callTypes();
 
+            if (callTypes.length == 0) {
+                self.deleteObjectAssociation(Source, ParamType, paramID, successCallback, failCallback);
+            }
+
             callTypes.forEach(function (ct) {
                 var successLoadCall : Function = function() {
                     var callCount = 0;
                     var calls : Array<Call> = ct.calls();
+
+                    if (calls.length == 0) {
+                        self.deleteObjectAssociation(Source, ParamType, paramID, successCallback, failCallback);
+                    }
 
                     calls.forEach(function (call) {
                         var successLoadParamValues : Function = function () {

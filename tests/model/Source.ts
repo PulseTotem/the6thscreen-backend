@@ -152,6 +152,41 @@ describe('Source', function() {
 			cpt.checkCompleteness(success, fail);
 		});
 
+		it('should consider the object as complete if it has an ID, a name, a complete infotype and a complete service but no method as it is a static source', function(done) {
+			var cpt = new Source("machin", null, "", 42, true, 28);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMock2.isDone(), "The mock2 request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+
 		it('should not consider the object as complete if it has an ID, a name, a method, a complete service and an infotype which is not complete itself', function(done) {
 			var cpt = new Source("machin", null, "method", 42, false, 28);
 
@@ -238,6 +273,50 @@ describe('Source', function() {
 			cpt.checkCompleteness(success, fail);
 		});
 
+		it('should not consider the object as complete if it has an ID, a name, a complete infotype, a complete service and an empty method as it is not a static source', function(done) {
+			var cpt = new Source("machin", null, "", 42, false, 28);
+
+			var response : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "type",
+					"complete": true
+				}
+			};
+
+			var response2 : SequelizeRestfulResponse = {
+				"status": "success",
+				"data": {
+					"id":12,
+					"name": "service",
+					"complete": true
+				}
+			};
+
+			var restClientMock = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response2));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMock2.isDone(), "The mock2 request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+
 		it('should not consider the object as complete if it has no id', function(done) {
 			nock.disableNetConnect();
 
@@ -276,40 +355,6 @@ describe('Source', function() {
 			nock.disableNetConnect();
 
 			var cpt = new Source(null, null, "method", 43, false, 28);
-
-			var success = function() {
-				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
-				done();
-			};
-
-			var fail = function(err) {
-				done(err);
-			};
-
-			cpt.checkCompleteness(success, fail);
-		});
-
-		it('should not consider the object as complete if it has an empty method', function(done) {
-			nock.disableNetConnect();
-
-			var cpt = new Source("test", null, "", 43, false, 28);
-
-			var success = function() {
-				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
-				done();
-			};
-
-			var fail = function(err) {
-				done(err);
-			};
-
-			cpt.checkCompleteness(success, fail);
-		});
-
-		it('should not consider the object as complete if it has a null method', function(done) {
-			nock.disableNetConnect();
-
-			var cpt = new Source("test", null, null, 43, false, 28);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -614,17 +659,31 @@ describe('Source', function() {
 				]
 			};
 
+
+
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamType.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
+
+
             var success = function() {
                 var paramTypes = c.paramTypes();
+
+	            var response2 : SequelizeRestfulResponse = {
+		            "status": "success",
+		            "data": []
+	            };
+
+	            var restClientMockCT = nock(DatabaseConnection.getBaseURL())
+		            .get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), CallType.getTableName()))
+		            .reply(200, JSON.stringify(response2));
 
                 assert.deepEqual(paramTypes, [pv], "The paramType array is not an array fill only with PV: "+JSON.stringify(paramTypes));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramTypes");
 
-                var spy = sinon.spy(pv, "desynchronize");
+
+	            var spy = sinon.spy(pv, "desynchronize");
                 var response2 : SequelizeRestfulResponse = {
                     "status": "success",
                     "data": {}
@@ -637,8 +696,9 @@ describe('Source', function() {
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the removeParamType is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramType in database.");
-                    done();
+	                assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramType in database.");
+	                assert.ok(restClientMockCT.isDone(), "The mock request has not been done to retrieve callTypes.");
+	                done();
                 };
 
                 var fail2 = function(err) {
