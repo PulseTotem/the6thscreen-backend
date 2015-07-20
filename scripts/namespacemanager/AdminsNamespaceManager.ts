@@ -198,6 +198,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	deleteObjectFromDescription(modelClass : any, propertyName : string, jsonDescription : any, channelResponse : string) {
 		var self = this;
 		var objectId = jsonDescription[propertyName];
+
 		self.deleteObject(modelClass, objectId, channelResponse);
 	}
 

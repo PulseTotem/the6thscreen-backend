@@ -423,8 +423,18 @@ describe('CallType', function(){
                     .put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(response2));
 
+	            var responseCall : SequelizeRestfulResponse = {
+		            "status": "success",
+		            "data": []
+	            };
+
+	            var restClientMockCall = nock(DatabaseConnection.getBaseURL())
+		            .get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Call.getTableName()))
+		            .reply(200, JSON.stringify(responseCall));
+
                 var success2 = function() {
                     //assert.ok(retour, "The return of the linkSource is false.");
+	                assert.ok(restClientMockCall.isDone(), "The mock request has not been done to retrieve calls in database.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the source in database.");
                     done();
                 };
@@ -465,6 +475,15 @@ describe('CallType', function(){
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the source");
                 var spy = sinon.spy(source, "desynchronize");
 
+	            var responseCall : SequelizeRestfulResponse = {
+		            "status": "success",
+		            "data": []
+	            };
+
+	            var restClientMockCall = nock(DatabaseConnection.getBaseURL())
+		            .get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Call.getTableName()))
+		            .reply(200, JSON.stringify(responseCall));
+
                 var response2 : SequelizeRestfulResponse = {
                     "status": "success",
                     "data": {}
@@ -476,6 +495,7 @@ describe('CallType', function(){
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the unlinkSource is false.");
+	                assert.ok(restClientMockCall.isDone(), "The mock request has not been done.");
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
                     done();
                 };

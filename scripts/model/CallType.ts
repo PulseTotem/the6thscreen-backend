@@ -545,7 +545,16 @@ class CallType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	linkSource(sourceId : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(CallType, Source, sourceId, successCallback, failCallback);
+        var self = this;
+        var successLoadCall = function () {
+            if (self.calls().length > 0) {
+                failCallback("You cannot replace a source of CallType owning calls.");
+            } else {
+                self.associateObject(CallType, Source, sourceId, successCallback, failCallback);
+            }
+        };
+
+        this.loadCalls(successLoadCall, failCallback);
 	}
 
 	/**
@@ -558,7 +567,16 @@ class CallType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	unlinkSource(sourceID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(CallType, Source, sourceID, successCallback, failCallback);
+        var self = this;
+        var successLoadCall = function () {
+            if (self.calls().length > 0) {
+                failCallback("You cannot unlink a source of CallType owning calls.");
+            } else {
+                self.deleteObjectAssociation(CallType, Source, sourceID, successCallback, failCallback);
+            }
+        };
+
+        this.loadCalls(successLoadCall, failCallback);
 	}
 
 	/**
@@ -689,7 +707,17 @@ class CallType extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(CallType, this.getId(), successCallback, failCallback, attemptNumber);
+
+        var self = this;
+        var successLoadCalls = function () {
+            if (self.calls().length > 0) {
+                failCallback("You cannot delete a CallBack which owns some calls. Delete the calls first.");
+            } else {
+                return ModelItf.deleteObject(CallType, self.getId(), successCallback, failCallback, attemptNumber);
+            }
+        };
+
+        this.loadCalls(successLoadCalls, failCallback);
     }
 
     /**
