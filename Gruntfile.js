@@ -13,6 +13,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
     grunt.loadNpmTasks('grunt-contrib-symlink');
     grunt.loadNpmTasks('grunt-mocha-istanbul');
+    grunt.loadNpmTasks('grunt-env');
 
 
 	// tasks
@@ -23,6 +24,15 @@ module.exports = function (grunt) {
 // ---------------------------------------------
 //                               configure tasks
 // ---------------------------------------------
+        env : {
+            test : {
+                NODE_ENV : 'test'
+            },
+            build : {
+                NODE_ENV : 'production'
+            }
+        },
+
         symlink: {
             // Enable overwrite to delete symlinks before recreating them
             options: {
@@ -230,7 +240,7 @@ module.exports = function (grunt) {
             jenkins: {
                 options: {
                     reporter: 'mocha-jenkins-reporter',
-                    quiet: true,
+                    quiet: false,
                     reporterOptions: {
                         "junit_report_name": "Tests",
                         "junit_report_path": "build/tests/report.xml",
@@ -278,7 +288,7 @@ module.exports = function (grunt) {
     grunt.registerTask('build', function () {
         grunt.task.run(['clean:package', 'clean:build']);
 
-        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'copy:buildBackendConfigInfosFile', 'typescript:build', 'clean:package']);
+        grunt.task.run(['env:build','update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'copy:buildBackendConfigInfosFile', 'typescript:build', 'clean:package']);
     });
 
     grunt.registerTask('dbinit', function () {
@@ -290,7 +300,7 @@ module.exports = function (grunt) {
     grunt.registerTask('dist', function () {
         grunt.task.run(['clean:package', 'clean:dist']);
 
-        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:distConnectionInfosFile', 'copy:distBackendConfigInfosFile', 'typescript:dist', 'clean:package']);
+        grunt.task.run(['env:build','update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:distConnectionInfosFile', 'copy:distBackendConfigInfosFile', 'typescript:dist', 'clean:package']);
     });
 
     grunt.registerTask('develop', ['build', 'express:build', 'watch']);
@@ -307,7 +317,7 @@ module.exports = function (grunt) {
     grunt.registerTask('initTest', function() {
         grunt.task.run(['clean:build']);
 
-        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit','copy:testConnectionInfosFile', 'copy:testBackendConfigInfosFile', 'typescript:build', 'typescript:test']);
+        grunt.task.run(['env:test','update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit','copy:testConnectionInfosFile', 'copy:testBackendConfigInfosFile', 'typescript:build', 'typescript:test']);
     });
 
 

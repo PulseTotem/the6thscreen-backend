@@ -18,7 +18,8 @@
     "grunt-mocha-istanbul": "~2.4.0",
     "mocha": "~2.2.5",
     "nock": "^2.9.1",
-    "sinon": "^1.15.4"
+    "sinon": "^1.15.4",
+    "grunt-env": "~0.4.4"
   },
   "dependencies": {
     "ipware": "0.0.3",
