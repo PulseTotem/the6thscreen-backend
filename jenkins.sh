@@ -6,7 +6,14 @@ then
   exit 1
 fi
 
+if [ -z $2 ]
+then
+  echo "Give path for core directory."
+  exit 1
+fi
+
+
 npm install
-echo '{ "coreBackendRepoPath" : "'$1'" }' > core-repos-config.json
-grunt init
+echo '{ "coreBackendRepoPath" : "'$1'", "coreRepoPath": "'$2'" }' > core-repos-config.json
+grunt initJenkins
 grunt jenkins

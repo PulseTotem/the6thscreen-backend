@@ -34,6 +34,10 @@ module.exports = function (grunt) {
             coreBackend: {
                 src: '<%= coreReposConfig.coreBackendRepoPath %>',
                 dest: 't6s-core/core-backend'
+            },
+            core: {
+                src: '<%= coreReposConfig.coreRepoPath %>',
+                dest: 't6s-core/core-backend/t6s-core/core'
             }
         },
 
@@ -267,7 +271,9 @@ module.exports = function (grunt) {
     // register tasks
     grunt.registerTask('default', ['build']);
 
-    grunt.registerTask('init', ['symlink']);
+    grunt.registerTask('init', ['symlink:coreBackend']);
+
+    grunt.registerTask('initJenkins', ['init','symlink:core']);
 
     grunt.registerTask('build', function () {
         grunt.task.run(['clean:package', 'clean:build']);
