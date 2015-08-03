@@ -12,6 +12,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
     grunt.loadNpmTasks('grunt-contrib-symlink');
+    grunt.loadNpmTasks('grunt-mocha-istanbul');
 
 
 	// tasks
@@ -49,13 +50,12 @@ module.exports = function (grunt) {
                 ]
             },
             packageHeroku: {
-              src: ['t6s-core/core-backend/package.json', 'packageHeroku.json'],
+              src: ['t6s-core/core-backend/package.json', 'package.json'],
               dest: 'heroku/package.json',
               fields: [
                 'name',
                 'version',
                 'dependencies',
-                'devDependencies',
                 'overrides'
               ]
             }
@@ -219,21 +219,34 @@ module.exports = function (grunt) {
                 options: {
                     reporter: 'spec',
                     colors: true,
-	                require: 'coverage/blanket'
+                    captureFile: 'build/tests/result.txt'
                 },
                 src: ['build/tests/Test.js']
             },
-	        coverage: {
-		        options: {
-			        reporter: 'html-cov',
-			        // use the quiet flag to suppress the mocha console output
-			        quiet: true,
-			        // specify a destination file to capture the mocha
-			        // output (the quiet option does not suppress this)
-			        captureFile: 'coverage.html'
-		        },
-		        src: ['build/tests/Test.js']
-	        }
+            jenkins: {
+                options: {
+                    reporter: 'mocha-jenkins-reporter',
+                    quiet: true,
+                    reporterOptions: {
+                        "junit_report_name": "Tests",
+                        "junit_report_path": "build/tests/report.xml",
+                        "junit_report_stack": 1
+                    }
+                },
+                src: ['build/tests/Test.js']
+            }
+        },
+
+        mocha_istanbul: {
+            coverage: {
+                src: 'build/tests/', // a folder works nicely
+                options: {
+                    mask: '*.js',
+                    root: 'build/tests/',
+                    reportFormats: ['cobertura', 'html'],
+                    coverageFolder: 'build/coverage'
+                }
+            },
         },
 // ---------------------------------------------
 
@@ -284,13 +297,17 @@ module.exports = function (grunt) {
 
     grunt.registerTask('doc', ['clean:doc', 'yuidoc']);
 
-    grunt.registerTask('test', function() {
-        grunt.task.run(['clean:package', 'clean:test']);
+	grunt.registerTask('coverage', ['test', 'mochaTest:coverage']);
+    grunt.registerTask('initTest', function() {
+        grunt.task.run(['clean:build']);
 
-        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:testConnectionInfosFile', 'copy:testBackendConfigInfosFile', 'typescript:test', 'mochaTest:test', 'clean:package']);
-	    //grunt.task.run(['mochaTest:test']);
+        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit','copy:testConnectionInfosFile', 'copy:testBackendConfigInfosFile', 'typescript:build', 'typescript:test']);
     });
 
-	grunt.registerTask('coverage', ['test', 'mochaTest:coverage']);
+
+    grunt.registerTask('coverage', ['initTest', 'mocha_istanbul:coverage']);
+    grunt.registerTask('test', ['initTest', 'mochaTest:test']);
+
+    grunt.registerTask('jenkins', ['initTest', 'mochaTest:jenkins', 'mocha_istanbul:coverage', 'clean:package']);
 
 }

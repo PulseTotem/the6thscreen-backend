@@ -2,7 +2,6 @@
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
  */
 
-/// <reference path="../../t6s-core/core-backend/libsdef/node.d.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 var fs = require('fs');
