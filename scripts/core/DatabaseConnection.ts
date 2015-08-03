@@ -3,7 +3,6 @@
  * @author Simon Urli <simon@the6thscreen.fr>
  */
 
-/// <reference path="../../t6s-core/core-backend/libsdef/node.d.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/RestClient.ts" />
 

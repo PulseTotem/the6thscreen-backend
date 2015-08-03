@@ -27,7 +27,7 @@ cd $herokuDir
 commitMess=`date +"%D %T"`
 git add .
 git commit -m "v $commitMess"
-heroku config:set NPM_CONFIG_PRODUCTION=false
+heroku config:set NPM_CONFIG_PRODUCTION=true
 heroku config:set T6S_DATABASE_HOST=t6s-database-test.herokuapp.com
 heroku config:set T6S_JWT_SECRET=$2
 git push heroku master
