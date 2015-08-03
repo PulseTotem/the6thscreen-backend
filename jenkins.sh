@@ -12,8 +12,14 @@ then
   exit 1
 fi
 
-
+currentDir=`pwd`
+cd $1
+absolutePathBackend=`pwd`
+cd currentDir
+cd $2
+absolutePathCore=`pwd`
+cd currentDir
 npm install
-echo '{ "coreBackendRepoPath" : "'$1'", "coreRepoPath": "'$2'" }' > core-repos-config.json
+echo '{ "coreBackendRepoPath" : "'$absolutePathBackend'", "coreRepoPath": "'$absolutePathCore'" }' > core-repos-config.json
 grunt initJenkins
 grunt jenkins
