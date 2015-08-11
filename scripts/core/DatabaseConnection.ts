@@ -33,14 +33,6 @@ class DatabaseConnection {
      */
     static port : number = -1;
 
-	/**
-	 * API Endpoint
-	 *
-	 * @property endpoint
-	 * @type {string}
-	 */
-	static endpoint : string = "";
-
     /**
      * Retrieve connection information from file description.
      *
@@ -55,13 +47,11 @@ class DatabaseConnection {
 			if(process.env.T6S_DATABASE_HOST) {
 				DatabaseConnection.host = process.env.T6S_DATABASE_HOST;
 				DatabaseConnection.port = 80;
-				DatabaseConnection.endpoint = "api";
 			} else {
 				try {
 					var connectionInfos = JSON.parse(fs.readFileSync(file, 'utf8'));
 					DatabaseConnection.host = connectionInfos.host;
 					DatabaseConnection.port = parseInt(connectionInfos.port);
-					DatabaseConnection.endpoint = connectionInfos.endpoint;
 				} catch (e) {
 					Logger.error("Connection configuration file can't be read.");
 					//TODO ? Throw Exception ?
@@ -94,18 +84,6 @@ class DatabaseConnection {
         return DatabaseConnection.port;
     }
 
-	/**
-	 * Return Database endpoint
-	 *
-	 * @method getEndpoint
-	 * @static
-	 * @returns {string} - Database endpoint
-	 */
-	static getEndpoint() : string {
-		DatabaseConnection.retrieveConnectionInformation();
-		return DatabaseConnection.endpoint;
-	}
-
     /**
      * Return DataBase's BaseURL.
      *
@@ -126,7 +104,7 @@ class DatabaseConnection {
 	 * @returns {string}
 	 */
 	static modelEndpoint(model : string) {
-		return "/"+DatabaseConnection.getEndpoint()+"/"+model;
+		return "/"+model;
 	}
 
 	/**
@@ -139,7 +117,7 @@ class DatabaseConnection {
 	 * @returns {string}
 	 */
 	static objectEndpoint(objectType : string, objectID : string) {
-		return "/"+DatabaseConnection.getEndpoint()+"/"+objectType+"/"+objectID;
+		return "/"+objectType+"/"+objectID;
 	}
 
 	/**
@@ -153,7 +131,7 @@ class DatabaseConnection {
 	 * @returns {string}
 	 */
 	static associationEndpoint(objectType : string, objectID : string, associatedType : string) {
-		return "/"+DatabaseConnection.getEndpoint()+"/"+objectType+"/"+objectID+"/"+associatedType;
+		return "/"+objectType+"/"+objectID+"/"+associatedType;
 	}
 
 	/**
@@ -168,7 +146,7 @@ class DatabaseConnection {
 	 * @returns {string}
 	 */
 	static associatedObjectEndpoint(objectType : string, objectID : string, associatedType : string, associatedID : string) {
-		return "/"+DatabaseConnection.getEndpoint()+"/"+objectType+"/"+objectID+"/"+associatedType+"/"+associatedID;
+		return "/"+objectType+"/"+objectID+"/"+associatedType+"/"+associatedID;
 	}
 
     /**
@@ -182,6 +160,6 @@ class DatabaseConnection {
      * @returns {string}
      */
     static searchEndpoint(objectType : string, objectParamName : string, objectParamValue : string) {
-        return "/" + DatabaseConnection.getEndpoint() + "/" + objectType + "?" + objectParamName + "=" + objectParamValue;
+        return "/" + objectType + "?" + objectParamName + "=" + objectParamValue;
     }
 }
