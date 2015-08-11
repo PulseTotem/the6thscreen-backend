@@ -55,6 +55,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrievePolicyDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Policy, "PolicyId", description, "PolicyDescription"); });
 		this.addListenerToSocket('RetrieveThemeZoneDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(ThemeZone, "themeZoneId", description, "ThemeZoneDescription"); });
 		this.addListenerToSocket('RetrieveThemeSDIDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(ThemeSDI, "themeSDIId", description, "ThemeSDIDescription"); });
+		this.addListenerToSocket('RetrieveSystemTriggerDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(SystemTrigger, "systemTriggerId", description, "SystemTriggerDescription"); });
+		this.addListenerToSocket('RetrieveUserTriggerDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(UserTrigger, "userTriggerId", description, "UserTriggerDescription"); });
 
 		// Retrieve all objects
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
@@ -74,6 +76,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveAllTypeParamTypeDescription', function() { self.sendAllObjectDescription(TypeParamType, "AllTypeParamTypeDescription"); });
 		this.addListenerToSocket('RetrieveAllConstraintParamTypeDescription', function() { self.sendAllObjectDescription(ConstraintParamType, "AllConstraintParamTypeDescription"); });
 		this.addListenerToSocket('RetrieveAllTypeParamTypeDescription', function() { self.sendAllObjectDescription(TypeParamType, "AllTypeParamTypeDescription"); });
+		this.addListenerToSocket('RetrieveAllSystemTriggerDescription', function() { self.sendAllObjectDescription(SystemTrigger, "AllSystemTriggerDescription"); });
+		this.addListenerToSocket('RetrieveAllUserTriggerDescription', function() { self.sendAllObjectDescription(UserTrigger, "AllUserTriggerDescription"); });
 
 
 		// Create object
@@ -96,6 +100,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateRenderer', function(data) { self.createObject(Renderer, data, "AnswerCreateRenderer"); });
 		this.addListenerToSocket('CreateBehaviour', function(data) { self.createObject(Behaviour, data, "AnswerCreateBehaviour"); });
 		this.addListenerToSocket('CreatePolicy', function(data) { self.createObject(Policy, data, "AnswerCreatePolicy"); });
+		this.addListenerToSocket('CreateSystemTrigger', function(data) { self.createObject(SystemTrigger, data, "AnswerCreateSystemTrigger"); });
+		this.addListenerToSocket('CreateUserTrigger', function(data) { self.createObject(UserTrigger, data, "AnswerCreateUserTrigger"); });
 
 		// Update object
 		this.addListenerToSocket('UpdateSDI', function(data) { self.updateObjectAttribute(SDI, data, "AnswerUpdateSDI"); });
@@ -117,6 +123,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateRenderer', function(data) { self.updateObjectAttribute(Renderer, data, "AnswerUpdateRenderer"); });
 		this.addListenerToSocket('UpdateBehaviour', function(data) { self.updateObjectAttribute(Behaviour, data, "AnswerUpdateBehaviour"); });
 		this.addListenerToSocket('UpdatePolicy', function(data) { self.updateObjectAttribute(Policy, data, "AnswerUpdatePolicy"); });
+		this.addListenerToSocket('UpdateSystemTrigger', function(data) { self.updateObjectAttribute(SystemTrigger, data, "AnswerUpdateSystemTrigger"); });
+		this.addListenerToSocket('UpdateUserTrigger', function(data) { self.updateObjectAttribute(UserTrigger, data, "AnswerUpdateUserTrigger"); });
 
 		// Delete object
 		this.addListenerToSocket('DeleteRelativeEvent', function(idRelativeEvent) { self.deleteObjectFromDescription(RelativeEvent, "relativeEventId", idRelativeEvent, "AnswerDeleteRelativeEvent"); });
@@ -136,7 +144,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteOAuthKey', function(idOAuthKey) { self.deleteObjectFromDescription(OAuthKey, "oauthKeyId", idOAuthKey, "AnswerDeleteOAuthKey"); });
 		this.addListenerToSocket('DeleteBehaviour', function(idBehaviour) { self.deleteObjectFromDescription(Behaviour, "behaviourId", idBehaviour, "AnswerDeleteBehaviour"); });
 		this.addListenerToSocket('DeletePolicy', function(idPolicy) { self.deleteObjectFromDescription(Policy, "policyId", idPolicy, "AnswerDeletePolicy"); });
-
+		this.addListenerToSocket('DeleteSystemTrigger', function(idSystemTrigger) { self.deleteObjectFromDescription(SystemTrigger, "systemTriggerId", idSystemTrigger, "AnswerDeleteSystemTrigger"); });
+		this.addListenerToSocket('DeleteUserTrigger', function(idUserTrigger) { self.deleteObjectFromDescription(UserTrigger, "userTriggerId", idUserTrigger, "AnswerDeleteUserTrigger"); });
 		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "AnswerDeleteSDI"); });
 
 
