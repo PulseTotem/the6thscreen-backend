@@ -108,44 +108,35 @@ describe('Profil', function() {
 		it('should return true if the object has a name and an ID but no description and number of ZoneContent equals to number of SDI\'s zones', function(done) {
 			var b = new Profil("toto", null, 52);
 
-			var responseSDI : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var responseSDI : any = {
 					"id": 42,
 					"name": null,
 					"description": "blabla",
 					"allowedHost": "",
 					"complete": true
-				}
-			};
+				};
 
 			var restClientMockSDI = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), b.getId().toString(), SDI.getTableName()))
 				.reply(200, JSON.stringify(responseSDI));
 
-			var responseZoneContents : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [{
+			var responseZoneContents : any = [{
 					"id": 32,
 					"name": null,
 					"description": "blabla",
 					"complete": true
-				}]
-			};
+				}];
 
 			var restClientMockZoneContents = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), b.getId().toString(), ZoneContent.getTableName()))
 				.reply(200, JSON.stringify(responseZoneContents));
 
-			var responseZones : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [{
+			var responseZones : any = [{
 					"id": 22,
 					"name": null,
 					"description": "blabla",
 					"complete": true
-				}]
-			};
+				}];
 
 			var restClientMockZones = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(SDI.getTableName(), "42", Zone.getTableName()))
@@ -185,10 +176,7 @@ describe('Profil', function() {
 			var pv = new ZoneContent("mavaleur", "", 12);
 			var spy = sinon.spy(pv, "desynchronize");
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1 : any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName()))
@@ -200,14 +188,11 @@ describe('Profil', function() {
                 assert.deepEqual(zoneContents, [], "The zoneContent is not an empty array: "+JSON.stringify(zoneContents));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zoneContents");
 
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .put(DatabaseConnection.associatedObjectEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the addZoneContent is false.");
@@ -235,16 +220,13 @@ describe('Profil', function() {
 			var c = new Profil("toto", "blabla", 52);
 			var pv = new ZoneContent("mavaleur", "", 12);
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
+			var response1 : any = [
 					{
 						"name": "mavaleur",
 						"id": 12,
 						"complete": false
 					}
-				]
-			};
+				];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName()))
@@ -257,14 +239,12 @@ describe('Profil', function() {
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zoneContents");
 
                 var spy = sinon.spy(pv, "desynchronize");
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .delete(DatabaseConnection.associatedObjectEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the removeZoneContent is false.");

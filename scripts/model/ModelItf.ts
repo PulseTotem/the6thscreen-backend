@@ -8,7 +8,6 @@
 /// <reference path="../core/DatabaseConnection.ts" />
 /// <reference path="../exceptions/DataException.ts" />
 /// <reference path="../exceptions/RequestException.ts" />
-/// <reference path="../exceptions/ResponseException.ts" />
 /// <reference path="../exceptions/ModelException.ts" />
 
 /**

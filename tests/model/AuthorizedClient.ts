@@ -187,10 +187,7 @@ describe('AuthorizedClient', function(){
 			var s = new Profil("toto", "machin", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1 : any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(AuthorizedClient.getTableName(), c.getId().toString(), Profil.getTableName()))
@@ -201,14 +198,11 @@ describe('AuthorizedClient', function(){
 				assert.equal(profil, null, "The Profil is not a null value: " + JSON.stringify(profil));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the Profil");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.put(DatabaseConnection.associatedObjectEndpoint(AuthorizedClient.getTableName(), c.getId().toString(), Profil.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 				var success2 = function() {
 					//assert.ok(retour, "The return of the linkProfil is false.");
@@ -236,10 +230,7 @@ describe('AuthorizedClient', function(){
 			var c = new AuthorizedClient("toto","", false, new Date(), 52);
 			var s = new Profil("toto","machin", 42);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
+			var response1 : any = s.toJSONObject();
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(AuthorizedClient.getTableName(), c.getId().toString(), Profil.getTableName()))
@@ -251,14 +242,11 @@ describe('AuthorizedClient', function(){
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the Profil");
 				var spy = sinon.spy(profil, "desynchronize");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.delete(DatabaseConnection.associatedObjectEndpoint(AuthorizedClient.getTableName(), c.getId().toString(), Profil.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 
 				var success2 = function() {
@@ -289,10 +277,8 @@ describe('AuthorizedClient', function(){
 			var s = new SDI("toto", "machin", "", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+
+			var response1 : any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(AuthorizedClient.getTableName(), c.getId().toString(), SDI.getTableName()))
@@ -303,14 +289,11 @@ describe('AuthorizedClient', function(){
 				assert.equal(sdi, null, "The SDI is not a null value: " + JSON.stringify(sdi));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the SDI");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
-
+				var emptyResponse : any = {};
+				
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.put(DatabaseConnection.associatedObjectEndpoint(AuthorizedClient.getTableName(), c.getId().toString(), SDI.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 				var success2 = function() {
 					//assert.ok(retour, "The return of the linkSDI is false.");
@@ -338,10 +321,7 @@ describe('AuthorizedClient', function(){
 			var c = new AuthorizedClient("toto","", false, new Date(), 52);
 			var s = new SDI("toto","machin", "", 42);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
+			var response1 : any = s.toJSONObject();
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(AuthorizedClient.getTableName(), c.getId().toString(), SDI.getTableName()))
@@ -353,14 +333,11 @@ describe('AuthorizedClient', function(){
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the SDI");
 				var spy = sinon.spy(sdi, "desynchronize");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
-
+				var emptyResponse : any = {};
+				
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.delete(DatabaseConnection.associatedObjectEndpoint(AuthorizedClient.getTableName(), c.getId().toString(), SDI.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 
 				var success2 = function() {

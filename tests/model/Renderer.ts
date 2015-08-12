@@ -94,14 +94,11 @@ describe('Renderer', function() {
 		it('should consider the object as complete if it has an ID, a name and a complete infotype', function(done) {
 			var cpt = new Renderer("test","", 52);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id":12,
 					"name": "type",
 					"complete": true
-				}
-			};
+				};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Renderer.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
@@ -123,14 +120,11 @@ describe('Renderer', function() {
 		it('should not consider the object as complete if it has an ID, a name and an infotype which is not complete itself', function(done) {
 			var cpt = new Renderer("test","", 52);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id":12,
 					"name": "type",
 					"complete": false
-				}
-			};
+				};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Renderer.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
@@ -224,10 +218,7 @@ describe('Renderer', function() {
 			var s = new InfoType("toto", 42);
 			var spy = sinon.spy(s, "desynchronize");
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1:any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Renderer.getTableName(), c.getId().toString(), InfoType.getTableName()))
@@ -238,14 +229,11 @@ describe('Renderer', function() {
                 assert.equal(infoType, null, "The infoType is not a null value: " + JSON.stringify(infoType));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the infoType");
 
-                var response2:SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .put(DatabaseConnection.associatedObjectEndpoint(Renderer.getTableName(), c.getId().toString(), InfoType.getTableName(), s.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the linkInfoType is false.");
@@ -273,10 +261,7 @@ describe('Renderer', function() {
 			var c = new Renderer("toto", "machin", 52);
 			var s = new InfoType("toto", 42);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
+			var response1:any = s.toJSONObject();
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Renderer.getTableName(), c.getId().toString(), InfoType.getTableName()))
@@ -288,14 +273,11 @@ describe('Renderer', function() {
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the infoType");
                 var spy = sinon.spy(infoType, "desynchronize");
 
-                var response2:SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .delete(DatabaseConnection.associatedObjectEndpoint(Renderer.getTableName(), c.getId().toString(), InfoType.getTableName(), s.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
 
                 var success2 = function() {

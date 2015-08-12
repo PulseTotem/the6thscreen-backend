@@ -233,10 +233,7 @@ describe('ThemeZone', function(){
 			toCloneJSON.id = null;
 			var expected = new ThemeZone("toto", "truc", true, "http://example.com/background.png","http://example.com/backgroundVideo.png", "black", "arial", "black", "89%", "14px", 23, 98, true);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": expected.toJSONObject()
-			};
+			var response : any = expected.toJSONObject();
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.post(DatabaseConnection.modelEndpoint(ThemeZone.getTableName()), toCloneJSON)

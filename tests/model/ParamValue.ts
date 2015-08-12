@@ -69,14 +69,11 @@ describe('ParamValue', function() {
 		it('should consider the object as complete if it has an ID, a name and a complete type', function(done) {
 			var cpt = new ParamValue("test", 52);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id":12,
 					"name": "type",
 					"complete": true
-				}
-			};
+				};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), cpt.getId().toString(), ParamType.getTableName()))
@@ -98,14 +95,11 @@ describe('ParamValue', function() {
 		it('should not consider the object as complete if it has an ID, a name and a type which is not complete itself', function(done) {
 			var cpt = new ParamValue("test", 52);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id":12,
 					"name": "type",
 					"complete": false
-				}
-			};
+				};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), cpt.getId().toString(), ParamType.getTableName()))
@@ -215,10 +209,7 @@ describe('ParamValue', function() {
 			var p = new ParamType("toto", "machin", 42);
 			var spy = sinon.spy(p, "desynchronize");
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1 : any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName()))
@@ -230,14 +221,11 @@ describe('ParamValue', function() {
                 assert.equal(paramType, null, "The paramType is not a null value: "+JSON.stringify(paramType));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramType");
 
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .put(DatabaseConnection.associatedObjectEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName(), p.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
 
                 var success2 = function() {
@@ -266,10 +254,7 @@ describe('ParamValue', function() {
 			var c = new ParamValue("toto", 52);
 			var p = new ParamType("toto", "machin", 42);
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": p.toJSONObject()
-			};
+			var response1 : any = p.toJSONObject();
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName()))
@@ -282,14 +267,11 @@ describe('ParamValue', function() {
 
                 var spy = sinon.spy(paramType, "desynchronize");
 
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .delete(DatabaseConnection.associatedObjectEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName(), p.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
 
                 var success2 = function() {

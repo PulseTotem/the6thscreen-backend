@@ -132,10 +132,7 @@ describe('Behaviour', function() {
 			var model = new Behaviour("", "", 12);
 			var modelUpdated = new Behaviour("tata", "", 12, true);
 
-			var responseRead : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": model.toJSONObject()
-			};
+			var responseRead : any = model.toJSONObject();
 
 			var restClientMockRead = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()))
@@ -147,10 +144,7 @@ describe('Behaviour', function() {
 				'value': modelUpdated.name()
 			};
 
-			var responseUpdate : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": modelUpdated.toJSONObject()
-			};
+			var responseUpdate : any = modelUpdated.toJSONObject();
 
 			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
 				.put(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
