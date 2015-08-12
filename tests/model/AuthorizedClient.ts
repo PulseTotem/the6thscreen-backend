@@ -185,7 +185,6 @@ describe('AuthorizedClient', function(){
 		it('should call the right request', function (done) {
 			var c = new AuthorizedClient("toto","", false, new Date(), 52);
 			var s = new Profil("toto", "machin", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
 			var response1 : any = [];
 
@@ -240,7 +239,6 @@ describe('AuthorizedClient', function(){
 				var profil = c.profil();
 				assert.deepEqual(profil, s, "The Profil is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the Profil");
-				var spy = sinon.spy(profil, "desynchronize");
 
 				var emptyResponse : any = {};
 
@@ -275,7 +273,6 @@ describe('AuthorizedClient', function(){
 		it('should call the right request', function (done) {
 			var c = new AuthorizedClient("toto","", false, new Date(), 52);
 			var s = new SDI("toto", "machin", "", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
 
 			var response1 : any = [];
@@ -331,7 +328,6 @@ describe('AuthorizedClient', function(){
 				var sdi = c.sdi();
 				assert.deepEqual(sdi, s, "The SDI is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the SDI");
-				var spy = sinon.spy(sdi, "desynchronize");
 
 				var emptyResponse : any = {};
 				

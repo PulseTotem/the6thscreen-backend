@@ -217,7 +217,6 @@ describe('ParamType', function() {
         it('should call the right request', function(done) {
             var c = new ParamType("toto","machin", 52);
             var s = new TypeParamType("toto", 42);
-            var spy = sinon.spy(s, "desynchronize");
 
             var response1 : any = [];
 
@@ -272,7 +271,6 @@ describe('ParamType', function() {
                 var type = c.type();
                 assert.deepEqual(type, s, "The type is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the type");
-                var spy = sinon.spy(type, "desynchronize");
 
 				var emptyResponse : any = {};
 
@@ -306,7 +304,6 @@ describe('ParamType', function() {
 		it('should call the right request', function(done) {
 			var c = new ParamType("toto","machin", 52);
 			var s = new ConstraintParamType("toto","tata" ,42);
-			var spy = sinon.spy(s, "desynchronize");
 
 			var response1 : any = [];
 
@@ -363,7 +360,6 @@ describe('ParamType', function() {
                 var constraint = c.constraint();
                 assert.deepEqual(constraint, s, "The constraint is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the constraint");
-                var spy = sinon.spy(constraint, "desynchronize");
 
 				var emptyResponse : any = {};
 
@@ -397,7 +393,6 @@ describe('ParamType', function() {
 		it('should set the given defaultValue', function(done) {
 			var c = new ParamType("toto","machin", 52);
 			var s = new ParamValue("toto" ,42);
-			var spy = sinon.spy(s, "desynchronize");
 
 			var response1 : any = [];
 
@@ -474,8 +469,6 @@ describe('ParamType', function() {
                 var defaultValue = c.defaultValue();
                 assert.deepEqual(defaultValue, s, "The defaultValue is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the defaultValue");
-
-                var spy = sinon.spy(defaultValue, "desynchronize");
 
 				var emptyResponse : any = {};
 

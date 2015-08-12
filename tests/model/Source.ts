@@ -421,7 +421,6 @@ describe('Source', function() {
 				var service = c.service();
 				assert.deepEqual(service, s, "The service is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
-				var spy = sinon.spy(service, "desynchronize");
 
 				var emptyResponse : any = {};
 
@@ -455,7 +454,6 @@ describe('Source', function() {
 		it('should call the right request', function (done) {
 			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var s = new InfoType("toto", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
 			var response1:any = [];
 
@@ -511,7 +509,6 @@ describe('Source', function() {
                 var infoType = c.infoType();
                 assert.deepEqual(infoType, s, "The infoType is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the infoType");
-                var spy = sinon.spy(infoType, "desynchronize");
 
 				var emptyResponse : any = {};
 
@@ -546,7 +543,6 @@ describe('Source', function() {
 		it('should call the right request', function(done) {
 			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var pv = new ParamType("mavaleur", "toto", 12);
-			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : any = [];
 
@@ -622,9 +618,6 @@ describe('Source', function() {
                 assert.deepEqual(paramTypes, [pv], "The paramType array is not an array fill only with PV: "+JSON.stringify(paramTypes));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramTypes");
 
-
-	            var spy = sinon.spy(pv, "desynchronize");
-
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
@@ -658,7 +651,6 @@ describe('Source', function() {
         it('should call the right request', function(done) {
 	        var c = new Source("machin", "desc", "method", 43, false, 28);
             var pv = new ParamValue("mavaleur",12);
-            var spy = sinon.spy(pv, "desynchronize");
 
             var response1 : any = [];
 
@@ -720,8 +712,6 @@ describe('Source', function() {
 
                 assert.deepEqual(paramValues, [pv], "The paramValue array is not an array fill only with PV: "+JSON.stringify(paramValues));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
-
-                var spy = sinon.spy(pv, "desynchronize");
 
 				var emptyResponse : any = {};
 

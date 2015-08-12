@@ -166,7 +166,6 @@ describe('Client', function(){
 		it('should call the right request', function (done) {
 			var c = new Client("toto","", 52);
 			var s = new Profil("toto", "machin", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
 			var response1:any = [];
 
@@ -221,7 +220,6 @@ describe('Client', function(){
 				var profil = c.profil();
 				assert.deepEqual(profil, s, "The Profil is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the Profil");
-				var spy = sinon.spy(profil, "desynchronize");
 
 				var emptyResponse : any = {};
 

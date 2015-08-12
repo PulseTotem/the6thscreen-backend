@@ -207,7 +207,6 @@ describe('ParamValue', function() {
 		it('should call the right request', function(done) {
 			var c = new ParamValue("toto", 52);
 			var p = new ParamType("toto", "machin", 42);
-			var spy = sinon.spy(p, "desynchronize");
 
 			var response1 : any = [];
 
@@ -264,8 +263,6 @@ describe('ParamValue', function() {
                 var paramType = c.paramType();
                 assert.deepEqual(paramType, p, "The paramType is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramType");
-
-                var spy = sinon.spy(paramType, "desynchronize");
 
 				var emptyResponse : any = {};
 

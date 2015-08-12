@@ -254,7 +254,6 @@ describe('Zone', function() {
 		it('should call the right request', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto", "machin", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
 			var response1:any = [];
 
@@ -311,8 +310,6 @@ describe('Zone', function() {
                 assert.deepEqual(behaviour, s, "The behaviour is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the behaviour");
 
-                var spy = sinon.spy(behaviour, "desynchronize");
-
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
@@ -344,7 +341,6 @@ describe('Zone', function() {
 		it('should call the right request', function(done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var ct = new CallType("mavaleur", "madescription", 12);
-			var spy = sinon.spy(ct, "desynchronize");
 
 			var response1 : any = [];
 
@@ -411,8 +407,6 @@ describe('Zone', function() {
 				assert.deepEqual(callTypes, [ct], "The callType array is not an array fill only with ct: "+JSON.stringify(callTypes));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the callTypes");
 
-				var spy = sinon.spy(ct, "desynchronize");
-
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
@@ -445,7 +439,6 @@ describe('Zone', function() {
 		it('should call the right request', function(done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var zc = new ZoneContent("mavaleur", "madescription", 12);
-			var spy = sinon.spy(zc, "desynchronize");
 
 			var response1 : any = [];
 
@@ -511,8 +504,6 @@ describe('Zone', function() {
 
 				assert.deepEqual(zoneContents, [zc], "The zoneContent array is not an array fill only with zc: "+JSON.stringify(zoneContents));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zoneContents");
-
-				var spy = sinon.spy(zc, "desynchronize");
 
 				var emptyResponse : any = {};
 
@@ -601,7 +592,6 @@ describe('Zone', function() {
 				var themeZone = c.theme();
 				assert.deepEqual(themeZone, s, "The themeZone is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
-				var spy = sinon.spy(themeZone, "desynchronize");
 
 				var emptyResponse : any = {};
 

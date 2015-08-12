@@ -209,7 +209,6 @@ describe('Call', function(){
 		it('should call the right request', function(done) {
 			var c = new Call("toto", 52);
 			var pv = new ParamValue("mavaleur",12);
-			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : any = [];
 
@@ -272,8 +271,6 @@ describe('Call', function(){
                 assert.deepEqual(paramValues, [pv], "The paramValue array is not an array fill only with PV: "+JSON.stringify(paramValues));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
 
-                var spy = sinon.spy(pv, "desynchronize");
-
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
@@ -306,8 +303,7 @@ describe('Call', function(){
 	describe('#linkCallType', function() {
 		it('should call the right request', function(done) {
 			var c = new Call("toto", 52);
-			var ct = new CallType("tptp", "blabla",12)
-			var spy = sinon.spy(ct, "desynchronize");
+			var ct = new CallType("tptp", "blabla",12);
 
 			var response1 : any = [];
 
@@ -363,7 +359,6 @@ describe('Call', function(){
                 var calltype = c.callType();
                 assert.deepEqual(calltype, ct, "The calltype is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the calltype");
-                var spy = sinon.spy(calltype, "desynchronize");
 
 				var emptyResponse : any = {};
 

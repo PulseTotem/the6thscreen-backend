@@ -173,7 +173,6 @@ describe('User', function() {
 		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", 52);
 			var pv = new Role("mavaleur",12);
-			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : any = [];
 
@@ -238,8 +237,6 @@ describe('User', function() {
                 assert.deepEqual(roles, [pv], "The role array is not an array fill only with PV: "+JSON.stringify(roles));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the roles");
 
-                var spy = sinon.spy(pv, "desynchronize");
-
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
@@ -271,7 +268,6 @@ describe('User', function() {
 		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", 52);
 			var pv = new SDI("mavaleur", "bidule", "host", 12);
-			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : any = [];
 
@@ -338,8 +334,6 @@ describe('User', function() {
                 assert.deepEqual(sdis, [pv], "The sdis array is not an array fill only with PV: "+JSON.stringify(sdis));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the sdis");
 
-                var spy = sinon.spy(pv, "desynchronize");
-
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
@@ -371,7 +365,6 @@ describe('User', function() {
         it('should call the right request', function(done) {
             var c = new User("toto", "bla", 52);
             var pv = new OAuthKey("mavaleur", "bidule", "maValeur", 12);
-            var spy = sinon.spy(pv, "desynchronize");
 
             var response1 : any = [];
 
@@ -436,8 +429,6 @@ describe('User', function() {
 
                 assert.deepEqual(oauthkeys, [pv], "The oauthkeys array is not an array fill only with PV: "+JSON.stringify(oauthkeys));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the oauthkeys");
-
-                var spy = sinon.spy(pv, "desynchronize");
 
 				var emptyResponse : any = {};
 

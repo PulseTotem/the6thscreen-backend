@@ -174,7 +174,6 @@ describe('Profil', function() {
 		it('should zoneContent the right request', function(done) {
 			var c = new Profil("toto", "blabla", 52);
 			var pv = new ZoneContent("mavaleur", "", 12);
-			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : any = [];
 
@@ -237,8 +236,6 @@ describe('Profil', function() {
 
                 assert.deepEqual(zoneContents, [pv], "The zoneContent array is not an array fill only with PV: "+JSON.stringify(zoneContents));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zoneContents");
-
-                var spy = sinon.spy(pv, "desynchronize");
 
 				var emptyResponse : any = {};
 

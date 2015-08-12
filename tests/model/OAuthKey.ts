@@ -233,7 +233,6 @@ describe('OAuthKey', function() {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
             var s = new Service("service", "serviceDesc", "serviceHost", true, "provider", "logo", 42);
-            var spy = sinon.spy(s, "desynchronize");
 
             var response1:any = [];
 
@@ -288,7 +287,6 @@ describe('OAuthKey', function() {
                 var service = c.service();
                 assert.deepEqual(service, s, "The service is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
-                var spy = sinon.spy(service, "desynchronize");
 
 				var emptyResponse : any = {};
 

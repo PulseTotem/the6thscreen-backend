@@ -173,16 +173,6 @@ class Client extends ModelItf {
         this.loadProfil(success, fail);
     }
 
-    /**
-     * Set the object as desynchronized given the different lazy properties.
-     *
-     * @method desynchronize
-     */
-    desynchronize() : void {
-        super.desynchronize();
-        this._profil_loaded = false;
-    }
-
 	/**
 	 * Return a NodeRestClient instance as a JSON Object
 	 *

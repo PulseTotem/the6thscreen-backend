@@ -145,7 +145,6 @@ describe('SDI', function() {
 		it('should call the right request', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
 			var pv = new User("mavaleur", "", 12);
-			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : any = [];
 
@@ -210,8 +209,6 @@ describe('SDI', function() {
                 assert.deepEqual(users, [pv], "The user array is not an array fill only with PV: "+JSON.stringify(users));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the users");
 
-                var spy = sinon.spy(pv, "desynchronize");
-
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
@@ -245,7 +242,6 @@ describe('SDI', function() {
 		it('should call the right request', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
 			var pv = new Zone("mavaleur","toto",2,3,4,5,12);
-			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : any = [];
 
@@ -314,8 +310,6 @@ describe('SDI', function() {
                 assert.deepEqual(zones, [pv], "The zone array is not an array fill only with PV: "+JSON.stringify(zones));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zones");
 
-                var spy = sinon.spy(pv, "desynchronize");
-
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
@@ -348,7 +342,6 @@ describe('SDI', function() {
 		it('should call the right request', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
 			var pv = new Profil("mavaleur", "toto", 12);
-			var spy = sinon.spy(pv, "desynchronize");
 
 			var response1 : any = [];
 
@@ -413,8 +406,6 @@ describe('SDI', function() {
 
                 assert.deepEqual(profils, [pv], "The profil array is not an array fill only with PV: "+JSON.stringify(profils));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the profils");
-
-                var spy = sinon.spy(pv, "desynchronize");
 
 				var emptyResponse : any = {};
 
@@ -502,7 +493,6 @@ describe('SDI', function() {
 				var themeSDI = c.theme();
 				assert.deepEqual(themeSDI, s, "The themeSDI is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
-				var spy = sinon.spy(themeSDI, "desynchronize");
 
 				var emptyResponse : any = {};
 

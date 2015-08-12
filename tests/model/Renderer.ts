@@ -216,7 +216,6 @@ describe('Renderer', function() {
 		it('should call the right request', function (done) {
 			var c = new Renderer("toto", "machin", 52);
 			var s = new InfoType("toto", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
 			var response1:any = [];
 
@@ -271,7 +270,6 @@ describe('Renderer', function() {
                 var infoType = c.infoType();
                 assert.deepEqual(infoType, s, "The infoType is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the infoType");
-                var spy = sinon.spy(infoType, "desynchronize");
 
 				var emptyResponse : any = {};
 

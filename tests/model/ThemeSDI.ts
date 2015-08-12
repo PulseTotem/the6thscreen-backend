@@ -342,7 +342,6 @@ describe('ThemeSDI', function(){
 				var themeZone = c.themeZone();
 				assert.deepEqual(themeZone, s, "The themeZone is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
-				var spy = sinon.spy(themeZone, "desynchronize");
 
 				var emptyResponse : any = {};
 

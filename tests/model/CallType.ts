@@ -362,7 +362,6 @@ describe('CallType', function(){
 		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var s = new Source("toto", "machin","titi", 12, false, 42);
-			var spy = sinon.spy(s, "desynchronize");
 
 			var response1 : any = [];
 
@@ -425,7 +424,6 @@ describe('CallType', function(){
                 var source = c.source();
                 assert.deepEqual(source, s, "The source is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the source");
-                var spy = sinon.spy(source, "desynchronize");
 
 	            var responseCall : any = [];
 
@@ -465,7 +463,6 @@ describe('CallType', function(){
 		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var r = new Renderer("renderer","blop",12);
-			var spy = sinon.spy(r, "desynchronize");
 
 			var response1 : any = [];
 
@@ -524,7 +521,6 @@ describe('CallType', function(){
                 var renderer = c.renderer();
                 assert.deepEqual(renderer, s, "The renderer is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the renderer.");
-                var spy = sinon.spy(renderer, "desynchronize");
 
 				var emptyResponse : any = {};
 
@@ -558,7 +554,6 @@ describe('CallType', function(){
 		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var r = new Policy("policy", "", 12);
-			var spy = sinon.spy(r, "desynchronize");
 
 			var response1 : any = [];
 
@@ -613,7 +608,6 @@ describe('CallType', function(){
             var success = function() {
                 var policy = c.policy();
                 assert.deepEqual(policy, s, "The policy is not the expected value");
-                var spy = sinon.spy(policy, "desynchronize");
 
 				var emptyResponse : any = {};
 
@@ -647,7 +641,6 @@ describe('CallType', function(){
 		it('should call the right request', function(done) {
 			var c = new CallType("toto","machin", 52);
 			var r = new Zone("zone","toto",2, 3, 4, 5, 12);
-			var spy = sinon.spy(r, "desynchronize");
 
 			var response1 : any = [];
 
@@ -705,7 +698,6 @@ describe('CallType', function(){
                 var zone = c.zone();
                 assert.deepEqual(zone, s, "The zone is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zone");
-                var spy = sinon.spy(zone, "desynchronize");
 
 				var emptyResponse : any = {};
 

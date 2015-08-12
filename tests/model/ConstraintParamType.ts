@@ -245,7 +245,6 @@ describe('ConstraintParamType', function() {
 		it('should call the right request', function(done) {
 			var c = new ConstraintParamType("toto","machin", 52);
 			var s = new TypeParamType("toto", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
 			var response1 : any = [];
 
@@ -301,7 +300,6 @@ describe('ConstraintParamType', function() {
                 var type = c.type();
                 assert.deepEqual(type, s, "The type is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the type");
-                var spy = sinon.spy(type, "desynchronize");
 
 				var emptyResponse : any = {};
 
