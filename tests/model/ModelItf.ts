@@ -346,10 +346,7 @@ describe('ModelItf', function() {
 
 			var modelName = ModelItf;
 
-			var response : any = {
-				"status": "success",
-				"data": {"id": 42, "complete": false}
-			};
+			var response : any = {"id": 42, "complete": false}
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()))
@@ -573,10 +570,7 @@ describe('ModelItf', function() {
 			var modelName = ModelItf;
 			var jsonParam = model.toJSONObject();
 
-			var response : any = {
-				"status": "success",
-				"data": model.toJSONObject()
-			};
+			var response : any = model.toJSONObject();
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
@@ -932,11 +926,7 @@ describe('ModelItf', function() {
 
 			var modelName = ModelItf;
 
-			var response : any = {
-				"status": "success",
-				"count": 4,
-				"data": data
-			};
+			var response : any = data;
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))

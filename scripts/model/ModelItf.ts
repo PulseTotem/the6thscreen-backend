@@ -572,7 +572,7 @@ class ModelItf {
             var response = result.data();
 
 			// in that case there is no data to retrieve
-			if ((response instanceof Array) && (response.length == 0)) {
+			if (((response instanceof Array) && (response.length == 0)) || JSON.stringify(response) == "{}") {
 				successCallback(null);
 				return;
 			}
