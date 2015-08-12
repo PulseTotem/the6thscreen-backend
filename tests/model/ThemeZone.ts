@@ -230,13 +230,13 @@ describe('ThemeZone', function(){
 		it('should create the same object with a different ID', function (done) {
 			var toClone = new ThemeZone("toto", "truc", true, "http://example.com/background.png","http://example.com/backgroundVideo.png", "black", "arial", "black", "89%", "14px", 23, 52, true);
 			var toCloneJSON : any = toClone.toJSONObject();
-			toCloneJSON.id = null;
+			delete(toCloneJSON["id"]);
+			delete(toCloneJSON["createdAt"]);
+			delete(toCloneJSON["updatedAt"]);
+
 			var expected = new ThemeZone("toto", "truc", true, "http://example.com/background.png","http://example.com/backgroundVideo.png", "black", "arial", "black", "89%", "14px", 23, 98, true);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": expected.toJSONObject()
-			};
+			var response : any = expected.toJSONObject();
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.post(DatabaseConnection.modelEndpoint(ThemeZone.getTableName()), toCloneJSON)

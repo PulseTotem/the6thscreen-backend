@@ -275,18 +275,6 @@ class Call extends ModelItf {
     }
 
 	/**
-	 * Set the object as desynchronized given the different lazy properties.
-     *
-     * @method desynchronize
-	 */
-	desynchronize() : void {
-		super.desynchronize();
-		this._call_type_loaded = false;
-		this._param_values_loaded = false;
-		this._oauthkey_loaded = false;
-	}
-
-	/**
 	 * Check whether the object is complete or not
 	 *
 	 * A Call is complete if it has an ID, a name, a calltype and a profil.

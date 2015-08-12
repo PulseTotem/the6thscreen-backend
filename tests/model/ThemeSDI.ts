@@ -91,14 +91,11 @@ describe('ThemeSDI', function(){
 		it('should consider the object as complete if it has an ID, a name and a complete ThemeZone', function(done) {
 			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "", "", "", 12);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id":12,
 					"name": "ThemeZone",
 					"complete": true
-				}
-			};
+				};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ThemeSDI.getTableName(), cpt.getId().toString(), ThemeZone.getTableName()))
@@ -120,14 +117,11 @@ describe('ThemeSDI', function(){
 		it('should not consider the object as complete if it has an ID, a name and a ThemeZone which is not complete', function(done) {
 			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "", "", "", 12);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id":12,
 					"name": "ThemeZone",
 					"complete": false
-				}
-			};
+				};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ThemeSDI.getTableName(), cpt.getId().toString(), ThemeZone.getTableName()))
@@ -149,10 +143,7 @@ describe('ThemeSDI', function(){
 		it('should not consider the object as complete if it has no linked ThemeZone', function(done) {
 			var cpt = new ThemeSDI("Toto", "", false, "", "", "", "", "", "", 43);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response : any = [];
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ThemeSDI.getTableName(), cpt.getId().toString(), ThemeZone.getTableName()))
@@ -297,10 +288,7 @@ describe('ThemeSDI', function(){
 			var c = new ThemeSDI("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", 52);
 			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", 2, 52);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1:any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName()))
@@ -311,14 +299,11 @@ describe('ThemeSDI', function(){
 				assert.equal(themeZone, null, "The themeZone is not a null value: " + JSON.stringify(themeZone));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.put(DatabaseConnection.associatedObjectEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 				var success2 = function () {
 					//assert.ok(retour, "The return of the setInfoType is false.");
@@ -347,10 +332,7 @@ describe('ThemeSDI', function(){
 			var c = new ThemeSDI("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", 52);
 			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", 1, 52);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
+			var response1:any = s.toJSONObject();
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName()))
@@ -360,16 +342,12 @@ describe('ThemeSDI', function(){
 				var themeZone = c.themeZone();
 				assert.deepEqual(themeZone, s, "The themeZone is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
-				var spy = sinon.spy(themeZone, "desynchronize");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.delete(DatabaseConnection.associatedObjectEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 
 				var success2 = function() {

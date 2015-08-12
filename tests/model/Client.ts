@@ -166,12 +166,8 @@ describe('Client', function(){
 		it('should call the right request', function (done) {
 			var c = new Client("toto","", 52);
 			var s = new Profil("toto", "machin", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1:any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName()))
@@ -182,14 +178,11 @@ describe('Client', function(){
 				assert.equal(profil, null, "The Profil is not a null value: " + JSON.stringify(profil));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the Profil");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.put(DatabaseConnection.associatedObjectEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 				var success2 = function() {
 					//assert.ok(retour, "The return of the linkProfil is false.");
@@ -217,10 +210,7 @@ describe('Client', function(){
 			var c = new Client("toto","", 52);
 			var s = new Profil("toto","machin", 42);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
+			var response1:any = s.toJSONObject();
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName()))
@@ -230,16 +220,12 @@ describe('Client', function(){
 				var profil = c.profil();
 				assert.deepEqual(profil, s, "The Profil is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the Profil");
-				var spy = sinon.spy(profil, "desynchronize");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.delete(DatabaseConnection.associatedObjectEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 
 				var success2 = function() {

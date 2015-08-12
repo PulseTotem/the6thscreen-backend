@@ -173,12 +173,8 @@ describe('User', function() {
 		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", 52);
 			var pv = new Role("mavaleur",12);
-			var spy = sinon.spy(pv, "desynchronize");
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1 : any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), Role.getTableName()))
@@ -190,14 +186,11 @@ describe('User', function() {
                 assert.deepEqual(roles, [], "The role is not an empty array: "+JSON.stringify(roles));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the roles");
 
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .put(DatabaseConnection.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), Role.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
 
                 var success2 = function() {
@@ -226,16 +219,13 @@ describe('User', function() {
 			var c = new User("toto", "bla", 52);
 			var pv = new Role("mavaleur",12);
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
+			var response1 : any = [
 					{
 						"name": "mavaleur",
 						"id": 12,
 						"complete": false
 					}
-				]
-			};
+				];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), Role.getTableName()))
@@ -247,15 +237,11 @@ describe('User', function() {
                 assert.deepEqual(roles, [pv], "The role array is not an array fill only with PV: "+JSON.stringify(roles));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the roles");
 
-                var spy = sinon.spy(pv, "desynchronize");
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .delete(DatabaseConnection.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), Role.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the removeRole is false.");
@@ -282,12 +268,8 @@ describe('User', function() {
 		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", 52);
 			var pv = new SDI("mavaleur", "bidule", "host", 12);
-			var spy = sinon.spy(pv, "desynchronize");
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1 : any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), SDI.getTableName()))
@@ -299,14 +281,11 @@ describe('User', function() {
                 assert.deepEqual(sdis, [], "The SDIs is not an empty array: "+JSON.stringify(sdis));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the sdis");
 
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .put(DatabaseConnection.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), SDI.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the addSDI is false.");
@@ -335,9 +314,7 @@ describe('User', function() {
 			var c = new User("toto", "bla", 52);
 			var pv = new SDI("mavaleur", "blup", "truc", 12);
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
+			var response1 : any = [
 					{
 						"name": "mavaleur",
 						"description": "blup",
@@ -345,8 +322,7 @@ describe('User', function() {
 						"complete": false,
 						"id": 12
 					}
-				]
-			};
+				];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), SDI.getTableName()))
@@ -358,15 +334,11 @@ describe('User', function() {
                 assert.deepEqual(sdis, [pv], "The sdis array is not an array fill only with PV: "+JSON.stringify(sdis));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the sdis");
 
-                var spy = sinon.spy(pv, "desynchronize");
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .delete(DatabaseConnection.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), SDI.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the removeSDI is false.");
@@ -393,12 +365,8 @@ describe('User', function() {
         it('should call the right request', function(done) {
             var c = new User("toto", "bla", 52);
             var pv = new OAuthKey("mavaleur", "bidule", "maValeur", 12);
-            var spy = sinon.spy(pv, "desynchronize");
 
-            var response1 : SequelizeRestfulResponse = {
-                "status": "success",
-                "data": []
-            };
+            var response1 : any = [];
 
             var restClientMock1 = nock(DatabaseConnection.getBaseURL())
                 .get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), OAuthKey.getTableName()))
@@ -410,14 +378,11 @@ describe('User', function() {
                 assert.deepEqual(oauthkeys, [], "The oauthkeys is not an empty array: "+JSON.stringify(oauthkeys));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the oauthkeys");
 
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .put(DatabaseConnection.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), OAuthKey.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the OAuthKey in database.");
@@ -445,9 +410,7 @@ describe('User', function() {
             var c = new User("toto", "bla", 52);
             var pv = new OAuthKey("mavaleur", "blup", "ouepKey", 12);
 
-            var response1 : SequelizeRestfulResponse = {
-                "status": "success",
-                "data": [
+            var response1 : any = [
                     {
                         "name": "mavaleur",
                         "description": "blup",
@@ -455,8 +418,7 @@ describe('User', function() {
                         "complete": false,
                         "id": 12
                     }
-                ]
-            };
+                ];
 
             var restClientMock1 = nock(DatabaseConnection.getBaseURL())
                 .get(DatabaseConnection.associationEndpoint(User.getTableName(), c.getId().toString(), OAuthKey.getTableName()))
@@ -468,15 +430,11 @@ describe('User', function() {
                 assert.deepEqual(oauthkeys, [pv], "The oauthkeys array is not an array fill only with PV: "+JSON.stringify(oauthkeys));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the oauthkeys");
 
-                var spy = sinon.spy(pv, "desynchronize");
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .delete(DatabaseConnection.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), OAuthKey.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the removeOAuthKey is false.");

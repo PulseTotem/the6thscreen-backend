@@ -103,9 +103,7 @@ describe('OAuthKey', function() {
         it('should consider the object as complete if it has an ID, a name and a complete Service', function(done) {
             var cpt = new OAuthKey("test","", "", 52);
 
-            var response : SequelizeRestfulResponse = {
-                "status": "success",
-                "data": {
+            var response : any = {
                     "id":12,
                     "name": "service",
                     "description": "serviceDesc",
@@ -113,8 +111,7 @@ describe('OAuthKey', function() {
 					"oauth": true,
 					"provider": "provider",
                     "complete": true
-                }
-            };
+                };
 
             var restClientMock = nock(DatabaseConnection.getBaseURL())
                 .get(DatabaseConnection.associationEndpoint(OAuthKey.getTableName(), cpt.getId().toString(), Service.getTableName()))
@@ -136,9 +133,7 @@ describe('OAuthKey', function() {
         it('should not consider the object as complete if it has an ID, a name and an Service which is not complete itself', function(done) {
             var cpt = new OAuthKey("test","", "", 52);
 
-            var response : SequelizeRestfulResponse = {
-                "status": "success",
-                "data": {
+            var response : any = {
                     "id":12,
                     "name": "service",
                     "description": "serviceDesc",
@@ -146,8 +141,7 @@ describe('OAuthKey', function() {
 					"oauth": true,
 					"provider": "provider",
                     "complete": false
-                }
-            };
+                };
 
             var restClientMock = nock(DatabaseConnection.getBaseURL())
                 .get(DatabaseConnection.associationEndpoint(OAuthKey.getTableName(), cpt.getId().toString(), Service.getTableName()))
@@ -239,12 +233,8 @@ describe('OAuthKey', function() {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
             var s = new Service("service", "serviceDesc", "serviceHost", true, "provider", "logo", 42);
-            var spy = sinon.spy(s, "desynchronize");
 
-            var response1:SequelizeRestfulResponse = {
-                "status": "success",
-                "data": []
-            };
+            var response1:any = [];
 
             var restClientMock1 = nock(DatabaseConnection.getBaseURL())
                 .get(DatabaseConnection.associationEndpoint(OAuthKey.getTableName(), c.getId().toString(), Service.getTableName()))
@@ -255,14 +245,11 @@ describe('OAuthKey', function() {
                 assert.equal(service, null, "The service is not a null value: " + JSON.stringify(service));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
 
-                var response2:SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .put(DatabaseConnection.associatedObjectEndpoint(OAuthKey.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the linkService is false.");
@@ -290,10 +277,7 @@ describe('OAuthKey', function() {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
             var s = new Service("service", "serviceDesc", "serviceHost", true, "provider", "logo", 42);
 
-            var response1:SequelizeRestfulResponse = {
-                "status": "success",
-                "data": s.toJSONObject()
-            };
+            var response1:any = s.toJSONObject();
 
             var restClientMock1 = nock(DatabaseConnection.getBaseURL())
                 .get(DatabaseConnection.associationEndpoint(OAuthKey.getTableName(), c.getId().toString(), Service.getTableName()))
@@ -303,16 +287,12 @@ describe('OAuthKey', function() {
                 var service = c.service();
                 assert.deepEqual(service, s, "The service is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
-                var spy = sinon.spy(service, "desynchronize");
 
-                var response2:SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .delete(DatabaseConnection.associatedObjectEndpoint(OAuthKey.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
 
                 var success2 = function() {

@@ -470,19 +470,15 @@ class User extends ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
-                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when updating an object with URL: "+urlUpdate+" and datas: "+this.toJSONObject()+"\nResponse data: "+JSON.stringify(response.data)));
-                } else {
-                    successCallback();
-                }
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(this.toJSONObject())+".\nMessage : "+JSON.stringify(response)));
-            }
+			if(response === undefined || Object.keys(response).length == 0 || response.id === undefined) {
+				failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when updating an object with URL: "+urlUpdate+" and datas: "+self.toJSONObject()+"\nResponse data: "+JSON.stringify(response)));
+			} else {
+				successCallback();
+			}
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(this.toJSONObject())+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
+            failCallback(new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(self.toJSONObject())+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
         };
 
         var urlUpdate = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(User.getTableName(), this.getId().toString());
@@ -516,25 +512,21 @@ class User extends ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                if(response.data === undefined || Object.keys(response.data).length == 0 ||response.data.id === undefined) {
-                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response.data)));
-                } else {
-                    var encryptedGivenPwd = crypto.createHash('sha256').update(BackendConfig.getJWTSecret() + password).digest("hex");
+			if(response === undefined || Object.keys(response).length == 0 ||response.id === undefined) {
+				failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response)));
+			} else {
+				var encryptedGivenPwd = crypto.createHash('sha256').update(BackendConfig.getJWTSecret() + password).digest("hex");
 
-                    if(!!response.data.password) {
-                        if(encryptedGivenPwd == response.data.password) {
-                            successCallback();
-                        } else {
-                            failCallback(new DataException("Given password is not correct."));
-                        }
-                    } else {
-                        failCallback(new DataException("The response is a success but the data appears to be erroneous when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response.data)));
-                    }
-                }
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to read an object with URL:"+urlReadObject+".\nMessage : "+JSON.stringify(response)));
-            }
+				if(!!response.password) {
+					if(encryptedGivenPwd == response.password) {
+						successCallback();
+					} else {
+						failCallback(new DataException("Given password is not correct."));
+					}
+				} else {
+					failCallback(new DataException("The response is a success but the data appears to be erroneous when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response)));
+				}
+			}
         };
 
         var fail : Function = function(result) {

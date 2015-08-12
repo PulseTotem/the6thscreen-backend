@@ -73,14 +73,11 @@ describe('Zone', function() {
 		it('should consider the object as complete if it has an ID, a name and a complete behaviour', function(done) {
 			var cpt = new Zone("bidule", "description", 10, 20, 30, 40, 43);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id":12,
 					"name": "type",
 					"complete": true
-				}
-			};
+				};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), cpt.getId().toString(), Behaviour.getTableName()))
@@ -102,14 +99,11 @@ describe('Zone', function() {
 		it('should not consider the object as complete if it has an ID, a name and a behaviour which is not complete itself', function(done) {
 			var cpt = new Zone("bidule", "description", 10, 20, 30, 40, 43);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id":12,
 					"name": "type",
 					"complete": false
-				}
-			};
+				};
 
 			var restClientMock = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), cpt.getId().toString(), Behaviour.getTableName()))
@@ -260,12 +254,8 @@ describe('Zone', function() {
 		it('should call the right request', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto", "machin", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1:any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName()))
@@ -276,14 +266,11 @@ describe('Zone', function() {
                 assert.equal(behaviour, null, "The behaviour is not a null value: " + JSON.stringify(behaviour));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the behaviour");
 
-                var response2:SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .put(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName(), s.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
 
                 var success2 = function() {
@@ -312,10 +299,7 @@ describe('Zone', function() {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new Behaviour("toto", "machin", 42);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
+			var response1:any = s.toJSONObject();
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName()))
@@ -326,16 +310,11 @@ describe('Zone', function() {
                 assert.deepEqual(behaviour, s, "The behaviour is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the behaviour");
 
-                var spy = sinon.spy(behaviour, "desynchronize");
+				var emptyResponse : any = {};
 
-                var response2:SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
-
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
+				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
                     .delete(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), Behaviour.getTableName(), s.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the unlinkBehaviour is false.");
@@ -362,12 +341,8 @@ describe('Zone', function() {
 		it('should call the right request', function(done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var ct = new CallType("mavaleur", "madescription", 12);
-			var spy = sinon.spy(ct, "desynchronize");
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1 : any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), CallType.getTableName()))
@@ -379,14 +354,11 @@ describe('Zone', function() {
 				assert.deepEqual(callTypes, [], "The callTypes is not an empty array: "+JSON.stringify(callTypes));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the callTypes");
 
-				var response2 : SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.put(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), CallType.getTableName(), ct.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 
 				var success2 = function() {
@@ -416,17 +388,14 @@ describe('Zone', function() {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var ct = new CallType("mavaleur", "madescription", 12);
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
+			var response1 : any = [
 					{
 						"name": "mavaleur",
 						"description": "madescription",
 						"id": 12,
 						"complete": false
 					}
-				]
-			};
+				];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), CallType.getTableName()))
@@ -438,15 +407,11 @@ describe('Zone', function() {
 				assert.deepEqual(callTypes, [ct], "The callType array is not an array fill only with ct: "+JSON.stringify(callTypes));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the callTypes");
 
-				var spy = sinon.spy(ct, "desynchronize");
-				var response2 : SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.delete(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), CallType.getTableName(), ct.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 				var success2 = function() {
 					//assert.ok(retour, "The return of the removeRole is false.");
@@ -474,12 +439,8 @@ describe('Zone', function() {
 		it('should call the right request', function(done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var zc = new ZoneContent("mavaleur", "madescription", 12);
-			var spy = sinon.spy(zc, "desynchronize");
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1 : any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), ZoneContent.getTableName()))
@@ -491,14 +452,11 @@ describe('Zone', function() {
 				assert.deepEqual(zoneContents, [], "The zoneContents is not an empty array: "+JSON.stringify(zoneContents));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zoneContents");
 
-				var response2 : SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.put(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), ZoneContent.getTableName(), zc.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 
 				var success2 = function() {
@@ -528,17 +486,14 @@ describe('Zone', function() {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var zc = new ZoneContent("mavaleur", "madescription", 12);
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
+			var response1 : any = [
 					{
 						"name": "mavaleur",
 						"description": "madescription",
 						"id": 12,
 						"complete": false
 					}
-				]
-			};
+				];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), ZoneContent.getTableName()))
@@ -550,15 +505,11 @@ describe('Zone', function() {
 				assert.deepEqual(zoneContents, [zc], "The zoneContent array is not an array fill only with zc: "+JSON.stringify(zoneContents));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the zoneContents");
 
-				var spy = sinon.spy(zc, "desynchronize");
-				var response2 : SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.delete(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), ZoneContent.getTableName(), zc.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 				var success2 = function() {
 					//assert.ok(retour, "The return of the removeRole is false.");
@@ -587,10 +538,7 @@ describe('Zone', function() {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", 2, 52);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1:any = [];
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), ThemeZone.getTableName()))
@@ -601,14 +549,11 @@ describe('Zone', function() {
 				assert.equal(themeZone, null, "The themeZone is not a null value: " + JSON.stringify(themeZone));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.put(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), ThemeZone.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 				var success2 = function () {
 					//assert.ok(retour, "The return of the setInfoType is false.");
@@ -637,10 +582,7 @@ describe('Zone', function() {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
 			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", 2, 52);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
+			var response1:any = s.toJSONObject();
 
 			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(Zone.getTableName(), c.getId().toString(), ThemeZone.getTableName()))
@@ -650,16 +592,12 @@ describe('Zone', function() {
 				var themeZone = c.theme();
 				assert.deepEqual(themeZone, s, "The themeZone is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
-				var spy = sinon.spy(themeZone, "desynchronize");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
 					.delete(DatabaseConnection.associatedObjectEndpoint(Zone.getTableName(), c.getId().toString(), ThemeZone.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+					.reply(200, JSON.stringify(emptyResponse));
 
 
 				var success2 = function() {

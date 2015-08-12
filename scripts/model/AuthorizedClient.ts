@@ -283,17 +283,6 @@ class AuthorizedClient extends ModelItf {
         this.loadSDI(success, fail);
     }
 
-    /**
-     * Set the object as desynchronized given the different lazy properties.
-     *
-     * @method desynchronize
-     */
-    desynchronize() : void {
-        super.desynchronize();
-        this._sdi_loaded = false;
-        this._profil_loaded = false;
-    }
-
 	/**
 	 * Return a AuthorizedClient instance as a JSON Object
 	 *

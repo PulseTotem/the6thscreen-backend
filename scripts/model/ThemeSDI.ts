@@ -376,16 +376,6 @@ class ThemeSDI extends ModelItf {
 	}
 
 	/**
-	 * Set the object as desynchronized given the different lazy properties.
-	 *
-	 * @method desynchronize
-	 */
-	desynchronize() : void {
-		super.desynchronize();
-		this._themeZone_loaded = false;
-	}
-
-	/**
 	 * Return a ThemeSDI instance as a JSON Object
 	 *
 	 * @method toJSONObject
