@@ -57,6 +57,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveThemeSDIDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(ThemeSDI, "themeSDIId", description, "ThemeSDIDescription"); });
 		this.addListenerToSocket('RetrieveSystemTriggerDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(SystemTrigger, "systemTriggerId", description, "SystemTriggerDescription"); });
 		this.addListenerToSocket('RetrieveUserTriggerDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(UserTrigger, "userTriggerId", description, "UserTriggerDescription"); });
+		this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(User, "userId", description, "UserDescription"); });
+
 
 		// Retrieve all objects
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
@@ -78,6 +80,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveAllTypeParamTypeDescription', function() { self.sendAllObjectDescription(TypeParamType, "AllTypeParamTypeDescription"); });
 		this.addListenerToSocket('RetrieveAllSystemTriggerDescription', function() { self.sendAllObjectDescription(SystemTrigger, "AllSystemTriggerDescription"); });
 		this.addListenerToSocket('RetrieveAllUserTriggerDescription', function() { self.sendAllObjectDescription(UserTrigger, "AllUserTriggerDescription"); });
+		this.addListenerToSocket('RetrieveAllUserDescription', function() { self.sendAllObjectDescription(User, "AllUserDescription"); });
+		this.addListenerToSocket('RetrieveAllSDIDescription', function() { self.sendAllObjectDescription(SDI, "AllSDIDescription"); });
 
 
 		// Create object
@@ -102,6 +106,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreatePolicy', function(data) { self.createObject(Policy, data, "AnswerCreatePolicy"); });
 		this.addListenerToSocket('CreateSystemTrigger', function(data) { self.createObject(SystemTrigger, data, "AnswerCreateSystemTrigger"); });
 		this.addListenerToSocket('CreateUserTrigger', function(data) { self.createObject(UserTrigger, data, "AnswerCreateUserTrigger"); });
+		this.addListenerToSocket('CreateUser', function(data) { self.createObject(User, data, "AnswerCreateUser"); });
 
 		// Update object
 		this.addListenerToSocket('UpdateSDI', function(data) { self.updateObjectAttribute(SDI, data, "AnswerUpdateSDI"); });
@@ -125,6 +130,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdatePolicy', function(data) { self.updateObjectAttribute(Policy, data, "AnswerUpdatePolicy"); });
 		this.addListenerToSocket('UpdateSystemTrigger', function(data) { self.updateObjectAttribute(SystemTrigger, data, "AnswerUpdateSystemTrigger"); });
 		this.addListenerToSocket('UpdateUserTrigger', function(data) { self.updateObjectAttribute(UserTrigger, data, "AnswerUpdateUserTrigger"); });
+		this.addListenerToSocket('UpdateUser', function(data) { self.updateObjectAttribute(User, data, "AnswerUpdateUser"); });
+
 
 		// Delete object
 		this.addListenerToSocket('DeleteRelativeEvent', function(idRelativeEvent) { self.deleteObjectFromDescription(RelativeEvent, "relativeEventId", idRelativeEvent, "AnswerDeleteRelativeEvent"); });
@@ -147,6 +154,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteSystemTrigger', function(idSystemTrigger) { self.deleteObjectFromDescription(SystemTrigger, "systemTriggerId", idSystemTrigger, "AnswerDeleteSystemTrigger"); });
 		this.addListenerToSocket('DeleteUserTrigger', function(idUserTrigger) { self.deleteObjectFromDescription(UserTrigger, "userTriggerId", idUserTrigger, "AnswerDeleteUserTrigger"); });
 		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "AnswerDeleteSDI"); });
+		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteObjectFromDescription(User, "userId", idUser, "AnswerDeleteUser"); });
 
 
 		// Custom requests
@@ -171,6 +179,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveParamTypesFromCallType', function (callTypeDescription) { self.sendParamTypesDescriptionFromCallType(callTypeDescription); });
 		this.addListenerToSocket('CreateParamValueDescription', function (paramValueDescription) { self.createParamValueDescription(paramValueDescription); });
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
+		this.addListenerToSocket('ResetUserPassword', function (passwordDescription) { self.resetUserPassword(passwordDescription); });
+
 
 		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
@@ -1369,7 +1379,31 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		Client.read(clientId, successRead, fail);
 	}
 
-////////////////////// Begin: Manage sendIdentifyCommandToClient //////////////////////
+////////////////////// END: Manage sendIdentifyCommandToClient //////////////////////
 
+////////////////////// Begin: Manage resetUserPassword //////////////////////
 
+	resetUserPassword(passwordDescription : any) {
+		// passwordDescription : { 'userId': number, 'password': encryptedPassword }
+		var userId = passwordDescription.userId;
+		var encryptedPassword = passwordDescription.password;
+		var self = this;
+
+		var fail : Function = function (error) {
+			Logger.error("Error when identifying the user : "+userId);
+			self.socket.emit("AnswerResetUserPassword", self.formatResponse(false, error));
+		};
+
+		var successReadUser = function (user : User) {
+			var successSetPassword = function () {
+				self.socket.emit("AnswerResetUserPassword", self.formatResponse(true, {}));
+			};
+
+			user.setPassword(encryptedPassword, successSetPassword, fail);
+		};
+
+		User.read(userId, successReadUser, fail);
+	}
+
+////////////////////// END: Manage resetUserPassword //////////////////////
 }
