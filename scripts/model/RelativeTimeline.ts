@@ -652,6 +652,62 @@ class RelativeTimeline extends ModelItf {
 		return new RelativeTimeline(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
+	/**
+	 * Clone a RelativeTimeline: it clones RelativeTL information, keeping the same TimelineRunner and User/System Triggers, but cloning the RelativeEvents.
+	 * However it does not keep information on AuthorizedClient or Clients.
+	 * @param modelClass
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+
+		var self = this;
+
+		var successCloneRelativeTL = function (clonedRelativeTL : RelativeTimeline) {
+
+			var successLoadAssociations = function () {
+
+				var successAssoSystemTrigger = function () {
+
+					var successAssoUserTrigger = function () {
+
+						var successAssoTLRunner = function () {
+							var nbRelativeEvent = self.relativeEvents().length;
+							var counterRelativeEvent = 0;
+
+							var successCloneRelativeEvent = function (clonedRelativeEvent : RelativeEvent) {
+
+								var successAssoRelativeEvent = function () {
+									counterRelativeEvent++;
+
+									if (counterRelativeEvent == nbRelativeEvent) {
+										successCallback(clonedRelativeTL);
+									}
+								};
+
+								clonedRelativeTL.addRelativeEvent(clonedRelativeEvent.getId(), successAssoRelativeEvent, failCallback);
+							};
+
+							self.relativeEvents().forEach(function (relativeEvent : RelativeEvent) {
+								relativeEvent.cloneObject(RelativeEvent, successCloneRelativeEvent, failCallback);
+							});
+						};
+
+						clonedRelativeTL.linkTimelineRunner(self.timelineRunner().getId(), successAssoTLRunner, failCallback);
+					};
+
+					clonedRelativeTL.linkUserTrigger(self.userTrigger().getId(), successAssoUserTrigger, failCallback);
+				};
+
+				clonedRelativeTL.linkSystemTrigger(self.systemTrigger().getId(), successAssoSystemTrigger, failCallback);
+			};
+
+			self.loadAssociations(successLoadAssociations, failCallback);
+		};
+
+		super.cloneObject(modelClass, successCloneRelativeTL, failCallback);
+	}
+
     /**
      * Retrieve DataBase Table Name.
      *

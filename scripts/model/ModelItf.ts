@@ -880,6 +880,11 @@ class ModelItf {
             return;
         }
 
+	    if (!this.isComplete()) {
+		    failCallback(new ModelException("The model must be complete in order to be cloned."));
+		    return;
+	    }
+
         var jsonInfo : any = this.toJSONObject();
         jsonInfo.id = null;
         var clone : ModelItf = modelClass.fromJSONObject(jsonInfo);
