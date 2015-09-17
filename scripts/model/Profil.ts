@@ -488,6 +488,7 @@ class Profil extends ModelItf {
 		this.deleteObjectAssociation(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
 	}
 
+
 	/**
 	 * Set the SDI of the Profil.
 	 *
@@ -579,7 +580,7 @@ class Profil extends ModelItf {
 						 if(zoneContentsUnlinkNumber == zoneContentsNumber) {
 							 ModelItf.deleteObject(Profil, self.getId(), successCallback, failCallback, attemptNumber);
 						 }
-					 }
+					 };
 
 					self.removeZoneContent(zoneContent.getId(), successUnlink, fail);
 				});
@@ -626,6 +627,54 @@ class Profil extends ModelItf {
     static fromJSONObject(jsonObject : any) : Profil {
 	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
+
+	/**
+	 * Clone a profil: it clones profil information, keeping the same SDI, and cloning ZoneContents.
+	 * However it does not keep information on AuthorizedClient or Clients.
+	 * @param modelClass
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+
+		var self = this;
+
+		var successCloneProfil = function (clonedProfil : Profil) {
+
+			var successLoad = function () {
+
+				var successAssociateSDI = function () {
+					var nbZoneContents = self.zoneContents().length;
+
+					var counterClonedZC = 0;
+
+					var successCloneZoneContent = function (clonedZC : ZoneContent) {
+						var successAssociateZoneContent = function () {
+							counterClonedZC++;
+
+							if (counterClonedZC == nbZoneContents) {
+								successCallback(clonedProfil);
+							}
+						};
+
+						clonedProfil.addZoneContent(clonedZC.getId(), successAssociateZoneContent, failCallback);
+					};
+
+					self.zoneContents().forEach(function (zoneContent : ZoneContent) {
+						zoneContent.cloneObject(ZoneContent, successCloneZoneContent, failCallback);
+					});
+				};
+
+				clonedProfil.linkSDI(self.sdi().getId(), successAssociateSDI, failCallback);
+			};
+
+			self.loadAssociations(successLoad, failCallback);
+		};
+
+		super.cloneObject(modelClass, successCloneProfil, failCallback);
+
+
+	}
 
     /**
      * Retrieve DataBase Table Name.
