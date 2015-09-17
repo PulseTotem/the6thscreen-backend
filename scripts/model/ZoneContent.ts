@@ -694,6 +694,56 @@ class ZoneContent extends ModelItf {
 		return new ZoneContent(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
+	/**
+	 * Clone a ZoneContent: it clones zoneContent information, keeping the same Zone, and cloning Relative or Absolute TL. However it does not link any Profil.
+	 * However it does not keep information on AuthorizedClient or Clients.
+	 * @param modelClass
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+		var self = this;
+
+		var successCloneZC = function (clonedZC : ZoneContent) {
+			var successLoadAsso = function () {
+
+				var successAssoZone = function () {
+
+					if (self.relativeTimeline() != null) {
+
+						var successCloneRelativeTL = function (clonedRelativeTL : RelativeTimeline) {
+
+							var successLinkRelativeTL = function () {
+								successCallback(clonedZC);
+							};
+
+							clonedZC.linkRelativeTimeline(clonedRelativeTL.getId(), successLinkRelativeTL, failCallback);
+						};
+
+						self.relativeTimeline().cloneObject(RelativeTimeline, successCloneRelativeTL, failCallback);
+					} else if (self.absoluteTimeline() != null) {
+						var successCloneAbsoluteTL = function (clonedAbsoluteTL : AbsoluteTimeline) {
+							var successLinkAbsoluteTL = function () {
+								successCallback(clonedZC);
+							};
+
+							clonedZC.linkAbsoluteTimeline(clonedAbsoluteTL.getId(), successLinkAbsoluteTL, failCallback);
+						};
+
+						self.absoluteTimeline().cloneObject(AbsoluteTimeline, successCloneAbsoluteTL, failCallback);
+					}
+
+				};
+
+				clonedZC.linkZone(self.zone().getId(), successAssoZone, failCallback);
+			};
+
+			self.loadAssociations(successLoadAsso, failCallback);
+		};
+
+		super.cloneObject(modelClass, successCloneZC, failCallback);
+	}
+
     /**
      * Retrieve DataBase Table Name.
      *
