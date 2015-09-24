@@ -654,7 +654,6 @@ class RelativeTimeline extends ModelItf {
 
 	/**
 	 * Clone a RelativeTimeline: it clones RelativeTL information, keeping the same TimelineRunner and User/System Triggers, but cloning the RelativeEvents.
-	 * However it does not keep information on AuthorizedClient or Clients.
 	 * @param modelClass
 	 * @param successCallback
 	 * @param failCallback

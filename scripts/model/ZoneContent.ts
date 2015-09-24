@@ -696,7 +696,6 @@ class ZoneContent extends ModelItf {
 
 	/**
 	 * Clone a ZoneContent: it clones zoneContent information, keeping the same Zone, and cloning Relative or Absolute TL. However it does not link any Profil.
-	 * However it does not keep information on AuthorizedClient or Clients.
 	 * @param modelClass
 	 * @param successCallback
 	 * @param failCallback
@@ -722,15 +721,7 @@ class ZoneContent extends ModelItf {
 
 						self.relativeTimeline().cloneObject(RelativeTimeline, successCloneRelativeTL, failCallback);
 					} else if (self.absoluteTimeline() != null) {
-						var successCloneAbsoluteTL = function (clonedAbsoluteTL : AbsoluteTimeline) {
-							var successLinkAbsoluteTL = function () {
-								successCallback(clonedZC);
-							};
-
-							clonedZC.linkAbsoluteTimeline(clonedAbsoluteTL.getId(), successLinkAbsoluteTL, failCallback);
-						};
-
-						self.absoluteTimeline().cloneObject(AbsoluteTimeline, successCloneAbsoluteTL, failCallback);
+						failCallback(new ModelException("AbsoluteTimeline are not supported for cloning yet."));
 					}
 
 				};

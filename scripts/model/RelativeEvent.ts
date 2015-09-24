@@ -419,6 +419,34 @@ class RelativeEvent extends ModelItf {
 	}
 
     /**
+     * Clone a RelativeEvent: it clones RelativeEvent information, cloning the Call.
+     * @param modelClass
+     * @param successCallback
+     * @param failCallback
+     */
+    cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+        var self = this;
+
+        var successCloneRelativeEvent = function (clonedRelativeEvent : RelativeEvent) {
+            var successLoadAsso = function () {
+                var successCloneCall = function (clonedCall : Call) {
+                    var successLinkCall = function () {
+                        successCallback(clonedRelativeEvent);
+                    };
+
+                    clonedRelativeEvent.linkCall(clonedCall.getId(), successLinkCall, failCallback);
+                };
+
+                self.call().cloneObject(Call, successCloneCall, failCallback);
+            };
+
+            self.loadAssociations(successLoadAsso, failCallback);
+        };
+
+        super.cloneObject(RelativeEvent, successCloneRelativeEvent, failCallback);
+    }
+
+    /**
      * Retrieve DataBase Table Name.
      *
      * @method getTableName
