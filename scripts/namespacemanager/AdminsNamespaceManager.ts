@@ -1098,19 +1098,33 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				}
 
 				var successCreateParamValue = function() {
+					var finalSuccess = function () {
+						self.socket.emit("AnswerCreateEmptyParamValueForParamTypeId", self.formatResponse(true, pV.toJSONObject()));
+					};
 
 					var successlinkParamType = function() {
-						self.socket.emit("AnswerCreateEmptyParamValueForParamTypeId", self.formatResponse(true, pV.toJSONObject()));
-					}
+						var successCheckCompleteness = function () {
+							if (pV.isComplete()) {
+								var successUpdate = function () {
+									finalSuccess();
+								};
+								pV.update(successUpdate, fail);
+							} else {
+								finalSuccess();
+							}
+						};
+
+						pV.checkCompleteness(successCheckCompleteness, fail);
+					};
 
 					pV.linkParamType(paramTypeId, successlinkParamType, fail);
-				}
+				};
 
 				pV.create(successCreateParamValue, fail);
 			};
 
 			paramType.loadAssociations(successLoadParamTypeAssociations, fail);
-		}
+		};
 
 		ParamType.read(paramTypeId, successReadParamType, fail);
 

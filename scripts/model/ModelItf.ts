@@ -881,7 +881,8 @@ class ModelItf {
         }
 
 	    if (!this.isComplete()) {
-		    failCallback(new ModelException("The model must be complete in order to be cloned."));
+		    Logger.error("Error when cloning with object: "+JSON.stringify(this));
+		    failCallback(new ModelException("The model must be complete in order to be cloned. ModelClass : "+modelClass.getTableName()));
 		    return;
 	    }
 

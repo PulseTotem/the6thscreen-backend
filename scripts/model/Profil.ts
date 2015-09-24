@@ -472,12 +472,25 @@ class Profil extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	addZoneContent(zoneContentID : number, successCallback : Function, failCallback : Function) {
+		var self = this;
+
+		var finalSuccess = function () {
+			self.associateObject(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
+		};
+
 		var successReadZC = function (zc : ZoneContent) {
 			if (zc.isComplete()) {
-				this.associateObject(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
+				finalSuccess();
 			} else {
 				var successCheckCompleteness = function () {
-					this.associateObject(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
+					if (zc.isComplete()) {
+						var successUpdate = function () {
+							finalSuccess();
+						};
+						zc.update(successUpdate, failCallback);
+					} else {
+						finalSuccess();
+					}
 				};
 
 				zc.checkCompleteness(successCheckCompleteness, failCallback);
