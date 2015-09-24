@@ -352,6 +352,29 @@ class ParamValue extends ModelItf {
 	}
 
     /**
+     * Clone a ParamValue: it clones value information, and keep the same ParamType
+     * @param modelClass
+     * @param successCallback
+     * @param failCallback
+     */
+    cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+        var self = this;
+
+        var successCloneParamValue = function (clonedParamValue : ParamValue) {
+            var successLoadAsso = function () {
+                var successLinkParamType = function () {
+                    successCallback(clonedParamValue);
+                };
+
+                clonedParamValue.linkParamType(self.paramType().getId(), successLinkParamType, failCallback);
+            };
+
+            self.loadAssociations(successLoadAsso, failCallback);
+        };
+        super.cloneObject(ParamValue, successCloneParamValue, failCallback);
+    }
+
+    /**
      * Retrieve DataBase Table Name.
      *
      * @method getTableName
