@@ -887,8 +887,13 @@ class ModelItf {
 
         var jsonInfo : any = this.toJSONObject();
         jsonInfo.id = null;
-        var clone : ModelItf = modelClass.fromJSONObject(jsonInfo);
-        clone.create(successCallback, failCallback);
+        var clone = modelClass.fromJSONObject(jsonInfo);
+
+	    var success = function (data : any) {
+		    successCallback(modelClass.fromJSONObject(data));
+	    };
+
+        clone.create(success, failCallback);
     }
 
     /**

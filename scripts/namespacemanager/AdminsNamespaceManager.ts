@@ -1417,7 +1417,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		var self = this;
 
 		var fail : Function = function (error) {
-			Logger.error("Error when reading a profil : "+profilId);
+			Logger.error("Error when reading the profil "+profilId);
+			Logger.error(error);
 			self.socket.emit("AnswerCloneProfil", self.formatResponse(false, error));
 		};
 

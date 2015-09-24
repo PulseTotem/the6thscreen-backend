@@ -472,7 +472,20 @@ class Profil extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	addZoneContent(zoneContentID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
+		var successReadZC = function (zc : ZoneContent) {
+			if (zc.isComplete()) {
+				this.associateObject(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
+			} else {
+				var successCheckCompleteness = function () {
+					this.associateObject(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
+				};
+
+				zc.checkCompleteness(successCheckCompleteness, failCallback);
+			}
+		};
+
+		ZoneContent.read(zoneContentID, successReadZC, failCallback);
+
 	}
 
 	/**
@@ -642,7 +655,7 @@ class Profil extends ModelItf {
 		var successCloneProfil = function (clonedProfil : Profil) {
 
 			var successLoad = function () {
-
+				Logger.debug("Obtained clonedProfil :"+JSON.stringify(clonedProfil));
 				var successAssociateSDI = function () {
 					var nbZoneContents = self.zoneContents().length;
 
@@ -671,9 +684,7 @@ class Profil extends ModelItf {
 			self.loadAssociations(successLoad, failCallback);
 		};
 
-		super.cloneObject(modelClass, successCloneProfil, failCallback);
-
-
+		super.cloneObject(Profil, successCloneProfil, failCallback);
 	}
 
     /**
