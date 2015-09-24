@@ -554,6 +554,55 @@ class Call extends ModelItf {
 	    return new Call(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
 
+	/**
+	 * Clone a Call: it clones Call information, cloning the ParamValues and keeping the original OAuthKey and CallType.
+	 * @param modelClass
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+
+		var self = this;
+		var successCloneCall = function (clonedCall : Call) {
+			var successLoadAsso = function () {
+				var successLinkCallType = function () {
+					var nbParamValues = self.paramValues().length;
+					var counterParamValues = 0;
+
+					var successCloneParamValue = function (clonedParamValue : ParamValue) {
+						var successAddParamValue = function () {
+							counterParamValues++;
+
+							if (counterParamValues == nbParamValues) {
+								var finalSuccess = function () {
+									successCallback(clonedCall);
+								};
+
+								if (self.oAuthKey() != null) {
+									clonedCall.linkOAuthKey(self.oAuthKey().getId(), finalSuccess, failCallback);
+								} else {
+									finalSuccess();
+								}
+							}
+						};
+
+						clonedCall.addParamValue(clonedParamValue.getId(), successAddParamValue, failCallback);
+					};
+
+					self.paramValues().forEach(function (paramValue : ParamValue) {
+						paramValue.cloneObject(ParamValue, successCloneParamValue, failCallback);
+					});
+				};
+
+				clonedCall.linkCallType(self.callType().getId(), successLinkCallType, failCallback);
+			};
+
+			self.loadAssociations(successLoadAsso, failCallback);
+		};
+
+		super.cloneObject(Call, successCloneCall, failCallback);
+	}
+
     /**
      * Retrieve DataBase Table Name.
      *
