@@ -181,6 +181,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
 		this.addListenerToSocket('ResetUserPassword', function (passwordDescription) { self.resetUserPassword(passwordDescription); });
 
+		this.addListenerToSocket('CloneProfil', function(data) { self.cloneProfil(data); });
+
 
 		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
@@ -1406,4 +1408,29 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// END: Manage resetUserPassword //////////////////////
+
+////////////////////// Begin: Manage cloneProfil //////////////////////
+
+	cloneProfil(profilDescription : any) {
+		// profilDescription : { 'profilId': number }
+		var profilId = profilDescription.profilId;
+		var self = this;
+
+		var fail : Function = function (error) {
+			Logger.error("Error when reading a profil : "+profilId);
+			self.socket.emit("AnswerCloneProfil", self.formatResponse(false, error));
+		};
+
+		var successReadProfil = function (profil : Profil) {
+			var successCloneProfil = function (clonedProfil : Profil) {
+				self.socket.emit("AnswerCloneProfil", self.formatResponse(true, clonedProfil));
+			};
+
+			profil.cloneObject(Profil, successCloneProfil, fail);
+		};
+
+		Profil.read(profilId, successReadProfil, fail);
+	}
+
+////////////////////// END: Manage cloneProfil //////////////////////
 }
