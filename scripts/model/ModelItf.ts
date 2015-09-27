@@ -888,13 +888,26 @@ class ModelItf {
 
         var jsonInfo : any = this.toJSONObject();
         jsonInfo.id = null;
+	    jsonInfo.complete = false;
         var clone = modelClass.fromJSONObject(jsonInfo);
 
-	    var success = function (data : any) {
-		    successCallback(modelClass.fromJSONObject(data));
+	    var successUpdate = function () {
+		    successCallback(clone);
 	    };
 
-        clone.create(success, failCallback);
+	    var successCheckCompleteness = function () {
+		    if (clone.isComplete()) {
+			    clone.update(successUpdate, failCallback);
+		    } else {
+			    successCallback(clone);
+		    }
+	    };
+
+	    var successCreate = function (data : any) {
+		    clone.checkCompleteness(successCheckCompleteness, failCallback);
+	    };
+
+        clone.create(successCreate, failCallback);
     }
 
     /**
