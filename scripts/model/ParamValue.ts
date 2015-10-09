@@ -188,9 +188,13 @@ class ParamValue extends ModelItf {
 		var self = this;
 
 		var success : Function = function () {
+            Logger.debug("Success super check complete ParamValue");
 			if (self.isComplete() && !!self.value()) {
-				var success:Function = function () {
+				var successLoad:Function = function () {
+                    Logger.debug("Success load asso check complete ParamValue");
 					self._complete = (self.paramType() !== null && self.paramType().isComplete());
+                    Logger.debug(JSON.stringify(self.paramType()));
+                    Logger.debug("Obtained complete value : "+self._complete);
 					successCallback();
 				};
 
@@ -198,12 +202,13 @@ class ParamValue extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadAssociations(success, fail);
+				self.loadAssociations(successLoad, fail);
 			} else {
 				self._complete = false;
 				successCallback();
 			}
-		}
+		};
+
 		super.checkCompleteness(success, failCallback);
 	}
 
@@ -358,12 +363,31 @@ class ParamValue extends ModelItf {
      * @param failCallback
      */
     cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+        Logger.debug("Start cloning ParamValue with id "+this.getId());
         var self = this;
 
         var successCloneParamValue = function (clonedParamValue : ParamValue) {
+            Logger.debug("Obtained clonedParamValue :"+JSON.stringify(clonedParamValue));
+            var completeParamValue = clonedParamValue.isComplete();
+
             var successLoadAsso = function () {
+
                 var successLinkParamType = function () {
-                    successCallback(clonedParamValue);
+
+                    var successCheckCompleteness = function () {
+                        if (clonedParamValue.isComplete() != completeParamValue) {
+
+                            var successUpdate = function () {
+                                successCallback(clonedParamValue);
+                            };
+
+                            clonedParamValue.update(successUpdate, failCallback);
+                        } else {
+                            successCallback(clonedParamValue);
+                        }
+                    };
+                    clonedParamValue.desynchronize();
+                    clonedParamValue.checkCompleteness(successCheckCompleteness, failCallback);
                 };
 
                 clonedParamValue.linkParamType(self.paramType().getId(), successLinkParamType, failCallback);

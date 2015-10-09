@@ -874,7 +874,8 @@ class ModelItf {
 	    return model;
     }
 
-    cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+    cloneObject(modelClass : any, successCallbackModelItf : Function, failCallback : Function) {
+	    Logger.debug("Clone de modelITF avec "+this.getId());
         if (!modelClass) {
             failCallback(new ModelException("The modelClasse argument must be given to clone the object."));
             return;
@@ -886,28 +887,33 @@ class ModelItf {
 		    return;
 	    }
 
+	    var self = this;
         var jsonInfo : any = this.toJSONObject();
         jsonInfo.id = null;
 	    jsonInfo.complete = false;
         var clone = modelClass.fromJSONObject(jsonInfo);
 
-	    var successUpdate = function () {
-		    successCallback(clone);
+	    var successUpdateModelItf = function () {
+		    Logger.debug("Success update model itf ! "+self.getId());
+		    successCallbackModelItf(clone);
 	    };
 
-	    var successCheckCompleteness = function () {
+	    var successCheckCompletenessModelItf = function () {
+		    Logger.debug("Success check completeness model itf ! "+self.getId());
+
 		    if (clone.isComplete()) {
-			    clone.update(successUpdate, failCallback);
+			    clone.update(successUpdateModelItf, failCallback);
 		    } else {
-			    successCallback(clone);
+			    successUpdateModelItf();
 		    }
 	    };
 
-	    var successCreate = function (data : any) {
-		    clone.checkCompleteness(successCheckCompleteness, failCallback);
+	    var successCreateModelItf = function (data : any) {
+		    Logger.debug("Success create model itf ! "+self.getId());
+		    clone.checkCompleteness(successCheckCompletenessModelItf, failCallback);
 	    };
 
-        clone.create(successCreate, failCallback);
+        clone.create(successCreateModelItf, failCallback);
     }
 
     /**

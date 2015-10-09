@@ -1438,7 +1438,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 		var successReadProfil = function (profil : Profil) {
 			var successCloneProfil = function (clonedProfil : Profil) {
-				self.socket.emit("AnswerCloneProfil", self.formatResponse(true, clonedProfil));
+				Logger.debug("Answer to admin for cloning profil");
+				self.socket.emit("AnswerCloneProfil", self.formatResponse(true, clonedProfil.toJSONObject()));
 			};
 
 			profil.cloneObject(Profil, successCloneProfil, fail);

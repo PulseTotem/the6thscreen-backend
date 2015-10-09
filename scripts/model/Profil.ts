@@ -408,14 +408,14 @@ class Profil extends ModelItf {
 					failCallback(error);
 				};
 
-				var success:Function = function () {
+				var successLoad :Function = function () {
 					if (self._zoneContents_loaded && self._sdi_loaded ) {
 						self._complete = self.isComplete() && self.sdi() != null;
 
 						var successSDILoadZones:Function = function () {
 							self._complete = self.isComplete() && self.sdi().zones().length == self.zoneContents().length;
 							successCallback();
-						}
+						};
 
 						if(self.isComplete()) {
 							self.sdi().loadZones(successSDILoadZones, fail);
@@ -425,10 +425,17 @@ class Profil extends ModelItf {
 					}
 				};
 
+				if (self._zoneContents_loaded && self._sdi_loaded ) {
+					successLoad();
+				}
 
+				if (!self._zoneContents_loaded) {
+					self.loadZoneContents(successLoad, fail);
+				}
 
-				self.loadZoneContents(success, fail);
-				self.loadSDI(success, fail);
+				if (!self._sdi_loaded) {
+					self.loadSDI(successLoad, fail);
+				}
 			} else {
 				self._complete = false;
 				successCallback();
@@ -662,10 +669,11 @@ class Profil extends ModelItf {
 	 * @param failCallback
 	 */
 	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
-
+		Logger.debug("Start cloning Profil with id "+this.getId());
 		var self = this;
 
 		var successCloneProfil = function (clonedProfil : Profil) {
+			var completeProfil = clonedProfil.isComplete();
 
 			var successLoad = function () {
 				Logger.debug("Obtained clonedProfil :"+JSON.stringify(clonedProfil));
@@ -679,7 +687,22 @@ class Profil extends ModelItf {
 							counterClonedZC++;
 
 							if (counterClonedZC == nbZoneContents) {
-								successCallback(clonedProfil);
+
+								var successCheckCompleteness = function () {
+									Logger.debug("Check completeness profil...");
+									if (clonedProfil.isComplete() != completeProfil) {
+
+										var successUpdateProfil = function () {
+											successCallback(clonedProfil);
+										};
+
+										clonedProfil.update(successUpdateProfil, failCallback);
+									} else {
+										successCallback(clonedProfil);
+									}
+								};
+								clonedProfil.desynchronize();
+								clonedProfil.checkCompleteness(successCheckCompleteness, failCallback);
 							}
 						};
 

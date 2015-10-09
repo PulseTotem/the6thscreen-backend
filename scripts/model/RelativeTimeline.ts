@@ -383,7 +383,7 @@ class RelativeTimeline extends ModelItf {
 
 		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
-				var success:Function = function () {
+				var successLoad:Function = function () {
 					if (self._relativeEvents_loaded && self._systemTrigger_loaded && self._timelineRunner_loaded) {
 						self._complete = (self._relativeEvents.length > 0) && self._systemTrigger != null && self._timelineRunner != null && self._systemTrigger.isComplete() && self._timelineRunner.isComplete();
 
@@ -397,9 +397,23 @@ class RelativeTimeline extends ModelItf {
 				var fail:Function = function (error) {
 					failCallback(error);
 				};
-				self.loadSystemTrigger(success, fail);
-				self.loadTimelineRunner(success, fail);
-				self.loadRelativeEvents(success, fail);
+
+				if (self._relativeEvents_loaded && self._systemTrigger_loaded && self._timelineRunner_loaded) {
+					successLoad();
+				}
+
+				if (!self._relativeEvents_loaded) {
+					self.loadRelativeEvents(successLoad, fail);
+				}
+
+				if (!self._timelineRunner_loaded) {
+					self.loadTimelineRunner(successLoad, fail);
+				}
+
+				if (!self._systemTrigger_loaded) {
+					self.loadSystemTrigger(successLoad, fail);
+				}
+
 			} else {
 				self._complete = false;
 				successCallback();
@@ -659,10 +673,13 @@ class RelativeTimeline extends ModelItf {
 	 * @param failCallback
 	 */
 	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+		Logger.debug("Start cloning RelativeTimeline with id "+this.getId());
 
 		var self = this;
 
 		var successCloneRelativeTL = function (clonedRelativeTL : RelativeTimeline) {
+			Logger.debug("Obtained clonedRelativeTL :"+JSON.stringify(clonedRelativeTL));
+			var completeRelativeTL = clonedRelativeTL.isComplete();
 
 			var successLoadAssociations = function () {
 
@@ -680,7 +697,21 @@ class RelativeTimeline extends ModelItf {
 									counterRelativeEvent++;
 
 									if (counterRelativeEvent == nbRelativeEvent) {
-										successCallback(clonedRelativeTL);
+
+										var successCheckCompleteness = function () {
+											if (clonedRelativeTL.isComplete() != completeRelativeTL) {
+
+												var successUpdate = function () {
+													successCallback(clonedRelativeTL);
+												};
+
+												clonedRelativeTL.update(successUpdate, failCallback);
+											} else {
+												successCallback(clonedRelativeTL);
+											}
+										};
+										clonedRelativeTL.desynchronize();
+										clonedRelativeTL.checkCompleteness(successCheckCompleteness, failCallback);
 									}
 								};
 

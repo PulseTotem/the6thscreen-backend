@@ -287,7 +287,7 @@ class Call extends ModelItf {
 		var self = this;
 		var success = function () {
 			if (self.isComplete() && !!self.name()) {
-				var success : Function = function () {
+				var successLoad : Function = function () {
 					if (self._call_type_loaded) {
 						self._complete = (!!self.callType() && self.callType().isComplete());
 						successCallback();
@@ -297,8 +297,12 @@ class Call extends ModelItf {
 				var fail : Function = function (error) {
 					failCallback(error);
 				};
+				if (self._call_type_loaded) {
+					successLoad();
+				} else {
+					self.loadCallType(successLoad,fail);
+				}
 
-				self.loadCallType(success,fail);
 			} else {
 				self._complete = false;
 				successCallback();
@@ -561,9 +565,13 @@ class Call extends ModelItf {
 	 * @param failCallback
 	 */
 	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+		Logger.debug("Start cloning Call with id "+this.getId());
 
 		var self = this;
 		var successCloneCall = function (clonedCall : Call) {
+			Logger.debug("Obtained clonedCall :"+JSON.stringify(clonedCall));
+			var completeCall = clonedCall.isComplete();
+
 			var successLoadAsso = function () {
 				var successLinkCallType = function () {
 					var nbParamValues = self.paramValues().length;
@@ -575,7 +583,22 @@ class Call extends ModelItf {
 
 							if (counterParamValues == nbParamValues) {
 								var finalSuccess = function () {
-									successCallback(clonedCall);
+
+									var successCheckCompleteness = function () {
+										if (clonedCall.isComplete() != completeCall) {
+
+											var successUpdate = function () {
+												successCallback(clonedCall);
+											};
+
+											clonedCall.update(successUpdate, failCallback);
+										} else {
+											successCallback(clonedCall);
+										}
+									};
+									clonedCall.desynchronize();
+									clonedCall.checkCompleteness(successCheckCompleteness, failCallback);
+
 								};
 
 								if (self.oAuthKey() != null) {

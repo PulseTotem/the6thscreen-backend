@@ -410,19 +410,20 @@ class ZoneContent extends ModelItf {
 		var self = this;
 		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
-				var success:Function = function () {
+				var successLoad:Function = function () {
 					if (self._zone_loaded && self._absoluteTimeline_loaded && self._relativeTimeline_loaded) {
 						var link : ModelItf = null;
 						if (!!self.absoluteTimeline()) {
-							link = self.absoluteTimeline();
+							self._complete = (!!self.zone()) && (self.absoluteTimeline().isComplete());
+							successCallback();
 						} else if (!!self.relativeTimeline()) {
-							link = self.relativeTimeline();
+							self._complete = (!!self.zone()) && (self.relativeTimeline().isComplete());
+							successCallback();
 						} else {
 							self._complete = false;
 							successCallback();
 						}
-						self._complete = (!!self.zone()) && (link.isComplete());
-						successCallback();
+
 					}
 				};
 
@@ -430,9 +431,22 @@ class ZoneContent extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadZone(success, fail);
-				self.loadAbsoluteTimeline(success, fail);
-				self.loadRelativeTimeline(success, fail);
+				if (self._zone_loaded && self._absoluteTimeline_loaded && self._relativeTimeline_loaded) {
+					successLoad();
+				}
+
+				if (!self._zone_loaded) {
+					self.loadZone(successLoad, fail);
+				}
+
+				if (!self._absoluteTimeline_loaded) {
+					self.loadAbsoluteTimeline(successLoad, fail);
+				}
+
+				if (!self._relativeTimeline_loaded) {
+					self.loadRelativeTimeline(successLoad, fail);
+				}
+
 			} else {
 				self._complete = false;
 				successCallback();
@@ -701,9 +715,13 @@ class ZoneContent extends ModelItf {
 	 * @param failCallback
 	 */
 	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+		Logger.debug("Start cloning ZoneContent with id "+this.getId());
 		var self = this;
 
 		var successCloneZC = function (clonedZC : ZoneContent) {
+			Logger.debug("Obtained clonedZoneContent :"+JSON.stringify(clonedZC));
+			var completeZC = clonedZC.isComplete();
+
 			var successLoadAsso = function () {
 
 				var successAssoZone = function () {
@@ -713,7 +731,21 @@ class ZoneContent extends ModelItf {
 						var successCloneRelativeTL = function (clonedRelativeTL : RelativeTimeline) {
 
 							var successLinkRelativeTL = function () {
-								successCallback(clonedZC);
+
+								var successCheckCompleteness = function () {
+									if (clonedZC.isComplete() != completeZC) {
+
+										var successUpdate = function () {
+											successCallback(clonedZC);
+										};
+
+										clonedZC.update(successUpdate, failCallback);
+									} else {
+										successCallback(clonedZC);
+									}
+								};
+								clonedZC.desynchronize();
+								clonedZC.checkCompleteness(successCheckCompleteness, failCallback);
 							};
 
 							clonedZC.linkRelativeTimeline(clonedRelativeTL.getId(), successLinkRelativeTL, failCallback);
@@ -732,7 +764,7 @@ class ZoneContent extends ModelItf {
 			self.loadAssociations(successLoadAsso, failCallback);
 		};
 
-		super.cloneObject(modelClass, successCloneZC, failCallback);
+		super.cloneObject(ZoneContent, successCloneZC, failCallback);
 	}
 
     /**

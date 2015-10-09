@@ -243,7 +243,7 @@ class RelativeEvent extends ModelItf {
 
 		var success : Function = function () {
             if (self.isComplete() && !!self.name()) {
-                var success:Function = function () {
+                var successLoad:Function = function () {
                     if (self._call_loaded) {
                         self._complete = (!!self.call() && self.call().isComplete());
                         successCallback();
@@ -254,7 +254,12 @@ class RelativeEvent extends ModelItf {
                     failCallback(error);
                 };
 
-                self.loadCall(success, fail);
+                if (self._call_loaded) {
+                    successLoad();
+                } else {
+                    self.loadCall(successLoad, fail);
+                }
+
             } else {
                 self._complete = false;
                 successCallback();
@@ -425,13 +430,32 @@ class RelativeEvent extends ModelItf {
      * @param failCallback
      */
     cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+        Logger.debug("Start cloning RelativeEvent with id "+this.getId());
         var self = this;
 
         var successCloneRelativeEvent = function (clonedRelativeEvent : RelativeEvent) {
+            Logger.debug("Obtained clonedRelativeEvent :"+JSON.stringify(clonedRelativeEvent));
+            var completeRelativeEvent = clonedRelativeEvent.isComplete();
+
             var successLoadAsso = function () {
                 var successCloneCall = function (clonedCall : Call) {
                     var successLinkCall = function () {
-                        successCallback(clonedRelativeEvent);
+
+                        var successCheckCompleteness = function () {
+                            if (clonedRelativeEvent.isComplete() != completeRelativeEvent) {
+
+                                var successUpdate = function () {
+                                    successCallback(clonedRelativeEvent);
+                                };
+
+                                clonedRelativeEvent.update(successUpdate, failCallback);
+                            } else {
+                                successCallback(clonedRelativeEvent);
+                            }
+                        };
+                        clonedRelativeEvent.desynchronize();
+                        clonedRelativeEvent.checkCompleteness(successCheckCompleteness, failCallback);
+
                     };
 
                     clonedRelativeEvent.linkCall(clonedCall.getId(), successLinkCall, failCallback);
