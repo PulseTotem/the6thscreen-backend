@@ -513,11 +513,13 @@ class RelativeEvent extends ModelItf {
 
     /**
      * Clone a RelativeEvent: it clones RelativeEvent information, cloning the Call.
+     *
+     * @method clone
      * @param modelClass
      * @param successCallback
      * @param failCallback
      */
-    cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+    clone(successCallback : Function, failCallback : Function, profilInfo : any) {
         Logger.debug("Start cloning RelativeEvent with id "+this.getId());
         var self = this;
 
@@ -554,7 +556,7 @@ class RelativeEvent extends ModelItf {
                         clonedRelativeEvent.linkCall(clonedCall.getId(), successLinkCall, failCallback);
                     };
 
-                    self.call().cloneObject(Call, successCloneCall, failCallback);
+                    self.call().clone(successCloneCall, failCallback, profilInfo);
                 };
 
                 self.loadAssociations(successLoadAsso, failCallback);
