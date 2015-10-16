@@ -756,56 +756,59 @@ class Profil extends ModelItf {
 	 * @param successCallback
 	 * @param failCallback
 	 */
-	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+	clone(successCallback : Function, failCallback : Function, sdi : SDI) {
 		Logger.debug("Start cloning Profil with id "+this.getId());
 		var self = this;
 
 		var successCloneProfil = function (clonedProfil : Profil) {
-			var completeProfil = clonedProfil.isComplete();
+			var successLinkOrigine = function () {
+				var completeProfil = clonedProfil.isComplete();
 
-			var successLoad = function () {
-				Logger.debug("Obtained clonedProfil :"+JSON.stringify(clonedProfil));
-				var successAssociateSDI = function () {
-					var nbZoneContents = self.zoneContents().length;
+				var successLoad = function () {
+					Logger.debug("Obtained clonedProfil :" + JSON.stringify(clonedProfil));
+					var successAssociateSDI = function () {
+						var nbZoneContents = self.zoneContents().length;
 
-					var counterClonedZC = 0;
+						var counterClonedZC = 0;
 
-					var successCloneZoneContent = function (clonedZC : ZoneContent) {
-						var successAssociateZoneContent = function () {
-							counterClonedZC++;
+						var successCloneZoneContent = function (clonedZC:ZoneContent) {
+							var successAssociateZoneContent = function () {
+								counterClonedZC++;
 
-							if (counterClonedZC == nbZoneContents) {
+								if (counterClonedZC == nbZoneContents) {
 
-								var successCheckCompleteness = function () {
-									Logger.debug("Check completeness profil...");
-									if (clonedProfil.isComplete() != completeProfil) {
+									var successCheckCompleteness = function () {
+										Logger.debug("Check completeness profil...");
+										if (clonedProfil.isComplete() != completeProfil) {
 
-										var successUpdateProfil = function () {
+											var successUpdateProfil = function () {
+												successCallback(clonedProfil);
+											};
+
+											clonedProfil.update(successUpdateProfil, failCallback);
+										} else {
 											successCallback(clonedProfil);
-										};
+										}
+									};
+									clonedProfil.desynchronize();
+									clonedProfil.checkCompleteness(successCheckCompleteness, failCallback);
+								}
+							};
 
-										clonedProfil.update(successUpdateProfil, failCallback);
-									} else {
-										successCallback(clonedProfil);
-									}
-								};
-								clonedProfil.desynchronize();
-								clonedProfil.checkCompleteness(successCheckCompleteness, failCallback);
-							}
+							clonedProfil.addZoneContent(clonedZC.getId(), successAssociateZoneContent, failCallback);
 						};
 
-						clonedProfil.addZoneContent(clonedZC.getId(), successAssociateZoneContent, failCallback);
+						self.zoneContents().forEach(function (zoneContent:ZoneContent) {
+							zoneContent.cloneObject(ZoneContent, successCloneZoneContent, failCallback);
+						});
 					};
 
-					self.zoneContents().forEach(function (zoneContent : ZoneContent) {
-						zoneContent.cloneObject(ZoneContent, successCloneZoneContent, failCallback);
-					});
+					clonedProfil.linkSDI(self.sdi().getId(), successAssociateSDI, failCallback);
 				};
 
-				clonedProfil.linkSDI(self.sdi().getId(), successAssociateSDI, failCallback);
+				self.loadAssociations(successLoad, failCallback);
 			};
-
-			self.loadAssociations(successLoad, failCallback);
+			clonedProfil.linkOrigineProfil(self.getId(), successLinkOrigine, failCallback);
 		};
 
 		super.cloneObject(Profil, successCloneProfil, failCallback);
