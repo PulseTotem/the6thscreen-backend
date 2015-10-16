@@ -517,6 +517,7 @@ class SDI extends ModelItf {
 		this._users_loaded = false;
 		this._zones_loaded = false;
         this._theme_loaded = false;
+        this._origineSDI_loaded = false;
 	}
 
 	/**

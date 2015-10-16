@@ -130,6 +130,22 @@ class Zone extends ModelItf {
 	 */
 	private _theme_loaded : boolean;
 
+	/**
+	 * Original zone if current object is a clone
+	 *
+	 * @property _origineZone
+	 * @type Zone
+	 */
+	private _origineZone : Zone;
+
+	/**
+	 * Lazy loading for the OrigineZone property
+	 *
+	 * @property _origineZone_loaded
+	 * @type boolean
+	 */
+	private _origineZone_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -162,6 +178,9 @@ class Zone extends ModelItf {
 
 	    this._theme = null;
 	    this._theme_loaded = false;
+
+	    this._origineZone = null;
+	    this._origineZone_loaded = false;
     }
 
 	/**
@@ -444,6 +463,50 @@ class Zone extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the original zone if the current object is a clone
+	 *
+	 * @method origineZone
+	 * @returns {Zone}
+	 */
+	origineZone() {
+		return this._origineZone;
+	}
+
+	/**
+	 * Load the original zone if the current object is a clone
+	 *
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	loadOrigineZone(successCallback : Function, failCallback : Function) {
+		if (! this._origineZone_loaded) {
+			var self = this;
+
+			var successLoad = function (zone) {
+				self._origineZone = zone;
+				self._origineZone_loaded = true;
+
+				if (successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail = function (error) {
+				if (failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+
+			this.getUniquelyAssociatedObject(Zone, Zone, successLoad, fail);
+		} else {
+			if (successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
 
 	//////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -490,6 +553,7 @@ class Zone extends ModelItf {
 		this._callTypes_loaded = false;
 		this._zoneContents_loaded = false;
 		this._theme_loaded = false;
+		this._origineZone_loaded = false;
 	}
 
 
