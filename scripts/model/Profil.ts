@@ -750,13 +750,16 @@ class Profil extends ModelItf {
     }
 
 	/**
-	 * Clone a profil: it clones profil information, keeping the same SDI, and cloning ZoneContents.
+	 * Clone a profil: it clones profil information, cloning ZoneContents.
 	 * However it does not keep information on AuthorizedClient or Clients.
+	 * If the profilInfo argument is given, the clonedProfil will be linked to the SDI id contained in ProfilInfo.
+	 *
+	 * @method clone
 	 * @param modelClass
 	 * @param successCallback
 	 * @param failCallback
 	 */
-	clone(successCallback : Function, failCallback : Function, sdi : SDI) {
+	clone(successCallback : Function, failCallback : Function, profilInfo : any) {
 		Logger.debug("Start cloning Profil with id "+this.getId());
 		var self = this;
 
@@ -799,11 +802,16 @@ class Profil extends ModelItf {
 						};
 
 						self.zoneContents().forEach(function (zoneContent:ZoneContent) {
-							zoneContent.cloneObject(ZoneContent, successCloneZoneContent, failCallback);
+							zoneContent.clone(ZoneContent, successCloneZoneContent, failCallback, profilInfo);
 						});
 					};
 
-					clonedProfil.linkSDI(self.sdi().getId(), successAssociateSDI, failCallback);
+					if (profilInfo == null) {
+						clonedProfil.linkSDI(self.sdi().getId(), successAssociateSDI, failCallback);
+					} else {
+						clonedProfil.linkSDI(profilInfo["SDI"], successAssociateSDI, failCallback);
+					}
+
 				};
 
 				self.loadAssociations(successLoad, failCallback);

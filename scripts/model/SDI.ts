@@ -809,6 +809,8 @@ class SDI extends ModelItf {
         var successCloneSDI = function (clonedSDI : SDI) {
 
             var successLinkOrigineSDI = function () {
+                clonedSDI._origineSDI = self;
+                clonedSDI._origineSDI_loaded = true;
 
                 var successLoadAsso = function () {
 
@@ -823,42 +825,88 @@ class SDI extends ModelItf {
 
                                 var zoneSize = self.zones().length;
                                 var counterZones = 0;
+                                var profilInfo = {
+                                    "SDI": clonedSDI.getId(),
+                                    "ZoneContents": {
+                                    },
+                                    "CallTypes": {
+
+                                    }
+                                };
 
                                 var successCloneZone = function (clonedZone : Zone) {
-                                    var successAssoZone = function () {
-                                        counterZones++;
+                                    profilInfo["CallTypes"][clonedZone.getId()] = {};
 
-                                        if (counterZones >= zoneSize) {
+                                    var successLoadOrigineZone = function () {
+                                        var successLoadZAsso = function () {
+                                            var successLoadCall = function () {
 
-                                            var profilSize = self.profils().length;
-                                            var counterProfil = 0;
+                                                var successAssoZone = function () {
+                                                    counterZones++;
 
-                                            var successCloneProfil = function (clonedProfil : Profil) {
+                                                    if (counterZones >= zoneSize) {
 
-                                                var successAssoProfil = function () {
-                                                    counterProfil++;
+                                                        var profilSize = self.profils().length;
+                                                        var counterProfil = 0;
 
-                                                    if (counterProfil >= profilSize) {
-                                                        successCallback(clonedSDI);
+                                                        var successCloneProfil = function (clonedProfil:Profil) {
+
+                                                            var successAssoProfil = function () {
+                                                                counterProfil++;
+
+                                                                if (counterProfil >= profilSize) {
+                                                                    successCallback(clonedSDI);
+                                                                }
+                                                            };
+
+                                                            clonedSDI.addProfil(clonedProfil.getId(), successAssoProfil, failCallback);
+                                                        };
+
+                                                        if (profilSize > 0) {
+                                                            self.profils().forEach(function (profil:Profil) {
+                                                                profil.clone(successCloneProfil, failCallback, profilInfo);
+                                                            });
+                                                        } else {
+                                                            successCallback(clonedSDI);
+                                                        }
                                                     }
                                                 };
 
-                                                clonedSDI.addProfil(clonedProfil.getId(), successAssoProfil, failCallback);
+                                                counterCTs++;
+
+                                                if (counterCTs >= nbCTs) {
+                                                    for (var i = 0; i < nbCTs; i++) {
+                                                        var callType = clonedZone.origineZone().callTypes()[i];
+
+                                                        for (var j = 0; j < callType.calls().length; j++) {
+                                                            var call = callType.calls()[j];
+                                                            profilInfo["CallTypes"][clonedZone.getId()][call.getId()] = callType.getId();
+                                                        }
+                                                    }
+                                                    clonedSDI.addZone(clonedZone.getId(), successAssoZone, failCallback);
+                                                }
                                             };
 
-                                            if (profilSize > 0) {
-                                                self.profils().forEach(function (profil : Profil) {
-                                                    // TODO : Manage cloneObject with the clonedSDI as parameter
-                                                    profil.cloneObject(Profil, successCloneProfil, failCallback);
-                                                });
-                                            } else {
-                                                successCallback(clonedSDI);
-                                            }
-                                        }
+                                            for (var i = 0; i < clonedZone.origineZone().zoneContents().length; i++) {
+                                                var zoneContent = clonedZone.origineZone().zoneContents()[i];
+
+                                                profilInfo["ZoneContents"][zoneContent.getId()] = clonedZone.getId();
+                                            };
+
+                                            var nbCTs = clonedZone.origineZone().callTypes().length;
+                                            var counterCTs = 0;
+
+                                            clonedZone.origineZone().callTypes().forEach(function (ct : CallType) {
+                                                ct.loadCalls(successLoadCall, failCallback);
+                                            });
+
+
+                                        };
+
+                                        clonedZone.origineZone().loadAssociations(successLoadZAsso, failCallback);
                                     };
 
-
-                                    clonedSDI.addZone(clonedZone.getId(), successAssoZone, failCallback);
+                                    clonedZone.loadOrigineZone(successLoadOrigineZone, failCallback);
                                 };
 
                                 if (zoneSize > 0) {
