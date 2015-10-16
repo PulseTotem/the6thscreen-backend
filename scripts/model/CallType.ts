@@ -844,6 +844,41 @@ class CallType extends ModelItf {
 	}
 
     /**
+     * Clone a CallType keeping the same Source, the same Renderer and Policy. Zone and Calls are not set.
+     *
+     * @param successCallback
+     * @param failCallback
+     */
+    clone(successCallback : Function, failCallback : Function) {
+        var self = this;
+        var successCloneCallType = function (clonedCallType : CallType) {
+            var successLinkOrigine = function () {
+                var successLoadAsso = function () {
+                    var successLinkPolicy = function () {
+                        var successLinkRenderer = function () {
+                            var successLinkSource = function () {
+                                successCallback(clonedCallType);
+                            };
+
+                            clonedCallType.linkSource(self.source().getId(), successLinkSource, failCallback);
+                        };
+
+                        clonedCallType.linkRenderer(self.renderer().getId(), successLinkRenderer, failCallback);
+                    };
+
+                    clonedCallType.linkPolicy(self.policy().getId(), successLinkPolicy, failCallback);
+                };
+
+                self.loadAssociations(successLoadAsso, failCallback);
+            };
+
+            clonedCallType.linkOrigineCallType(self.getId(), successLinkOrigine, failCallback);
+        };
+
+        super.cloneObject(CallType, successCloneCallType, failCallback);
+    }
+
+    /**
      * Retrieve DataBase Table Name.
      *
      * @method getTableName
