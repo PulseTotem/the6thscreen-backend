@@ -415,7 +415,13 @@ class ThemeSDI extends ModelItf {
 
 					successCallback();
 				};
-				self.loadAssociations(successLoadAsso, failCallback);
+
+				if (!self._themeZone_loaded) {
+					self.loadThemeZone(successLoadAsso, failCallback);
+				} else {
+					successLoadAsso();
+				}
+
 			} else {
 				self._complete = false;
 				successCallback();

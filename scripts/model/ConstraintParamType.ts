@@ -225,7 +225,12 @@ class ConstraintParamType extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadAssociations(successAsso, fail);
+				if (self._type_loaded) {
+					self.loadType(successAsso, fail);
+				} else {
+					successAsso();
+				}
+
 			} else {
 				self._complete = false;
 				successCallback();

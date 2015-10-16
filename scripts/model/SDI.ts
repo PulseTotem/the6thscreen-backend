@@ -807,26 +807,33 @@ class SDI extends ModelItf {
         var self = this;
 
         var successCloneSDI = function (clonedSDI : SDI) {
+            Logger.debug("Success clone SDI for SDI : "+self.getId());
 
             var successLinkOrigineSDI = function () {
+                Logger.debug("Success link SDI with origine");
                 clonedSDI._origineSDI = self;
                 clonedSDI._origineSDI_loaded = true;
 
                 var isComplete = clonedSDI.isComplete();
 
                 var successLoadAsso = function () {
+                    Logger.debug("Success load asso for SDI");
 
                     var successLinkThemeSDI = function () {
+                        Logger.debug("Success link theme SDI");
 
                         var userSize = self.users().length;
                         var counterUsers = 0;
 
                         var successAddUser = function () {
+                            Logger.debug("Success add user ("+counterUsers+" / "+userSize+")");
+
                             counterUsers++;
                             if (counterUsers >= userSize) {
 
                                 var zoneSize = self.zones().length;
                                 var counterZones = 0;
+
                                 var profilInfo = {
                                     "SDI": clonedSDI.getId(),
                                     "ZoneContents": {
@@ -837,11 +844,17 @@ class SDI extends ModelItf {
                                 };
 
                                 var successCloneZone = function (clonedZone : Zone) {
-
+                                    Logger.debug("Success clone zone ");
 
                                     var successLoadOrigineZone = function () {
+                                        Logger.debug("Success clone zone ");
+
                                         var successLoadZAsso = function () {
+                                            Logger.debug("Success load zone asso");
+
                                             var successLoadCT = function () {
+                                                Logger.debug("Success load CT ");
+
                                                 var successLoadOrigineCT = function () {
                                                     var successLoadCall = function () {
 
@@ -913,6 +926,9 @@ class SDI extends ModelItf {
                                                             var callType = clonedZone.callTypes()[i];
                                                             var callTypeOrigine = callType.origineCallType();
 
+                                                            Logger.debug("Obtained callType : "+callType.getId());
+                                                            Logger.debug("Obtained origine : "+JSON.stringify(callTypeOrigine));
+
                                                             callTypeOrigine.loadCalls(successLoadCall, failCallback);
                                                         }
                                                     }
@@ -928,28 +944,29 @@ class SDI extends ModelItf {
                                                 var nbCTs = clonedZone.callTypes().length;
                                                 var counterCTs = 0;
 
-                                                clonedZone.callTypes().forEach(function (ct:CallType) {
+                                                Logger.debug("NBCTS : "+nbCTs);
+
+                                                for (var i = 0; i < nbCTs; i++) {
+                                                    Logger.debug("Loop loadOrigine :"+i);
+                                                    var ct = clonedZone.callTypes()[i];
+                                                    Logger.debug("Clone : load origine for callType : "+ct.getId());
                                                     ct.loadOrigineCallType(successLoadOrigineCT, failCallback);
-                                                });
+                                                }
                                             };
 
                                             clonedZone.loadCallTypes(successLoadCT, failCallback);
                                         };
 
+                                        clonedZone.origineZone().desynchronize();
                                         clonedZone.origineZone().loadAssociations(successLoadZAsso, failCallback);
                                     };
 
                                     clonedZone.loadOrigineZone(successLoadOrigineZone, failCallback);
                                 };
 
-                                if (zoneSize > 0) {
-                                    self.zones().forEach(function (zone : Zone) {
-                                        zone.clone(successCloneZone, failCallback);
-                                    });
-                                } else {
-                                    successCallback(clonedSDI);
-                                }
-
+                                self.zones().forEach(function (zone : Zone) {
+                                    zone.clone(successCloneZone, failCallback);
+                                });
                             }
                         };
 

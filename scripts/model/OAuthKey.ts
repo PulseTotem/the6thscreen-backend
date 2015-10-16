@@ -257,7 +257,12 @@ class OAuthKey extends ModelItf {
                     failCallback(error);
                 };
 
-                self.loadService(successAsso, fail);
+                if (!self._service_loaded) {
+                    self.loadService(successAsso, fail);
+                } else {
+                    successAsso();
+                }
+
             } else {
                 self._complete = false;
                 successCallback();

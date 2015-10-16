@@ -344,7 +344,12 @@ class ParamType extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadType(successAsso, fail);
+                if (!self._type_loaded) {
+                    self.loadType(successAsso, fail);
+                } else {
+                    successAsso();
+                }
+
 			} else {
 				self._complete = false;
 				successCallback();

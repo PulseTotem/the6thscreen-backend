@@ -574,8 +574,16 @@ class Source extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadInfoType(success, fail);
-				self.loadService(success, fail);
+                if (self._info_type_loaded && self._service_loaded) {
+                    success();
+                }
+
+                if (!self._info_type_loaded) {
+                    self.loadInfoType(success, fail);
+                }
+				if (!self._service_loaded) {
+                    self.loadService(success, fail);
+                }
 			} else {
 				self._complete = false;
 				successCallback();

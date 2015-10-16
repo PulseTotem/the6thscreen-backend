@@ -253,7 +253,12 @@ class AbsoluteEvent extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadRelativeTimeline(success, fail);
+				if (!self._relativeTimeline_loaded) {
+					self.loadRelativeTimeline(success, fail);
+				} else {
+					success();
+				}
+
 			} else {
 				self._complete = false;
 				successCallback();

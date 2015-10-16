@@ -603,7 +603,12 @@ class Zone extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadBehaviour(success, fail);
+				if (!self._behaviour_loaded) {
+					self.loadBehaviour(success, fail);
+				} else {
+					success();
+				}
+
 			} else {
 				self._complete = false;
 				successCallback();
@@ -895,22 +900,33 @@ class Zone extends ModelItf {
 	 * @param failCallback
 	 */
 	clone(successCallback : Function, failCallback : Function) {
+		Logger.debug("Enter in clone zone for zone : "+this.getId());
 		var self = this;
 
 		var successCloneZone = function (clonedZone : Zone) {
+			Logger.debug("Success clone zone in zone");
+
 			var successOrigineZone = function () {
+				Logger.debug("Success link origine zone");
 				clonedZone._origineZone = self;
 				clonedZone._origineZone_loaded = true;
 
 				var isComplete = clonedZone.isComplete();
 
 				var successLoadAsso = function () {
+					Logger.debug("Success load asso in zone");
 					var successLinkBehaviour = function () {
+						Logger.debug("Success link behaviour in zone");
 						var successLinkTheme = function () {
+							Logger.debug("Success link theme in zone");
+
 							var callTypesSize = self.callTypes().length;
 							var callTypeCounter = 0;
 
+							Logger.debug("CallTypes size : "+callTypesSize);
+
 							var successCloneCallType = function (clonedCallType : CallType) {
+								Logger.debug("Success clone call type in zone ("+callTypeCounter+"/"+callTypesSize+")");
 
 								var successLinkCallType = function () {
 									callTypeCounter++;

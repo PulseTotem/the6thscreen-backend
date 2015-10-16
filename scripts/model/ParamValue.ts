@@ -266,7 +266,12 @@ class ParamValue extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadAssociations(successLoad, fail);
+                if (!self._paramType_loaded) {
+                    self.loadParamType(successLoad, fail);
+                } else {
+                    successLoad();
+                }
+
 			} else {
 				self._complete = false;
 				successCallback();

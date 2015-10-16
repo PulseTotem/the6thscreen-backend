@@ -550,9 +550,21 @@ class CallType extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadSource(success, fail);
-				self.loadZone(success, fail);
-				self.loadRenderer(success, fail);
+                if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
+                    success();
+                }
+
+                if (!self._zone_loaded) {
+                    self.loadZone(success, fail);
+                }
+
+                if (!self._source_loaded) {
+                    self.loadSource(success, fail);
+                }
+
+                if (!self._renderer_loaded) {
+                    self.loadRenderer(success, fail);
+                }
 			} else {
 				self._complete = false;
 				successCallback();
