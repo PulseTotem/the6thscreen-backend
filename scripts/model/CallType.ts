@@ -116,6 +116,22 @@ class CallType extends ModelItf {
     private _calls_loaded : boolean;
 
     /**
+     * OrigineCallType if the current object is a clone
+     *
+     * @property _origineCallType
+     * @type CallType
+     */
+    private _origineCallType : CallType;
+
+    /**
+     * Lazy loading for OrigineCallType property
+     *
+     * @property _origineCallType_loaded
+     * @type boolean
+     */
+    private _origineCallType_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -145,6 +161,9 @@ class CallType extends ModelItf {
 
         this._calls = new Array<Call>();
         this._calls_loaded = false;
+
+        this._origineCallType = null;
+        this._origineCallType_loaded = false;
     }
 
 	/**
@@ -391,6 +410,50 @@ class CallType extends ModelItf {
             this.getAssociatedObjects(CallType, Call, success, fail);
         } else {
             if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
+    /**
+     * Return the original callType if the current object is cloned
+     *
+     * @method origineCallType
+     * @returns {CallType}
+     */
+    origineCallType() {
+        return this._origineCallType;
+    }
+
+    /**
+     * Load the original CallType if the current object is cloned
+     *
+     * @method loadOrigineCallType
+     * @param successCallback
+     * @param failCallback
+     */
+    loadOrigineCallType(successCallback : Function, failCallback : Function) {
+        if ( !this._origineCallType_loaded) {
+            var self = this;
+
+            var successLoad = function (callType) {
+                self._origineCallType = callType;
+                self._origineCallType_loaded = true;
+
+                if (successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail = function (error) {
+                if (failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(CallType, CallType, successLoad, fail);
+        } else {
+            if (successCallback != null) {
                 successCallback();
             }
         }
@@ -659,6 +722,30 @@ class CallType extends ModelItf {
 	unlinkZone(zoneID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(CallType, Zone, zoneID, successCallback, failCallback);
 	}
+
+    /**
+     * Set the original CallType if current object is a clone
+     *
+     * @method linkOrigineCallType
+     * @param callTypeId
+     * @param successCallback
+     * @param failCallback
+     */
+    linkOrigineCallType(callTypeId : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(CallType, CallType, callTypeId, successCallback, failCallback);
+    }
+
+    /**
+     * Unset the original CallType
+     *
+     * @method unlinkOrigineCallType
+     * @param callTypeId
+     * @param successCallback
+     * @param failCallback
+     */
+    unlinkOrigineCallType(callTypeId : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(CallType, CallType, callTypeId, successCallback, failCallback);
+    }
 
     /**
      * Create model in database.
