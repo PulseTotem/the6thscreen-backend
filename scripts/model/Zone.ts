@@ -748,6 +748,26 @@ class Zone extends ModelItf {
 		this.deleteObjectAssociation(Zone, ThemeZone, themeZoneID, successCallback, failCallback);
 	}
 
+	/**
+	 * Set the origine zone of the cloned object
+	 * @param origineZoneId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	linkOrigineZone(origineZoneId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Zone, Zone, origineZoneId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the origine zone property
+	 * @param origineZoneId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	unlinkOrigineZone(origineZoneId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Zone, Zone, origineZoneId, successCallback, failCallback);
+	}
+
 
 	/**
      * Create model in database.
@@ -865,6 +885,23 @@ class Zone extends ModelItf {
 	 */
 	static fromJSONObject(jsonObject : any) : Zone {
 		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+	}
+
+	/**
+	 * Clone a Zone keeping the same Theme, the same Behaviour, but cloning CallTypes and ZoneContents
+	 *
+	 * @param modelClass
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+		var self = this;
+
+		var successCloneZone = function (clonedZone : Zone) {
+
+		};
+
+		super.cloneObject(Zone, successCloneZone, failCallback);
 	}
 
     /**
