@@ -658,12 +658,15 @@ class Call extends ModelItf {
     }
 
 	/**
-	 * Clone a Call: it clones Call information, cloning the ParamValues and keeping the original OAuthKey and CallType.
+	 * Clone a Call: it clones Call information, cloning the ParamValues and keeping the original OAuthKey.
+	 * If no infoProfil argument is given, the original CallType is keeping, otherwise the information is retrieved inside infoProfil.
+	 *
+	 * @method clone
 	 * @param modelClass
 	 * @param successCallback
 	 * @param failCallback
 	 */
-	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+	clone(successCallback : Function, failCallback : Function, infoProfil : any) {
 		Logger.debug("Start cloning Call with id "+this.getId());
 
 		var self = this;
@@ -717,11 +720,16 @@ class Call extends ModelItf {
 						};
 
 						self.paramValues().forEach(function (paramValue:ParamValue) {
-							paramValue.cloneObject(ParamValue, successCloneParamValue, failCallback);
+							paramValue.clone(successCloneParamValue, failCallback);
 						});
 					};
 
-					clonedCall.linkCallType(self.callType().getId(), successLinkCallType, failCallback);
+					if (infoProfil == null) {
+						clonedCall.linkCallType(self.callType().getId(), successLinkCallType, failCallback);
+					} else {
+						clonedCall.linkCallType(infoProfil["Calls"][self.getId()], successLinkCallType, failCallback);
+					}
+
 				};
 
 				self.loadAssociations(successLoadAsso, failCallback);
