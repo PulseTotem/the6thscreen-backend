@@ -765,6 +765,9 @@ class Profil extends ModelItf {
 
 		var successCloneProfil = function (clonedProfil : Profil) {
 			var successLinkOrigine = function () {
+				clonedProfil._origineProfil = self;
+				clonedProfil._origineProfil_loaded = true;
+
 				var completeProfil = clonedProfil.isComplete();
 
 				var successLoad = function () {
@@ -802,7 +805,7 @@ class Profil extends ModelItf {
 						};
 
 						self.zoneContents().forEach(function (zoneContent:ZoneContent) {
-							zoneContent.clone(ZoneContent, successCloneZoneContent, failCallback, profilInfo);
+							zoneContent.clone(successCloneZoneContent, failCallback, profilInfo);
 						});
 					};
 

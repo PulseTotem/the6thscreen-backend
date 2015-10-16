@@ -91,6 +91,22 @@ class RelativeTimeline extends ModelItf {
 	 */
 	private _userTrigger_loaded : boolean;
 
+	/**
+	 * The origine relativeTimeline if the current object is a clone
+	 *
+	 * @property _origineRelativeTimeline
+	 * @type RelativeTimeline
+	 */
+	private _origineRelativeTimeline : RelativeTimeline;
+
+	/**
+	 * Lazy loading for the origine relativeTimeline attribute
+	 *
+	 * @property _origineRelativeTimeline_loaded
+	 * @type boolean
+	 */
+	private _origineRelativeTimeline_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -116,6 +132,9 @@ class RelativeTimeline extends ModelItf {
 
 	    this._userTrigger = null;
 	    this._userTrigger_loaded = false;
+
+	    this._origineRelativeTimeline = null;
+	    this._origineRelativeTimeline_loaded = false;
     }
 
 	/**
@@ -310,6 +329,50 @@ class RelativeTimeline extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the origine relativeTimeline if the current object is a clone
+	 *
+	 * @method origineRelativeTimeline
+	 * @returns {RelativeTimeline}
+	 */
+	origineRelativeTimeline() {
+		return this._origineRelativeTimeline;
+	}
+
+	/**
+	 * Lazy loading for the origine relativeTimeline attribute
+	 *
+	 * @method loadOrigineRelativeTimeline
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	loadOrigineRelativeTimeline(successCallback : Function, failCallback : Function) {
+		if (! this._origineRelativeTimeline_loaded) {
+			var self = this;
+
+			var successLoad = function (origineRelativeTimeline) {
+				self._origineRelativeTimeline = origineRelativeTimeline;
+				self._origineRelativeTimeline_loaded = true;
+
+				if (successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail = function (error) {
+				if (failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(RelativeTimeline, RelativeTimeline, successLoad, fail);
+		} else {
+			if (successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
@@ -355,6 +418,7 @@ class RelativeTimeline extends ModelItf {
 		this._timelineRunner_loaded = false;
 		this._userTrigger_loaded = false;
 		this._systemTrigger_loaded = false;
+		this._origineRelativeTimeline_loaded = false;
 	}
 	
 	/**
@@ -551,6 +615,30 @@ class RelativeTimeline extends ModelItf {
 		this.deleteObjectAssociation(RelativeTimeline, SystemTrigger, runnerID, successCallback, failCallback);
 	}
 
+	/**
+	 * Set the origine relativeTimeline if the current object is a clone
+	 *
+	 * @method linkOrigineRelativeTimeline
+	 * @param relativeTLID
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	linkOrigineRelativeTimeline(relativeTLID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(RelativeTimeline, RelativeTimeline, relativeTLID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the origine relativeTimeline attribute
+	 *
+	 * @method unlinkOrigineRelativeTimeline
+	 * @param relativeTLID
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	unlinkOrigineRelativeTimeline(relativeTLID : number, successCallback: Function, failCallback : Function) {
+		this.deleteObjectAssociation(RelativeTimeline, RelativeTimeline, relativeTLID, successCallback, failCallback);
+	}
+
     /**
      * Create model in database.
      *
@@ -679,60 +767,68 @@ class RelativeTimeline extends ModelItf {
 
 		var successCloneRelativeTL = function (clonedRelativeTL : RelativeTimeline) {
 			Logger.debug("Obtained clonedRelativeTL :"+JSON.stringify(clonedRelativeTL));
-			var completeRelativeTL = clonedRelativeTL.isComplete();
 
-			var successLoadAssociations = function () {
+			var successLinkOrigine = function () {
+				clonedRelativeTL._origineRelativeTimeline = self;
+				clonedRelativeTL._origineRelativeTimeline_loaded = true;
 
-				var successAssoSystemTrigger = function () {
+				var completeRelativeTL = clonedRelativeTL.isComplete();
 
-					var successAssoUserTrigger = function () {
+				var successLoadAssociations = function () {
 
-						var successAssoTLRunner = function () {
-							var nbRelativeEvent = self.relativeEvents().length;
-							var counterRelativeEvent = 0;
+					var successAssoSystemTrigger = function () {
 
-							var successCloneRelativeEvent = function (clonedRelativeEvent : RelativeEvent) {
+						var successAssoUserTrigger = function () {
 
-								var successAssoRelativeEvent = function () {
-									counterRelativeEvent++;
+							var successAssoTLRunner = function () {
+								var nbRelativeEvent = self.relativeEvents().length;
+								var counterRelativeEvent = 0;
 
-									if (counterRelativeEvent == nbRelativeEvent) {
+								var successCloneRelativeEvent = function (clonedRelativeEvent:RelativeEvent) {
 
-										var successCheckCompleteness = function () {
-											if (clonedRelativeTL.isComplete() != completeRelativeTL) {
+									var successAssoRelativeEvent = function () {
+										counterRelativeEvent++;
 
-												var successUpdate = function () {
+										if (counterRelativeEvent == nbRelativeEvent) {
+
+											var successCheckCompleteness = function () {
+												if (clonedRelativeTL.isComplete() != completeRelativeTL) {
+
+													var successUpdate = function () {
+														successCallback(clonedRelativeTL);
+													};
+
+													clonedRelativeTL.update(successUpdate, failCallback);
+												} else {
 													successCallback(clonedRelativeTL);
-												};
+												}
+											};
+											clonedRelativeTL.desynchronize();
+											clonedRelativeTL.checkCompleteness(successCheckCompleteness, failCallback);
+										}
+									};
 
-												clonedRelativeTL.update(successUpdate, failCallback);
-											} else {
-												successCallback(clonedRelativeTL);
-											}
-										};
-										clonedRelativeTL.desynchronize();
-										clonedRelativeTL.checkCompleteness(successCheckCompleteness, failCallback);
-									}
+									clonedRelativeTL.addRelativeEvent(clonedRelativeEvent.getId(), successAssoRelativeEvent, failCallback);
 								};
 
-								clonedRelativeTL.addRelativeEvent(clonedRelativeEvent.getId(), successAssoRelativeEvent, failCallback);
+								self.relativeEvents().forEach(function (relativeEvent:RelativeEvent) {
+									relativeEvent.cloneObject(RelativeEvent, successCloneRelativeEvent, failCallback);
+								});
 							};
 
-							self.relativeEvents().forEach(function (relativeEvent : RelativeEvent) {
-								relativeEvent.cloneObject(RelativeEvent, successCloneRelativeEvent, failCallback);
-							});
+							clonedRelativeTL.linkTimelineRunner(self.timelineRunner().getId(), successAssoTLRunner, failCallback);
 						};
 
-						clonedRelativeTL.linkTimelineRunner(self.timelineRunner().getId(), successAssoTLRunner, failCallback);
+						clonedRelativeTL.linkUserTrigger(self.userTrigger().getId(), successAssoUserTrigger, failCallback);
 					};
 
-					clonedRelativeTL.linkUserTrigger(self.userTrigger().getId(), successAssoUserTrigger, failCallback);
+					clonedRelativeTL.linkSystemTrigger(self.systemTrigger().getId(), successAssoSystemTrigger, failCallback);
 				};
 
-				clonedRelativeTL.linkSystemTrigger(self.systemTrigger().getId(), successAssoSystemTrigger, failCallback);
+				self.loadAssociations(successLoadAssociations, failCallback);
 			};
 
-			self.loadAssociations(successLoadAssociations, failCallback);
+			clonedRelativeTL.linkOrigineRelativeTimeline(self.getId(), successLinkOrigine, failCallback);
 		};
 
 		super.cloneObject(modelClass, successCloneRelativeTL, failCallback);

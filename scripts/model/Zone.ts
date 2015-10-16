@@ -899,6 +899,9 @@ class Zone extends ModelItf {
 
 		var successCloneZone = function (clonedZone : Zone) {
 			var successOrigineZone = function () {
+				clonedZone._origineZone = self;
+				clonedZone._origineZone_loaded = true;
+
 				var successLoadAsso = function () {
 					var successLinkBehaviour = function () {
 						var successLinkTheme = function () {

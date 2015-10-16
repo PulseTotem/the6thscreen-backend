@@ -441,6 +441,7 @@ class ZoneContent extends ModelItf {
 		this._relativeTimeline_loaded = false;
 		this._zone_loaded = false;
 		this._profils_loaded = false;
+		this._origineZoneContent_loaded = false;
 	}
 
 	/**
@@ -809,6 +810,8 @@ class ZoneContent extends ModelItf {
 
 		var successCloneZC = function (clonedZC : ZoneContent) {
 			var successLinkOrigine = function () {
+				clonedZC._origineZoneContent = self;
+				clonedZC._origineZoneContent_loaded = true;
 
 				var completeZC = clonedZC.isComplete();
 
