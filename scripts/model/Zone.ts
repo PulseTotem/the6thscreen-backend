@@ -888,7 +888,7 @@ class Zone extends ModelItf {
 	}
 
 	/**
-	 * Clone a Zone keeping the same Theme, the same Behaviour, but cloning CallTypes and ZoneContents
+	 * Clone a Zone keeping the same Theme, the same Behaviour, but cloning CallTypes. ZoneContents are cloned inside Profil.
 	 *
 	 * @param modelClass
 	 * @param successCallback
@@ -898,7 +898,47 @@ class Zone extends ModelItf {
 		var self = this;
 
 		var successCloneZone = function (clonedZone : Zone) {
+			var successOrigineZone = function () {
+				var successLoadAsso = function () {
+					var successLinkBehaviour = function () {
+						var successLinkTheme = function () {
+							var callTypesSize = self.callTypes().length;
+							var callTypeCounter = 0;
 
+							var successCloneCallType = function (clonedCallType : CallType) {
+
+								var successLinkCallType = function () {
+									callTypeCounter++;
+
+									if (callTypeCounter >= callTypesSize) {
+										successCallback(clonedZone);
+									}
+								};
+
+								clonedZone.addCallType(clonedCallType.getId(), successLinkCallType, failCallback);
+							};
+
+							self.callTypes().forEach( function (callType : CallType) {
+								callType.cloneObject(CallType, successCloneCallType, failCallback);
+							});
+						};
+
+						if (self.theme() != null) {
+							clonedZone.linkTheme(self.theme().getId(), successLinkTheme, failCallback);
+						} else {
+							successLinkTheme();
+						}
+
+					};
+
+					clonedZone.linkBehaviour(self.behaviour().getId(), successLinkBehaviour, failCallback);
+				};
+
+				self.loadAssociations(successLoadAsso, failCallback);
+			};
+
+
+			clonedZone.linkOrigineZone(self.getId(), successOrigineZone, failCallback);
 		};
 
 		super.cloneObject(Zone, successCloneZone, failCallback);
