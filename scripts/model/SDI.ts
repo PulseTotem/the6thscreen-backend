@@ -812,6 +812,8 @@ class SDI extends ModelItf {
                 clonedSDI._origineSDI = self;
                 clonedSDI._origineSDI_loaded = true;
 
+                var isComplete = clonedSDI.isComplete();
+
                 var successLoadAsso = function () {
 
                     var successLinkThemeSDI = function () {
@@ -835,6 +837,8 @@ class SDI extends ModelItf {
                                 };
 
                                 var successCloneZone = function (clonedZone : Zone) {
+
+
                                     var successLoadOrigineZone = function () {
                                         var successLoadZAsso = function () {
                                             var successLoadCT = function () {
@@ -849,13 +853,25 @@ class SDI extends ModelItf {
                                                                 var profilSize = self.profils().length;
                                                                 var counterProfil = 0;
 
+                                                                var successCheckComplete = function () {
+                                                                    var finalSuccess = function () {
+                                                                        successCallback(clonedSDI);
+                                                                    };
+
+                                                                    if (clonedSDI.isComplete() != isComplete) {
+                                                                       clonedZone.update(finalSuccess, failCallback);
+                                                                    } else {
+                                                                        finalSuccess();
+                                                                    }
+                                                                };
+
                                                                 var successCloneProfil = function (clonedProfil:Profil) {
 
                                                                     var successAssoProfil = function () {
                                                                         counterProfil++;
 
                                                                         if (counterProfil >= profilSize) {
-                                                                            successCallback(clonedSDI);
+                                                                            clonedSDI.checkCompleteness(successCheckComplete, failCallback);
                                                                         }
                                                                     };
 
@@ -867,7 +883,7 @@ class SDI extends ModelItf {
                                                                         profil.clone(successCloneProfil, failCallback, profilInfo);
                                                                     });
                                                                 } else {
-                                                                    successCallback(clonedSDI);
+                                                                    clonedSDI.checkCompleteness(successCheckComplete, failCallback);
                                                                 }
                                                             }
                                                         };

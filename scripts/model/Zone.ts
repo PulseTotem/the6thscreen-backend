@@ -902,6 +902,8 @@ class Zone extends ModelItf {
 				clonedZone._origineZone = self;
 				clonedZone._origineZone_loaded = true;
 
+				var isComplete = clonedZone.isComplete();
+
 				var successLoadAsso = function () {
 					var successLinkBehaviour = function () {
 						var successLinkTheme = function () {
@@ -914,7 +916,20 @@ class Zone extends ModelItf {
 									callTypeCounter++;
 
 									if (callTypeCounter >= callTypesSize) {
-										successCallback(clonedZone);
+
+										var successCheckComplete = function () {
+											var finalSuccess = function () {
+												successCallback(clonedZone);
+											};
+
+											if (clonedZone.isComplete() != isComplete) {
+												clonedZone.update(finalSuccess, failCallback);
+											} else {
+												finalSuccess();
+											}
+										};
+
+										clonedZone.checkCompleteness(successCheckComplete, failCallback);
 									}
 								};
 

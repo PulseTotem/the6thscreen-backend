@@ -853,11 +853,28 @@ class CallType extends ModelItf {
         var self = this;
         var successCloneCallType = function (clonedCallType : CallType) {
             var successLinkOrigine = function () {
+                clonedCallType._origineCallType = self;
+                clonedCallType._origineCallType_loaded = true;
+
+                var isComplete = clonedCallType.isComplete();
+
                 var successLoadAsso = function () {
                     var successLinkPolicy = function () {
                         var successLinkRenderer = function () {
                             var successLinkSource = function () {
-                                successCallback(clonedCallType);
+                                var successCheckComplete = function () {
+                                    var finalSuccess = function () {
+                                        successCallback(clonedCallType);
+                                    };
+
+                                    if (clonedCallType.isComplete() != isComplete) {
+                                        clonedCallType.update(finalSuccess, failCallback);
+                                    } else {
+                                        finalSuccess();
+                                    }
+                                };
+
+                                clonedCallType.checkCompleteness(successCheckComplete, failCallback);
                             };
 
                             clonedCallType.linkSource(self.source().getId(), successLinkSource, failCallback);

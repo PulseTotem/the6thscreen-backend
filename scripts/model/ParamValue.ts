@@ -450,7 +450,7 @@ class ParamValue extends ModelItf {
      * @param successCallback
      * @param failCallback
      */
-    cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+    clone(successCallback : Function, failCallback : Function) {
         Logger.debug("Start cloning ParamValue with id "+this.getId());
         var self = this;
 
