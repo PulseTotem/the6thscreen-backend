@@ -802,7 +802,7 @@ class SDI extends ModelItf {
      * @param successCallback
      * @param failCallback
      */
-    cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+    clone(successCallback : Function, failCallback : Function) {
 
         var self = this;
 
@@ -863,7 +863,7 @@ class SDI extends ModelItf {
 
                                 if (zoneSize > 0) {
                                     self.zones().forEach(function (zone : Zone) {
-                                        zone.cloneObject(Zone, successCloneZone, failCallback);
+                                        zone.clone(successCloneZone, failCallback);
                                     });
                                 } else {
                                     successCallback(clonedSDI);

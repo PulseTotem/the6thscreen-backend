@@ -894,7 +894,7 @@ class Zone extends ModelItf {
 	 * @param successCallback
 	 * @param failCallback
 	 */
-	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+	clone(successCallback : Function, failCallback : Function) {
 		var self = this;
 
 		var successCloneZone = function (clonedZone : Zone) {
@@ -919,7 +919,7 @@ class Zone extends ModelItf {
 							};
 
 							self.callTypes().forEach( function (callType : CallType) {
-								callType.cloneObject(CallType, successCloneCallType, failCallback);
+								callType.clone(successCloneCallType, failCallback);
 							});
 						};
 

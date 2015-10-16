@@ -98,6 +98,22 @@ class Profil extends ModelItf {
 	 */
 	private _connectedClients_loaded : boolean;
 
+	/**
+	 * The original profil if the current object is a clone
+	 *
+	 * @property _origineProfil
+	 * @type Profil
+	 */
+	private _origineProfil : Profil;
+
+	/**
+	 * Lazy loading for origineProfil
+	 *
+	 * @property origineProfilLoaded
+	 * @type boolean
+	 */
+	private _origineProfil_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -125,6 +141,9 @@ class Profil extends ModelItf {
 
 	    this._connectedClients = new Array<Client>();
 	    this._connectedClients_loaded = false;
+
+	    this._origineProfil = null;
+	    this._origineProfil_loaded = false;
     }
 
     /**
@@ -334,6 +353,50 @@ class Profil extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the original profil if the current object is a clone
+	 *
+	 * @method origineProfil
+	 * @returns {Profil}
+	 */
+	origineProfil() : Profil {
+		return this._origineProfil;
+	}
+
+	/**
+	 * Load origineProfil
+	 *
+	 * @method loadOrigineProfil
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	loadOrigineProfil(successCallback : Function, failCallback : Function) {
+		if (!this._origineProfil_loaded) {
+			var self = this;
+
+			var successLoad = function (origineProfil) {
+				self._origineProfil = origineProfil;
+				self._origineProfil_loaded = true;
+
+				if (successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail = function (error) {
+				if (failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Profil, Profil, successLoad, fail);
+		} else {
+			if (successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
@@ -375,6 +438,7 @@ class Profil extends ModelItf {
 	desynchronize() : void {
 		this._zoneContents_loaded = false;
 		this._sdi_loaded = false;
+		this._origineProfil_loaded = false;
 	}
 
 	/**
@@ -546,6 +610,30 @@ class Profil extends ModelItf {
 	 */
 	unlinkSDI(sdiId : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Profil, SDI, sdiId, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the origineProfil
+	 *
+	 * @method linkOrigineProfil
+	 * @param profilID
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	linkOrigineProfil(profilID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Profil, Profil, profilID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the origineProfil
+	 *
+	 * @method unlinkOrigineProfil
+	 * @param profilId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	unlinkOrigineProfil(profilId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Profil, Profil, profilId, successCallback, failCallback);
 	}
 
     /**
