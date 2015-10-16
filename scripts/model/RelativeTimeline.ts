@@ -756,11 +756,13 @@ class RelativeTimeline extends ModelItf {
 
 	/**
 	 * Clone a RelativeTimeline: it clones RelativeTL information, keeping the same TimelineRunner and User/System Triggers, but cloning the RelativeEvents.
+	 *
+	 * @method clone
 	 * @param modelClass
 	 * @param successCallback
 	 * @param failCallback
 	 */
-	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+	clone(successCallback : Function, failCallback : Function, profilInfo : any) {
 		Logger.debug("Start cloning RelativeTimeline with id "+this.getId());
 
 		var self = this;
@@ -812,7 +814,7 @@ class RelativeTimeline extends ModelItf {
 								};
 
 								self.relativeEvents().forEach(function (relativeEvent:RelativeEvent) {
-									relativeEvent.cloneObject(RelativeEvent, successCloneRelativeEvent, failCallback);
+									relativeEvent.clone(successCloneRelativeEvent, failCallback, profilInfo);
 								});
 							};
 
@@ -831,7 +833,7 @@ class RelativeTimeline extends ModelItf {
 			clonedRelativeTL.linkOrigineRelativeTimeline(self.getId(), successLinkOrigine, failCallback);
 		};
 
-		super.cloneObject(modelClass, successCloneRelativeTL, failCallback);
+		super.cloneObject(RelativeTimeline, successCloneRelativeTL, failCallback);
 	}
 
     /**
