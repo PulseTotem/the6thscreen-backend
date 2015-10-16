@@ -98,6 +98,22 @@ class ZoneContent extends ModelItf {
 	 */
 	private _profils_loaded : boolean;
 
+	/**
+	 * The original ZoneContent if current object is a clone
+	 *
+	 * @property _origineZoneContent
+	 * @type ZoneContent
+	 */
+	private _origineZoneContent : ZoneContent;
+
+	/**
+	 * Lazy loading for OrigineZoneContent property
+	 *
+	 * @property _origineZoneContent_loaded
+	 * @type boolean
+	 */
+	private _origineZoneContent_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -125,6 +141,9 @@ class ZoneContent extends ModelItf {
 
 		this._profils = new Array<Profil>();
 		this._profils_loaded = false;
+
+	    this._origineZoneContent = null;
+	    this._origineZoneContent_loaded = false;
     }
 
 	/**
@@ -328,6 +347,50 @@ class ZoneContent extends ModelItf {
 			this.getAssociatedObjects(ZoneContent, Profil, success, fail);
 		} else {
 			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
+	/**
+	 * Return the original zoneContent if current object is a clone
+	 *
+	 * @method origineZoneContent
+	 * @returns {ZoneContent}
+	 */
+	origineZoneContent() {
+		return this._origineZoneContent;
+	}
+
+	/**
+	 * Load the origineZonecontent attribute
+	 *
+	 * @method loadOrigineZoneContent
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	loadOrigineZoneContent(successCallback : Function, failCallback : Function) {
+		if (! this._origineZoneContent_loaded) {
+			var self = this;
+
+			var successLoad = function (origineZoneContent) {
+				self._origineZoneContent = origineZoneContent;
+				self._origineZoneContent_loaded = true;
+
+				if (successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail = function (error) {
+				if (failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(ZoneContent, ZoneContent, successLoad, fail);
+		} else {
+			if (successCallback != null) {
 				successCallback();
 			}
 		}
@@ -591,6 +654,30 @@ class ZoneContent extends ModelItf {
 		this.deleteObjectAssociation(ZoneContent, Profil, profilID, successCallback, failCallback);
 	}
 
+	/**
+	 * Set the original zoneContent if the current object is a clone
+	 *
+	 * @method linkOrigineZoneContent
+	 * @param zoneContentId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	linkOrigineZoneContent(zoneContentId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(ZoneContent, ZoneContent, zoneContentId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the original ZoneContent
+	 *
+	 * @method unlinkOrigineZoneContent
+	 * @param zoneContentId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	unlinkOrigineZoneContent(zoneContentId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ZoneContent, ZoneContent, zoneContentId, successCallback, failCallback);
+	}
+
 
 	/**
      * Create model in database.
@@ -709,12 +796,15 @@ class ZoneContent extends ModelItf {
 	}
 
 	/**
-	 * Clone a ZoneContent: it clones zoneContent information, keeping the same Zone, and cloning Relative or Absolute TL. However it does not link any Profil.
+	 * Clone a ZoneContent: it clones zoneContent information, cloning Relative or Absolute TL. However it does not link any Profil.
+	 * If profilInfo is given, the zone is linked from information contained in it, otherwise the original zone is linked.
+	 *
+	 * @method clone
 	 * @param modelClass
 	 * @param successCallback
 	 * @param failCallback
 	 */
-	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+	clone(successCallback : Function, failCallback : Function, profilInfo : any) {
 		Logger.debug("Start cloning ZoneContent with id "+this.getId());
 		var self = this;
 
