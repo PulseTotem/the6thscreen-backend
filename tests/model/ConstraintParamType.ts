@@ -15,6 +15,12 @@ var nock : any = require("nock");
 var sinon : SinonStatic = require("sinon");
 
 describe('ConstraintParamType', function() {
+	beforeEach(function() {
+		Logger.setLevel(LoggerLevel.Debug);
+		nock.cleanAll();
+
+	});
+
 	describe('#constructor', function () {
 		it('should store the name', function(){
 			var name = "machin";
@@ -188,7 +194,7 @@ describe('ConstraintParamType', function() {
 
             var fail = function(err) {
                 done(err);
-            }
+            };
 
             cpt.loadType(success, fail);
         });

@@ -139,9 +139,6 @@ class ModelItf {
 	    }
 
         var success : Function = function(result) {
-
-
-
             var response = result.data();
 
 			if(response === undefined || Object.keys(response).length == 0 || response.id === undefined) {
@@ -724,6 +721,10 @@ class ModelItf {
      */
     update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - update : Method need to be implemented.");
+	    // for tests
+	    if (successCallback != null) {
+		    successCallback();
+	    }
     }
 
     /**

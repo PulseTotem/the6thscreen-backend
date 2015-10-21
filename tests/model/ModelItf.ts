@@ -12,6 +12,10 @@ var assert = require("assert");
 var nock : any = require("nock");
 
 describe('ModelItf', function() {
+    beforeEach(function() {
+        nock.cleanAll();
+    });
+
 	describe('#constructor(id)', function() {
 		it('should store the given id', function() {
 			var id = 12;
@@ -2223,10 +2227,29 @@ describe('ModelItf', function() {
             model.cloneObject(null, success, fail);
         });
 
+        it('should launch an exception if the object is not complete', function (done) {
+            var model : ModelItf = new ModelItf(12);
+            var success = function () {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function (err) {
+                assert.throws(function () {
+                        if (err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The DataException has not been thrown.");
+                done();
+            };
+
+            model.cloneObject(ModelItf, success, fail);
+        });
+
         it('should create an object with a different id.', function (done) {
 
             var emptyModel = new ModelItf();
-            var model = new ModelItf(12);
+            var model = new ModelItf(12, true);
             var id = 42;
 
             var response : any = model.toJSONObject();
@@ -2244,7 +2267,7 @@ describe('ModelItf', function() {
             var success = function(obtainedData : any) {
                 //assert.ok(retour, "The creation did not return true");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-                assert.equal(obtainedData.id, id, "The ID is not recorded in the object : "+obtainedData.id);
+                assert.equal(obtainedData._id, id, "The ID is not recorded in the object : "+JSON.stringify(obtainedData));
                 assert.notEqual(model.getId(), obtainedData.id, "The ID of original object and created one are different.");
                 done();
             };

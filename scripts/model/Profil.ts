@@ -536,6 +536,7 @@ class Profil extends ModelItf {
 	/**
 	 * Add a new ZoneContent to the Profil and associate it in the database.
 	 * A ZoneContent can only be added once.
+	 * This method also launch the checkCompleteness method on the ZoneContent object which is added.
 	 *
      * @method addCall
 	 * @param {Call} c The ZoneContent to add inside the Profil. It cannot be a null value.
