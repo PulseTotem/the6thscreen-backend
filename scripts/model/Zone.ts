@@ -929,24 +929,40 @@ class Zone extends ModelItf {
 								Logger.debug("Success clone call type in zone ("+callTypeCounter+"/"+callTypesSize+")");
 
 								var successLinkCallType = function () {
-									callTypeCounter++;
 
-									if (callTypeCounter >= callTypesSize) {
+									clonedCallType.desynchronize();
+									var ctComplete = clonedCallType.isComplete();
 
-										var successCheckComplete = function () {
-											var finalSuccess = function () {
-												successCallback(clonedZone);
-											};
+									var successCTCheckComplete = function () {
+										var successEitherWay = function () {
+											callTypeCounter++;
 
-											if (clonedZone.isComplete() != isComplete) {
-												clonedZone.update(finalSuccess, failCallback);
-											} else {
-												finalSuccess();
+											if (callTypeCounter >= callTypesSize) {
+
+												var successCheckComplete = function () {
+													var finalSuccess = function () {
+														successCallback(clonedZone);
+													};
+
+													if (clonedZone.isComplete() != isComplete) {
+														clonedZone.update(finalSuccess, failCallback);
+													} else {
+														finalSuccess();
+													}
+												};
+
+												clonedZone.checkCompleteness(successCheckComplete, failCallback);
 											}
 										};
 
-										clonedZone.checkCompleteness(successCheckComplete, failCallback);
-									}
+										if (clonedCallType.isComplete() != ctComplete) {
+											clonedCallType.update(successEitherWay, failCallback);
+										} else {
+											successEitherWay();
+										}
+									};
+
+									clonedCallType.checkCompleteness(successCTCheckComplete, failCallback);
 								};
 
 								clonedZone.addCallType(clonedCallType.getId(), successLinkCallType, failCallback);

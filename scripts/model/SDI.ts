@@ -892,6 +892,7 @@ class SDI extends ModelItf {
                                                                 };
 
                                                                 if (profilSize > 0) {
+                                                                    Logger.debug("Profil info : "+JSON.stringify(profilInfo));
                                                                     self.profils().forEach(function (profil:Profil) {
                                                                         profil.clone(successCloneProfil, failCallback, profilInfo);
                                                                     });

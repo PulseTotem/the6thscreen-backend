@@ -819,34 +819,56 @@ class ZoneContent extends ModelItf {
 
 					var successAssoZone = function () {
 
-						if (self.relativeTimeline() != null) {
+						var successEitherWay = function () {
+							if (self.relativeTimeline() != null) {
 
-							var successCloneRelativeTL = function (clonedRelativeTL:RelativeTimeline) {
+								var successCloneRelativeTL = function (clonedRelativeTL:RelativeTimeline) {
 
-								var successLinkRelativeTL = function () {
+									var successLinkRelativeTL = function () {
 
-									var successCheckCompleteness = function () {
-										if (clonedZC.isComplete() != completeZC) {
+										var successCheckCompleteness = function () {
+											if (clonedZC.isComplete() != completeZC) {
 
-											var successUpdate = function () {
+												var successUpdate = function () {
+													successCallback(clonedZC);
+												};
+
+												clonedZC.update(successUpdate, failCallback);
+											} else {
 												successCallback(clonedZC);
-											};
-
-											clonedZC.update(successUpdate, failCallback);
-										} else {
-											successCallback(clonedZC);
-										}
+											}
+										};
+										clonedZC.desynchronize();
+										clonedZC.checkCompleteness(successCheckCompleteness, failCallback);
 									};
-									clonedZC.desynchronize();
-									clonedZC.checkCompleteness(successCheckCompleteness, failCallback);
+
+									clonedZC.linkRelativeTimeline(clonedRelativeTL.getId(), successLinkRelativeTL, failCallback);
 								};
 
-								clonedZC.linkRelativeTimeline(clonedRelativeTL.getId(), successLinkRelativeTL, failCallback);
+								self.relativeTimeline().clone(successCloneRelativeTL, failCallback, profilInfo);
+							} else if (self.absoluteTimeline() != null) {
+								failCallback(new ModelException("AbsoluteTimeline are not supported for cloning yet."));
+							}
+						};
+
+						if (profilInfo != null) {
+							var successReadZone = function (zone : Zone) {
+								var zoneComplete = zone.isComplete();
+
+								var successCheckCompleteZone = function () {
+									if (zone.isComplete() != zoneComplete) {
+										zone.update(successEitherWay, failCallback);
+									} else {
+										successEitherWay();
+									}
+								};
+
+								zone.checkCompleteness(successCheckCompleteZone, failCallback);
 							};
 
-							self.relativeTimeline().clone(successCloneRelativeTL, failCallback, profilInfo);
-						} else if (self.absoluteTimeline() != null) {
-							failCallback(new ModelException("AbsoluteTimeline are not supported for cloning yet."));
+							Zone.read(profilInfo["ZoneContents"][self.getId()], successReadZone, failCallback);
+						} else {
+							successEitherWay();
 						}
 
 					};

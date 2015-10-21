@@ -527,8 +527,9 @@ class RelativeEvent extends ModelItf {
             Logger.debug("Obtained clonedRelativeEvent :"+JSON.stringify(clonedRelativeEvent));
 
             var successLinkOrigine = function () {
+                Logger.debug("Success link relativeEvent to origine");
                 clonedRelativeEvent._origineRelativeEvent = self;
-                clonedRelativeEvent._origineRelativeEvent_loaded = true
+                clonedRelativeEvent._origineRelativeEvent_loaded = true;
 
                 var completeRelativeEvent = clonedRelativeEvent.isComplete();
 
@@ -560,9 +561,8 @@ class RelativeEvent extends ModelItf {
                 };
 
                 self.loadAssociations(successLoadAsso, failCallback);
-
-                clonedRelativeEvent.linkOrigineRelativeEvent(self.getId(), successLinkOrigine, failCallback);
             };
+            clonedRelativeEvent.linkOrigineRelativeEvent(self.getId(), successLinkOrigine, failCallback);
         };
 
         super.cloneObject(RelativeEvent, successCloneRelativeEvent, failCallback);

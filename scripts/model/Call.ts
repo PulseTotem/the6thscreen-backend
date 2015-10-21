@@ -727,6 +727,7 @@ class Call extends ModelItf {
 					if (infoProfil == null) {
 						clonedCall.linkCallType(self.callType().getId(), successLinkCallType, failCallback);
 					} else {
+						Logger.debug("Call : Link call type from infoProfil");
 						clonedCall.linkCallType(infoProfil["Calls"][self.getId()], successLinkCallType, failCallback);
 					}
 
