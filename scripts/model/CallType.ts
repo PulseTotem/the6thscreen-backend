@@ -116,6 +116,22 @@ class CallType extends ModelItf {
     private _calls_loaded : boolean;
 
     /**
+     * OrigineCallType if the current object is a clone
+     *
+     * @property _origineCallType
+     * @type CallType
+     */
+    private _origineCallType : CallType;
+
+    /**
+     * Lazy loading for OrigineCallType property
+     *
+     * @property _origineCallType_loaded
+     * @type boolean
+     */
+    private _origineCallType_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -145,6 +161,9 @@ class CallType extends ModelItf {
 
         this._calls = new Array<Call>();
         this._calls_loaded = false;
+
+        this._origineCallType = null;
+        this._origineCallType_loaded = false;
     }
 
 	/**
@@ -396,6 +415,50 @@ class CallType extends ModelItf {
         }
     }
 
+    /**
+     * Return the original callType if the current object is cloned
+     *
+     * @method origineCallType
+     * @returns {CallType}
+     */
+    origineCallType() {
+        return this._origineCallType;
+    }
+
+    /**
+     * Load the original CallType if the current object is cloned
+     *
+     * @method loadOrigineCallType
+     * @param successCallback
+     * @param failCallback
+     */
+    loadOrigineCallType(successCallback : Function, failCallback : Function) {
+        if ( !this._origineCallType_loaded) {
+            var self = this;
+
+            var successLoad = function (callType) {
+                self._origineCallType = callType;
+                self._origineCallType_loaded = true;
+
+                if (successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail = function (error) {
+                if (failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(CallType, CallType, successLoad, fail);
+        } else {
+            if (successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -487,9 +550,21 @@ class CallType extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadSource(success, fail);
-				self.loadZone(success, fail);
-				self.loadRenderer(success, fail);
+                if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
+                    success();
+                }
+
+                if (!self._zone_loaded) {
+                    self.loadZone(success, fail);
+                }
+
+                if (!self._source_loaded) {
+                    self.loadSource(success, fail);
+                }
+
+                if (!self._renderer_loaded) {
+                    self.loadRenderer(success, fail);
+                }
 			} else {
 				self._complete = false;
 				successCallback();
@@ -661,6 +736,30 @@ class CallType extends ModelItf {
 	}
 
     /**
+     * Set the original CallType if current object is a clone
+     *
+     * @method linkOrigineCallType
+     * @param callTypeId
+     * @param successCallback
+     * @param failCallback
+     */
+    linkOrigineCallType(callTypeId : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(CallType, CallType, callTypeId, successCallback, failCallback);
+    }
+
+    /**
+     * Unset the original CallType
+     *
+     * @method unlinkOrigineCallType
+     * @param callTypeId
+     * @param successCallback
+     * @param failCallback
+     */
+    unlinkOrigineCallType(callTypeId : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(CallType, CallType, callTypeId, successCallback, failCallback);
+    }
+
+    /**
      * Create model in database.
      *
      * @method create
@@ -755,6 +854,58 @@ class CallType extends ModelItf {
 	static fromJSONObject(jsonObject : any) : CallType {
 		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
+
+    /**
+     * Clone a CallType keeping the same Source, the same Renderer and Policy. Zone and Calls are not set.
+     *
+     * @param successCallback
+     * @param failCallback
+     */
+    clone(successCallback : Function, failCallback : Function) {
+        var self = this;
+        var successCloneCallType = function (clonedCallType : CallType) {
+            var successLinkOrigine = function () {
+                clonedCallType._origineCallType = self;
+                clonedCallType._origineCallType_loaded = true;
+
+                var isComplete = clonedCallType.isComplete();
+
+                var successLoadAsso = function () {
+                    var successLinkPolicy = function () {
+                        var successLinkRenderer = function () {
+                            var successLinkSource = function () {
+                                var successCheckComplete = function () {
+                                    var finalSuccess = function () {
+                                        successCallback(clonedCallType);
+                                    };
+
+                                    if (clonedCallType.isComplete() != isComplete) {
+                                        clonedCallType.update(finalSuccess, failCallback);
+                                    } else {
+                                        finalSuccess();
+                                    }
+                                };
+
+                                clonedCallType.checkCompleteness(successCheckComplete, failCallback);
+                            };
+
+                            clonedCallType.linkSource(self.source().getId(), successLinkSource, failCallback);
+                        };
+
+                        clonedCallType.linkRenderer(self.renderer().getId(), successLinkRenderer, failCallback);
+                    };
+
+                    clonedCallType.linkPolicy(self.policy().getId(), successLinkPolicy, failCallback);
+                };
+
+                self.loadAssociations(successLoadAsso, failCallback);
+            };
+
+            clonedCallType.linkOrigineCallType(self.getId(), successLinkOrigine, failCallback);
+        };
+
+        super.cloneObject(CallType, successCloneCallType, failCallback);
+    }
 
     /**
      * Retrieve DataBase Table Name.

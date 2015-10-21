@@ -124,6 +124,22 @@ class SDI extends ModelItf {
     private _authorizedClients_loaded : boolean;
 
     /**
+     * Origine SDI information if cloned
+     *
+     * @property _origineSDI
+     * @type SDI
+     */
+    private _origineSDI : SDI;
+
+    /**
+     * Lazy loading for origineSDI property
+     *
+     * @property _origineSDI_loaded
+     * @type boolean
+     */
+    private _origineSDI_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -155,6 +171,9 @@ class SDI extends ModelItf {
 
         this._authorizedClients = new Array<AuthorizedClient>();
         this._authorizedClients_loaded = false;
+
+        this._origineSDI = null;
+        this._origineSDI_loaded = false;
     }
 
 	/**
@@ -416,6 +435,43 @@ class SDI extends ModelItf {
         }
     }
 
+    /**
+     * Return the original SDI element
+     *
+     * @method origineSDI
+     * @returns {SDI}
+     */
+    origineSDI() {
+        return this._origineSDI;
+    }
+
+    loadOrigineSDI(successCallback : Function, failCallback : Function) {
+        if (!this._origineSDI_loaded) {
+            var self = this;
+
+            var successLoad : Function = function(origineSDI) {
+                self._origineSDI = origineSDI;
+                self._origineSDI_loaded = true;
+
+                if (successCallback != null){
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(SDI, SDI, successLoad, fail);
+        } else {
+            if (successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -461,6 +517,7 @@ class SDI extends ModelItf {
 		this._users_loaded = false;
 		this._zones_loaded = false;
         this._theme_loaded = false;
+        this._origineSDI_loaded = false;
 	}
 
 	/**
@@ -631,6 +688,28 @@ class SDI extends ModelItf {
         this.deleteObjectAssociation(SDI, ThemeSDI, themeSDIID, successCallback, failCallback);
     }
 
+    /**
+     * Set the origineSDI of the current SDI
+     *
+     * @param origineSDIID
+     * @param successCallback
+     * @param failCallback
+     */
+    linkOrigineSDI(origineSDIID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(SDI, SDI, origineSDIID, successCallback, failCallback);
+    }
+
+    /**
+     * Unset the origineSDI for the current SDI
+     *
+     * @param origineSDIID
+     * @param successCallback
+     * @param failCallback
+     */
+    unlinkOrigineSDI(origineSDIID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(SDI, SDI, origineSDIID, successCallback, failCallback);
+    }
+
 	/**
      * Create model in database.
      *
@@ -716,6 +795,207 @@ class SDI extends ModelItf {
 	static fromJSONObject(jsonObject : any) : SDI {
 		return new SDI(jsonObject.name, jsonObject.description, jsonObject.allowedHost, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
+
+    /**
+     * Clone the SDI creating new clone for every element contained inside the SDI.
+     * @param modelClass
+     * @param successCallback
+     * @param failCallback
+     */
+    clone(successCallback : Function, failCallback : Function) {
+
+        var self = this;
+
+        var successCloneSDI = function (clonedSDI : SDI) {
+            Logger.debug("Success clone SDI for SDI : "+self.getId());
+
+            var successLinkOrigineSDI = function () {
+                Logger.debug("Success link SDI with origine");
+                clonedSDI._origineSDI = self;
+                clonedSDI._origineSDI_loaded = true;
+
+                var isComplete = clonedSDI.isComplete();
+
+                var successLoadAsso = function () {
+                    Logger.debug("Success load asso for SDI");
+
+                    var successLinkThemeSDI = function () {
+                        Logger.debug("Success link theme SDI");
+
+                        var userSize = self.users().length;
+                        var counterUsers = 0;
+
+                        var successAddUser = function () {
+                            Logger.debug("Success add user ("+counterUsers+" / "+userSize+")");
+
+                            counterUsers++;
+                            if (counterUsers >= userSize) {
+
+                                var zoneSize = self.zones().length;
+                                var counterZones = 0;
+
+                                var profilInfo = {
+                                    "SDI": clonedSDI.getId(),
+                                    "ZoneContents": {
+                                    },
+                                    "Calls": {
+
+                                    }
+                                };
+
+                                var successCloneZone = function (clonedZone : Zone) {
+                                    Logger.debug("Success clone zone ");
+
+                                    var successLoadOrigineZone = function () {
+                                        Logger.debug("Success clone zone ");
+
+                                        var successLoadZAsso = function () {
+                                            Logger.debug("Success load zone asso");
+
+                                            var successLoadCT = function () {
+                                                Logger.debug("Success load CT ");
+
+                                                var successLoadOrigineCT = function () {
+                                                    var successLoadCall = function () {
+
+                                                        var successAssoZone = function () {
+                                                            counterZones++;
+
+                                                            if (counterZones >= zoneSize) {
+
+                                                                var profilSize = self.profils().length;
+                                                                var counterProfil = 0;
+
+                                                                var successCheckComplete = function () {
+                                                                    var finalSuccess = function () {
+                                                                        successCallback(clonedSDI);
+                                                                    };
+
+                                                                    if (clonedSDI.isComplete() != isComplete) {
+                                                                       clonedZone.update(finalSuccess, failCallback);
+                                                                    } else {
+                                                                        finalSuccess();
+                                                                    }
+                                                                };
+
+                                                                var successCloneProfil = function (clonedProfil:Profil) {
+
+                                                                    var successAssoProfil = function () {
+                                                                        counterProfil++;
+
+                                                                        if (counterProfil >= profilSize) {
+                                                                            clonedSDI.checkCompleteness(successCheckComplete, failCallback);
+                                                                        }
+                                                                    };
+
+                                                                    clonedSDI.addProfil(clonedProfil.getId(), successAssoProfil, failCallback);
+                                                                };
+
+                                                                if (profilSize > 0) {
+                                                                    Logger.debug("Profil info : "+JSON.stringify(profilInfo));
+                                                                    self.profils().forEach(function (profil:Profil) {
+                                                                        profil.clone(successCloneProfil, failCallback, profilInfo);
+                                                                    });
+                                                                } else {
+                                                                    clonedSDI.checkCompleteness(successCheckComplete, failCallback);
+                                                                }
+                                                            }
+                                                        };
+
+                                                        counterCTCall++;
+
+                                                        if (counterCTCall >= nbCTs) {
+                                                            for (var i = 0; i < nbCTs; i++) {
+                                                                var callType = clonedZone.callTypes()[i];
+                                                                var callTypeOrigine = callType.origineCallType();
+
+                                                                for (var j = 0; j < callTypeOrigine.calls().length; j++) {
+                                                                    var call = callTypeOrigine.calls()[j];
+                                                                    profilInfo["Calls"][call.getId()] = callType.getId();
+                                                                }
+                                                            }
+                                                            clonedSDI.addZone(clonedZone.getId(), successAssoZone, failCallback);
+                                                        }
+
+                                                    };
+
+                                                    counterCTs++;
+                                                    var counterCTCall = 0;
+
+                                                    if (counterCTs >= nbCTs) {
+                                                        for (var i = 0; i < nbCTs; i++) {
+                                                            var callType = clonedZone.callTypes()[i];
+                                                            var callTypeOrigine = callType.origineCallType();
+
+                                                            Logger.debug("Obtained callType : "+callType.getId());
+                                                            Logger.debug("Obtained origine : "+JSON.stringify(callTypeOrigine));
+
+                                                            callTypeOrigine.loadCalls(successLoadCall, failCallback);
+                                                        }
+                                                    }
+
+                                                };
+
+                                                for (var i = 0; i < clonedZone.origineZone().zoneContents().length; i++) {
+                                                    var zoneContent = clonedZone.origineZone().zoneContents()[i];
+
+                                                    profilInfo["ZoneContents"][zoneContent.getId()] = clonedZone.getId();
+                                                }
+
+                                                var nbCTs = clonedZone.callTypes().length;
+                                                var counterCTs = 0;
+
+                                                Logger.debug("NBCTS : "+nbCTs);
+
+                                                for (var i = 0; i < nbCTs; i++) {
+                                                    Logger.debug("Loop loadOrigine :"+i);
+                                                    var ct = clonedZone.callTypes()[i];
+                                                    Logger.debug("Clone : load origine for callType : "+ct.getId());
+                                                    ct.loadOrigineCallType(successLoadOrigineCT, failCallback);
+                                                }
+                                            };
+
+                                            clonedZone.loadCallTypes(successLoadCT, failCallback);
+                                        };
+
+                                        clonedZone.origineZone().desynchronize();
+                                        clonedZone.origineZone().loadAssociations(successLoadZAsso, failCallback);
+                                    };
+
+                                    clonedZone.loadOrigineZone(successLoadOrigineZone, failCallback);
+                                };
+
+                                self.zones().forEach(function (zone : Zone) {
+                                    zone.clone(successCloneZone, failCallback);
+                                });
+                            }
+                        };
+
+                        if (userSize > 0) {
+                            self.users().forEach( function (user : User) {
+                                clonedSDI.addUser(user.getId(), successAddUser, failCallback);
+                            });
+                        } else {
+                            successAddUser();
+                        }
+
+                    };
+
+                    if (self.theme() != null) {
+                        clonedSDI.linkTheme(self.theme().getId(), successLinkThemeSDI, failCallback);
+                    } else {
+                        successLinkThemeSDI();
+                    }
+                };
+
+              self.loadAssociations(successLoadAsso, failCallback);
+            };
+
+            clonedSDI.linkOrigineSDI(self.getId(), successLinkOrigineSDI, failCallback);
+        };
+
+        super.cloneObject(SDI, successCloneSDI, failCallback);
+    }
 
 	/**
      * Retrieve DataBase Table Name.

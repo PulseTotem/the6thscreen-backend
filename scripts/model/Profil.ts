@@ -98,6 +98,22 @@ class Profil extends ModelItf {
 	 */
 	private _connectedClients_loaded : boolean;
 
+	/**
+	 * The original profil if the current object is a clone
+	 *
+	 * @property _origineProfil
+	 * @type Profil
+	 */
+	private _origineProfil : Profil;
+
+	/**
+	 * Lazy loading for origineProfil
+	 *
+	 * @property origineProfilLoaded
+	 * @type boolean
+	 */
+	private _origineProfil_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -125,6 +141,9 @@ class Profil extends ModelItf {
 
 	    this._connectedClients = new Array<Client>();
 	    this._connectedClients_loaded = false;
+
+	    this._origineProfil = null;
+	    this._origineProfil_loaded = false;
     }
 
     /**
@@ -334,6 +353,50 @@ class Profil extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the original profil if the current object is a clone
+	 *
+	 * @method origineProfil
+	 * @returns {Profil}
+	 */
+	origineProfil() : Profil {
+		return this._origineProfil;
+	}
+
+	/**
+	 * Load origineProfil
+	 *
+	 * @method loadOrigineProfil
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	loadOrigineProfil(successCallback : Function, failCallback : Function) {
+		if (!this._origineProfil_loaded) {
+			var self = this;
+
+			var successLoad = function (origineProfil) {
+				self._origineProfil = origineProfil;
+				self._origineProfil_loaded = true;
+
+				if (successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail = function (error) {
+				if (failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Profil, Profil, successLoad, fail);
+		} else {
+			if (successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
@@ -375,6 +438,7 @@ class Profil extends ModelItf {
 	desynchronize() : void {
 		this._zoneContents_loaded = false;
 		this._sdi_loaded = false;
+		this._origineProfil_loaded = false;
 	}
 
 	/**
@@ -548,6 +612,30 @@ class Profil extends ModelItf {
 		this.deleteObjectAssociation(Profil, SDI, sdiId, successCallback, failCallback);
 	}
 
+	/**
+	 * Set the origineProfil
+	 *
+	 * @method linkOrigineProfil
+	 * @param profilID
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	linkOrigineProfil(profilID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Profil, Profil, profilID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the origineProfil
+	 *
+	 * @method unlinkOrigineProfil
+	 * @param profilId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	unlinkOrigineProfil(profilId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Profil, Profil, profilId, successCallback, failCallback);
+	}
+
     /**
      * Create model in database.
      *
@@ -662,62 +750,76 @@ class Profil extends ModelItf {
     }
 
 	/**
-	 * Clone a profil: it clones profil information, keeping the same SDI, and cloning ZoneContents.
+	 * Clone a profil: it clones profil information, cloning ZoneContents.
 	 * However it does not keep information on AuthorizedClient or Clients.
+	 * If the profilInfo argument is given, the clonedProfil will be linked to the SDI id contained in ProfilInfo.
+	 *
+	 * @method clone
 	 * @param modelClass
 	 * @param successCallback
 	 * @param failCallback
 	 */
-	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+	clone(successCallback : Function, failCallback : Function, profilInfo : any) {
 		Logger.debug("Start cloning Profil with id "+this.getId());
 		var self = this;
 
 		var successCloneProfil = function (clonedProfil : Profil) {
-			var completeProfil = clonedProfil.isComplete();
+			var successLinkOrigine = function () {
+				clonedProfil._origineProfil = self;
+				clonedProfil._origineProfil_loaded = true;
 
-			var successLoad = function () {
-				Logger.debug("Obtained clonedProfil :"+JSON.stringify(clonedProfil));
-				var successAssociateSDI = function () {
-					var nbZoneContents = self.zoneContents().length;
+				var completeProfil = clonedProfil.isComplete();
 
-					var counterClonedZC = 0;
+				var successLoad = function () {
+					Logger.debug("Obtained clonedProfil :" + JSON.stringify(clonedProfil));
+					var successAssociateSDI = function () {
+						var nbZoneContents = self.zoneContents().length;
 
-					var successCloneZoneContent = function (clonedZC : ZoneContent) {
-						var successAssociateZoneContent = function () {
-							counterClonedZC++;
+						var counterClonedZC = 0;
 
-							if (counterClonedZC == nbZoneContents) {
+						var successCloneZoneContent = function (clonedZC:ZoneContent) {
+							var successAssociateZoneContent = function () {
+								counterClonedZC++;
 
-								var successCheckCompleteness = function () {
-									Logger.debug("Check completeness profil...");
-									if (clonedProfil.isComplete() != completeProfil) {
+								if (counterClonedZC == nbZoneContents) {
 
-										var successUpdateProfil = function () {
+									var successCheckCompleteness = function () {
+										Logger.debug("Check completeness profil...");
+										if (clonedProfil.isComplete() != completeProfil) {
+
+											var successUpdateProfil = function () {
+												successCallback(clonedProfil);
+											};
+
+											clonedProfil.update(successUpdateProfil, failCallback);
+										} else {
 											successCallback(clonedProfil);
-										};
+										}
+									};
+									clonedProfil.desynchronize();
+									clonedProfil.checkCompleteness(successCheckCompleteness, failCallback);
+								}
+							};
 
-										clonedProfil.update(successUpdateProfil, failCallback);
-									} else {
-										successCallback(clonedProfil);
-									}
-								};
-								clonedProfil.desynchronize();
-								clonedProfil.checkCompleteness(successCheckCompleteness, failCallback);
-							}
+							clonedProfil.addZoneContent(clonedZC.getId(), successAssociateZoneContent, failCallback);
 						};
 
-						clonedProfil.addZoneContent(clonedZC.getId(), successAssociateZoneContent, failCallback);
+						self.zoneContents().forEach(function (zoneContent:ZoneContent) {
+							zoneContent.clone(successCloneZoneContent, failCallback, profilInfo);
+						});
 					};
 
-					self.zoneContents().forEach(function (zoneContent : ZoneContent) {
-						zoneContent.cloneObject(ZoneContent, successCloneZoneContent, failCallback);
-					});
+					if (profilInfo == null) {
+						clonedProfil.linkSDI(self.sdi().getId(), successAssociateSDI, failCallback);
+					} else {
+						clonedProfil.linkSDI(profilInfo["SDI"], successAssociateSDI, failCallback);
+					}
+
 				};
 
-				clonedProfil.linkSDI(self.sdi().getId(), successAssociateSDI, failCallback);
+				self.loadAssociations(successLoad, failCallback);
 			};
-
-			self.loadAssociations(successLoad, failCallback);
+			clonedProfil.linkOrigineProfil(self.getId(), successLinkOrigine, failCallback);
 		};
 
 		super.cloneObject(Profil, successCloneProfil, failCallback);

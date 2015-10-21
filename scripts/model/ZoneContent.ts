@@ -98,6 +98,22 @@ class ZoneContent extends ModelItf {
 	 */
 	private _profils_loaded : boolean;
 
+	/**
+	 * The original ZoneContent if current object is a clone
+	 *
+	 * @property _origineZoneContent
+	 * @type ZoneContent
+	 */
+	private _origineZoneContent : ZoneContent;
+
+	/**
+	 * Lazy loading for OrigineZoneContent property
+	 *
+	 * @property _origineZoneContent_loaded
+	 * @type boolean
+	 */
+	private _origineZoneContent_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -125,6 +141,9 @@ class ZoneContent extends ModelItf {
 
 		this._profils = new Array<Profil>();
 		this._profils_loaded = false;
+
+	    this._origineZoneContent = null;
+	    this._origineZoneContent_loaded = false;
     }
 
 	/**
@@ -333,6 +352,50 @@ class ZoneContent extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the original zoneContent if current object is a clone
+	 *
+	 * @method origineZoneContent
+	 * @returns {ZoneContent}
+	 */
+	origineZoneContent() {
+		return this._origineZoneContent;
+	}
+
+	/**
+	 * Load the origineZonecontent attribute
+	 *
+	 * @method loadOrigineZoneContent
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	loadOrigineZoneContent(successCallback : Function, failCallback : Function) {
+		if (! this._origineZoneContent_loaded) {
+			var self = this;
+
+			var successLoad = function (origineZoneContent) {
+				self._origineZoneContent = origineZoneContent;
+				self._origineZoneContent_loaded = true;
+
+				if (successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail = function (error) {
+				if (failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(ZoneContent, ZoneContent, successLoad, fail);
+		} else {
+			if (successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -378,6 +441,7 @@ class ZoneContent extends ModelItf {
 		this._relativeTimeline_loaded = false;
 		this._zone_loaded = false;
 		this._profils_loaded = false;
+		this._origineZoneContent_loaded = false;
 	}
 
 	/**
@@ -591,6 +655,30 @@ class ZoneContent extends ModelItf {
 		this.deleteObjectAssociation(ZoneContent, Profil, profilID, successCallback, failCallback);
 	}
 
+	/**
+	 * Set the original zoneContent if the current object is a clone
+	 *
+	 * @method linkOrigineZoneContent
+	 * @param zoneContentId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	linkOrigineZoneContent(zoneContentId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(ZoneContent, ZoneContent, zoneContentId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the original ZoneContent
+	 *
+	 * @method unlinkOrigineZoneContent
+	 * @param zoneContentId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	unlinkOrigineZoneContent(zoneContentId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ZoneContent, ZoneContent, zoneContentId, successCallback, failCallback);
+	}
+
 
 	/**
      * Create model in database.
@@ -709,59 +797,94 @@ class ZoneContent extends ModelItf {
 	}
 
 	/**
-	 * Clone a ZoneContent: it clones zoneContent information, keeping the same Zone, and cloning Relative or Absolute TL. However it does not link any Profil.
+	 * Clone a ZoneContent: it clones zoneContent information, cloning Relative or Absolute TL. However it does not link any Profil.
+	 * If profilInfo is given, the zone is linked from information contained in it, otherwise the original zone is linked.
+	 *
+	 * @method clone
 	 * @param modelClass
 	 * @param successCallback
 	 * @param failCallback
 	 */
-	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
-		Logger.debug("Start cloning ZoneContent with id "+this.getId());
+	clone(successCallback : Function, failCallback : Function, profilInfo : any) {
 		var self = this;
 
 		var successCloneZC = function (clonedZC : ZoneContent) {
-			Logger.debug("Obtained clonedZoneContent :"+JSON.stringify(clonedZC));
-			var completeZC = clonedZC.isComplete();
+			var successLinkOrigine = function () {
+				clonedZC._origineZoneContent = self;
+				clonedZC._origineZoneContent_loaded = true;
 
-			var successLoadAsso = function () {
+				var completeZC = clonedZC.isComplete();
 
-				var successAssoZone = function () {
+				var successLoadAsso = function () {
 
-					if (self.relativeTimeline() != null) {
+					var successAssoZone = function () {
 
-						var successCloneRelativeTL = function (clonedRelativeTL : RelativeTimeline) {
+						var successEitherWay = function () {
+							if (self.relativeTimeline() != null) {
 
-							var successLinkRelativeTL = function () {
+								var successCloneRelativeTL = function (clonedRelativeTL:RelativeTimeline) {
 
-								var successCheckCompleteness = function () {
-									if (clonedZC.isComplete() != completeZC) {
+									var successLinkRelativeTL = function () {
 
-										var successUpdate = function () {
-											successCallback(clonedZC);
+										var successCheckCompleteness = function () {
+											if (clonedZC.isComplete() != completeZC) {
+
+												var successUpdate = function () {
+													successCallback(clonedZC);
+												};
+
+												clonedZC.update(successUpdate, failCallback);
+											} else {
+												successCallback(clonedZC);
+											}
 										};
+										clonedZC.desynchronize();
+										clonedZC.checkCompleteness(successCheckCompleteness, failCallback);
+									};
 
-										clonedZC.update(successUpdate, failCallback);
-									} else {
-										successCallback(clonedZC);
-									}
+									clonedZC.linkRelativeTimeline(clonedRelativeTL.getId(), successLinkRelativeTL, failCallback);
 								};
-								clonedZC.desynchronize();
-								clonedZC.checkCompleteness(successCheckCompleteness, failCallback);
-							};
 
-							clonedZC.linkRelativeTimeline(clonedRelativeTL.getId(), successLinkRelativeTL, failCallback);
+								self.relativeTimeline().clone(successCloneRelativeTL, failCallback, profilInfo);
+							} else if (self.absoluteTimeline() != null) {
+								failCallback(new ModelException("AbsoluteTimeline are not supported for cloning yet."));
+							}
 						};
 
-						self.relativeTimeline().cloneObject(RelativeTimeline, successCloneRelativeTL, failCallback);
-					} else if (self.absoluteTimeline() != null) {
-						failCallback(new ModelException("AbsoluteTimeline are not supported for cloning yet."));
+						if (profilInfo != null) {
+							var successReadZone = function (zone : Zone) {
+								var zoneComplete = zone.isComplete();
+
+								var successCheckCompleteZone = function () {
+									if (zone.isComplete() != zoneComplete) {
+										zone.update(successEitherWay, failCallback);
+									} else {
+										successEitherWay();
+									}
+								};
+
+								zone.checkCompleteness(successCheckCompleteZone, failCallback);
+							};
+
+							Zone.read(profilInfo["ZoneContents"][self.getId()], successReadZone, failCallback);
+						} else {
+							successEitherWay();
+						}
+
+					};
+
+					if (profilInfo == null) {
+						clonedZC.linkZone(self.zone().getId(), successAssoZone, failCallback);
+					} else {
+						clonedZC.linkZone(profilInfo["ZoneContents"][self.getId()], successAssoZone, failCallback);
 					}
 
 				};
 
-				clonedZC.linkZone(self.zone().getId(), successAssoZone, failCallback);
+				self.loadAssociations(successLoadAsso, failCallback);
 			};
 
-			self.loadAssociations(successLoadAsso, failCallback);
+			clonedZC.linkOrigineZoneContent(self.getId(), successLinkOrigine, failCallback);
 		};
 
 		super.cloneObject(ZoneContent, successCloneZC, failCallback);

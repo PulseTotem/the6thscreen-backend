@@ -75,6 +75,22 @@ class Call extends ModelItf {
 	 */
 	private _oauthkey_loaded : boolean;
 
+	/**
+	 * The origine Call if the current object is a clone
+	 *
+	 * @property _origineCall
+	 * @type Call
+	 */
+	private _origineCall : Call;
+
+	/**
+	 * Lazy loading for the origine call attribute
+	 *
+	 * @property _origineCall_loaded
+	 * @type boolean
+	 */
+	private _origineCall_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -97,6 +113,9 @@ class Call extends ModelItf {
 
 		this._oauthkey = null;
 		this._oauthkey_loaded = false;
+
+	    this._origineCall = null;
+	    this._origineCall_loaded = false;
     }
 
     /**
@@ -240,6 +259,50 @@ class Call extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the original Call if the current object is a clone
+	 *
+	 * @method origineCall
+	 * @returns {Call}
+	 */
+	origineCall() {
+		return this._origineCall;
+	}
+
+	/**
+	 * Load the origine Call attribute if the current object is a clone
+	 *
+	 * @method loadCall
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	loadCall(successCallback : Function, failCallback : Function) {
+		if (! this._origineCall_loaded) {
+			var self = this;
+
+			var successLoad = function (origineCall) {
+				self._origineCall = origineCall;
+				self._origineCall_loaded = true;
+
+				if (successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail = function (error) {
+				if (failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Call, Call, successLoad, fail);
+		} else {
+			if (successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -273,6 +336,18 @@ class Call extends ModelItf {
         this.loadCallType(success, fail);
 		this.loadOAuthKey(success, fail);
     }
+
+	/**
+	 * Set the object as desynchronized given the different lazy properties.
+	 *
+	 * @method desynchronize
+	 */
+	desynchronize() : void {
+		this._call_type_loaded = false;
+		this._oauthkey_loaded = false;
+		this._param_values_loaded = false;
+		this._origineCall_loaded = false;
+	}
 
 	/**
 	 * Check whether the object is complete or not
@@ -443,6 +518,30 @@ class Call extends ModelItf {
 		this.deleteObjectAssociation(Call, OAuthKey, oAuthKeyId, successCallback, failCallback);
 	}
 
+	/**
+	 * Set the origine Call if the current object is a clone
+	 *
+	 * @method linkOrigineCall
+	 * @param origineCallId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	linkOrigineCall(origineCallId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Call, Call, origineCallId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the origine Call attribute
+	 *
+	 * @method unlinkOrigineCall
+	 * @param origineCallId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	unlinkOrigineCall(origineCallId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Call, Call, origineCallId, successCallback, failCallback);
+	}
+
     /**
      * Create model in database.
      *
@@ -559,68 +658,85 @@ class Call extends ModelItf {
     }
 
 	/**
-	 * Clone a Call: it clones Call information, cloning the ParamValues and keeping the original OAuthKey and CallType.
+	 * Clone a Call: it clones Call information, cloning the ParamValues and keeping the original OAuthKey.
+	 * If no infoProfil argument is given, the original CallType is keeping, otherwise the information is retrieved inside infoProfil.
+	 *
+	 * @method clone
 	 * @param modelClass
 	 * @param successCallback
 	 * @param failCallback
 	 */
-	cloneObject(modelClass : any, successCallback : Function, failCallback : Function) {
+	clone(successCallback : Function, failCallback : Function, infoProfil : any) {
 		Logger.debug("Start cloning Call with id "+this.getId());
 
 		var self = this;
 		var successCloneCall = function (clonedCall : Call) {
 			Logger.debug("Obtained clonedCall :"+JSON.stringify(clonedCall));
-			var completeCall = clonedCall.isComplete();
 
-			var successLoadAsso = function () {
-				var successLinkCallType = function () {
-					var nbParamValues = self.paramValues().length;
-					var counterParamValues = 0;
+			var successLinkOrigine = function () {
+				clonedCall._origineCall = self;
+				clonedCall._origineCall_loaded = true;
 
-					var successCloneParamValue = function (clonedParamValue : ParamValue) {
-						var successAddParamValue = function () {
-							counterParamValues++;
+				var completeCall = clonedCall.isComplete();
 
-							if (counterParamValues == nbParamValues) {
-								var finalSuccess = function () {
+				var successLoadAsso = function () {
+					var successLinkCallType = function () {
+						var nbParamValues = self.paramValues().length;
+						var counterParamValues = 0;
 
-									var successCheckCompleteness = function () {
-										if (clonedCall.isComplete() != completeCall) {
+						var successCloneParamValue = function (clonedParamValue:ParamValue) {
+							var successAddParamValue = function () {
+								counterParamValues++;
 
-											var successUpdate = function () {
+								if (counterParamValues == nbParamValues) {
+									var finalSuccess = function () {
+
+										var successCheckCompleteness = function () {
+											if (clonedCall.isComplete() != completeCall) {
+
+												var successUpdate = function () {
+													successCallback(clonedCall);
+												};
+
+												clonedCall.update(successUpdate, failCallback);
+											} else {
 												successCallback(clonedCall);
-											};
+											}
+										};
+										clonedCall.desynchronize();
+										clonedCall.checkCompleteness(successCheckCompleteness, failCallback);
 
-											clonedCall.update(successUpdate, failCallback);
-										} else {
-											successCallback(clonedCall);
-										}
 									};
-									clonedCall.desynchronize();
-									clonedCall.checkCompleteness(successCheckCompleteness, failCallback);
 
-								};
-
-								if (self.oAuthKey() != null) {
-									clonedCall.linkOAuthKey(self.oAuthKey().getId(), finalSuccess, failCallback);
-								} else {
-									finalSuccess();
+									if (self.oAuthKey() != null) {
+										clonedCall.linkOAuthKey(self.oAuthKey().getId(), finalSuccess, failCallback);
+									} else {
+										finalSuccess();
+									}
 								}
-							}
+							};
+
+							clonedCall.addParamValue(clonedParamValue.getId(), successAddParamValue, failCallback);
 						};
 
-						clonedCall.addParamValue(clonedParamValue.getId(), successAddParamValue, failCallback);
+						self.paramValues().forEach(function (paramValue:ParamValue) {
+							paramValue.clone(successCloneParamValue, failCallback);
+						});
 					};
 
-					self.paramValues().forEach(function (paramValue : ParamValue) {
-						paramValue.cloneObject(ParamValue, successCloneParamValue, failCallback);
-					});
+					if (infoProfil == null) {
+						clonedCall.linkCallType(self.callType().getId(), successLinkCallType, failCallback);
+					} else {
+						Logger.debug("Call : Link call type from infoProfil");
+						clonedCall.linkCallType(infoProfil["Calls"][self.getId()], successLinkCallType, failCallback);
+					}
+
 				};
 
-				clonedCall.linkCallType(self.callType().getId(), successLinkCallType, failCallback);
+				self.loadAssociations(successLoadAsso, failCallback);
 			};
 
-			self.loadAssociations(successLoadAsso, failCallback);
+			clonedCall.linkOrigineCall(self.getId(), successLinkOrigine, failCallback);
 		};
 
 		super.cloneObject(Call, successCloneCall, failCallback);

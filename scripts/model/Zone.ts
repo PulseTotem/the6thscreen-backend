@@ -130,6 +130,22 @@ class Zone extends ModelItf {
 	 */
 	private _theme_loaded : boolean;
 
+	/**
+	 * Original zone if current object is a clone
+	 *
+	 * @property _origineZone
+	 * @type Zone
+	 */
+	private _origineZone : Zone;
+
+	/**
+	 * Lazy loading for the OrigineZone property
+	 *
+	 * @property _origineZone_loaded
+	 * @type boolean
+	 */
+	private _origineZone_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -162,6 +178,9 @@ class Zone extends ModelItf {
 
 	    this._theme = null;
 	    this._theme_loaded = false;
+
+	    this._origineZone = null;
+	    this._origineZone_loaded = false;
     }
 
 	/**
@@ -444,6 +463,50 @@ class Zone extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the original zone if the current object is a clone
+	 *
+	 * @method origineZone
+	 * @returns {Zone}
+	 */
+	origineZone() {
+		return this._origineZone;
+	}
+
+	/**
+	 * Load the original zone if the current object is a clone
+	 *
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	loadOrigineZone(successCallback : Function, failCallback : Function) {
+		if (! this._origineZone_loaded) {
+			var self = this;
+
+			var successLoad = function (zone) {
+				self._origineZone = zone;
+				self._origineZone_loaded = true;
+
+				if (successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail = function (error) {
+				if (failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+
+			this.getUniquelyAssociatedObject(Zone, Zone, successLoad, fail);
+		} else {
+			if (successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
 
 	//////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -490,6 +553,7 @@ class Zone extends ModelItf {
 		this._callTypes_loaded = false;
 		this._zoneContents_loaded = false;
 		this._theme_loaded = false;
+		this._origineZone_loaded = false;
 	}
 
 
@@ -539,7 +603,12 @@ class Zone extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadBehaviour(success, fail);
+				if (!self._behaviour_loaded) {
+					self.loadBehaviour(success, fail);
+				} else {
+					success();
+				}
+
 			} else {
 				self._complete = false;
 				successCallback();
@@ -684,6 +753,26 @@ class Zone extends ModelItf {
 		this.deleteObjectAssociation(Zone, ThemeZone, themeZoneID, successCallback, failCallback);
 	}
 
+	/**
+	 * Set the origine zone of the cloned object
+	 * @param origineZoneId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	linkOrigineZone(origineZoneId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Zone, Zone, origineZoneId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the origine zone property
+	 * @param origineZoneId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	unlinkOrigineZone(origineZoneId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Zone, Zone, origineZoneId, successCallback, failCallback);
+	}
+
 
 	/**
      * Create model in database.
@@ -801,6 +890,108 @@ class Zone extends ModelItf {
 	 */
 	static fromJSONObject(jsonObject : any) : Zone {
 		return new Zone(jsonObject.name, jsonObject.description, jsonObject.width, jsonObject.height, jsonObject.positionFromTop, jsonObject.positionFromLeft, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+	}
+
+	/**
+	 * Clone a Zone keeping the same Theme, the same Behaviour, but cloning CallTypes. ZoneContents are cloned inside Profil.
+	 *
+	 * @param modelClass
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	clone(successCallback : Function, failCallback : Function) {
+		Logger.debug("Enter in clone zone for zone : "+this.getId());
+		var self = this;
+
+		var successCloneZone = function (clonedZone : Zone) {
+			Logger.debug("Success clone zone in zone");
+
+			var successOrigineZone = function () {
+				Logger.debug("Success link origine zone");
+				clonedZone._origineZone = self;
+				clonedZone._origineZone_loaded = true;
+
+				var isComplete = clonedZone.isComplete();
+
+				var successLoadAsso = function () {
+					Logger.debug("Success load asso in zone");
+					var successLinkBehaviour = function () {
+						Logger.debug("Success link behaviour in zone");
+						var successLinkTheme = function () {
+							Logger.debug("Success link theme in zone");
+
+							var callTypesSize = self.callTypes().length;
+							var callTypeCounter = 0;
+
+							Logger.debug("CallTypes size : "+callTypesSize);
+
+							var successCloneCallType = function (clonedCallType : CallType) {
+								Logger.debug("Success clone call type in zone ("+callTypeCounter+"/"+callTypesSize+")");
+
+								var successLinkCallType = function () {
+
+									clonedCallType.desynchronize();
+									var ctComplete = clonedCallType.isComplete();
+
+									var successCTCheckComplete = function () {
+										var successEitherWay = function () {
+											callTypeCounter++;
+
+											if (callTypeCounter >= callTypesSize) {
+
+												var successCheckComplete = function () {
+													var finalSuccess = function () {
+														successCallback(clonedZone);
+													};
+
+													if (clonedZone.isComplete() != isComplete) {
+														clonedZone.update(finalSuccess, failCallback);
+													} else {
+														finalSuccess();
+													}
+												};
+
+												clonedZone.checkCompleteness(successCheckComplete, failCallback);
+											}
+										};
+
+										if (clonedCallType.isComplete() != ctComplete) {
+											clonedCallType.update(successEitherWay, failCallback);
+										} else {
+											successEitherWay();
+										}
+									};
+
+									clonedCallType.checkCompleteness(successCTCheckComplete, failCallback);
+								};
+
+								clonedZone.addCallType(clonedCallType.getId(), successLinkCallType, failCallback);
+							};
+
+							self.callTypes().forEach( function (callType : CallType) {
+								callType.clone(successCloneCallType, failCallback);
+							});
+						};
+
+						if (self.theme() != null) {
+							clonedZone.linkTheme(self.theme().getId(), successLinkTheme, failCallback);
+						} else {
+							successLinkTheme();
+						}
+
+					};
+
+					clonedZone.linkBehaviour(self.behaviour().getId(), successLinkBehaviour, failCallback);
+				};
+
+				self.loadAssociations(successLoadAsso, failCallback);
+			};
+
+
+			clonedZone.linkOrigineZone(self.getId(), successOrigineZone, failCallback);
+		};
+
+		super.cloneObject(Zone, successCloneZone, failCallback);
 	}
 
     /**

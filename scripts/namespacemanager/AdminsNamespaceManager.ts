@@ -182,6 +182,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('ResetUserPassword', function (passwordDescription) { self.resetUserPassword(passwordDescription); });
 
 		this.addListenerToSocket('CloneProfil', function(data) { self.cloneProfil(data); });
+		this.addListenerToSocket('CloneSDI', function(data) { self.cloneSDI(data); });
 
 
 		// Remote control to the client
@@ -1442,11 +1443,38 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				self.socket.emit("AnswerCloneProfil", self.formatResponse(true, clonedProfil.toJSONObject()));
 			};
 
-			profil.cloneObject(Profil, successCloneProfil, fail);
+			profil.clone(successCloneProfil, fail, null);
 		};
 
 		Profil.read(profilId, successReadProfil, fail);
 	}
 
 ////////////////////// END: Manage cloneProfil //////////////////////
+
+////////////////////// Begin: Manage cloneSDI //////////////////////
+
+	cloneSDI(SDIDescription : any) {
+		// SDIDescription : { 'SDIId': number }
+		var sdiId = SDIDescription.SDIId;
+		var self = this;
+
+		var fail : Function = function (error) {
+			Logger.error("Error when reading the SDI "+sdiId);
+			Logger.error(error);
+			self.socket.emit("AnswerCloneSDI", self.formatResponse(false, error));
+		};
+
+		var successReadSDI = function (sdi : SDI) {
+			var successCloneSDI = function (clonedSDI : SDI) {
+				Logger.debug("Answer to admin for cloning sdi");
+				self.socket.emit("AnswerCloneSDI", self.formatResponse(true, clonedSDI.toJSONObject()));
+			};
+
+			sdi.clone(successCloneSDI, fail);
+		};
+
+		SDI.read(sdiId, successReadSDI, fail);
+	}
+
+////////////////////// END: Manage cloneSDI //////////////////////
 }
