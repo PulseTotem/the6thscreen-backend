@@ -18,3 +18,4 @@ herokuDBInit
 compileWebstorm/
 dbInitFiles/servicesBackup.json
 dbInitFiles/servicesProd.json
+scripts/core/contact_config.json

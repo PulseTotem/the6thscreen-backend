@@ -9,6 +9,8 @@
 /// <reference path="./namespacemanager/SourcesNamespaceManager.ts" />
 /// <reference path="./namespacemanager/AdminsNamespaceManager.ts" />
 
+/// <reference path="./routers/ContactFormRouter.ts" />
+
 /// <reference path="./core/BackendConfig.ts" />
 /// <reference path="./model/User.ts" />
 
@@ -32,6 +34,8 @@ class The6thScreenBackend extends Server {
      */
     constructor(listeningPort : number, arguments : Array<string>) {
         super(listeningPort, arguments);
+
+		this.addAPIEndpoint("contact", ContactFormRouter);
 
         this.app.post('/login', function (req, res) {
 
