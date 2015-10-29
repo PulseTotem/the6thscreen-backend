@@ -74,7 +74,7 @@ class ContactFormRouter extends RouterItf {
 		};
 
 		var fail : Function = function(result) {
-			failCallback(new RequestException("The request failed when trying to check recaptcha:"+urlCheckRecaptcha+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+			res.status(500).send("The request failed when trying to check recaptcha:"+urlCheckRecaptcha+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+ result.response());
 		};
 
 		RestClient.post(urlCheckRecaptcha, data, success, fail);
