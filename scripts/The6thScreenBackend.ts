@@ -35,8 +35,6 @@ class The6thScreenBackend extends Server {
     constructor(listeningPort : number, arguments : Array<string>) {
         super(listeningPort, arguments);
 
-		this.addAPIEndpoint("contact", ContactFormRouter);
-
         this.app.post('/login', function (req, res) {
 
             var success = function(user) {
@@ -188,6 +186,8 @@ class The6thScreenBackend extends Server {
             // next(new Error('not authorized');
             // else just call next
         });
+
+		this.addAPIEndpoint("contact", ContactFormRouter);
     }
 }
 

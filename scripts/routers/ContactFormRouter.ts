@@ -32,17 +32,25 @@ class ContactFormRouter extends RouterItf {
 	buildRouter() {
 		var self = this;
 
-		this.router.use(function(req, res, next) {
+		/*this.router.use(function(req, res, next) {
 			res.header("Access-Control-Allow-Origin", "*");
 			res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-			res.header("Access-Control-Allow-Methods", "POST");
+			res.header("Access-Control-Allow-Methods", "OPTIONS, POST");
 			next();
-		});
+		});*/
 
 		// Route to check and send email to our contact email address
 
+		this.router.get('/', function(req : any, res : any) { self.pouet(req, res); });
+
 		/* Routes to take a picture */
 		this.router.post('/send', function(req : any, res : any) { self.checkAndSendEmail(req, res); });
+	}
+
+	pouet(req : any, res : any) {
+		Logger.debug("ContactFormRouter - pouet");
+
+		res.send("pouet pouet");
 	}
 
 	/**
@@ -53,43 +61,59 @@ class ContactFormRouter extends RouterItf {
 	 * @param {Express.Response} res - Response object.
 	 */
 	checkAndSendEmail(req : any, res : any) {
-		Logger.debug("ContactFormRouter - checkAndSendEmail");
+		var firstName = req.body.firstName;
+		var lastName = req.body.lastName;
+		var email = req.body.email;
+		var function_company = req.body.function;
+		var company = req.body.company;
+		var message = req.body.message;
 
-		Logger.debug(req.body);
+		if(typeof(firstName) == "undefined" ||
+			typeof(lastName) == "undefined" ||
+			typeof(email) == "undefined" ||
+			typeof(message) == "undefined"
+		) {
+			res.status(500).send("Missing 'first name, last name, email or message.");
+		} else {
 
-		var contact = req.body.contact;
-
-		Logger.debug(contact);
-
-		var transporter = nodemailer.createTransport({
-			service: 'Gmail',
-			auth: {
-				user: ContactConfig.getAuthLogin(), // Your email id
-				pass: ContactConfig.getAuthPassword() // Your password
+			if(typeof(function_company) != "undefined" || function_company == "") {
+				function_company = "Unknown";
 			}
-		});
 
-		var text = 'From : ' + contact.firstName + ' ' + contact.lastName + '(' + contact.email + ')\n';
-		text += 'Function : ' + contact.function + ' -- Company : ' + contact.company + '\n\n';
-		text += 'Message : \n----------\n\n';
-		text += contact.message;
+			if(typeof(company) != "undefined" || company == "") {
+				company = "Unknown";
+			}
 
-		var mailOptions = {
-			from: contact.email, // sender address
-			to: ContactConfig.getContactEmail(), // list of receivers
-			subject: '[Contact Form] From : ' + contact.firstName + ' ' + contact.lastName, // Subject line
-			text: text //, // plaintext body
-			// html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead
-		};
+			var transporter = nodemailer.createTransport({
+				service: 'Gmail',
+				auth: {
+					user: ContactConfig.getAuthLogin(), // Your email id
+					pass: ContactConfig.getAuthPassword() // Your password
+				}
+			});
 
-		transporter.sendMail(mailOptions, function(error, info){
-			if(error){
-				Logger.error(error);
-				res.json({yo: 'error'});
-			}else{
-				Logger.info('Message sent: ' + info.response);
-				res.json({yo: info.response});
+			var text = 'From : ' + firstName + ' ' + lastName + '(' + email + ')\n';
+			text += 'Function : ' + function_company + ' -- Company : ' + company + '\n\n';
+			text += 'Message : \n----------\n\n';
+			text += message;
+
+			var mailOptions = {
+				from: email, // sender address
+				to: ContactConfig.getContactEmail(), // list of receivers
+				subject: '[Contact Form] From : ' + firstName + ' ' + lastName, // Subject line
+				text: text //, // plaintext body
+				// html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead
 			};
-		});
+
+			transporter.sendMail(mailOptions, function (error, info) {
+				if (error) {
+					Logger.error(error);
+					res.status(500).send(error);
+				} else {
+					Logger.info('Message sent: ' + info.response);
+					res.send(info.response);
+				}
+			});
+		}
 	}
 }
