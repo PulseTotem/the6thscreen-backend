@@ -4,6 +4,9 @@
 
 /// <reference path="../../t6s-core/core-backend/scripts/server/RouterItf.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
+/// <reference path="../../t6s-core/core-backend/scripts/RestClient.ts" />
+/// <reference path="../../t6s-core/core-backend/scripts/RestClientResponse.ts" />
+/// <reference path="../exceptions/RequestException.ts" />
 
 /// <reference path="../core/ContactConfig.ts" />
 
