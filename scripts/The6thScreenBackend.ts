@@ -9,6 +9,8 @@
 /// <reference path="./namespacemanager/SourcesNamespaceManager.ts" />
 /// <reference path="./namespacemanager/AdminsNamespaceManager.ts" />
 
+/// <reference path="./routers/ContactFormRouter.ts" />
+
 /// <reference path="./core/BackendConfig.ts" />
 /// <reference path="./model/User.ts" />
 
@@ -184,6 +186,8 @@ class The6thScreenBackend extends Server {
             // next(new Error('not authorized');
             // else just call next
         });
+
+		this.addAPIEndpoint("contact", ContactFormRouter);
     }
 }
 
