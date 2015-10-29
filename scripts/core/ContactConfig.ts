@@ -41,13 +41,22 @@ class ContactConfig {
 	static contactEmail : string = "";
 
 	/**
+	 * Recaptcha Private Key.
+	 *
+	 * @property recaptchaPrivateKey
+	 * @type string
+	 * @static
+	 */
+	static recaptchaPrivateKey : string = "";
+
+	/**
 	 * Retrieve configuration information from file description.
 	 *
 	 * @method retrieveConfigurationInformation
 	 * @static
 	 */
 	static retrieveConfigurationInformation() {
-		if(ContactConfig.authLogin == "" && ContactConfig.authPassword == "" && ContactConfig.contactEmail == "") {
+		if(ContactConfig.authLogin == "" && ContactConfig.authPassword == "" && ContactConfig.contactEmail == "" && ContactConfig.recaptchaPrivateKey == "") {
 			var file = __dirname + '/contact_config.json';
 
 			try {
@@ -55,11 +64,12 @@ class ContactConfig {
 				ContactConfig.authLogin = configInfos.auth.login;
 				ContactConfig.authPassword = configInfos.auth.password;
 				ContactConfig.contactEmail = configInfos.contact;
+				ContactConfig.recaptchaPrivateKey = configInfos.recaptchaPrivateKey;
 			} catch (e) {
 				Logger.error("Contact configuration file can't be read.");
 				Logger.debug(e);
 				//TODO ? Throw Exception ?
-				}
+			}
 		}
 	}
 
@@ -97,5 +107,17 @@ class ContactConfig {
 	static getContactEmail() : string {
 		ContactConfig.retrieveConfigurationInformation();
 		return ContactConfig.contactEmail;
+	}
+
+	/**
+	 * Return Recaptcha Private Key.
+	 *
+	 * @method getRecaptchaPrivateKey
+	 * @static
+	 * @return {string} - Recaptcha Private Key.
+	 */
+	static getRecaptchaPrivateKey() : string {
+		ContactConfig.retrieveConfigurationInformation();
+		return ContactConfig.recaptchaPrivateKey;
 	}
 }

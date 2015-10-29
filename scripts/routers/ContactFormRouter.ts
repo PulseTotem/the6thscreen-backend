@@ -32,25 +32,8 @@ class ContactFormRouter extends RouterItf {
 	buildRouter() {
 		var self = this;
 
-		/*this.router.use(function(req, res, next) {
-			res.header("Access-Control-Allow-Origin", "*");
-			res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-			res.header("Access-Control-Allow-Methods", "OPTIONS, POST");
-			next();
-		});*/
-
 		// Route to check and send email to our contact email address
-
-		this.router.get('/', function(req : any, res : any) { self.pouet(req, res); });
-
-		/* Routes to take a picture */
 		this.router.post('/send', function(req : any, res : any) { self.checkAndSendEmail(req, res); });
-	}
-
-	pouet(req : any, res : any) {
-		Logger.debug("ContactFormRouter - pouet");
-
-		res.send("pouet pouet");
 	}
 
 	/**
@@ -61,10 +44,52 @@ class ContactFormRouter extends RouterItf {
 	 * @param {Express.Response} res - Response object.
 	 */
 	checkAndSendEmail(req : any, res : any) {
+		var self = this;
+
+		var recaptcha = req.body.recaptcha;
+
+		if(typeof(recaptcha) == "undefined") {
+			res.status(500).send("Missing recaptcha param.");
+			return;
+		}
+
+		var urlCheckRecaptcha = "https://www.google.com/recaptcha/api/siteverify";
+
+		var data = {
+			"secret" : ContactConfig.getRecaptchaPrivateKey(),
+			"response" : recaptcha,
+		};
+
+		var success : Function = function(result) {
+			var response = result.data();
+
+			if(response.success) {
+				self._sendEmail(req, res);
+			} else {
+				res.status(500).send("Error during check recaptcha : " + JSON.stringify(response["error-codes"]));
+			}
+		};
+
+		var fail : Function = function(result) {
+			failCallback(new RequestException("The request failed when trying to check recaptcha:"+urlCheckRecaptcha+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+		};
+
+		RestClient.post(urlCheckRecaptcha, data, success, fail);
+	}
+
+	/**
+	 * Send email to contact email address
+	 *
+	 * @method _sendEmail
+	 * @private
+	 * @param {Express.Request} req - Request object.
+	 * @param {Express.Response} res - Response object.
+	 */
+	private _sendEmail(req : any, res : any) {
 		var firstName = req.body.firstName;
 		var lastName = req.body.lastName;
 		var email = req.body.email;
-		var function_company = req.body.function;
+		var function_company = req.body.function_company;
 		var company = req.body.company;
 		var message = req.body.message;
 
@@ -73,14 +98,15 @@ class ContactFormRouter extends RouterItf {
 			typeof(email) == "undefined" ||
 			typeof(message) == "undefined"
 		) {
-			res.status(500).send("Missing 'first name, last name, email or message.");
+			res.status(500).send("Missing first name, last name, email or message.");
+			return;
 		} else {
 
-			if(typeof(function_company) != "undefined" || function_company == "") {
+			if(typeof(function_company) == "undefined" || function_company == "") {
 				function_company = "Unknown";
 			}
 
-			if(typeof(company) != "undefined" || company == "") {
+			if(typeof(company) == "undefined" || company == "") {
 				company = "Unknown";
 			}
 
