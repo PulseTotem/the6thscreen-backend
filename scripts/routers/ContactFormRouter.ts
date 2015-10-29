@@ -61,6 +61,9 @@ class ContactFormRouter extends RouterItf {
 		var data = {
 			"secret" : ContactConfig.getRecaptchaPrivateKey(),
 			"response" : recaptcha,
+			"headers": {
+				"Content-Type": "application/json"
+			}
 		};
 
 		var success : Function = function(result) {
@@ -77,7 +80,28 @@ class ContactFormRouter extends RouterItf {
 			res.status(500).send("The request failed when trying to check recaptcha:"+urlCheckRecaptcha+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+ result.response());
 		};
 
-		RestClient.post(urlCheckRecaptcha, data, success, fail);
+		// Re-write this : RestClient.post(urlCheckRecaptcha, data, success, fail); => without 'createArgs' function and 'manageCallbacks' function cause is private
+		// TODO: Added a parameter to all RestClient methods to manage the use of 'createArgs' or not.
+		var returnSuccess : Function = function(data, response) {
+			var result : RestClientResponse = new RestClientResponse(true, response, JSON.parse(data));
+			success(result);
+		};
+
+		var returnFail : Function = function(error) {
+			var result : RestClientResponse = new RestClientResponse(false, error);
+			fail(result);
+		};
+
+		var callbacks : Array<Function> = [returnSuccess, returnFail];
+
+		var postReq = RestClient.getClient().post(urlCheckRecaptcha, data, function(dataResponse, response) {
+			if(response.statusCode >= 200 && response.statusCode < 300) {
+				callbacks[0](dataResponse, response);
+			} else {
+				callbacks[1](dataResponse, response);
+			}
+		});
+		postReq.on('error', callbacks[1]);
 	}
 
 	/**
