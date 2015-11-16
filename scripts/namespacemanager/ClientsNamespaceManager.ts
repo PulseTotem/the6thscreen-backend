@@ -1,5 +1,6 @@
 /**
- * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Christian Brel <christian@pulsetotem.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@pulsetotem.fr>
  */
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
@@ -36,13 +37,14 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
         var self = this;
 	    this._client = null;
 
-        this.addListenerToSocket('RetrieveProfilDescription', function(description) { self.sendProfilDescription(description); });
+        /*
+		this.addListenerToSocket('RetrieveProfilDescription', function(description) { self.sendProfilDescription(description); });
         this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
         this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
         this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
         this.addListenerToSocket('RetrieveCallDescription', function(description) { self.sendCallDescription(description); });
         this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
-
+		*/
 
 		this.addListenerToSocket('HashDescription', function(description) { self.manageHashDescription(description); });
 
@@ -97,12 +99,8 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		var hash = hashDescription.hash;
 
-		//TODO : Manage Hash
-		var sdiId = 1;
-		var profilId = hash;
-
 		var fail = function (err) {
-			Logger.debug("SocketId: " + self.socket.id + " - manageHashDescription : send done with fail status for Profil with Id : " + profilId + " : "+err);
+			Logger.debug("SocketId: " + self.socket.id + " - manageHashDescription : send done with fail status for Profil with Hash : " + hash + " : "+err);
 			self.socket.emit("SDIDescription", self.formatResponse(false, err));
 		};
 
@@ -313,12 +311,14 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 			profil.loadAssociations(successLoadAssoProfil, fail);
 		};
 
-		Profil.read(profilId, successReadProfil, fail);
+		//Profil.read(hash, successReadProfil, fail);
 
+		Profil.findOneByHash(hash, successReadProfil, fail);
 	}
 
 ////////////////////// End: Manage HashDescription //////////////////////
 
+/*
 ////////////////////// Begin: Manage SendProfilDescription //////////////////////
 
     /**
@@ -327,7 +327,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
      * @method sendProfilDescription
      * @param {any} profilDescription - The Profil Description.
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
+     * /
     sendProfilDescription(profilDescription : any, self : ClientsNamespaceManager = null) {
         // profilDescription : {"profilId" : string}
         var self = this;
@@ -347,7 +347,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
      * @method sendUserDescription
      * @param {any} userDescription - The User Description.
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
+     * /
     sendUserDescription(userDescription : any, self : ClientsNamespaceManager = null) {
         // userDescription : {"userId" : string}
         var self = this;
@@ -367,7 +367,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
      * @method sendSDIDescription
      * @param {any} sdiDescription - The SDI Description.
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
+     * /
     sendSDIDescription(sdiDescription : any, self : ClientsNamespaceManager = null) {
         // sdiDescription : {"sdiId" : string}
         var self = this;
@@ -387,7 +387,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
      * @method sendZoneDescription
      * @param {any} zoneDescription - The Zone Description.
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
+     * /
     sendZoneDescription(zoneDescription : any, self : ClientsNamespaceManager = null) {
         // zoneDescription : {"zoneId" : string}
         var self = this;
@@ -407,7 +407,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
      * @method sendCallDescription
      * @param {any} callDescription - The Call Description.
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
+     * /
     sendCallDescription(callDescription : any, self : ClientsNamespaceManager = null) {
         // callDescription : {"callId" : string}
         var self = this;
@@ -427,7 +427,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
      * @method sendCallTypeDescription
      * @param {any} callTypeDescription - The CallType Description
      * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
+     * /
     sendCallTypeDescription(callTypeDescription : any, self : ClientsNamespaceManager = null) {
         // callTypeDescription : {"callTypeId" : string}
         var self = this;
@@ -439,6 +439,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage SendCallTypeDescription //////////////////////
 
+*/
 
 	/**
 	 * Send command to refresh the client

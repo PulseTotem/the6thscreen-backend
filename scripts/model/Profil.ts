@@ -26,6 +26,14 @@ class Profil extends ModelItf {
      */
     private _name : string;
 
+	/**
+	 * Hash property.
+	 *
+	 * @property _hash
+	 * @type string
+	 */
+	private _hash : string;
+
     /**
      * Description property.
      *
@@ -119,15 +127,17 @@ class Profil extends ModelItf {
      *
      * @constructor
      * @param {string} name - The Profil's name.
+	 * @param {string} hash - The Profil's hash.
      * @param {string} description - The Profil's description.
      * @param {number} id - The Profil's ID.
 	 * @param {string} createdAt - The Profil's createdAt.
 	 * @param {string} updatedAt - The Profil's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", hash : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
+		this.setHash(hash);
         this.setDescription(description);
 
         this._zoneContents = new Array<ZoneContent>();
@@ -164,6 +174,25 @@ class Profil extends ModelItf {
     setName(name : string) {
         this._name = name;
     }
+
+	/**
+	 * Return the Profil's hash.
+	 *
+	 * @method hash
+	 * @return {string} The Profil's hash.
+	 */
+	hash() {
+		return this._hash;
+	}
+
+	/**
+	 * Set the Profil's hash.
+	 *
+	 * @method setHash
+	 */
+	setHash(hash : string) {
+		this._hash = hash;
+	}
 
     /**
      * Return the Profil's description.
@@ -451,6 +480,7 @@ class Profil extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
+			"hash": this.hash(),
 			"description": this.description(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
@@ -467,7 +497,7 @@ class Profil extends ModelItf {
 		var self = this;
 
 		var success : Function = function () {
-			if (self.isComplete() && !!self.name()) {
+			if (self.isComplete() && !!self.name() && !!self.hash()) {
 				var fail:Function = function (error) {
 					failCallback(error);
 				};
@@ -726,6 +756,18 @@ class Profil extends ModelItf {
         return this.allObjects(Profil, successCallback, failCallback, attemptNumber);
     }
 
+	/**
+	 * Find One Profil by hash.
+	 *
+	 * @method findOneByHash
+	 * @param {string} hash - The Profil's hash
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	static findOneByHash(hash : string, successCallback : Function, failCallback : Function) {
+		return this.findOneBy(Profil, "hash", hash, successCallback, failCallback);
+	}
+
     /**
      * Return a Profil instance from a JSON string.
      *
@@ -747,7 +789,7 @@ class Profil extends ModelItf {
      * @return {Profil} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Profil {
-	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+	    return new Profil(jsonObject.name, jsonObject.hash, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
 
 	/**
