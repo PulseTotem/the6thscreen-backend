@@ -184,7 +184,7 @@ describe('AuthorizedClient', function(){
 	describe('#linkProfil', function () {
 		it('should call the right request', function (done) {
 			var c = new AuthorizedClient("toto","", false, new Date(), 52);
-			var s = new Profil("toto", "machin", 42);
+			var s = new Profil("toto", "42", "machin", 42);
 
 			var response1 : any = [];
 
@@ -227,7 +227,7 @@ describe('AuthorizedClient', function(){
 	describe('#unlinkProfil', function () {
 		it('should call the right request', function (done) {
 			var c = new AuthorizedClient("toto","", false, new Date(), 52);
-			var s = new Profil("toto","machin", 42);
+			var s = new Profil("toto","42", "machin", 42);
 
 			var response1 : any = s.toJSONObject();
 
