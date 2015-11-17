@@ -86,6 +86,14 @@ class ThemeZone extends ModelItf {
 	private _border : string;
 
 	/**
+	 * Border Radius property.
+	 *
+	 * @property _borderRadius
+	 * @type string
+	 */
+	private _borderRadius : string;
+
+	/**
 	 * Color property.
 	 *
 	 * @property _color
@@ -114,11 +122,12 @@ class ThemeZone extends ModelItf {
 	 * @param {string} color - The ThemeZone's color
 	 * @param {string} opacity - The ThemeZone's opacity
 	 * @param {string} border - The ThemeZone's border
+	 * @param {string} borderRadius - The ThemeZone's borderRadius
 	 * @param id The DB id of the themeZone
 	 * @param {string} createdAt - The ThemeZone's createdAt.
 	 * @param {string} updatedAt - The ThemeZone's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, backgroundImageURL : string = "", backgroundVideoURL : string = "", backgroundColor : string = "", font : string = "", color : string = "", opacity : string = "", border : string = "", zindex : number = null, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+	constructor(name : string = "", description : string = "", defaultTheme : boolean = false, backgroundImageURL : string = "", backgroundVideoURL : string = "", backgroundColor : string = "", font : string = "", color : string = "", opacity : string = "", border : string = "", borderRadius : string = "", zindex : number = null, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
@@ -131,6 +140,7 @@ class ThemeZone extends ModelItf {
 		this.setColor(color);
 		this.setOpacity(opacity);
 		this.setBorder(border);
+		this.setBorderRadius(borderRadius);
 		this.setZindex(zindex);
 	}
 
@@ -225,6 +235,15 @@ class ThemeZone extends ModelItf {
 	 */
 	setBorder(border : string) {
 		this._border = border;
+	}
+
+	/**
+	 * Set the ThemeZone's borderRadius.
+	 *
+	 * @method setBorderRadius
+	 */
+	setBorderRadius(borderRadius : string) {
+		this._borderRadius = borderRadius;
 	}
 
 	/**
@@ -327,6 +346,15 @@ class ThemeZone extends ModelItf {
 	}
 
 	/**
+	 * Return the ThemeZone's borderRadius.
+	 *
+	 * @method borderRadius
+	 */
+	borderRadius() {
+		return this._borderRadius;
+	}
+
+	/**
 	 * Return the ThemeZone's z-index.
 	 *
 	 * @method z-index
@@ -359,6 +387,7 @@ class ThemeZone extends ModelItf {
 			"color": this.color(),
 			"opacity": this.opacity(),
 			"border": this.border(),
+			"borderRadius": this.borderRadius(),
 			"zindex": this.zindex(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
@@ -466,7 +495,7 @@ class ThemeZone extends ModelItf {
 	 * @return {ThemeZone} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ThemeZone {
-		return new ThemeZone(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.backgroundImageURL, jsonObject.backgroundVideoURL, jsonObject.backgroundColor, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.border, jsonObject.zindex, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new ThemeZone(jsonObject.name, jsonObject.description, jsonObject.defaultTheme, jsonObject.backgroundImageURL, jsonObject.backgroundVideoURL, jsonObject.backgroundColor, jsonObject.font, jsonObject.color, jsonObject.opacity, jsonObject.border, jsonObject.borderRadius, jsonObject.zindex, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**
