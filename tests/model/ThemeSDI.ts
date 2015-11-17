@@ -286,7 +286,7 @@ describe('ThemeSDI', function(){
 	describe('#linkThemeZone', function () {
 		it('should call the right request', function (done) {
 			var c = new ThemeSDI("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", 52);
-			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", 2, 52);
+			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", "20%", 2, 52);
 
 			var response1:any = [];
 
@@ -330,7 +330,7 @@ describe('ThemeSDI', function(){
 	describe('#unlinkThemeZone', function () {
 		it('should call the right request', function (done) {
 			var c = new ThemeSDI("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", 52);
-			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", 1, 52);
+			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", "20%", 1, 52);
 
 			var response1:any = s.toJSONObject();
 
