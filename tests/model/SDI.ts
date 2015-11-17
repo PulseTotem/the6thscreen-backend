@@ -341,7 +341,7 @@ describe('SDI', function() {
 	describe('#addProfil', function() {
 		it('should call the right request', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new Profil("mavaleur", "toto", 12);
+			var pv = new Profil("mavaleur", "12", "toto", 12);
 
 			var response1 : any = [];
 
@@ -386,13 +386,14 @@ describe('SDI', function() {
 	describe('#removeProfil', function() {
 		it('should call the right request', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new Profil("mavaleur","uneautre",12);
+			var pv = new Profil("mavaleur", "12", "uneautre",12);
 
 			var response1 : any = [
 					{
 						"name": "mavaleur",
 						"description": "uneautre",
 						"id": 12,
+						"hash": "12",
 						"complete": false
 					}
 				];

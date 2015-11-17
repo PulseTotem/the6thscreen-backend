@@ -20,20 +20,26 @@ describe('Profil', function() {
 			assert.equal(c.name(), name, "The name is not stored correctly.");
 		});
 
+		it('should store the hash', function () {
+			var hash = "42";
+			var c = new Profil("", hash);
+			assert.equal(c.hash(), hash, "The hash is not stored correctly.");
+		});
+
 		it('should store the description', function () {
 			var desc = "machin";
-			var c = new Profil("", desc);
+			var c = new Profil("", "", desc);
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Profil("", "", id);
+			var c = new Profil("", "", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete attribute', function () {
-			var c = new Profil("test", "t", 34, true);
+			var c = new Profil("test", "34", "t", 34, true);
 			assert.equal(c.isComplete(), true, "The complete attribute is not stored.");
 		});
 
@@ -47,13 +53,14 @@ describe('Profil', function() {
 		it('should create the right object', function () {
 			var json = {
 				"id": 42,
+				"hash": "42",
 				"name": "toto",
 				"description": "blabla",
 				"complete": true
 			};
 
 			var zoneContentRetrieve = Profil.fromJSONObject(json);
-			var zoneContentExpected = new Profil("toto", "blabla", 42, true);
+			var zoneContentExpected = new Profil("toto", "42", "blabla", 42, true);
 
 			assert.deepEqual(zoneContentRetrieve, zoneContentExpected, "The retrieve profil (" + zoneContentRetrieve + ") does not match with the expected one (" + zoneContentExpected + ")");
 		});
@@ -61,13 +68,14 @@ describe('Profil', function() {
 		it('should create the right object even if it is partial', function () {
 			var json = {
 				"id": 42,
+				"hash": "42",
 				"name": null,
 				"description": "blabla",
 				"complete": false
 			};
 
 			var zoneContentRetrieve = Profil.fromJSONObject(json);
-			var zoneContentExpected = new Profil(null, "blabla", 42);
+			var zoneContentExpected = new Profil(null, "42", "blabla", 42);
 
 			assert.deepEqual(zoneContentRetrieve, zoneContentExpected, "The retrieve profil (" + zoneContentRetrieve + ") does not match with the expected one (" + zoneContentExpected + ")");
 		});
@@ -76,11 +84,12 @@ describe('Profil', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Profil("toto", "blabla", 52, true);
+			var c = new Profil("toto", "52", "blabla", 52, true);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
 				"id": 52,
+				"hash": "52",
 				"complete": true,
 				"createdAt":null,
 				"updatedAt":null
@@ -106,7 +115,7 @@ describe('Profil', function() {
 		});
 
 		it('should return true if the object has a name and an ID but no description and number of ZoneContent equals to number of SDI\'s zones', function(done) {
-			var b = new Profil("toto", null, 52);
+			var b = new Profil("toto", "52", null, 52);
 
 			var responseSDI : any = {
 					"id": 42,
@@ -157,7 +166,7 @@ describe('Profil', function() {
 		});
 
 		it('should return false if the object has an empty name and an ID but no description', function(done) {
-			var b = new Profil("", "blabla", 52);
+			var b = new Profil("", "52", "blabla", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), false, "The Profil should not be complete.");
 				done();
@@ -221,7 +230,7 @@ describe('Profil', function() {
 
 	describe('#removeZoneContent', function() {
 		it('should zoneContent the right request', function(done) {
-			var c = new Profil("toto", "blabla", 52);
+			var c = new Profil("toto", "52", "blabla", 52);
 			var pv = new ZoneContent("mavaleur", "", 12);
 
 			var response1 : any = [
