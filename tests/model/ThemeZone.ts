@@ -74,33 +74,39 @@ describe('ThemeZone', function(){
 			assert.equal(c.border(), border, "The border is not stored correctly.");
 		});
 
+		it('should store the borderRadius', function(){
+			var borderRadius = "10%";
+			var c = new ThemeZone("", "", false, "", "", "", "", "", "", "", borderRadius);
+			assert.equal(c.borderRadius(), borderRadius, "The borderRadius is not stored correctly.");
+		});
+
 		it('should store the zindex', function(){
 			var zindex = 42;
-			var c = new ThemeZone("", "", false, "", "", "", "", "", "", "", zindex);
+			var c = new ThemeZone("", "", false, "", "", "", "", "", "", "", "", zindex);
 			assert.equal(c.zindex(), zindex, "The zindex is not stored correctly.");
 		});
 
 
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new ThemeZone("", "", false, "", "", "", "", "","", "", 0, id);
+			var c = new ThemeZone("", "", false, "", "", "", "", "","", "", "", 0, id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete value', function() {
-			var c = new ThemeZone("", "", false, "", "", "", "", "", "", "", 0, 12, true);
+			var c = new ThemeZone("", "", false, "", "", "", "", "", "", "", "", 0, 12, true);
 			assert.equal(c.isComplete(), true, "The complete attribute is not stored.");
 		});
 
 		it('should assign a default value to the complete attribute', function() {
-			var c = new ThemeZone("", "", false, "", "", "", "", "", "", "", 0, 12, false);
+			var c = new ThemeZone("", "", false, "", "", "", "", "", "", "", "", 0, 12, false);
 			assert.equal(c.isComplete(), false, "The complete attribute is not stored.");
 		});
 	});
 
 	describe('#checkCompleteness', function() {
 		it('should specify the object is complete if it has a name and an ID', function(done) {
-			var c = new ThemeZone("toto", "", false, "", "", "", "", "", "", "", 0, 12);
+			var c = new ThemeZone("toto", "", false, "", "", "", "", "", "", "", "", 0, 12);
 			var success = function () {
 				assert.equal(c.isComplete(), true, "The ThemeZone is not considered as complete.");
 				done();
@@ -126,7 +132,7 @@ describe('ThemeZone', function(){
 		});
 
 		it('should not specify the object is complete if it has an empty name and an ID', function(done) {
-			var c = new ThemeZone("", "", false, "", "", "", "", "","", "",0, 12);
+			var c = new ThemeZone("", "", false, "", "", "", "", "","", "", "", 0, 12);
 			var success = function () {
 				assert.equal(c.isComplete(), false, "The ThemeZone is not considered as complete.");
 				done();
@@ -139,7 +145,7 @@ describe('ThemeZone', function(){
 		});
 
 		it('should not specify the object is complete if it has a null name and an ID', function(done) {
-			var c = new ThemeZone(null, "", false, "", "", "", "", "","", "",0, 12);
+			var c = new ThemeZone(null, "", false, "", "", "", "", "","", "", "", 0, 12);
 			var success = function () {
 				assert.equal(c.isComplete(), false, "The ThemeZone is not considered as complete.");
 				done();
@@ -166,12 +172,13 @@ describe('ThemeZone', function(){
 				"color": "black",
 				"opacity": "24%",
 				"border": "1px",
+				"borderRadius": "10%",
 				"zindex": 23,
 				"complete": true
 			};
 
 			var callRetrieve = ThemeZone.fromJSONObject(json);
-			var callExpected = new ThemeZone("toto", "tata", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "red", "arial", "black", "24%", "1px", 23, 42, true);
+			var callExpected = new ThemeZone("toto", "tata", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "red", "arial", "black", "24%", "1px", "10%", 23, 42, true);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve themeZone ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -189,12 +196,13 @@ describe('ThemeZone', function(){
 				"color": "black",
 				"opacity": "24%",
 				"border": "",
+				"borderRadius": "10%",
 				"zindex": 23,
 				"complete": false
 			};
 
 			var callRetrieve = ThemeZone.fromJSONObject(json);
-			var callExpected = new ThemeZone("toto", "tata", false, "http://example.com/background.png","http://example.com/backgroundVideo.png", "red", "arial", "black", "24%", "", 23, 42);
+			var callExpected = new ThemeZone("toto", "tata", false, "http://example.com/background.png","http://example.com/backgroundVideo.png", "red", "arial", "black", "24%", "", "10%", 23, 42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve themeZone ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -202,7 +210,7 @@ describe('ThemeZone', function(){
 
 	describe('#toJsonObject', function() {
 		it('should create the expected JSON Object', function() {
-			var c = new ThemeZone("toto", "truc", true, "http://example.com/background.png","http://example.com/backgroundVideo.png", "black", "arial", "black", "89%", "14px",  23, 52, true);
+			var c = new ThemeZone("toto", "truc", true, "http://example.com/background.png","http://example.com/backgroundVideo.png", "black", "arial", "black", "89%", "14px",  "10%", 23, 52, true);
 			var expected = {
 				"id": 52,
 				"name": "toto",
@@ -215,6 +223,7 @@ describe('ThemeZone', function(){
 				"color": "black",
 				"opacity": "89%",
 				"border": "14px",
+				"borderRadius": "10%",
 				"zindex": 23,
 				"complete": true,
 				"createdAt":null,

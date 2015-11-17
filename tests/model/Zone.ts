@@ -536,7 +536,7 @@ describe('Zone', function() {
 	describe('#linkTheme', function () {
 		it('should call the right request', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", 2, 52);
+			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", "10%", 2, 52);
 
 			var response1:any = [];
 
@@ -580,7 +580,7 @@ describe('Zone', function() {
 	describe('#unlinkTheme', function () {
 		it('should call the right request', function (done) {
 			var c = new Zone("bidule", "description", 10, 20, 30, 40, 13);
-			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", 2, 52);
+			var s = new ThemeZone("toto", "truc", true, "http://example.com/background.png", "http://example.com/backgroundVideo.png", "black", "arial","black", "89%", "14px", "10%", 2, 52);
 
 			var response1:any = s.toJSONObject();
 
