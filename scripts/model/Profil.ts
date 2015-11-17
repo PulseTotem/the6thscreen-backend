@@ -865,7 +865,52 @@ class Profil extends ModelItf {
 			clonedProfil.linkOrigineProfil(self.getId(), successLinkOrigine, failCallback);
 		};
 
-		super.cloneObject(Profil, successCloneProfil, failCallback);
+		this.cloneObject(Profil, successCloneProfil, failCallback);
+	}
+
+	/**
+	 * Clone a profil resetting the hash attribute
+	 * @param modelClass
+	 * @param successCallbackModelItf
+	 * @param failCallback
+	 */
+	cloneObject(modelClass : any, successCallbackModelItf : Function, failCallback : Function) {
+		Logger.debug("Clone de modelITF avec "+this.getId());
+		if (!modelClass) {
+			failCallback(new ModelException("The modelClasse argument must be given to clone the object."));
+			return;
+		}
+
+		if (!this.isComplete()) {
+			Logger.error("Error when cloning with object: "+JSON.stringify(this));
+			failCallback(new ModelException("The model must be complete in order to be cloned. ModelClass : "+modelClass.getTableName()));
+			return;
+		}
+
+		var self = this;
+		var jsonInfo : any = this.toJSONObject();
+		jsonInfo.id = null;
+		jsonInfo.complete = false;
+		jsonInfo.hash = null;
+		var clone = modelClass.fromJSONObject(jsonInfo);
+
+		var successUpdateModelItf = function () {
+			Logger.debug("Success update profil ! "+self.getId());
+			successCallbackModelItf(clone);
+		};
+
+		var successCheckCompletenessModelItf = function () {
+			Logger.debug("Success check completeness profil ! "+self.getId());
+			clone.setHash(clone.getId());
+			clone.update(successUpdateModelItf, failCallback);
+		};
+
+		var successCreateModelItf = function (data : any) {
+			Logger.debug("Success create model profil ! "+self.getId());
+			clone.checkCompleteness(successCheckCompletenessModelItf, failCallback);
+		};
+
+		clone.create(successCreateModelItf, failCallback);
 	}
 
     /**
