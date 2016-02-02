@@ -19,6 +19,7 @@
 /// <reference path="../model/Behaviour.ts" />
 /// <reference path="../model/ThemeZone.ts" />
 /// <reference path="../model/ThemeSDI.ts" />
+/// <reference path="../model/TimelineRunner.ts" />
 
 
 class AdminsNamespaceManager extends ShareNamespaceManager {
@@ -107,6 +108,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateSystemTrigger', function(data) { self.createObject(SystemTrigger, data, "AnswerCreateSystemTrigger"); });
 		this.addListenerToSocket('CreateUserTrigger', function(data) { self.createObject(UserTrigger, data, "AnswerCreateUserTrigger"); });
 		this.addListenerToSocket('CreateUser', function(data) { self.createObject(User, data, "AnswerCreateUser"); });
+		this.addListenerToSocket('CreateTimelineRunner', function(data) { self.createObject(TimelineRunner, data, "AnswerCreateTimelineRunner"); });
 
 		// Update object
 		this.addListenerToSocket('UpdateSDI', function(data) { self.updateObjectAttribute(SDI, data, "AnswerUpdateSDI"); });
@@ -131,6 +133,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateSystemTrigger', function(data) { self.updateObjectAttribute(SystemTrigger, data, "AnswerUpdateSystemTrigger"); });
 		this.addListenerToSocket('UpdateUserTrigger', function(data) { self.updateObjectAttribute(UserTrigger, data, "AnswerUpdateUserTrigger"); });
 		this.addListenerToSocket('UpdateUser', function(data) { self.updateObjectAttribute(User, data, "AnswerUpdateUser"); });
+		this.addListenerToSocket('UpdateTimelineRunner', function(data) { self.updateObjectAttribute(TimelineRunner, data, "AnswerUpdateTimelineRunner"); });
 
 
 		// Delete object
@@ -155,6 +158,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteUserTrigger', function(idUserTrigger) { self.deleteObjectFromDescription(UserTrigger, "userTriggerId", idUserTrigger, "AnswerDeleteUserTrigger"); });
 		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "AnswerDeleteSDI"); });
 		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteObjectFromDescription(User, "userId", idUser, "AnswerDeleteUser"); });
+		this.addListenerToSocket('DeleteTimelineRunner', function(idTimelineRunner) { self.deleteObjectFromDescription(TimelineRunner, "timelineRunnerId", idTimelineRunner, "AnswerDeleteTimelineRunner"); });
 
 
 		// Custom requests
