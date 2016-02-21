@@ -109,7 +109,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreatePolicy', function(data) { self.createObject(Policy, data, "AnswerCreatePolicy"); });
 		this.addListenerToSocket('CreateSystemTrigger', function(data) { self.createObject(SystemTrigger, data, "AnswerCreateSystemTrigger"); });
 		this.addListenerToSocket('CreateUserTrigger', function(data) { self.createObject(UserTrigger, data, "AnswerCreateUserTrigger"); });
-		this.addListenerToSocket('CreateUser', function(data) { self.createUser(data); });
+		this.addListenerToSocket('CreateUser', function(data) { self.createObject(User, data, "AnswerCreateUser"); });
 		this.addListenerToSocket('CreateTimelineRunner', function(data) { self.createObject(TimelineRunner, data, "AnswerCreateTimelineRunner"); });
 
 		// Update object
@@ -134,7 +134,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdatePolicy', function(data) { self.updateObjectAttribute(Policy, data, "AnswerUpdatePolicy"); });
 		this.addListenerToSocket('UpdateSystemTrigger', function(data) { self.updateObjectAttribute(SystemTrigger, data, "AnswerUpdateSystemTrigger"); });
 		this.addListenerToSocket('UpdateUserTrigger', function(data) { self.updateObjectAttribute(UserTrigger, data, "AnswerUpdateUserTrigger"); });
-		this.addListenerToSocket('UpdateUser', function(data) { self.updateObjectAttribute(User, data, "AnswerUpdateUser"); });
+		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
 		this.addListenerToSocket('UpdateTimelineRunner', function(data) { self.updateObjectAttribute(TimelineRunner, data, "AnswerUpdateTimelineRunner"); });
 
 
@@ -159,7 +159,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteSystemTrigger', function(idSystemTrigger) { self.deleteObjectFromDescription(SystemTrigger, "systemTriggerId", idSystemTrigger, "AnswerDeleteSystemTrigger"); });
 		this.addListenerToSocket('DeleteUserTrigger', function(idUserTrigger) { self.deleteObjectFromDescription(UserTrigger, "userTriggerId", idUserTrigger, "AnswerDeleteUserTrigger"); });
 		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "AnswerDeleteSDI"); });
-		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteObjectFromDescription(User, "userId", idUser, "AnswerDeleteUser"); });
+		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteUser(idUser["userId"]); });
 		this.addListenerToSocket('DeleteTimelineRunner', function(idTimelineRunner) { self.deleteObjectFromDescription(TimelineRunner, "timelineRunnerId", idTimelineRunner, "AnswerDeleteTimelineRunner"); });
 
 
@@ -1484,73 +1484,162 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// END: Manage cloneSDI //////////////////////
 
-////////////////////// Begin: Manage createUser //////////////////////
+////////////////////// Begin: Manage updateUser //////////////////////
 
 	/**
-	 * Create User from giver data.
+	 * Update User from given data.
 	 * Save new User in CMS.
-	 * Send the result on the channel "AnswerCreateUser"
+	 * Send the result on the channel "AnswerUpdateUser"
 	 *
-	 * @method createUser
-	 * @param {JSONObject} userDescription - User description to create
+	 * @method updateUser
+	 * @param {JSONObject} userDescription - User description to update
 	 */
-	createUser(userDescription : any) {
-		Logger.debug("SocketId: " + self.socket.id + " - createUser");
-
-		//self.createObject(User, data, "AnswerCreateUser");
-
+	updateUser(userDescription : any) {
 		var self = this;
 
-		userDescription["cmsId"] = "";
-		userDescription["cmsAuthkey"] = "";
-
-		var user = User.fromJSONObject(userDescription);
-
 		var fail = function(error) {
-			self.socket.emit("AnswerCreateUser", self.formatResponse(false, error));
-			Logger.debug("SocketId: " + self.socket.id + " - createUser : send done with fail status.");
+			self.socket.emit("AnswerUpdateUser", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with fail status.");
 		};
 
-		var success = function () {
+		var successUserCompleteDesc = function(userCompleteDesc) {
+			self.socket.emit("AnswerUpdateUser", self.formatResponse(true, userCompleteDesc));
+			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with success status.");
+		};
 
-			var createUserUrl = CMSConfig.getHost() + CMSConfig.usersPath;
+		var successUserRead = function(user : User) {
 
-			var args = {
-				"data": {
-					"username" : user.username(),
-					"email" : user.email()
-				},
-				"headers": {
-					"Content-Type": "application/json",
-					"Authorization": self.socket.connectedUser.cmsAuthkey()
-				}
-			};
+			if(user.cmsId() != "" && user.cmsAuthkey() != "") {
+				if(user.username() != "" && user.email() != "") {
+					var updateUserUrl = CMSConfig.getHost() + CMSConfig.usersPath + user.cmsId();
 
-			var req = RestClient.getClient().post(createUserUrl, args, function(data, response) {
-				if(response.statusCode >= 200 && response.statusCode < 300) {
-					user.setCmsId(data.id);
-					user.setCmsAuthkey(data.authkey);
-
-					var successUpdate = function() {
-						var successToComplete : Function = function(completeJSONObject) {
-							self.socket.emit("AnswerCreateUser", self.formatResponse(true, completeJSONObject));
-							Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : send done with success status for User with Id : " + user.getId());
-						};
-
-						user.toCompleteJSONObject(successToComplete, fail);
+					var args = {
+						"data": {
+							"username": user.username(),
+							"email": user.email()
+						},
+						"headers": {
+							"Content-Type": "application/json",
+							"Authorization": self.socket.connectedUser.cmsAuthkey()
+						}
 					};
 
-					user.update(successUpdate, fail);
+					var req = RestClient.getClient().put(updateUserUrl, args, function (data, response) {
+						if (response.statusCode >= 200 && response.statusCode < 300) {
+							user.toCompleteJSONObject(successUserCompleteDesc, fail);
+						} else {
+							fail(new RestClientResponse(false, data));
+						}
+					});
+					req.on('error', fail);
 				} else {
-					fail(new RestClientResponse(false, data));
+					user.toCompleteJSONObject(successUserCompleteDesc, fail);
 				}
-			});
-			req.on('error', fail);
+			} else {
+				if(user.username() != "" && user.email() != "") {
+					var createUserUrl = CMSConfig.getHost() + CMSConfig.usersPath;
+
+					var args = {
+						"data": {
+							"username" : user.username(),
+							"email" : user.email()
+						},
+						"headers": {
+							"Content-Type": "application/json",
+							"Authorization": self.socket.connectedUser.cmsAuthkey()
+						}
+					};
+
+					var req = RestClient.getClient().post(createUserUrl, args, function(data, response) {
+						if(response.statusCode >= 200 && response.statusCode < 300) {
+
+							Logger.debug(data.id);
+							Logger.debug(data.authkey);
+
+							user.setCmsId(data.id);
+							user.setCmsAuthkey(data.authkey);
+
+							var successUpdate = function() {
+								user.toCompleteJSONObject(successUserCompleteDesc, fail);
+							};
+
+							Logger.debug(user.toJSONObject());
+
+							user.update(successUpdate, fail);
+						} else {
+							fail(new RestClientResponse(false, data));
+						}
+					});
+					req.on('error', fail);
+				} else {
+					user.toCompleteJSONObject(successUserCompleteDesc, fail);
+				}
+			}
 		};
 
-		user.create(success, fail);
+		var successUpdateUser = function() {
+			User.read(userDescription.id, successUserRead, fail);
+		};
+
+		ModelItf.updateAttribute(User, userDescription, successUpdateUser, fail);
 	}
 
-////////////////////// End: Manage createUser //////////////////////
+////////////////////// End: Manage updateUser //////////////////////
+
+////////////////////// Begin: Manage deleteUser //////////////////////
+
+	/**
+	 * Delete User from given id.
+	 * Delete User in CMS.
+	 * Send the result on the channel "AnswerDeleteUser"
+	 *
+	 * @method deleteUser
+	 * @param {number} userId - User's Id to delete
+	 */
+	deleteUser(userId : number) {
+		var self = this;
+
+		var fail = function(error) {
+			self.socket.emit("AnswerDeleteUser", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - deleteUser : send done with fail status.");
+		};
+
+		var successDelete = function () {
+			self.socket.emit("AnswerDeleteUser", self.formatResponse(true, userId));
+		};
+
+		var successReadObject = function (user) {
+
+			if(user.cmsId() != "") {
+
+				var deleteUserUrl = CMSConfig.getHost() + CMSConfig.usersPath + user.cmsId();
+
+				var args = {
+					"data" : {
+
+					},
+					"headers": {
+						"Content-Type": "application/json",
+						"Authorization": self.socket.connectedUser.cmsAuthkey()
+					}
+				};
+
+				var req = RestClient.getClient().delete(deleteUserUrl, args, function (data, response) {
+					if (response.statusCode >= 200 && response.statusCode < 300) {
+						user.delete(successDelete, fail);
+					} else {
+						fail(new RestClientResponse(false, data));
+					}
+				});
+				req.on('error', fail);
+			} else {
+				user.delete(successDelete, fail);
+			}
+		};
+
+		User.read(userId, successReadObject, fail);
+	}
+
+////////////////////// End: Manage deleteUser //////////////////////
 
 }
