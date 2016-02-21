@@ -167,6 +167,8 @@ class The6thScreenBackend extends Server {
 				console.log(handshakeData.client._peername.address);
 				console.log("BYPASS CHECKING IP ADDRESS !!!!!!!!! // TODO // TO FIX");
 				//if(user.lastIp() == handshakeData.client._peername.address) {
+					socket.connectedUser = user;
+
                     next();
                 //} else {
                 //    next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));

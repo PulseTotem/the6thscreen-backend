@@ -3,7 +3,9 @@
  */
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
+/// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="./ShareNamespaceManager.ts" />
+/// <reference path="../core/CMSConfig.ts" />
 /// <reference path="../model/User.ts" />
 /// <reference path="../model/SDI.ts" />
 /// <reference path="../model/Source.ts" />
@@ -107,7 +109,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreatePolicy', function(data) { self.createObject(Policy, data, "AnswerCreatePolicy"); });
 		this.addListenerToSocket('CreateSystemTrigger', function(data) { self.createObject(SystemTrigger, data, "AnswerCreateSystemTrigger"); });
 		this.addListenerToSocket('CreateUserTrigger', function(data) { self.createObject(UserTrigger, data, "AnswerCreateUserTrigger"); });
-		this.addListenerToSocket('CreateUser', function(data) { self.createObject(User, data, "AnswerCreateUser"); });
+		this.addListenerToSocket('CreateUser', function(data) { self.createUser(data); });
 		this.addListenerToSocket('CreateTimelineRunner', function(data) { self.createObject(TimelineRunner, data, "AnswerCreateTimelineRunner"); });
 
 		// Update object
@@ -1481,4 +1483,74 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// END: Manage cloneSDI //////////////////////
+
+////////////////////// Begin: Manage createUser //////////////////////
+
+	/**
+	 * Create User from giver data.
+	 * Save new User in CMS.
+	 * Send the result on the channel "AnswerCreateUser"
+	 *
+	 * @method createUser
+	 * @param {JSONObject} userDescription - User description to create
+	 */
+	createUser(userDescription : any) {
+		Logger.debug("SocketId: " + self.socket.id + " - createUser");
+
+		//self.createObject(User, data, "AnswerCreateUser");
+
+		var self = this;
+
+		userDescription["cmsId"] = "";
+		userDescription["cmsAuthkey"] = "";
+
+		var user = User.fromJSONObject(userDescription);
+
+		var fail = function(error) {
+			self.socket.emit("AnswerCreateUser", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - createUser : send done with fail status.");
+		};
+
+		var success = function () {
+
+			var createUserUrl = CMSConfig.getHost() + CMSConfig.usersPath;
+
+			var args = {
+				"data": {
+					"username" : user.username(),
+					"email" : user.email()
+				},
+				"headers": {
+					"Content-Type": "application/json",
+					"Authorization": self.socket.connectedUser.cmsAuthkey()
+				}
+			};
+
+			var req = RestClient.getClient().post(createUserUrl, args, function(data, response) {
+				if(response.statusCode >= 200 && response.statusCode < 300) {
+					user.setCmsId(data.id);
+					user.setCmsAuthkey(data.authkey);
+
+					var successUpdate = function() {
+						var successToComplete : Function = function(completeJSONObject) {
+							self.socket.emit("AnswerCreateUser", self.formatResponse(true, completeJSONObject));
+							Logger.debug("SocketId: " + self.socket.id + " - sendUserDescription : send done with success status for User with Id : " + user.getId());
+						};
+
+						user.toCompleteJSONObject(successToComplete, fail);
+					};
+
+					user.update(successUpdate, fail);
+				} else {
+					fail(new RestClientResponse(false, data));
+				}
+			});
+			req.on('error', fail);
+		};
+
+		user.create(success, fail);
+	}
+
+////////////////////// End: Manage createUser //////////////////////
+
 }

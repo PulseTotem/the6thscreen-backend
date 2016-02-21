@@ -54,6 +54,22 @@ class User extends ModelItf {
      */
     private _lastIp : string;
 
+	/**
+	 * CmsId property.
+	 *
+	 * @property _cmsId
+	 * @type string
+	 */
+	private _cmsId : string;
+
+	/**
+	 * CmsAuthkey property.
+	 *
+	 * @property _cmsAuthkey
+	 * @type string
+	 */
+	private _cmsAuthkey : string;
+
     /**
      * Roles property.
      *
@@ -109,14 +125,18 @@ class User extends ModelItf {
      * @constructor
      * @param {string} username - The User's username.
      * @param {number} id - The User's ID.
+	 * @param {string} cmsId - The User's cmsId.
+	 * @param {string} cmsAuthkey - The User's cmsAuthkey.
 	 * @param {string} createdAt - The User's createdAt.
 	 * @param {string} updatedAt - The User's updatedAt.
      */
-    constructor(username : string = "", email : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(username : string = "", email : string = "", cmsId : string = "", cmsAuthkey : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setUsername(username);
         this.setEmail(email);
+		this.setCmsId(cmsId);
+		this.setCmsAuthkey(cmsAuthkey);
 
 	    this._token = null;
 	    this._lastIp = null;
@@ -202,6 +222,42 @@ class User extends ModelItf {
     lastIp() {
         return this._lastIp;
     }
+
+	/**
+	 * Returns User's cmsId.
+	 *
+	 * @method cmsId
+	 */
+	cmsId() : string {
+		return this._cmsId;
+	}
+
+	/**
+	 * Set the User's cmsId.
+	 *
+	 * @method setCmsId
+	 */
+	setCmsId(cmsId : string) {
+		this._cmsId = cmsId;
+	}
+
+	/**
+	 * Returns User's cmsAuthkey.
+	 *
+	 * @method cmsAuthkey
+	 */
+	cmsAuthkey() : string {
+		return this._cmsAuthkey;
+	}
+
+	/**
+	 * Set the User's cmsAuthkey.
+	 *
+	 * @method setCmsAuthkey
+	 */
+	setCmsAuthkey(cmsAuthkey : string) {
+		this._cmsAuthkey = cmsAuthkey;
+	}
 
     /**
      * Return the User's roles.
@@ -399,6 +455,8 @@ class User extends ModelItf {
             "email": this.email(),
             "token": this.token(),
             "lastIp": this.lastIp(),
+			"cmsId": this.cmsId(),
+			"cmsAuthkey": this.cmsAuthkey(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
 			"updatedAt" : this.getUpdatedAt()
@@ -735,7 +793,7 @@ class User extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : User {
-		var user = new User(jsonObject.username, jsonObject.email, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		var user = new User(jsonObject.username, jsonObject.email, jsonObject.cmsId, jsonObject.cmsAuthkey, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 
         if(!!jsonObject.token) {
             user.setToken(jsonObject.token);

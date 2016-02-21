@@ -24,14 +24,26 @@ describe('User', function() {
 			assert.equal(c.email(), email, "The email is not stored correctly.");
 		});
 
+		it('should store the cmsId', function () {
+			var cmsId = "cmsId42";
+			var c = new User("", "", cmsId);
+			assert.equal(c.cmsId(), cmsId, "The cmsId is not stored correctly.");
+		});
+
+		it('should store the cmsAuthkey', function () {
+			var cmsAuthkey = "authkey";
+			var c = new User("", "", "", cmsAuthkey);
+			assert.equal(c.cmsAuthkey(), cmsAuthkey, "The cmsAuthkey is not stored correctly.");
+		});
+
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new User("", "", 52);
+			var c = new User("", "", "", "", 52);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete value', function () {
-			var c = new User("test", "bla", 52, true);
+			var c = new User("test", "bla", "", "", 52, true);
 			assert.equal(c.isComplete(), true, "The complete value is not stored.");
 		});
 
@@ -47,11 +59,13 @@ describe('User', function() {
 				"id": 42,
 				"username": "toto",
 				"email": "blabla",
+				"cmsId": "theid",
+				"cmsAuthkey": "authkey",
 				"complete": true
 			};
 
 			var userRetrieve = User.fromJSONObject(json);
-			var userExpected = new User("toto", "blabla", 42, true);
+			var userExpected = new User("toto", "blabla", "theid", "authkey", 42, true);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve user (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
@@ -59,11 +73,13 @@ describe('User', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new User("toto", "bla", 52);
+			var c = new User("toto", "bla", "theid", "authkey", 52);
 			var expected = {
 				"id": 52,
 				"username": "toto",
 				"email": "bla",
+				"cmsId": "theid",
+				"cmsAuthkey": "authkey",
 				"token": null,
 				"lastIp": null,
 				"complete": false,
@@ -91,7 +107,7 @@ describe('User', function() {
 		});
 
 		it('should return true if the object has a name, an email and an ID', function(done) {
-			var b = new User("toto", "bla", 52);
+			var b = new User("toto", "bla", "", "", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), true, "The behaviour should be complete.");
 				done();
@@ -104,7 +120,7 @@ describe('User', function() {
 		});
 
 		it('should return false if the object has an empty name, an email and an ID', function(done) {
-			var b = new User("", "bla", 52);
+			var b = new User("", "bla", "", "", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), false, "The behaviour should be complete.");
 				done();
@@ -117,7 +133,7 @@ describe('User', function() {
 		});
 
 		it('should return false if the object has a null name, an email and an ID', function(done) {
-			var b = new User(null, "bla", 52);
+			var b = new User(null, "bla", "", "", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), false, "The behaviour should be complete.");
 				done();
@@ -130,7 +146,7 @@ describe('User', function() {
 		});
 
 		it('should return false if the object has a name, an empty email and an ID', function(done) {
-			var b = new User("test", "", 52);
+			var b = new User("test", "", "", "", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), false, "The behaviour should be complete.");
 				done();
@@ -143,7 +159,7 @@ describe('User', function() {
 		});
 
 		it('should return false if the object has a name, a null email and an ID', function(done) {
-			var b = new User("test", null, 52);
+			var b = new User("test", null, "", "", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), false, "The behaviour should be complete.");
 				done();
@@ -171,7 +187,7 @@ describe('User', function() {
 
 	describe('#addRole', function() {
 		it('should call the right request', function(done) {
-			var c = new User("toto", "bla", 52);
+			var c = new User("toto", "bla", "", "", 52);
 			var pv = new Role("mavaleur",12);
 
 			var response1 : any = [];
@@ -216,8 +232,8 @@ describe('User', function() {
 
 	describe('#removeRole', function() {
 		it('should call the right request', function(done) {
-			var c = new User("toto", "bla", 52);
-			var pv = new Role("mavaleur",12);
+			var c = new User("toto", "bla", "", "", 52);
+			var pv = new Role("mavaleur", 12);
 
 			var response1 : any = [
 					{
@@ -266,7 +282,7 @@ describe('User', function() {
 
 	describe('#addSDI', function() {
 		it('should call the right request', function(done) {
-			var c = new User("toto", "bla", 52);
+			var c = new User("toto", "bla", "", "", 52);
 			var pv = new SDI("mavaleur", "bidule", "host", 12);
 
 			var response1 : any = [];
@@ -311,7 +327,7 @@ describe('User', function() {
 
 	describe('#removeSDI', function() {
 		it('should call the right request', function(done) {
-			var c = new User("toto", "bla", 52);
+			var c = new User("toto", "bla", "", "", 52);
 			var pv = new SDI("mavaleur", "blup", "truc", 12);
 
 			var response1 : any = [
@@ -363,7 +379,7 @@ describe('User', function() {
 
     describe('#addOAuthKey', function() {
         it('should call the right request', function(done) {
-            var c = new User("toto", "bla", 52);
+            var c = new User("toto", "bla", "", "", 52);
             var pv = new OAuthKey("mavaleur", "bidule", "maValeur", 12);
 
             var response1 : any = [];
@@ -407,7 +423,7 @@ describe('User', function() {
 
     describe('#removeOAuthKey', function() {
         it('should call the right request', function(done) {
-            var c = new User("toto", "bla", 52);
+            var c = new User("toto", "bla", "", "", 52);
             var pv = new OAuthKey("mavaleur", "blup", "ouepKey", 12);
 
             var response1 : any = [

@@ -144,7 +144,7 @@ describe('SDI', function() {
 	describe('#addUser', function() {
 		it('should call the right request', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("mavaleur", "", 12);
+			var pv = new User("mavaleur", "", "", "", 12);
 
 			var response1 : any = [];
 
@@ -189,7 +189,7 @@ describe('SDI', function() {
 	describe('#removeUser', function() {
 		it('should call the right request', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("mavaleur", "", 12);
+			var pv = new User("mavaleur", "", "", "", 12);
 
 			var response1 : any = [
 					{
