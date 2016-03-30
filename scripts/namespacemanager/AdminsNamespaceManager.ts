@@ -15,6 +15,7 @@
 /// <reference path="../model/OAuthKey.ts" />
 /// <reference path="../model/Call.ts" />
 /// <reference path="../model/Renderer.ts" />
+/// <reference path="../model/RendererTheme.ts" />
 /// <reference path="../model/Profil.ts" />
 /// <reference path="../model/InfoType.ts" />
 /// <reference path="../model/Policy.ts" />
@@ -176,7 +177,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveOAuthKeysFromServiceAndUser', function(serviceUserDescription) { self.sendOAuthKeysFromServiceAndUser(serviceUserDescription); });
 		this.addListenerToSocket('RetrieveCompleteProfilDescription', function(profilIdDescription) { self.sendCompleteProfil(profilIdDescription); });
 		this.addListenerToSocket('RetrieveZoneContentsFromZoneId', function(zoneIdDescription) { self.sendZoneContentsFromZoneId(zoneIdDescription); });
-
+		this.addListenerToSocket('AddThemeToRenderer', function(newThemeDescription) { self.addThemeToRenderer(newThemeDescription); });
+		this.addListenerToSocket('RemoveThemeFromRenderer', function(themeDescription) { self.removeThemeFromRenderer(themeDescription); });
 
 		this.addListenerToSocket('RetrieveConnectedClientOfProfil', function (profilIdDescription) { self.sendConnectedClients(profilIdDescription); });
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
@@ -1641,5 +1643,88 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage deleteUser //////////////////////
+
+////////////////////// Begin: Manage RendererThemes of Renderer //////////////////////
+
+	/**
+	 * Add a new RendererTheme to a given Renderer Id.
+	 * Send the result on the channel "AnswerUpdateRenderer"
+	 *
+	 * @method addThemeToRenderer
+	 * @param {JSONObject} newThemeDescription - new RendererTheme description
+	 */
+	addThemeToRenderer(newThemeDescription : any) {
+		// newThemeDescription : { "name": string, "id" : number }
+		var self = this;
+
+		var rendererId = newThemeDescription.id;
+
+		var fail : Function = function(error) {
+			self.socket.emit("AnswerUpdateRenderer", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - addThemeToRenderer failed ");
+		};
+
+		var successRead = function (renderer : Renderer) {
+
+			var themeName = newThemeDescription.name;
+
+			var newTheme : RendererTheme = new RendererTheme(themeName);
+
+			var successCreateTheme = function() {
+
+				var successAddRendererTheme = function() {
+					self.sendObjectDescriptionFromId(Renderer, rendererId, "AnswerUpdateRenderer", false);
+				};
+
+				renderer.addRendererTheme(newTheme.getId(), successAddRendererTheme, fail);
+			};
+
+			newTheme.create(successCreateTheme, fail);
+		};
+
+		Renderer.read(rendererId, successRead, fail);
+	}
+
+	/**
+	 * Remove RendererTheme from a given Renderer Id.
+	 * Send the result on the channel "AnswerUpdateRenderer"
+	 *
+	 * @method removeThemeFromRenderer
+	 * @param {JSONObject} newThemeDescription - new RendererTheme description
+	 */
+	removeThemeFromRenderer(themeDescription : any) {
+		// themeDescription : { "themeId": number, "id" : number }
+		var self = this;
+
+		var themeId = themeDescription.themeId;
+		var rendererId = themeDescription.id;
+
+		var fail:Function = function (error) {
+			self.socket.emit("AnswerUpdateRenderer", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - removeThemeFromRenderer failed ");
+		};
+
+		var successReadRT = function(rendererTheme : RendererTheme) {
+			var successRead = function(renderer : Renderer) {
+
+				var successRemoveRendererTheme = function () {
+
+					var successDelete = function() {
+						self.sendObjectDescriptionFromId(Renderer, rendererId, "AnswerUpdateRenderer", false);
+					};
+
+					rendererTheme.delete(successDelete, fail);
+				};
+
+				renderer.removeRendererTheme(rendererTheme.getId(), successRemoveRendererTheme, fail);
+			};
+
+			Renderer.read(rendererId, successRead, fail);
+		};
+
+		RendererTheme.read(themeId, successReadRT, fail)
+	}
+
+////////////////////// End: Manage RendererThemes of Renderer //////////////////////
 
 }
