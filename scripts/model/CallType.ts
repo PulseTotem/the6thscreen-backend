@@ -35,6 +35,14 @@ class CallType extends ModelItf {
      */
     private _description : string;
 
+	/**
+	 * Description property.
+	 *
+	 * @property _rendererTheme
+	 * @type string
+	 */
+	private _rendererTheme : string;
+
     /**
      * Source property.
      *
@@ -137,15 +145,18 @@ class CallType extends ModelItf {
      * @constructor
      * @param {string} name - The CallType's name.
      * @param {string} description - The CallType's description.
+	 * @param {string} rendererTheme - The CallType's rendererTheme.
      * @param {number} id - The CallType's ID.
 	 * @param {string} createdAt - The CallType's createdAt.
 	 * @param {string} updatedAt - The CallType's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", description : string = "", rendererTheme : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
+
+		this.setRendererTheme(rendererTheme);
 
         this._source = null;
         this._source_loaded = false;
@@ -184,6 +195,15 @@ class CallType extends ModelItf {
 		this._description = description;
 	}
 
+	/**
+	 * Set the CallType's rendererTheme.
+	 *
+	 * @method setRendererTheme
+	 */
+	setRendererTheme(rendererTheme : string) {
+		this._rendererTheme = rendererTheme;
+	}
+
     /**
      * Return the CallType's name.
      *
@@ -201,6 +221,15 @@ class CallType extends ModelItf {
     description() {
         return this._description;
     }
+
+	/**
+	 * Return the CallType's rendererTheme.
+	 *
+	 * @method rendererTheme
+	 */
+	rendererTheme() {
+		return this._rendererTheme;
+	}
 
     /**
      * Return the CallType's source.
@@ -519,6 +548,7 @@ class CallType extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
+			"rendererTheme": this.rendererTheme(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
 			"updatedAt" : this.getUpdatedAt()
@@ -529,7 +559,7 @@ class CallType extends ModelItf {
 	/**
 	 * Check whether the object is complete or not
 	 *
-	 * A CallType is complete if it has an ID, a name, a source, a renderer and a zone.
+	 * A CallType is complete if it has an ID, a name, a source, a renderer, a rendererTheme and a zone.
      * It is not necessary that the zone is complete yet.
 	 *
 	 * @param successCallback The function to call in case of success.
@@ -538,7 +568,7 @@ class CallType extends ModelItf {
 	checkCompleteness(successCallback : Function, failCallback : Function) {
 		var self = this;
 		var success : Function = function () {
-			if (self.isComplete() && !!self.name()) {
+			if (self.isComplete() && !!self.name() && !!self.rendererTheme()) {
 				var success:Function = function () {
 					if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
 						self._complete = (!!self.renderer() && self.renderer().isComplete()) && !!self.zone() && (!!self.source() && self.source().isComplete());
@@ -852,7 +882,7 @@ class CallType extends ModelItf {
 	 * @return {CallType} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : CallType {
-		return new CallType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new CallType(jsonObject.name, jsonObject.description, jsonObject.rendererTheme, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

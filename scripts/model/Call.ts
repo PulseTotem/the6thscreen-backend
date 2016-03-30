@@ -28,6 +28,14 @@ class Call extends ModelItf {
     private _name : string;
 
 	/**
+	 * RendererTheme property.
+	 *
+	 * @property _rendererTheme
+	 * @type string
+	 */
+	private _rendererTheme : string;
+
+	/**
 	 * CallType property.
 	 *
 	 * @property _call_type
@@ -96,14 +104,16 @@ class Call extends ModelItf {
      *
      * @constructor
      * @param {string} name - The Call's name.
+	 * @param {string} rendererTheme - The Call's name.
      * @param {number} id - The Call's ID.
 	 * @param {string} createdAt - The Call's createdAt.
 	 * @param {string} updatedAt - The Call's updatedAt.
      */
-    constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", rendererTheme : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
+		this.setRendererTheme(rendererTheme);
 
         this._param_values = new Array<ParamValue>();
         this._param_values_loaded = false;
@@ -135,6 +145,24 @@ class Call extends ModelItf {
     setName(name : string) {
         this._name = name;
     }
+
+	/**
+	 * Return the Call's rendererTheme.
+	 *
+	 * @method rendererTheme
+	 */
+	rendererTheme() {
+		return this._rendererTheme;
+	}
+
+	/**
+	 * Set the Call's rendererTheme.
+	 *
+	 * @method setRendererTheme
+	 */
+	setRendererTheme(rendererTheme : string) {
+		this._rendererTheme = rendererTheme;
+	}
 
     /**
      * Return the Call's paramValues.
@@ -397,6 +425,7 @@ class Call extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
+			"rendererTheme": this.rendererTheme(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
 			"updatedAt" : this.getUpdatedAt()
@@ -654,7 +683,7 @@ class Call extends ModelItf {
      * @return {Call} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Call {
-	    return new Call(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+	    return new Call(jsonObject.name, jsonObject.rendererTheme, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
 
 	/**
