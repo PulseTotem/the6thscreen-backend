@@ -6,6 +6,7 @@
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./ParamValue.ts" />
 /// <reference path="./CallType.ts" />
+/// <reference path="./RendererTheme.ts" />
 /// <reference path="./Profil.ts" />
 /// <reference path="./OAuthKey.ts" />
 
@@ -26,6 +27,22 @@ class Call extends ModelItf {
      * @type string
      */
     private _name : string;
+
+	/**
+	 * RendererTheme property.
+	 *
+	 * @property _rendererTheme
+	 * @type RendererTheme
+	 */
+	private _rendererTheme : RendererTheme;
+
+	/**
+	 * Lazy loading for RendererTheme property.
+	 *
+	 * @property _rendererTheme_loaded
+	 * @type boolean
+	 */
+	private _rendererTheme_loaded : boolean;
 
 	/**
 	 * CallType property.
@@ -107,6 +124,9 @@ class Call extends ModelItf {
 
         this._param_values = new Array<ParamValue>();
         this._param_values_loaded = false;
+
+		this._rendererTheme = null;
+		this._rendererTheme_loaded = false;
 
 	    this._call_type = null;
 	    this._call_type_loaded = false;
@@ -217,6 +237,49 @@ class Call extends ModelItf {
     }
 
 	/**
+	 * Return the Call's rendererTheme.
+	 *
+	 * @method rendererTheme
+	 */
+	rendererTheme() {
+		return this._rendererTheme;
+	}
+
+	/**
+	 * Load the Call's rendererTheme.
+	 *
+	 * @method loadRendererTheme
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadRendererTheme(successCallback : Function = null, failCallback : Function = null) {
+		if(! this._rendererTheme_loaded) {
+			var self = this;
+			var success : Function = function(rendererTheme) {
+				if(!!rendererTheme) {
+					self._rendererTheme = rendererTheme;
+				}
+				self._rendererTheme_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Call, RendererTheme, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
+	/**
 	 * Return the Call's oAuthKey.
 	 *
 	 * @method oAuthKey
@@ -317,7 +380,7 @@ class Call extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._param_values_loaded && self._call_type_loaded && self._oauthkey_loaded) {
+            if(self._param_values_loaded && self._call_type_loaded && self._rendererTheme_loaded && self._oauthkey_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -334,6 +397,7 @@ class Call extends ModelItf {
 
         this.loadParamValues(success, fail);
         this.loadCallType(success, fail);
+		this.loadRendererTheme(success, fail);
 		this.loadOAuthKey(success, fail);
     }
 
@@ -420,9 +484,11 @@ class Call extends ModelItf {
 
 	        if (onlyId) {
 		        data["callType"] = (self.callType() !== null) ? self.callType().getId() : null;
+				data["rendererTheme"] = (self.rendererTheme() !== null) ? self.rendererTheme().getId() : null;
 				data["oAuthKey"] = (self.oAuthKey() !== null) ? self.oAuthKey().getId() : null;
 	        } else {
 		        data["callType"] = (self.callType() !== null) ? self.callType().toJSONObject() : null;
+				data["rendererTheme"] = (self.rendererTheme() !== null) ? self.rendererTheme().toJSONObject() : null;
 				data["oAuthKey"] = (self.oAuthKey() !== null) ? self.oAuthKey().toJSONObject() : null;
 	        }
 	        data["paramValues"] = self.serializeArray(self.paramValues(), onlyId);
@@ -488,6 +554,33 @@ class Call extends ModelItf {
 	 */
 	unlinkCallType(callTypeId : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Call, CallType, callTypeId, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the RendererTheme of the Call.
+	 * As a Call can only have one RendererTheme, if the value is already set, this method throws an exception: you need first to unset the RendererTheme.
+	 * Moreover the given RendererTheme must be created in database.
+	 *
+	 * @method linkRendererTheme
+	 * @param {number} rendererThemeId - The RendererTheme to associate with the Call.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkRendererTheme(rendererThemeId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Call, RendererTheme, rendererThemeId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current RendererTheme from the Call.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A RendererTheme must have been set before using it, else an exception is thrown.
+	 *
+	 * @method unlinkRendererTheme
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkRendererTheme(rendererThemeId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Call, RendererTheme, rendererThemeId, successCallback, failCallback);
 	}
 
 	/**
@@ -689,30 +782,34 @@ class Call extends ModelItf {
 								counterParamValues++;
 
 								if (counterParamValues == nbParamValues) {
-									var finalSuccess = function () {
+									var successLinkRendererTheme = function() {
+										var finalSuccess = function () {
 
-										var successCheckCompleteness = function () {
-											if (clonedCall.isComplete() != completeCall) {
+											var successCheckCompleteness = function () {
+												if (clonedCall.isComplete() != completeCall) {
 
-												var successUpdate = function () {
+													var successUpdate = function () {
+														successCallback(clonedCall);
+													};
+
+													clonedCall.update(successUpdate, failCallback);
+												} else {
 													successCallback(clonedCall);
-												};
+												}
+											};
+											clonedCall.desynchronize();
+											clonedCall.checkCompleteness(successCheckCompleteness, failCallback);
 
-												clonedCall.update(successUpdate, failCallback);
-											} else {
-												successCallback(clonedCall);
-											}
 										};
-										clonedCall.desynchronize();
-										clonedCall.checkCompleteness(successCheckCompleteness, failCallback);
 
+										if (self.oAuthKey() != null) {
+											clonedCall.linkOAuthKey(self.oAuthKey().getId(), finalSuccess, failCallback);
+										} else {
+											finalSuccess();
+										}
 									};
 
-									if (self.oAuthKey() != null) {
-										clonedCall.linkOAuthKey(self.oAuthKey().getId(), finalSuccess, failCallback);
-									} else {
-										finalSuccess();
-									}
+									clonedCall.linkRendererTheme(self.rendererTheme().getId(), successLinkRendererTheme, failCallback);
 								}
 							};
 
