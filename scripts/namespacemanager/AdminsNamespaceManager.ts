@@ -167,6 +167,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		// Custom requests
 		this.addListenerToSocket('RetrieveSourcesFromServiceId', function(serviceIdDescription) { self.sendSourcesFromServiceId(serviceIdDescription); });
 		this.addListenerToSocket('RetrieveRenderersFromSourceId', function(sourceIdDescription) { self.sendRenderersFromSourceId(sourceIdDescription); });
+		this.addListenerToSocket('RetrieveRendererThemesFromRendererId', function(rendererIdDescription) { self.sendRendererThemesFromRendererId(rendererIdDescription); });
+
 		this.addListenerToSocket('RetrieveCallTypesFromZoneId', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteRelativeTimeline', function(timelineIdDescription) { self.sendCompleteRelativeTimeline(timelineIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteAbsoluteTimeline', function(timelineIdDescription) { self.sendCompleteAbsoluteTimeline(timelineIdDescription); });
@@ -581,6 +583,42 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		};
 
 		Source.read(sourceId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendRenderersFromSourceId //////////////////////
+
+////////////////////// Begin: Manage sendRendererThemesFromRendererId //////////////////////
+
+	/**
+	 * Retrieve RendererThemes from a given Renderer Id.
+	 * Send the result on the channel "RendererThemesDescriptionFromRenderer"
+	 *
+	 * @method sendRendererThemesFromRendererId
+	 * @param rendererIdDescription
+	 */
+	sendRendererThemesFromRendererId(rendererIdDescription : any) {
+		// rendererIdDescription : { "rendererId": number }
+		var self = this;
+
+		var rendererId = rendererIdDescription.rendererId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("RendererThemesDescriptionFromRenderer", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendRendererThemesFromRendererId failed ");
+		};
+
+		var successRead = function (renderer : Renderer) {
+
+			var successLoadRendererThemes : Function = function () {
+				var rendererThemes : Array<RendererTheme> = renderer.rendererThemes();
+
+				self.socket.emit("RendererThemesDescriptionFromRenderer", self.formatResponse(true, renderer.serializeArray(rendererThemes)));
+			};
+
+			renderer.loadRendererThemes(successLoadRendererThemes, fail);
+		};
+
+		Renderer.read(rendererId, successRead, fail);
 	}
 
 ////////////////////// End: Manage sendRenderersFromSourceId //////////////////////
