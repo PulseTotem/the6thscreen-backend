@@ -955,6 +955,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 			var successLoadAssociations = function() {
 
 				cTJSON["renderer"] = (callType.renderer() !== null) ? callType.renderer().toJSONObject() : null;
+				cTJSON["rendererTheme"] = (callType.rendererTheme() !== null) ? callType.rendererTheme().toJSONObject() : null;
 
 				var successSourceCompleteDescription = function(sourceCompleteDesc) {
 					cTJSON["source"] = sourceCompleteDesc;
