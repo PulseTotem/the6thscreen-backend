@@ -603,10 +603,10 @@ class CallType extends ModelItf {
 	checkCompleteness(successCallback : Function, failCallback : Function) {
 		var self = this;
 		var success : Function = function () {
-			if (self.isComplete() && !!self.name() && !!self.rendererTheme()) {
+			if (self.isComplete() && !!self.name()) {
 				var success:Function = function () {
-					if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
-						self._complete = (!!self.renderer() && self.renderer().isComplete()) && !!self.zone() && (!!self.source() && self.source().isComplete());
+					if (self._renderer_loaded && self._rendererTheme_loaded && self._source_loaded && self._zone_loaded) {
+						self._complete = (!!self.renderer() && self.renderer().isComplete()) && !!self.rendererTheme() && !!self.zone() && (!!self.source() && self.source().isComplete());
 						successCallback();
 					}
 				};

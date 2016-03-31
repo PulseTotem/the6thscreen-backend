@@ -93,7 +93,6 @@ class RendererTheme extends ModelItf {
 		}
 
 		super.checkCompleteness(success, failCallback);
-
 	}
 
     /**
