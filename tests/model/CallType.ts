@@ -93,7 +93,7 @@ describe('CallType', function(){
 	});
 
 	describe('#checkCompleteness', function() {
-		it('should consider the object as complete if it has an ID, a name, a complete source, a complete renderer and a complete zone', function(done) {
+		it('should consider the object as complete if it has an ID, a name, a complete source, a complete renderer, a rendererTheme and a complete zone', function(done) {
 			var cpt = new CallType("toto","blabla", 52);
 
 			var responseSource : any = {
@@ -109,6 +109,12 @@ describe('CallType', function(){
 					"complete": true
 				};
 
+			var responseRendererTheme : any = {
+				"id":12,
+				"name": "rendererTheme",
+				"complete": true
+			};
+
 			var responseZone : any = {
 					"id":12,
 					"name": "zone",
@@ -123,6 +129,10 @@ describe('CallType', function(){
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
 				.reply(200, JSON.stringify(responseRenderer));
 
+			var restClientMockRT = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
+				.reply(200, JSON.stringify(responseRendererTheme));
+
 			var restClientMockZ = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
 				.reply(200, JSON.stringify(responseZone));
@@ -130,6 +140,7 @@ describe('CallType', function(){
 			var success = function() {
 				assert.ok(restClientMockS.isDone(), "The mock request has not been done to get the type");
 				assert.ok(restClientMockR.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMockRT.isDone(), "The mock request has not been done to get the type");
 				assert.ok(restClientMockZ.isDone(), "The mock request has not been done to get the type");
 				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
 				done();
@@ -158,6 +169,12 @@ describe('CallType', function(){
 					"complete": true
 				};
 
+			var responseRendererTheme : any = {
+				"id":12,
+				"name": "rendererTheme",
+				"complete": true
+			};
+
 			var responseZone : any = {
 					"id":12,
 					"name": "zone",
@@ -172,6 +189,10 @@ describe('CallType', function(){
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
 				.reply(200, JSON.stringify(responseRenderer));
 
+			var restClientMockRT = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
+				.reply(200, JSON.stringify(responseRendererTheme));
+
 			var restClientMockZ = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
 				.reply(200, JSON.stringify(responseZone));
@@ -179,6 +200,7 @@ describe('CallType', function(){
 			var success = function() {
 				assert.ok(restClientMockS.isDone(), "The mock request has not been done to get the type");
 				assert.ok(restClientMockR.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMockRT.isDone(), "The mock request has not been done to get the type");
 				assert.ok(restClientMockZ.isDone(), "The mock request has not been done to get the type");
 				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
 				done();
@@ -207,6 +229,12 @@ describe('CallType', function(){
 					"complete": false
 				};
 
+			var responseRendererTheme : any = {
+				"id":12,
+				"name": "rendererTheme",
+				"complete": true
+			};
+
 			var responseZone : any = {
 					"id":12,
 					"name": "zone",
@@ -221,6 +249,10 @@ describe('CallType', function(){
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
 				.reply(200, JSON.stringify(responseRenderer));
 
+			var restClientMockRT = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
+				.reply(200, JSON.stringify(responseRendererTheme));
+
 			var restClientMockZ = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
 				.reply(200, JSON.stringify(responseZone));
@@ -228,6 +260,7 @@ describe('CallType', function(){
 			var success = function() {
 				assert.ok(restClientMockS.isDone(), "The mock request has not been done to get the type");
 				assert.ok(restClientMockR.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMockRT.isDone(), "The mock request has not been done to get the type");
 				assert.ok(restClientMockZ.isDone(), "The mock request has not been done to get the type");
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
 				done();
@@ -256,6 +289,12 @@ describe('CallType', function(){
 					"complete": true
 				};
 
+			var responseRendererTheme : any = {
+				"id":12,
+				"name": "rendererTheme",
+				"complete": true
+			};
+
 			var responseZone : any = {
 					"id":12,
 					"name": "zone",
@@ -270,6 +309,10 @@ describe('CallType', function(){
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
 				.reply(200, JSON.stringify(responseRenderer));
 
+			var restClientMockRT = nock(DatabaseConnection.getBaseURL())
+				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
+				.reply(200, JSON.stringify(responseRendererTheme));
+
 			var restClientMockZ = nock(DatabaseConnection.getBaseURL())
 				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
 				.reply(200, JSON.stringify(responseZone));
@@ -277,6 +320,7 @@ describe('CallType', function(){
 			var success = function() {
 				assert.ok(restClientMockS.isDone(), "The mock request has not been done to get the type");
 				assert.ok(restClientMockR.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMockRT.isDone(), "The mock request has not been done to get the type");
 				assert.ok(restClientMockZ.isDone(), "The mock request has not been done to get the type");
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
 				done();
