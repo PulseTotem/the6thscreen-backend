@@ -257,7 +257,7 @@ class Call extends ModelItf {
 			var self = this;
 			var success : Function = function(rendererTheme) {
 				if(!!rendererTheme) {
-					self.rendererTheme = rendererTheme;
+					self._rendererTheme = rendererTheme;
 				}
 				self._rendererTheme_loaded = true;
 				if(successCallback != null) {
