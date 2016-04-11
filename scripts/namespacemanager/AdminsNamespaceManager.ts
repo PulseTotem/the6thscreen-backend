@@ -100,6 +100,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateThemeZone', function(data) { self.createObject(ThemeZone, data, "AnswerCreateThemeZone"); });
 		this.addListenerToSocket('CreateThemeSDI', function(data) { self.createObject(ThemeSDI, data, "AnswerCreateThemeSDI"); });
 		this.addListenerToSocket('CreateParamType', function(data) { self.createObject(ParamType, data, "AnswerCreateParamType"); });
+		this.addListenerToSocket('CreateConstraintParamType', function(data) { self.createObject(ConstraintParamType, data, "AnswerCreateConstraintParamType"); });
 		this.addListenerToSocket('CreateTypeParamType', function(data) { self.createObject(TypeParamType, data, "AnswerCreateTypeParamType"); });
 		this.addListenerToSocket('CreateInfoType', function(data) { self.createObject(InfoType, data, "AnswerCreateInfoType"); });
 		this.addListenerToSocket('CreateService', function(data) { self.createObject(Service, data, "AnswerCreateService"); });
@@ -125,6 +126,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateThemeZone', function(data) { self.updateObjectAttribute(ThemeZone, data, "AnswerUpdateThemeZone"); });
 		this.addListenerToSocket('UpdateThemeSDI', function(data) { self.updateObjectAttribute(ThemeSDI, data, "AnswerUpdateThemeSDI"); });
 		this.addListenerToSocket('UpdateParamType', function(data) { self.updateObjectAttribute(ParamType, data, "AnswerUpdateParamType"); });
+		this.addListenerToSocket('UpdateConstraintParamType', function(data) { self.updateObjectAttribute(ConstraintParamType, data, "AnswerUpdateConstraintParamType"); });
 		this.addListenerToSocket('UpdateTypeParamType', function(data) { self.updateObjectAttribute(TypeParamType, data, "AnswerUpdateTypeParamType"); });
 		this.addListenerToSocket('UpdateInfoType', function(data) { self.updateObjectAttribute(InfoType, data, "AnswerUpdateInfoType"); });
 		this.addListenerToSocket('UpdateService', function(data) { self.updateObjectAttribute(Service, data, "AnswerUpdateService"); });
@@ -145,6 +147,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteThemeZone', function(idThemeZone) { self.deleteObjectFromDescription(ThemeZone, "themeZoneId", idThemeZone, "AnswerDeleteThemeZone"); });
 		this.addListenerToSocket('DeleteThemeSDI', function(idThemeSDI) { self.deleteObjectFromDescription(ThemeSDI, "themeSDIId", idThemeSDI, "AnswerDeleteThemeSDI"); });
 		this.addListenerToSocket('DeleteParamType', function(idParamType) { self.deleteObjectFromDescription(ParamType, "paramTypeId", idParamType, "AnswerDeleteParamType"); });
+		this.addListenerToSocket('DeleteConstraintParamType', function(idConstraintParamType) { self.deleteObjectFromDescription(ConstraintParamType, "constraintParamTypeId", idConstraintParamType, "AnswerDeleteConstraintParamType"); });
 		this.addListenerToSocket('DeleteParamValue', function(idParamValue) { self.deleteObjectFromDescription(ParamValue, "paramValueId", idParamValue, "AnswerDeleteParamValue"); });
 		this.addListenerToSocket('DeleteTypeParamType', function(idTypeParamType) { self.deleteObjectFromDescription(TypeParamType, "typeParamTypeId", idTypeParamType, "AnswerDeleteTypeParamType"); });
 		this.addListenerToSocket('DeleteInfoType', function(idInfoType) { self.deleteObjectFromDescription(InfoType, "infoTypeId", idInfoType, "AnswerDeleteInfoType"); });
