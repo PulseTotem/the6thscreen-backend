@@ -219,6 +219,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 										var callDesc = call.toJSONObject();
 
 										var successCallLoadAsso = function () {
+											callDesc["rendererTheme"] = (call.rendererTheme() !== null) ? call.rendererTheme().toJSONObject() : null;
 
 											var successCallTypeLoadAsso = function () {
 												callDesc["callType"] = {

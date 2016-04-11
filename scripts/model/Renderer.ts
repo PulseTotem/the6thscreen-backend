@@ -4,6 +4,7 @@
 
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./InfoType.ts" />
+/// <reference path="./RendererTheme.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -48,6 +49,22 @@ class Renderer extends ModelItf {
      */
     private _info_type_loaded : boolean;
 
+	/**
+	 * RendererThemes property
+	 *
+	 * @property _rendererThemes
+	 * @type Array<RendererTheme>
+	 */
+	private _rendererThemes : Array<RendererTheme>;
+
+	/**
+	 * Lazy loading for RendererThemes property
+	 *
+	 * @property _rendererThemes_loaded
+	 * @type boolean
+	 */
+	private _rendererThemes_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -66,6 +83,9 @@ class Renderer extends ModelItf {
 
         this._info_type = null;
         this._info_type_loaded = false;
+
+		this._rendererThemes = new Array<RendererTheme>();
+		this._rendererThemes_loaded = false;
     }
 
 	/**
@@ -147,6 +167,47 @@ class Renderer extends ModelItf {
         }
     }
 
+	/**
+	 * Return the CallType's rendererThemes.
+	 *
+	 * @method rendererThemes
+	 */
+	rendererThemes() {
+		return this._rendererThemes;
+	}
+
+	/**
+	 * Load the CallType's rendererThemes.
+	 *
+	 * @method loadRendererThemes
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadRendererThemes(successCallback : Function, failCallback : Function) {
+		if(! this._rendererThemes_loaded) {
+			var self = this;
+			var success : Function = function(rendererThemes) {
+				self._rendererThemes = rendererThemes;
+				self._rendererThemes_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getAssociatedObjects(Renderer, RendererTheme, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -161,7 +222,7 @@ class Renderer extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._info_type_loaded) {
+            if(self._info_type_loaded && self._rendererThemes_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -177,6 +238,7 @@ class Renderer extends ModelItf {
         };
 
         this.loadInfoType(success, fail);
+		this.loadRendererThemes(success, fail);
     }
 
 	/**
@@ -259,6 +321,8 @@ class Renderer extends ModelItf {
 	        } else {
 		        data["infoType"] = (self.infoType() !== null) ? self.infoType().toJSONObject() : null;
 	        }
+
+			data["rendererThemes"] = self.serializeArray(self.rendererThemes(), onlyId);
             successCallback(data);
         };
 
@@ -294,6 +358,32 @@ class Renderer extends ModelItf {
 	 */
 	unlinkInfoType(typeID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Renderer, InfoType, typeID, successCallback, failCallback);
+	}
+
+	/**
+	 * Add a new RendererTheme to the Renderer and associate it in the database.
+	 * A RendererTheme can only be added once.
+	 *
+	 * @method addRendererTheme
+	 * @param {number} rendererThemeId - The RendererTheme to add inside the renderer. It cannot be a null value.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	addRendererTheme(rendererThemeId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Renderer, RendererTheme, rendererThemeId, successCallback, failCallback);
+	}
+
+	/**
+	 * Remove a RendererTheme from the Renderer: the association is removed both in the object and in database.
+	 * The RendererTheme can only be removed if it exists first in the list of associated RendererTheme, else an exception is thrown.
+	 *
+	 * @method removeRendererTheme
+	 * @param {number} rendererThemeId - The RendererTheme to remove from that Renderer
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	removeRendererTheme(rendererThemeId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Renderer, RendererTheme, rendererThemeId, successCallback, failCallback);
 	}
 
     /**

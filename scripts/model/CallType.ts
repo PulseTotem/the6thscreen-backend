@@ -5,6 +5,7 @@
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Source.ts" />
 /// <reference path="./Renderer.ts" />
+/// <reference path="./RendererTheme.ts" />
 /// <reference path="./Zone.ts" />
 /// <reference path="./Policy.ts" />
 /// <reference path="./Call.ts" />
@@ -66,6 +67,22 @@ class CallType extends ModelItf {
      * @type boolean
      */
     private _renderer_loaded : boolean;
+
+	/**
+	 * RendererTheme property.
+	 *
+	 * @property _rendererTheme
+	 * @type RendererTheme
+	 */
+	private _rendererTheme : RendererTheme;
+
+	/**
+	 * Lazy loading for RendererTheme property.
+	 *
+	 * @property _rendererTheme_loaded
+	 * @type boolean
+	 */
+	private _rendererTheme_loaded : boolean;
 
     /**
      * Policy property.
@@ -152,6 +169,9 @@ class CallType extends ModelItf {
 
         this._renderer = null;
         this._renderer_loaded = false;
+
+		this._rendererTheme = null;
+		this._rendererTheme_loaded = false;
 
         this._policy = null;
         this._policy_loaded = false;
@@ -287,6 +307,49 @@ class CallType extends ModelItf {
             }
         }
     }
+
+	/**
+	 * Return the CallType's rendererTheme.
+	 *
+	 * @method rendererTheme
+	 */
+	rendererTheme() {
+		return this._rendererTheme;
+	}
+
+	/**
+	 * Load the CallType's rendererTheme.
+	 *
+	 * @method loadRendererTheme
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadRendererTheme(successCallback : Function, failCallback : Function) {
+		if(! this._rendererTheme_loaded) {
+			var self = this;
+			var success : Function = function(rendererTheme) {
+				if(!!rendererTheme) {
+					self._rendererTheme = rendererTheme;
+				}
+				self._rendererTheme_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(CallType, RendererTheme, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
 
     /**
      * Return the CallType's policy.
@@ -473,7 +536,7 @@ class CallType extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._source_loaded && self._renderer_loaded && self._policy_loaded && self._zone_loaded && self._calls_loaded) {
+            if(self._source_loaded && self._renderer_loaded && self._rendererTheme_loaded && self._policy_loaded && self._zone_loaded && self._calls_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -490,6 +553,7 @@ class CallType extends ModelItf {
 
         this.loadSource(success, fail);
         this.loadRenderer(success, fail);
+		this.loadRendererTheme(success, fail);
         this.loadPolicy(success, fail);
         this.loadZone(success, fail);
         this.loadCalls(success, fail);
@@ -504,6 +568,7 @@ class CallType extends ModelItf {
 		this._source_loaded = false;
 		this._policy_loaded = false;
 		this._renderer_loaded = false;
+		this._rendererTheme_loaded = false;
 		this._zone_loaded = false;
         this._calls_loaded = false;
 	}
@@ -529,7 +594,7 @@ class CallType extends ModelItf {
 	/**
 	 * Check whether the object is complete or not
 	 *
-	 * A CallType is complete if it has an ID, a name, a source, a renderer and a zone.
+	 * A CallType is complete if it has an ID, a name, a source, a renderer, a rendererTheme and a zone.
      * It is not necessary that the zone is complete yet.
 	 *
 	 * @param successCallback The function to call in case of success.
@@ -540,8 +605,8 @@ class CallType extends ModelItf {
 		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 				var success:Function = function () {
-					if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
-						self._complete = (!!self.renderer() && self.renderer().isComplete()) && !!self.zone() && (!!self.source() && self.source().isComplete());
+					if (self._renderer_loaded && self._rendererTheme_loaded && self._source_loaded && self._zone_loaded) {
+						self._complete = (!!self.renderer() && self.renderer().isComplete()) && !!self.rendererTheme() && !!self.zone() && (!!self.source() && self.source().isComplete());
 						successCallback();
 					}
 				};
@@ -550,7 +615,7 @@ class CallType extends ModelItf {
 					failCallback(error);
 				};
 
-                if (self._renderer_loaded && self._source_loaded && self._zone_loaded) {
+                if (self._renderer_loaded && self._rendererTheme_loaded && self._source_loaded && self._zone_loaded) {
                     success();
                 }
 
@@ -565,6 +630,10 @@ class CallType extends ModelItf {
                 if (!self._renderer_loaded) {
                     self.loadRenderer(success, fail);
                 }
+
+				if (!self._rendererTheme_loaded) {
+					self.loadRendererTheme(success, fail);
+				}
 			} else {
 				self._complete = false;
 				successCallback();
@@ -589,11 +658,13 @@ class CallType extends ModelItf {
 	        if (onlyId) {
 		        data["source"] = (self.source() !== null) ? self.source().getId() : null;
 		        data["renderer"] = (self.renderer() !== null) ? self.renderer().getId() : null;
+				data["rendererTheme"] = (self.rendererTheme() !== null) ? self.rendererTheme().getId() : null;
 		        data["zone"] = (self.zone() !== null) ? self.zone().getId() : null;
 		        data["policy"] = (self.policy() !== null) ? self.policy().getId() : null;
 	        } else {
 		        data["source"] = (self.source() !== null) ? self.source().toJSONObject() : null;
 		        data["renderer"] = (self.renderer() !== null) ? self.renderer().toJSONObject() : null;
+				data["rendererTheme"] = (self.rendererTheme() !== null) ? self.rendererTheme().toJSONObject() : null;
 		        data["zone"] = (self.zone() !== null) ? self.zone().toJSONObject() : null;
                 data["policy"] = (self.policy() !== null) ? self.policy().toJSONObject() : null;
 	        }
@@ -679,6 +750,34 @@ class CallType extends ModelItf {
 	 */
 	unlinkRenderer(rendererID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(CallType, Renderer, rendererID, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the RendererTheme of the CallType.
+	 * As a CallType can only have one RendererTheme, if the value is already set, this method throws an exception: you need first to unset the RendererTheme.
+	 * Moreover the given RendererTheme must be created in database.
+	 *
+	 * @method linkRendererTheme
+	 * @param {number} rendererThemeId - The RendererTheme to associate with the CallType.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	linkRendererTheme(rendererThemeId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(CallType, RendererTheme, rendererThemeId, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the current RendererTheme from the CallType.
+	 * It both sets a null value for the object property and remove the association in database.
+	 * A RendererTheme must have been set before using it, else an exception is thrown.
+	 *
+	 * @method unlinkRendererTheme
+	 * @param {number} rendererThemeId - The RendererTheme to dissociate from the CallType.
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	unlinkRendererTheme(rendererThemeId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(CallType, RendererTheme, rendererThemeId, successCallback, failCallback);
 	}
 
 	/**
@@ -873,23 +972,27 @@ class CallType extends ModelItf {
                 var successLoadAsso = function () {
                     var successLinkPolicy = function () {
                         var successLinkRenderer = function () {
-                            var successLinkSource = function () {
-                                var successCheckComplete = function () {
-                                    var finalSuccess = function () {
-                                        successCallback(clonedCallType);
-                                    };
+							var successLinkRendererTheme = function () {
+								var successLinkSource = function () {
+									var successCheckComplete = function () {
+										var finalSuccess = function () {
+											successCallback(clonedCallType);
+										};
 
-                                    if (clonedCallType.isComplete() != isComplete) {
-                                        clonedCallType.update(finalSuccess, failCallback);
-                                    } else {
-                                        finalSuccess();
-                                    }
-                                };
+										if (clonedCallType.isComplete() != isComplete) {
+											clonedCallType.update(finalSuccess, failCallback);
+										} else {
+											finalSuccess();
+										}
+									};
 
-                                clonedCallType.checkCompleteness(successCheckComplete, failCallback);
-                            };
+									clonedCallType.checkCompleteness(successCheckComplete, failCallback);
+								};
 
-                            clonedCallType.linkSource(self.source().getId(), successLinkSource, failCallback);
+								clonedCallType.linkSource(self.source().getId(), successLinkSource, failCallback);
+							};
+
+							clonedCallType.linkRendererTheme(self.rendererTheme().getId(), successLinkRendererTheme, failCallback);
                         };
 
                         clonedCallType.linkRenderer(self.renderer().getId(), successLinkRenderer, failCallback);
