@@ -415,7 +415,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to retrieve all objects with URL:"+urlAll+".\nCode : "+result.statusCode()+"\nMessage : " + result.response()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to retrieve all objects with URL:"+urlAll+".\nCode : "+result.statusCode()+"\nMessage : " + result.response()+"\nData : "+JSON.stringify(result.data())), attemptNumber);
         };
 
 		var urlAll = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());

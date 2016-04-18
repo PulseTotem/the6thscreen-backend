@@ -13,6 +13,7 @@
 
 /// <reference path="./core/BackendConfig.ts" />
 /// <reference path="./model/User.ts" />
+/// <reference path="./model/Client.ts" />
 
 var jwt : any = require('jsonwebtoken');
 var socketioJwt : any = require('socketio-jwt');
@@ -142,54 +143,97 @@ class The6thScreenBackend extends Server {
     }
 
     /**
-     * Method to init the RSSFeedReader server.
+     * Method to init the Backend server.
      *
      * @method init
      */
     init() {
         var self = this;
 
-        this.addNamespace("clients", ClientsNamespaceManager);
-        this.addNamespace("sources", SourcesNamespaceManager);
-        var adminNamespace : any = this.addNamespace("admins", AdminsNamespaceManager);
+        var fail = function (error) {
+            Logger.error("Error while cleaning clients : ");
+            Logger.error(error);
+        };
 
-		//console.log("BYPASS CHECKING JWT Token !!!!!!!!! // TODO // TO FIX");
-        adminNamespace.use(socketioJwt.authorize({
-            secret: BackendConfig.getJWTSecret(),
-            handshake: true
-        }));
+        var success = function () {
+            Logger.debug("Cleaning successful. Create endpoints.");
 
-        adminNamespace.use(function(socket, next) {
-            var handshakeData : any = socket.request;
+            self.addNamespace("clients", ClientsNamespaceManager);
+            self.addNamespace("sources", SourcesNamespaceManager);
+            var adminNamespace : any = self.addNamespace("admins", AdminsNamespaceManager);
 
-            var success = function(user) {
-				console.log("check : ");
-				console.log(handshakeData.client._peername.address);
-				console.log("BYPASS CHECKING IP ADDRESS !!!!!!!!! // TODO // TO FIX");
-				//if(user.lastIp() == handshakeData.client._peername.address) {
-					socket.connectedUser = user;
+            //console.log("BYPASS CHECKING JWT Token !!!!!!!!! // TODO // TO FIX");
+            adminNamespace.use(socketioJwt.authorize({
+                secret: BackendConfig.getJWTSecret(),
+                handshake: true
+            }));
+
+            adminNamespace.use(function(socket, next) {
+                var handshakeData : any = socket.request;
+
+                var success = function(user) {
+                    console.log("check : ");
+                    console.log(handshakeData.client._peername.address);
+                    console.log("BYPASS CHECKING IP ADDRESS !!!!!!!!! // TODO // TO FIX");
+                    //if(user.lastIp() == handshakeData.client._peername.address) {
+                    socket.connectedUser = user;
 
                     next();
-                //} else {
-                //    next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));
-                //}
+                    //} else {
+                    //    next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));
+                    //}
+                };
+
+                var fail = function(error) {
+                    next(error);
+                };
+
+                console.log("token : ");
+                console.log(handshakeData._query.token);
+
+                User.findOneByToken(handshakeData._query.token, success, fail);
+                // make sure the handshake data looks good as before
+                // if error do this:
+                // next(new Error('not authorized');
+                // else just call next
+            });
+
+            self.addAPIEndpoint("contact", ContactFormRouter);
+        };
+
+
+        self.cleanDatabase(success, fail);
+    }
+
+    /**
+     * Method to clean and/or check database before startup.
+     * Here it consists in cleaning all datas in Client table.
+     */
+    cleanDatabase(success, fail) {
+
+
+
+        var successGetAllClients = function (clients : Array<Client>) {
+
+            var nbClients = clients.length;
+
+            if (nbClients == 0) {
+                success();
+            }
+            var successDelete = function () {
+                Logger.debug("Cleaning DB - Old client data deleted.");
+                if (--nbClients == 0) {
+                    success();
+                }
             };
 
-            var fail = function(error) {
-                next(error);
-            };
+            clients.forEach(function (client : Client) {
+                client.delete(successDelete, fail);
+            });
+        };
 
-			console.log("token : ");
-			console.log(handshakeData._query.token);
 
-            User.findOneByToken(handshakeData._query.token, success, fail);
-            // make sure the handshake data looks good as before
-            // if error do this:
-            // next(new Error('not authorized');
-            // else just call next
-        });
-
-		this.addAPIEndpoint("contact", ContactFormRouter);
+        Client.all(successGetAllClients, fail);
     }
 }
 
