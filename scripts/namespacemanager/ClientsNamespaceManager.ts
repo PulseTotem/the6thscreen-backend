@@ -66,6 +66,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		var data = {};
 		data["message"] = msg;
+		result.setData(data);
 
 		StatsClient.pushStats(result);
 	}
@@ -95,7 +96,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var self = this;
 
 		self.pushStat("Client disconnected.");
-		
+
 		var successDelete : Function = function () {
 			Logger.debug("Delete the client for socketId "+self._client.socketID());
 		};
