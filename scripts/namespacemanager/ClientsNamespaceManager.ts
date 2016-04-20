@@ -94,6 +94,8 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 	public onDisconnection() {
 		var self = this;
 
+		self.pushStat("Client disconnected.");
+		
 		var successDelete : Function = function () {
 			Logger.debug("Delete the client for socketId "+self._client.socketID());
 		};
