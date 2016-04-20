@@ -5,7 +5,6 @@
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="./ShareNamespaceManager.ts" />
-/// <reference path="../core/CMSConfig.ts" />
 /// <reference path="../model/User.ts" />
 /// <reference path="../model/SDI.ts" />
 /// <reference path="../model/Source.ts" />

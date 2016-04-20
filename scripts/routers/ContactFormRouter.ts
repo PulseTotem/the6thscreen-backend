@@ -8,7 +8,7 @@
 /// <reference path="../../t6s-core/core-backend/scripts/RestClientResponse.ts" />
 /// <reference path="../exceptions/RequestException.ts" />
 
-/// <reference path="../core/ContactConfig.ts" />
+/// <reference path="../core/BackendConfig.ts" />
 
 var nodemailer : any = require('nodemailer');
 

@@ -1,5 +1,6 @@
 /**
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@pulsetotem.fr>
  */
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
@@ -159,7 +160,7 @@ class BackendConfig {
      */
     static getContactInfoAuthLogin() : string {
         BackendConfig.retrieveConfigurationInformation();
-        return ContactConfig.authLogin;
+        return BackendConfig.backendConfig.contacts.authLogin;
     }
 
     /**
@@ -222,9 +223,9 @@ class BackendConfig {
         return BackendConfig.backendConfig.stats.endpoint;
     }
 
-    static getStatsURL() : number {
+    static getStatsURL() : string {
         BackendConfig.retrieveConfigurationInformation();
-        return "http://"+BackendConfig.getStatsHost()+":"+BackendConfig.getStatsPort()+"/"+BackendConfig.getStatsEndpoint()+"/";
+        return "http://"+BackendConfig.getStatsHost()+":"+BackendConfig.getStatsPort().toString()+"/"+BackendConfig.getStatsEndpoint()+"/";
     }
 
 }
