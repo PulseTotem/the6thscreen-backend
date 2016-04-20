@@ -4,7 +4,9 @@
  */
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
+/// <reference path="../../t6s-core/core-backend/scripts/stats/StatObject.ts" />
 
+/// <reference path="../core/StatsClient.ts" />
 /// <reference path="./ShareNamespaceManager.ts" />
 
 /// <reference path="../model/Profil.ts" />
@@ -51,15 +53,35 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 	    this.createClient();
     }
 
+	private pushStat(msg : string) : void {
+		var result : StatObject = new StatObject();
+
+		result.setCollection("clients");
+		result.setIp(this._client.IP());
+		result.setSocketId(this.socket.id);
+
+		if (this._client.profil() != null) {
+			result.setHashId(this._client.profil().hash());
+		}
+
+		var data = {};
+		data["message"] = msg;
+
+		StatsClient.pushStats(result);
+	}
+
 
 	private createClient() {
 		var self = this;
-		var ip : string = this.socket.request.connection.remoteAddress;
+		var ip : string = this.socket.conn.remoteAddress;
 		var socketId : string = this.socket.id;
+
 		this._client = new Client(ip, socketId);
+
 		var success : Function = function () {
 			Logger.debug("Client save : ");
 			Logger.debug(JSON.stringify(self._client.toJSONObject()));
+			self.pushStat("Client connected.");
 		};
 
 		var fail : Function = function () {
@@ -149,6 +171,8 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 									if (nbZones == zones.length) {
 										self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
+
+										self.pushStat("Emit SDI description");
 									}
 								}
 							};
@@ -245,6 +269,8 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 																	if (nbZC == zoneContents.length) {
 																		self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+
+																		self.pushStat("Emit profil description");
 																	}
 																}
 															}
@@ -264,6 +290,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 															if (nbZC == zoneContents.length) {
 																self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+																self.pushStat("Emit profil description");
 															}
 														}
 													}
@@ -278,6 +305,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 														if (nbZC == zoneContents.length) {
 															self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+															self.pushStat("Emit profil description");
 														}
 													}
 												}
@@ -319,129 +347,6 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage HashDescription //////////////////////
 
-/*
-////////////////////// Begin: Manage SendProfilDescription //////////////////////
-
-    /**
-     * Retrieve Profil instance description and send it to client.
-     *
-     * @method sendProfilDescription
-     * @param {any} profilDescription - The Profil Description.
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     * /
-    sendProfilDescription(profilDescription : any, self : ClientsNamespaceManager = null) {
-        // profilDescription : {"profilId" : string}
-        var self = this;
-
-        var profilId = profilDescription.profilId;
-
-        self.sendObjectDescriptionFromId(Profil, profilId, "ProfilDescription");
-    }
-
-////////////////////// End: Manage SendProfilDescription //////////////////////
-
-////////////////////// Begin: Manage SendUserDescription //////////////////////
-
-    /**
-     * Retrieve User instance description and send it to client.
-     *
-     * @method sendUserDescription
-     * @param {any} userDescription - The User Description.
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     * /
-    sendUserDescription(userDescription : any, self : ClientsNamespaceManager = null) {
-        // userDescription : {"userId" : string}
-        var self = this;
-
-        var userId = userDescription.userId;
-
-        self.sendObjectDescriptionFromId(User, userId, "UserDescription");
-    }
-
-////////////////////// End: Manage SendUserDescription //////////////////////
-
-////////////////////// Begin: Manage SendSDIDescription //////////////////////
-
-    /**
-     * Retrieve SDI instance description and send it to client.
-     *
-     * @method sendSDIDescription
-     * @param {any} sdiDescription - The SDI Description.
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     * /
-    sendSDIDescription(sdiDescription : any, self : ClientsNamespaceManager = null) {
-        // sdiDescription : {"sdiId" : string}
-        var self = this;
-
-        var sdiId = sdiDescription.sdiId;
-
-        self.sendObjectDescriptionFromId(SDI, sdiId, "SDIDescription");
-    }
-
-////////////////////// End: Manage SendSDIDescription //////////////////////
-
-////////////////////// Begin: Manage SendZoneDescription //////////////////////
-
-    /**
-     * Retrieve Zone instance description and send it to client.
-     *
-     * @method sendZoneDescription
-     * @param {any} zoneDescription - The Zone Description.
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     * /
-    sendZoneDescription(zoneDescription : any, self : ClientsNamespaceManager = null) {
-        // zoneDescription : {"zoneId" : string}
-        var self = this;
-
-        var zoneId = zoneDescription.zoneId;
-
-        self.sendObjectDescriptionFromId(Zone, zoneId, "ZoneDescription");
-    }
-
-////////////////////// End: Manage SendZoneDescription //////////////////////
-
-////////////////////// Begin: Manage SendCallDescription //////////////////////
-
-    /**
-     * Retrieve Call instance description and send it to client.
-     *
-     * @method sendCallDescription
-     * @param {any} callDescription - The Call Description.
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     * /
-    sendCallDescription(callDescription : any, self : ClientsNamespaceManager = null) {
-        // callDescription : {"callId" : string}
-        var self = this;
-
-        var callId = callDescription.callId;
-
-        self.sendObjectDescriptionFromId(Call, callId, "CallDescription");
-    }
-
-////////////////////// End: Manage SendCallDescription //////////////////////
-
-////////////////////// Begin: Manage SendCallTypeDescription //////////////////////
-
-    /**
-     * Retrieve CallType instance description and send it to client.
-     *
-     * @method sendCallTypeDescription
-     * @param {any} callTypeDescription - The CallType Description
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     * /
-    sendCallTypeDescription(callTypeDescription : any, self : ClientsNamespaceManager = null) {
-        // callTypeDescription : {"callTypeId" : string}
-        var self = this;
-
-        var callTypeId = callTypeDescription.callTypeId;
-
-        self.sendObjectDescriptionFromId(CallType, callTypeId, "CallTypeDescription");
-    }
-
-////////////////////// End: Manage SendCallTypeDescription //////////////////////
-
-*/
-
 	/**
 	 * Send command to refresh the client
 	 */
@@ -450,6 +355,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var self = this;
 
 		self.socket.emit("RefreshClient", self.formatResponse(true, ""));
+		self.pushStat("Refresh client");
 	}
 
 	/**
@@ -460,6 +366,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var self = this;
 
 		self.socket.emit("IdentifyClient", self.formatResponse(true, clientId.toString()));
+		self.pushStat("Identify client");
 	}
 
 
