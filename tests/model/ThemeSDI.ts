@@ -6,7 +6,7 @@
 /// <reference path="../../libsdef/mocha.d.ts" />
 /// <reference path="../../libsdef/nock.d.ts" />
 
-/// <reference path="../../scripts/core/DatabaseConnection.ts" />
+/// <reference path="../../scripts/core/BackendConfig.ts" />
 /// <reference path="../../scripts/model/ThemeSDI.ts" />
 /// <reference path="../../scripts/model/ThemeZone.ts" />
 
@@ -97,8 +97,8 @@ describe('ThemeSDI', function(){
 					"complete": true
 				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ThemeSDI.getTableName(), cpt.getId().toString(), ThemeZone.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ThemeSDI.getTableName(), cpt.getId().toString(), ThemeZone.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			var success = function() {
@@ -123,8 +123,8 @@ describe('ThemeSDI', function(){
 					"complete": false
 				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ThemeSDI.getTableName(), cpt.getId().toString(), ThemeZone.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ThemeSDI.getTableName(), cpt.getId().toString(), ThemeZone.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			var success = function() {
@@ -145,8 +145,8 @@ describe('ThemeSDI', function(){
 
 			var response : any = [];
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ThemeSDI.getTableName(), cpt.getId().toString(), ThemeZone.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ThemeSDI.getTableName(), cpt.getId().toString(), ThemeZone.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			var success = function() {
@@ -290,8 +290,8 @@ describe('ThemeSDI', function(){
 
 			var response1:any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
 			var success = function () {
@@ -301,8 +301,8 @@ describe('ThemeSDI', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-					.put(DatabaseConnection.associatedObjectEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.put(BackendConfig.associatedObjectEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName(), s.getId().toString()))
 					.reply(200, JSON.stringify(emptyResponse));
 
 				var success2 = function () {
@@ -334,8 +334,8 @@ describe('ThemeSDI', function(){
 
 			var response1:any = s.toJSONObject();
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
 			var success = function() {
@@ -345,8 +345,8 @@ describe('ThemeSDI', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-					.delete(DatabaseConnection.associatedObjectEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.delete(BackendConfig.associatedObjectEndpoint(ThemeSDI.getTableName(), c.getId().toString(), ThemeZone.getTableName(), s.getId().toString()))
 					.reply(200, JSON.stringify(emptyResponse));
 
 

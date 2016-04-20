@@ -56,7 +56,7 @@ class ContactFormRouter extends RouterItf {
 			return;
 		}
 
-		var dataReq = "?secret=" + ContactConfig.getRecaptchaPrivateKey() + "&response=" + recaptcha;
+		var dataReq = "?secret=" + BackendConfig.getContactInfoRecaptchaPrivateKey() + "&response=" + recaptcha;
 		var urlCheckRecaptcha = "https://www.google.com/recaptcha/api/siteverify" + dataReq;
 
 		var data = {
@@ -118,8 +118,8 @@ class ContactFormRouter extends RouterItf {
 			var transporter = nodemailer.createTransport({
 				service: 'Gmail',
 				auth: {
-					user: ContactConfig.getAuthLogin(), // Your email id
-					pass: ContactConfig.getAuthPassword() // Your password
+					user: BackendConfig.getContactInfoAuthLogin(), // Your email id
+					pass: BackendConfig.getContactInfoAuthPassword() // Your password
 				}
 			});
 
@@ -130,7 +130,7 @@ class ContactFormRouter extends RouterItf {
 
 			var mailOptions = {
 				from: email, // sender address
-				to: ContactConfig.getContactEmail(), // list of receivers
+				to: BackendConfig.getContactInfoContactEmail(), // list of receivers
 				subject: '[Contact Form] From : ' + firstName + ' ' + lastName, // Subject line
 				text: text //, // plaintext body
 				// html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead

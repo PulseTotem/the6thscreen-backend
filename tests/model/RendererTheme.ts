@@ -125,8 +125,8 @@ describe('RendererTheme', function() {
 
 			var responseRead : any = model.toJSONObject();
 
-			var restClientMockRead = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(RendererTheme.getTableName(), model.getId().toString()))
+			var restClientMockRead = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(RendererTheme.getTableName(), model.getId().toString()))
 				.reply(200, JSON.stringify(responseRead));
 
 			var newInfo = {
@@ -137,8 +137,8 @@ describe('RendererTheme', function() {
 
 			var responseUpdate : any = modelUpdated.toJSONObject();
 
-			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(RendererTheme.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
+			var restClientMockUpdate = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(RendererTheme.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
 				.reply(200, JSON.stringify(responseUpdate));
 
 			var success : Function = function () {

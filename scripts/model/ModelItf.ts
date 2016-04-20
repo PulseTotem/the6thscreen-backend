@@ -5,7 +5,7 @@
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/RestClient.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/RestClientResponse.ts" />
-/// <reference path="../core/DatabaseConnection.ts" />
+/// <reference path="../core/BackendConfig.ts" />
 /// <reference path="../exceptions/DataException.ts" />
 /// <reference path="../exceptions/RequestException.ts" />
 /// <reference path="../exceptions/ModelException.ts" />
@@ -155,7 +155,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-	    var urlCreateObject = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
+	    var urlCreateObject = BackendConfig.getDBBaseURL() + BackendConfig.modelEndpoint(modelClass.getTableName());
 
 		delete(data["id"]);
 		delete(data["createdAt"]);
@@ -194,7 +194,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), id, attemptNumber);
         };
 
-        var urlReadObject = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), id.toString());
+        var urlReadObject = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(modelClass.getTableName(), id.toString());
 
         RestClient.get(urlReadObject, success, fail);
     }
@@ -243,7 +243,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to find an object with URL:"+urlSearchObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
         };
 
-        var urlSearchObject = DatabaseConnection.getBaseURL() + DatabaseConnection.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
+        var urlSearchObject = BackendConfig.getDBBaseURL() + BackendConfig.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
 
         RestClient.get(urlSearchObject, success, fail);
     }
@@ -292,7 +292,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to find an object with URL:"+urlSearchObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
         };
 
-        var urlSearchObject = DatabaseConnection.getBaseURL() + DatabaseConnection.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
+        var urlSearchObject = BackendConfig.getDBBaseURL() + BackendConfig.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
 
         RestClient.get(urlSearchObject, success, fail);
     }
@@ -335,7 +335,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-	    var urlUpdate = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
+	    var urlUpdate = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(modelClass.getTableName(), this.getId().toString());
 	    //Logger.debug("[ModelItf] Update an object with the URL : "+urlUpdate+" and data : "+JSON.stringify(data));
 
         RestClient.put(urlUpdate, data, success, fail);
@@ -371,7 +371,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to delete an object with URL:"+urlDelete+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-	    var urlDelete = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), objectId.toString());
+	    var urlDelete = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(modelClass.getTableName(), objectId.toString());
 	    //Logger.debug("[ModelItf] Delete an object with the URL : "+urlDelete);
 
         RestClient.delete(urlDelete, success, fail);
@@ -418,7 +418,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to retrieve all objects with URL:"+urlAll+".\nCode : "+result.statusCode()+"\nMessage : " + result.response()+"\nData : "+JSON.stringify(result.data())), attemptNumber);
         };
 
-		var urlAll = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
+		var urlAll = BackendConfig.getDBBaseURL() + BackendConfig.modelEndpoint(modelClass.getTableName());
 
 		RestClient.get(urlAll, success, fail);
 	}
@@ -454,7 +454,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to associate objects with URL:"+associationURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-		var associationURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
+		var associationURL = BackendConfig.getDBBaseURL() + BackendConfig.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
 
 		RestClient.put(associationURL, {}, success, fail);
 	}
@@ -490,7 +490,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to delete an association between objects with URL:"+deleteAssoURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-		var deleteAssoURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
+		var deleteAssoURL = BackendConfig.getDBBaseURL() + BackendConfig.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
 
 		RestClient.delete(deleteAssoURL, success, fail);
 	}
@@ -539,7 +539,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-        var urlAssociatedObjects = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
+        var urlAssociatedObjects = BackendConfig.getDBBaseURL() + BackendConfig.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
 
         RestClient.get(urlAssociatedObjects, success, fail);
     }
@@ -584,7 +584,7 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-        var urlUniqueAssociatedOject = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
+        var urlUniqueAssociatedOject = BackendConfig.getDBBaseURL() + BackendConfig.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
 
         RestClient.get(urlUniqueAssociatedOject, success, fail);
     }

@@ -75,8 +75,8 @@ describe('ParamValue', function() {
 					"complete": true
 				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), cpt.getId().toString(), ParamType.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ParamValue.getTableName(), cpt.getId().toString(), ParamType.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			var success = function() {
@@ -101,8 +101,8 @@ describe('ParamValue', function() {
 					"complete": false
 				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), cpt.getId().toString(), ParamType.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ParamValue.getTableName(), cpt.getId().toString(), ParamType.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			var success = function() {
@@ -210,8 +210,8 @@ describe('ParamValue', function() {
 
 			var response1 : any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
 
@@ -222,8 +222,8 @@ describe('ParamValue', function() {
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName(), p.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName(), p.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
 
@@ -255,8 +255,8 @@ describe('ParamValue', function() {
 
 			var response1 : any = p.toJSONObject();
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -266,8 +266,8 @@ describe('ParamValue', function() {
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName(), p.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(ParamValue.getTableName(), c.getId().toString(), ParamType.getTableName(), p.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
 

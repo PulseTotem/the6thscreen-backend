@@ -134,8 +134,8 @@ describe('Behaviour', function() {
 
 			var responseRead : any = model.toJSONObject();
 
-			var restClientMockRead = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()))
+			var restClientMockRead = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(Behaviour.getTableName(), model.getId().toString()))
 				.reply(200, JSON.stringify(responseRead));
 
 			var newInfo = {
@@ -146,8 +146,8 @@ describe('Behaviour', function() {
 
 			var responseUpdate : any = modelUpdated.toJSONObject();
 
-			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(Behaviour.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
+			var restClientMockUpdate = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(Behaviour.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
 				.reply(200, JSON.stringify(responseUpdate));
 
 			var success : Function = function () {
