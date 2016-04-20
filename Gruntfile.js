@@ -70,16 +70,6 @@ module.exports = function (grunt) {
 //                          build and dist tasks
 // ---------------------------------------------
         copy: {
-            buildConnectionInfosFile: {
-                files: 	[{'build/js/connection_infos.json': 'scripts/core/connection_infos.json'}]
-            },
-            distConnectionInfosFile: {
-                files: 	[{'dist/js/connection_infos.json': 'scripts/core/connection_infos.json'}]
-            },
-            testConnectionInfosFile: {
-              files: 	[{'build/tests/connection_infos.json': 'scripts/core/connection_infos-sample.json'}]
-            },
-
             buildBackendConfigInfosFile: {
                 files: 	[{'build/js/backend_config.json': 'scripts/core/backend_config.json'}]
             },
@@ -87,31 +77,7 @@ module.exports = function (grunt) {
                 files: 	[{'dist/js/backend_config.json': 'scripts/core/backend_config.json'}]
             },
             testBackendConfigInfosFile: {
-                files: 	[{'build/tests/backend_config.json': 'scripts/core/backend_config.json'}]
-            },
-
-            buildContactConfigInfosFile: {
-              files: 	[{'build/js/contact_config.json': 'scripts/core/contact_config.json'}]
-            },
-            distContactConfigInfosFile: {
-              files: 	[{'dist/js/contact_config.json': 'scripts/core/contact_config.json'}]
-            },
-            testContactConfigInfosFile: {
-              files: 	[{'build/tests/contact_config.json': 'scripts/core/contact_config.json'}]
-            },
-
-            buildCMSConfigInfosFile: {
-              files: 	[{'build/js/cms_config.json': 'scripts/core/cms_config.json'}]
-            },
-            distCMSConfigInfosFile: {
-              files: 	[{'dist/js/cms_config.json': 'scripts/core/cms_config.json'}]
-            },
-            testCMSConfigInfosFile: {
-              files: 	[{'build/tests/cms_config.json': 'scripts/core/cms_config.json'}]
-            },
-
-            dbInitFiles : {
-                files: 	[{expand: true, cwd: 'dbInitFiles', src: ['**'], dest: 'build/dbInitFiles/'}]
+                files: 	[{'build/tests/backend_config.json': 'scripts/core/backend_config-sample.json'}]
             },
 
             buildPackageBak: {
@@ -145,16 +111,6 @@ module.exports = function (grunt) {
                     'scripts/The6thScreenBackend.ts'
                 ],
                 dest: 'build/js/The6thScreenBackend.js',
-                options: {
-                    module: 'commonjs',
-                    basePath: 'scripts'
-                }
-            },
-            dbinit: {
-                src: [
-                    'scripts/CleanAndInitDatabase.ts'
-                ],
-                dest: 'build/js/CleanAndInitDatabase.js',
                 options: {
                     module: 'commonjs',
                     basePath: 'scripts'
@@ -302,28 +258,16 @@ module.exports = function (grunt) {
     grunt.registerTask('build', function () {
         grunt.task.run(['clean:package', 'clean:build']);
 
-        grunt.task.run(['env:build','update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'copy:buildBackendConfigInfosFile', 'copy:buildContactConfigInfosFile', 'copy:buildCMSConfigInfosFile', 'typescript:build', 'clean:package']);
-    });
-
-    grunt.registerTask('dbinit', function () {
-        grunt.task.run(['clean:package', 'clean:build']);
-
-        grunt.task.run(['update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildConnectionInfosFile', 'copy:buildBackendConfigInfosFile', 'copy:buildContactConfigInfosFile', 'copy:buildCMSConfigInfosFile', 'copy:dbInitFiles', 'typescript:dbinit', 'clean:package']);
+        grunt.task.run(['env:build','update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit', 'copy:buildBackendConfigInfosFile','typescript:build', 'clean:package']);
     });
 
     grunt.registerTask('dist', function () {
         grunt.task.run(['clean:package', 'clean:dist']);
 
-        grunt.task.run(['env:build','update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:distPackage', 'copy:buildPackageReinit', 'copy:distConnectionInfosFile', 'copy:distBackendConfigInfosFile', 'copy:distContactConfigInfosFile', 'copy:distCMSConfigInfosFile', 'typescript:dist', 'clean:package']);
+        grunt.task.run(['env:build','update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:distPackage', 'copy:buildPackageReinit','copy:distBackendConfigInfosFile','typescript:dist', 'clean:package']);
     });
 
     grunt.registerTask('develop', ['build', 'express:build', 'watch']);
-
-    grunt.registerTask('heroku', function () {
-      grunt.task.run(['clean:heroku']);
-
-      grunt.task.run(['dist', 'copy:heroku', 'copy:herokuProcfile', 'copy:herokuGitignore']);
-    });
 
     grunt.registerTask('doc', ['clean:doc', 'yuidoc']);
 
@@ -331,7 +275,7 @@ module.exports = function (grunt) {
     grunt.registerTask('initTest', function() {
         grunt.task.run(['clean:build']);
 
-        grunt.task.run(['env:test','update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit','copy:testConnectionInfosFile', 'copy:testBackendConfigInfosFile', 'copy:testContactConfigInfosFile', 'copy:testCMSConfigInfosFile', 'typescript:build', 'typescript:test']);
+        grunt.task.run(['env:test','update_json:packageBuild', 'copy:buildPackageBak', 'copy:buildPackageReplace', 'npm-install', 'copy:buildPackageReinit','copy:testBackendConfigInfosFile','typescript:build', 'typescript:test']);
     });
 
 
