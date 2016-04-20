@@ -1,8 +1,0 @@
-{
-  "auth" : {
-    "login" : "login@gmail.com",
-    "password" : "password"
-  },
-  "contact" : "contact@example.com",
-  "recaptchaPrivateKey" : "PRIVATE KEY"
-}

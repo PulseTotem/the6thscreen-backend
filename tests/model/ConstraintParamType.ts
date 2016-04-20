@@ -61,8 +61,8 @@ describe('ConstraintParamType', function() {
 					"complete": true
 				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ConstraintParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			var success = function() {
@@ -87,8 +87,8 @@ describe('ConstraintParamType', function() {
 					"complete": false
 				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ConstraintParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			var success = function() {
@@ -179,8 +179,8 @@ describe('ConstraintParamType', function() {
 
             var response : any = [];
 
-            var restClientMock = nock(DatabaseConnection.getBaseURL())
-                .get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
+            var restClientMock = nock(BackendConfig.getDBBaseURL())
+                .get(BackendConfig.associationEndpoint(ConstraintParamType.getTableName(), cpt.getId().toString(), TypeParamType.getTableName()))
                 .reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -254,8 +254,8 @@ describe('ConstraintParamType', function() {
 
 			var response1 : any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -265,8 +265,8 @@ describe('ConstraintParamType', function() {
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
@@ -298,8 +298,8 @@ describe('ConstraintParamType', function() {
 
 			var response1 : any = s.toJSONObject();
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -309,8 +309,8 @@ describe('ConstraintParamType', function() {
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(ConstraintParamType.getTableName(), c.getId().toString(), TypeParamType.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {

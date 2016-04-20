@@ -7,7 +7,7 @@
 /// <reference path="../../libsdef/nock.d.ts" />
 /// <reference path="../../libsdef/sinon.d.ts" />
 
-/// <reference path="../../scripts/core/DatabaseConnection.ts" />
+/// <reference path="../../scripts/core/BackendConfig.ts" />
 /// <reference path="../../scripts/model/Client.ts" />
 /// <reference path="../../scripts/model/Profil.ts" />
 /// <reference path="../../scripts/model/SDI.ts" />
@@ -169,8 +169,8 @@ describe('Client', function(){
 
 			var response1:any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
 			var success = function() {
@@ -180,8 +180,8 @@ describe('Client', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-					.put(DatabaseConnection.associatedObjectEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.put(BackendConfig.associatedObjectEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName(), s.getId().toString()))
 					.reply(200, JSON.stringify(emptyResponse));
 
 				var success2 = function() {
@@ -212,8 +212,8 @@ describe('Client', function(){
 
 			var response1:any = s.toJSONObject();
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
 			var success = function() {
@@ -223,8 +223,8 @@ describe('Client', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-					.delete(DatabaseConnection.associatedObjectEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.delete(BackendConfig.associatedObjectEndpoint(Client.getTableName(), c.getId().toString(), Profil.getTableName(), s.getId().toString()))
 					.reply(200, JSON.stringify(emptyResponse));
 
 

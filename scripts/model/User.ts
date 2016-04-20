@@ -2,7 +2,7 @@
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
  */
 
-/// <reference path="../core/DatabaseConnection.ts" />
+/// <reference path="../core/BackendConfig.ts" />
 /// <reference path="../core/BackendConfig.ts" />
 
 /// <reference path="./ModelItf.ts" />
@@ -539,7 +539,7 @@ class User extends ModelItf {
             failCallback(new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(self.toJSONObject())+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
         };
 
-        var urlUpdate = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(User.getTableName(), this.getId().toString());
+        var urlUpdate = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(User.getTableName(), this.getId().toString());
 
         var encryptedPwd = crypto.createHash('sha256').update(BackendConfig.getJWTSecret() + password).digest("hex");
 
@@ -591,7 +591,7 @@ class User extends ModelItf {
             failCallback(new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
         };
 
-        var urlReadObject = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(User.getTableName(), this.getId().toString());
+        var urlReadObject = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(User.getTableName(), this.getId().toString());
 
         RestClient.get(urlReadObject, success, fail);
     }

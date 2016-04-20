@@ -7,7 +7,7 @@
 /// <reference path="../../libsdef/sinon.d.ts" />
 
 /// <reference path="../../scripts/model/CallType.ts" />
-/// <reference path="../../scripts/core/DatabaseConnection.ts" />
+/// <reference path="../../scripts/core/BackendConfig.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");
@@ -121,20 +121,20 @@ describe('CallType', function(){
 					"complete": true
 				};
 
-			var restClientMockS = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Source.getTableName()))
+			var restClientMockS = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Source.getTableName()))
 				.reply(200, JSON.stringify(responseSource));
 
-			var restClientMockR = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
+			var restClientMockR = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
 				.reply(200, JSON.stringify(responseRenderer));
 
-			var restClientMockRT = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
+			var restClientMockRT = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
 				.reply(200, JSON.stringify(responseRendererTheme));
 
-			var restClientMockZ = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
+			var restClientMockZ = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
 				.reply(200, JSON.stringify(responseZone));
 
 			var success = function() {
@@ -181,20 +181,20 @@ describe('CallType', function(){
 					"complete": false
 				};
 
-			var restClientMockS = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Source.getTableName()))
+			var restClientMockS = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Source.getTableName()))
 				.reply(200, JSON.stringify(responseSource));
 
-			var restClientMockR = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
+			var restClientMockR = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
 				.reply(200, JSON.stringify(responseRenderer));
 
-			var restClientMockRT = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
+			var restClientMockRT = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
 				.reply(200, JSON.stringify(responseRendererTheme));
 
-			var restClientMockZ = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
+			var restClientMockZ = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
 				.reply(200, JSON.stringify(responseZone));
 
 			var success = function() {
@@ -241,20 +241,20 @@ describe('CallType', function(){
 					"complete": true
 				};
 
-			var restClientMockS = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Source.getTableName()))
+			var restClientMockS = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Source.getTableName()))
 				.reply(200, JSON.stringify(responseSource));
 
-			var restClientMockR = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
+			var restClientMockR = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
 				.reply(200, JSON.stringify(responseRenderer));
 
-			var restClientMockRT = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
+			var restClientMockRT = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
 				.reply(200, JSON.stringify(responseRendererTheme));
 
-			var restClientMockZ = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
+			var restClientMockZ = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
 				.reply(200, JSON.stringify(responseZone));
 
 			var success = function() {
@@ -301,20 +301,20 @@ describe('CallType', function(){
 					"complete": true
 				};
 
-			var restClientMockS = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Source.getTableName()))
+			var restClientMockS = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Source.getTableName()))
 				.reply(200, JSON.stringify(responseSource));
 
-			var restClientMockR = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
+			var restClientMockR = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Renderer.getTableName()))
 				.reply(200, JSON.stringify(responseRenderer));
 
-			var restClientMockRT = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
+			var restClientMockRT = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), RendererTheme.getTableName()))
 				.reply(200, JSON.stringify(responseRendererTheme));
 
-			var restClientMockZ = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
+			var restClientMockZ = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), cpt.getId().toString(), Zone.getTableName()))
 				.reply(200, JSON.stringify(responseZone));
 
 			var success = function() {
@@ -409,8 +409,8 @@ describe('CallType', function(){
 
 			var response1 : any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -420,14 +420,14 @@ describe('CallType', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
 	            var responseCall : any = [];
 
-	            var restClientMockCall = nock(DatabaseConnection.getBaseURL())
-		            .get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Call.getTableName()))
+	            var restClientMockCall = nock(BackendConfig.getDBBaseURL())
+		            .get(BackendConfig.associationEndpoint(CallType.getTableName(), c.getId().toString(), Call.getTableName()))
 		            .reply(200, JSON.stringify(responseCall));
 
                 var success2 = function() {
@@ -460,8 +460,8 @@ describe('CallType', function(){
 
 			var response1 : any = s.toJSONObject();
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -471,14 +471,14 @@ describe('CallType', function(){
 
 	            var responseCall : any = [];
 
-	            var restClientMockCall = nock(DatabaseConnection.getBaseURL())
-		            .get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Call.getTableName()))
+	            var restClientMockCall = nock(BackendConfig.getDBBaseURL())
+		            .get(BackendConfig.associationEndpoint(CallType.getTableName(), c.getId().toString(), Call.getTableName()))
 		            .reply(200, JSON.stringify(responseCall));
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Source.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
@@ -510,8 +510,8 @@ describe('CallType', function(){
 
 			var response1 : any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -522,8 +522,8 @@ describe('CallType', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName(), r.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName(), r.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
 
@@ -557,8 +557,8 @@ describe('CallType', function(){
 
 			var response1 : any = s.toJSONObject();
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -568,8 +568,8 @@ describe('CallType', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Renderer.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
@@ -601,8 +601,8 @@ describe('CallType', function(){
 
 			var response1 : any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -612,8 +612,8 @@ describe('CallType', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName(), r.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName(), r.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
@@ -645,8 +645,8 @@ describe('CallType', function(){
 
 			var response1 : any = s.toJSONObject();
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -655,8 +655,8 @@ describe('CallType', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Policy.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
 
@@ -688,8 +688,8 @@ describe('CallType', function(){
 
 			var response1 : any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -699,8 +699,8 @@ describe('CallType', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName(), r.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName(), r.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
 
@@ -733,8 +733,8 @@ describe('CallType', function(){
 
 			var response1 : any = s.toJSONObject();
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -745,8 +745,8 @@ describe('CallType', function(){
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName(), s.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(CallType.getTableName(), c.getId().toString(), Zone.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {

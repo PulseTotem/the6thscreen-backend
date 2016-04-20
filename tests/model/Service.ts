@@ -6,7 +6,7 @@
 /// <reference path="../../libsdef/mocha.d.ts" />
 /// <reference path="../../libsdef/nock.d.ts" />
 
-/// <reference path="../../scripts/core/DatabaseConnection.ts" />
+/// <reference path="../../scripts/core/BackendConfig.ts" />
 /// <reference path="../../scripts/model/Service.ts" />
 
 var assert = require("assert");

@@ -5,7 +5,6 @@
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="./ShareNamespaceManager.ts" />
-/// <reference path="../core/CMSConfig.ts" />
 /// <reference path="../model/User.ts" />
 /// <reference path="../model/SDI.ts" />
 /// <reference path="../model/Source.ts" />
@@ -1557,7 +1556,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 			if(user.cmsId() != "" && user.cmsAuthkey() != "") {
 				if(user.username() != "" && user.email() != "") {
-					var updateUserUrl = CMSConfig.getHost() + CMSConfig.usersPath + user.cmsId();
+					var updateUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
 
 					var args = {
 						"data": {
@@ -1583,7 +1582,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				}
 			} else {
 				if(user.username() != "" && user.email() != "") {
-					var createUserUrl = CMSConfig.getHost() + CMSConfig.usersPath;
+					var createUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath();
 
 					var args = {
 						"data": {
@@ -1658,7 +1657,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 			if(user.cmsId() != "") {
 
-				var deleteUserUrl = CMSConfig.getHost() + CMSConfig.usersPath + user.cmsId();
+				var deleteUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
 
 				var args = {
 					"data" : {

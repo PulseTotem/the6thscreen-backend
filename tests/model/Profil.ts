@@ -125,8 +125,8 @@ describe('Profil', function() {
 					"complete": true
 				};
 
-			var restClientMockSDI = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), b.getId().toString(), SDI.getTableName()))
+			var restClientMockSDI = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Profil.getTableName(), b.getId().toString(), SDI.getTableName()))
 				.reply(200, JSON.stringify(responseSDI));
 
 			var responseZoneContents : any = [{
@@ -136,8 +136,8 @@ describe('Profil', function() {
 					"complete": true
 				}];
 
-			var restClientMockZoneContents = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), b.getId().toString(), ZoneContent.getTableName()))
+			var restClientMockZoneContents = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Profil.getTableName(), b.getId().toString(), ZoneContent.getTableName()))
 				.reply(200, JSON.stringify(responseZoneContents));
 
 			var responseZones : any = [{
@@ -147,8 +147,8 @@ describe('Profil', function() {
 					"complete": true
 				}];
 
-			var restClientMockZones = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(SDI.getTableName(), "42", Zone.getTableName()))
+			var restClientMockZones = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(SDI.getTableName(), "42", Zone.getTableName()))
 				.reply(200, JSON.stringify(responseZones));
 
 			var success = function () {
@@ -187,8 +187,8 @@ describe('Profil', function() {
 
 			var response1 : any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -199,12 +199,12 @@ describe('Profil', function() {
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName(), pv.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName(), pv.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
-	            var restClientMock3 = nock(DatabaseConnection.getBaseURL())
-		            .get(DatabaseConnection.objectEndpoint(ZoneContent.getTableName(), pv.getId().toString()))
+	            var restClientMock3 = nock(BackendConfig.getDBBaseURL())
+		            .get(BackendConfig.objectEndpoint(ZoneContent.getTableName(), pv.getId().toString()))
 		            .reply(200, JSON.stringify(pv.toJSONObject));
 
                 var success2 = function() {
@@ -241,8 +241,8 @@ describe('Profil', function() {
 					}
 				];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -253,8 +253,8 @@ describe('Profil', function() {
 
 				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName(), pv.getId().toString()))
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(Profil.getTableName(), c.getId().toString(), ZoneContent.getTableName(), pv.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {

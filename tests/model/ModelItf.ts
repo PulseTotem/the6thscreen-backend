@@ -5,7 +5,7 @@
 /// <reference path="../../libsdef/mocha.d.ts" />
 /// <reference path="../../libsdef/nock.d.ts" />
 
-/// <reference path="../../scripts/core/DatabaseConnection.ts" />
+/// <reference path="../../scripts/core/BackendConfig.ts" />
 /// <reference path="../../scripts/model/ModelItf.ts" />
 
 var assert = require("assert");
@@ -106,8 +106,8 @@ describe('ModelItf', function() {
 			delete(realParams["createdAt"]);
 			delete(realParams["updatedAt"]);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), realParams)
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -202,8 +202,8 @@ describe('ModelItf', function() {
 			delete(realParams["createdAt"]);
 			delete(realParams["updatedAt"]);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-			 .post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), realParams)
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+			 .post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
 			 .reply(500, JSON.stringify('Server error'));
 
 
@@ -241,8 +241,8 @@ describe('ModelItf', function() {
 			delete(realParams["createdAt"]);
 			delete(realParams["updatedAt"]);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), realParams)
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -279,8 +279,8 @@ describe('ModelItf', function() {
 			delete(realParams["createdAt"]);
 			delete(realParams["updatedAt"]);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), realParams)
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -320,8 +320,8 @@ describe('ModelItf', function() {
 			delete(realParams["createdAt"]);
 			delete(realParams["updatedAt"]);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), realParams)
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -352,8 +352,8 @@ describe('ModelItf', function() {
 
 			var response : any = {"id": 42, "complete": false}
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(ModelItf.getTableName(),id.toString()))
 				.reply(200, JSON.stringify(response));
 
             var success = function(model2) {
@@ -434,8 +434,8 @@ describe('ModelItf', function() {
 		it('should throw an error if the request failed', function(done) {
 			var id = 42;
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(ModelItf.getTableName(),id.toString()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -462,8 +462,8 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -491,8 +491,8 @@ describe('ModelItf', function() {
 				"data": {}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -523,8 +523,8 @@ describe('ModelItf', function() {
 				}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -576,8 +576,8 @@ describe('ModelItf', function() {
 
 			var response : any = model.toJSONObject();
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -667,8 +667,8 @@ describe('ModelItf', function() {
 			var modelName = ModelItf;
 			var jsonParam = model.toJSONObject();
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -700,8 +700,8 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -734,8 +734,8 @@ describe('ModelItf', function() {
 				"data": {}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -770,8 +770,8 @@ describe('ModelItf', function() {
 				}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
 				.reply(200, JSON.stringify(response));
 
 
@@ -826,8 +826,8 @@ describe('ModelItf', function() {
 				"data": {}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.delete(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -894,8 +894,8 @@ describe('ModelItf', function() {
 
 			var modelName = ModelItf;
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.delete(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -932,8 +932,8 @@ describe('ModelItf', function() {
 
 			var response : any = data;
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.modelEndpoint(ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function(allmodels) {
@@ -991,8 +991,8 @@ describe('ModelItf', function() {
 		});
 
 		it('should throw an error if the request failed', function(done) {
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.modelEndpoint(ModelItf.getTableName()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -1018,8 +1018,8 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.modelEndpoint(ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1049,8 +1049,8 @@ describe('ModelItf', function() {
 				}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.modelEndpoint(ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1085,8 +1085,8 @@ describe('ModelItf', function() {
 				]
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.modelEndpoint(ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1201,8 +1201,8 @@ describe('ModelItf', function() {
 			var emptyResponse : any = {};
 
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
 				.reply(200, JSON.stringify(emptyResponse));
 
             var success = function() {
@@ -1245,8 +1245,8 @@ describe('ModelItf', function() {
 			var id2 = 24;
 			var model = new ModelItf(id);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -1360,8 +1360,8 @@ describe('ModelItf', function() {
 			var emptyResponse : any = {};
 
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.delete(BackendConfig.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
 				.reply(200, JSON.stringify(emptyResponse));
 
             var success = function() {
@@ -1406,8 +1406,8 @@ describe('ModelItf', function() {
 			var id2 = 24;
 			var model = new ModelItf(id);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.delete(BackendConfig.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -1507,8 +1507,8 @@ describe('ModelItf', function() {
 
 			var response : any = data;
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function(allmodels) {
@@ -1551,8 +1551,8 @@ describe('ModelItf', function() {
 			var originID = 12;
 			var model = new ModelItf(originID);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -1582,8 +1582,8 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1615,8 +1615,8 @@ describe('ModelItf', function() {
 				}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1654,8 +1654,8 @@ describe('ModelItf', function() {
 				]
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1750,8 +1750,8 @@ describe('ModelItf', function() {
 					"id": targetID
 				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var expected = new ModelItf(targetID);
@@ -1776,8 +1776,8 @@ describe('ModelItf', function() {
 
 			var emptyResponse : any = {};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(emptyResponse));
 
             var success = function(result) {
@@ -1820,8 +1820,8 @@ describe('ModelItf', function() {
 			var originID = 12;
 			var model = new ModelItf(originID);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -1851,8 +1851,8 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1881,8 +1881,8 @@ describe('ModelItf', function() {
 					"toto": "bidule"
 				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -2260,8 +2260,8 @@ describe('ModelItf', function() {
 			delete(realParams["createdAt"]);
 			delete(realParams["updatedAt"]);
 
-            var restClientMock = nock(DatabaseConnection.getBaseURL())
-                .post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), realParams)
+            var restClientMock = nock(BackendConfig.getDBBaseURL())
+                .post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
                 .reply(200, JSON.stringify(response));
 
             var success = function(obtainedData : any) {

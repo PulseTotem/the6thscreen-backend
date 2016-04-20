@@ -1,3 +1,24 @@
 {
-    "jwtSecret" : "42"
+    "jwtSecret" : "BabelCast",
+    "CMS": {
+        "host": "http://localhost:8000/"
+    },
+    "database": {
+        "host" : "localhost",
+        "port" : 3000,
+        "endpoint": "api"
+    },
+    "contacts": {
+        "auth" : {
+            "login" : "login@gmail.com",
+            "password" : "password"
+        },
+        "contact" : "contact@example.com",
+        "recaptchaPrivateKey" : "PRIVATE KEY"
+    },
+    "stats": {
+        "host": "http://localhost",
+        "port": 11000,
+        "endpoint": "crud"
+    }
 }
