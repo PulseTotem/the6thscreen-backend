@@ -61,7 +61,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		result.setSocketId(this.socket.id);
 
 		if (this._client.profil() != null) {
-			result.setHashId(this._client.profil().hash());
+			result.setProfilId(this._client.profil().getId().toString());
 		}
 
 		var data = {};
