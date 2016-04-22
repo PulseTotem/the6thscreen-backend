@@ -16,7 +16,6 @@
 /// <reference path="../model/Zone.ts" />
 /// <reference path="../model/Call.ts" />
 /// <reference path="../model/CallType.ts" />
-/// <reference path="../model/Client.ts" />
 
 class ClientsNamespaceManager extends ShareNamespaceManager {
 
