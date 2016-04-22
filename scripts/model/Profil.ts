@@ -7,7 +7,6 @@
 /// <reference path="./ZoneContent.ts" />
 /// <reference path="./SDI.ts" />
 /// <reference path="./AuthorizedClient.ts" />
-/// <reference path="./Client.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
@@ -91,22 +90,6 @@ class Profil extends ModelItf {
 	private _authorizedClients_loaded : boolean;
 
 	/**
-	 * ConnectedClients property
-	 *
-	 * @property _connectedClients
-	 * @type Array<Client>
-	 */
-	private _connectedClients : Array<Client>;
-
-	/**
-	 * Lazy loading for connectedClients property
-	 *
-	 * @property _connectedClients_loaded
-	 * @type boolean
-	 */
-	private _connectedClients_loaded : boolean;
-
-	/**
 	 * The original profil if the current object is a clone
 	 *
 	 * @property _origineProfil
@@ -148,9 +131,6 @@ class Profil extends ModelItf {
 
 	    this._authorizedClients = new Array<AuthorizedClient>();
 	    this._authorizedClients_loaded = false;
-
-	    this._connectedClients = new Array<Client>();
-	    this._connectedClients_loaded = false;
 
 	    this._origineProfil = null;
 	    this._origineProfil_loaded = false;
@@ -333,48 +313,6 @@ class Profil extends ModelItf {
 			};
 
 			this.getAssociatedObjects(Profil, AuthorizedClient, success, fail);
-		} else {
-			if(successCallback != null) {
-				successCallback();
-			}
-		}
-	}
-
-	/**
-	 * Return the Profil's connectedClients.
-	 *
-	 * @method connectedClients
-	 * @return {Array<Client>} The Profil's connectedClients.
-	 */
-	connectedClients() : Array<Client> {
-		return this._connectedClients;
-	}
-
-	/**
-	 * Load the Profil's connectedClients.
-	 *
-	 * @method loadConnectedClients
-	 * @param {Function} successCallback - The callback function when success.
-	 * @param {Function} failCallback - The callback function when fail.
-	 */
-	loadConnectedClients(successCallback : Function, failCallback : Function) {
-		if(! this._connectedClients_loaded) {
-			var self = this;
-			var success : Function = function(connectedClients) {
-				self._connectedClients = connectedClients;
-				self._connectedClients_loaded = true;
-				if(successCallback != null) {
-					successCallback();
-				}
-			};
-
-			var fail : Function = function(error) {
-				if(failCallback != null) {
-					failCallback(error);
-				}
-			};
-
-			this.getAssociatedObjects(Profil, Client, success, fail);
 		} else {
 			if(successCallback != null) {
 				successCallback();

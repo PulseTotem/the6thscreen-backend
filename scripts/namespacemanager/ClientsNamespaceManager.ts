@@ -7,6 +7,7 @@
 /// <reference path="../../t6s-core/core-backend/scripts/stats/StatObject.ts" />
 
 /// <reference path="../core/StatsClient.ts" />
+/// <reference path="../core/OnlineClient.ts" />
 /// <reference path="./ShareNamespaceManager.ts" />
 
 /// <reference path="../model/Profil.ts" />
@@ -19,13 +20,9 @@
 
 class ClientsNamespaceManager extends ShareNamespaceManager {
 
-	/**
-	 * Client attribute of the ClientNameSpaceManager
-	 *
-	 * @property _client
-	 * @type Client
-	 */
-	private _client : Client;
+	static onlineClients : Array<OnlineClient> = [];
+
+	private _client : OnlineClient = null;
 
     /**
      * Constructor.
@@ -37,35 +34,25 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
         super(socket);
 
         var self = this;
-	    this._client = null;
-
-        /*
-		this.addListenerToSocket('RetrieveProfilDescription', function(description) { self.sendProfilDescription(description); });
-        this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
-        this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
-        this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
-        this.addListenerToSocket('RetrieveCallDescription', function(description) { self.sendCallDescription(description); });
-        this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
-		*/
 
 		this.addListenerToSocket('HashDescription', function(description) { self.manageHashDescription(description); });
 
 	    this.createClient();
     }
 
-	private pushStat(msg : string) : void {
+	private pushStat(status: string, msg : string) : void {
 		var result : StatObject = new StatObject();
 
 		result.setCollection("clients");
-		result.setIp(this._client.IP());
+		result.setIp(this._client.getIP());
 		result.setSocketId(this.socket.id);
 
-		if (this._client.profil() != null) {
-			result.setProfilId(this._client.profil().getId().toString());
-		}
+		result.setProfilId(this._client.getProfilId());
+		result.setSDIId(this._client.getSDIId());
 
 		var data = {};
-		data["message"] = msg;
+		data["status"] = status;
+		data["hash"] = msg;
 		result.setData(data);
 
 		StatsClient.pushStats(result);
@@ -77,35 +64,38 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var ip : string = this.socket.conn.remoteAddress;
 		var socketId : string = this.socket.id;
 
-		this._client = new Client(ip, socketId);
+		this._client = new OnlineClient();
+		this._client.setIp(ip);
+		this._client.setSocketId(socketId);
 
-		var success : Function = function () {
-			Logger.debug("Client save : ");
-			Logger.debug(JSON.stringify(self._client.toJSONObject()));
-			self.pushStat("Client connected.");
-		};
+		ClientsNamespaceManager.onlineClients.push(this._client);
 
-		var fail : Function = function () {
-			Logger.error("Error while creating the client : "+JSON.stringify(self._client.toJSONObject()));
-		};
+		self.pushStat("Connection","");
+	}
 
-		this._client.create(success, fail);
+	public static getClientsForProfil(profilId : number) : Array<Object> {
+		var clients = ClientsNamespaceManager.onlineClients.filter(function (client : OnlineClient) {
+			return (client.getProfilId() == profilId.toString());
+		});
+
+		var result = [];
+		for (var i = 0; i < clients.length; i++) {
+			result.push(clients[i].toJSON());
+		}
+		return result;
 	}
 
 	public onDisconnection() {
 		var self = this;
 
-		self.pushStat("Client disconnected.");
+		self.pushStat("Disconnection","");
 
-		var successDelete : Function = function () {
-			Logger.debug("Delete the client for socketId "+self._client.socketID());
-		};
-
-		var fail : Function = function () {
-			Logger.error("Error while deleting the client for the following socketId: "+self._client.socketID());
-		};
-
-		this._client.delete(successDelete, fail);
+		for (var i = 0; i < ClientsNamespaceManager.onlineClients.length; i++) {
+			var client = ClientsNamespaceManager.onlineClients[i];
+			if (client.getSocketId() == this._client.getSocketId()) {
+				delete ClientsNamespaceManager.onlineClients[i];
+			}
+		}
 	}
 
 
@@ -123,6 +113,8 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var self = this;
 
 		var hash = hashDescription.hash;
+
+		this._client.setHashValue(hash);
 
 		var fail = function (err) {
 			Logger.debug("SocketId: " + self.socket.id + " - manageHashDescription : send done with fail status for Profil with Hash : " + hash + " : "+err);
@@ -174,8 +166,8 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 									if (nbZones == zones.length) {
 										self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
-
-										self.pushStat("Emit SDI description");
+										self._client.setSDIid(sdi.getId());
+										self.pushStat("Send SDI Description","Hash: "+self._client.getHash());
 									}
 								}
 							};
@@ -190,12 +182,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 			sdi.theme().toCompleteJSONObject(successThemeCompleteDescription, fail);
 		};
 
-		var successLinkProfil : Function = function () {
-			Logger.debug("Link Client object with Profil successfully");
-		};
-
 		var successLoadAssoProfil = function () {
-			self._client.linkProfil(profil.getId(), successLinkProfil, fail);
 			sdi = profil.sdi();
 
 			sdiDesc = sdi.toJSONObject();
@@ -273,7 +260,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 																	if (nbZC == zoneContents.length) {
 																		self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
 
-																		self.pushStat("Emit profil description");
+																		self.pushStat("Send Profil description",self._client.getHash());
 																	}
 																}
 															}
@@ -293,7 +280,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 															if (nbZC == zoneContents.length) {
 																self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
-																self.pushStat("Emit profil description");
+																self.pushStat("Send Profil description",self._client.getHash());
 															}
 														}
 													}
@@ -308,7 +295,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 														if (nbZC == zoneContents.length) {
 															self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
-															self.pushStat("Emit profil description");
+															self.pushStat("Send Profil description",self._client.getHash());
 														}
 													}
 												}
@@ -339,7 +326,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		var successReadProfil = function (pro : Profil) {
 			profil = pro;
-
+			self._client.setProfilId(pro.getId());
 			profil.loadAssociations(successLoadAssoProfil, fail);
 		};
 
@@ -358,7 +345,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var self = this;
 
 		self.socket.emit("RefreshClient", self.formatResponse(true, ""));
-		self.pushStat("Refresh client");
+		self.pushStat("Refresh client",self._client.getHash());
 	}
 
 	/**
@@ -369,7 +356,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var self = this;
 
 		self.socket.emit("IdentifyClient", self.formatResponse(true, clientId.toString()));
-		self.pushStat("Identify client");
+		self.pushStat("Identify client",self._client.getHash());
 	}
 
 
