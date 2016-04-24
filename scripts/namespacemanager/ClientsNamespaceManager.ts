@@ -60,7 +60,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 	private createClient() {
 		var self = this;
-		var ip : string = this.socket.conn.remoteAddress;
+		var ip : string = this.socket.request.connection.remoteAddress;
 		var socketId : string = this.socket.id;
 
 		this._client = new OnlineClient();
@@ -89,10 +89,12 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		self.pushStat("Disconnection","");
 
-		for (var i = 0; i < ClientsNamespaceManager.onlineClients.length; i++) {
-			var client = ClientsNamespaceManager.onlineClients[i];
-			if (client.getSocketId() == this._client.getSocketId()) {
-				delete ClientsNamespaceManager.onlineClients[i];
+		if (this._client != null) {
+			for (var i = 0; i < ClientsNamespaceManager.onlineClients.length; i++) {
+				var client = ClientsNamespaceManager.onlineClients[i];
+				if (client.getSocketId() == this._client.getSocketId()) {
+					delete ClientsNamespaceManager.onlineClients[i];
+				}
 			}
 		}
 	}
@@ -117,6 +119,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		var fail = function (err) {
 			Logger.debug("SocketId: " + self.socket.id + " - manageHashDescription : send done with fail status for Profil with Hash : " + hash + " : "+err);
+			Logger.debug(err);
 			self.socket.emit("SDIDescription", self.formatResponse(false, err));
 		};
 
