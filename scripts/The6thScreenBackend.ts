@@ -163,8 +163,10 @@ class The6thScreenBackend extends Server {
             var handshakeData : any = socket.request;
 
             var success = function(user) {
-                console.log("check : ");
+                console.log("3 methods to get IP: ");
                 console.log(handshakeData.client._peername.address);
+                console.log(socket.handshake.headers['x-forwarded-for']);
+                console.log(socket.handshake.address.address);
                 console.log("BYPASS CHECKING IP ADDRESS !!!!!!!!! // TODO // TO FIX");
                 //if(user.lastIp() == handshakeData.client._peername.address) {
                 socket.connectedUser = user;

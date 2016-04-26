@@ -39,7 +39,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 	    this.createClient();
     }
 
-	private pushStat(status: string, msg : string) : void {
+	private pushStat(status: string) : void {
 		var result : StatObject = new StatObject();
 
 		result.setCollection("clients");
@@ -48,10 +48,10 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		result.setProfilId(this._client.getProfilId());
 		result.setSDIId(this._client.getSDIId());
+		result.setHash(this._client.getHash());
 
 		var data = {};
 		data["status"] = status;
-		data["hash"] = msg;
 		result.setData(data);
 
 		StatsClient.pushStats(result);
@@ -60,7 +60,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 	private createClient() {
 		var self = this;
-		var ip : string = this.socket.request.connection.remoteAddress;
+		var ip : string = this.getIP();
 		var socketId : string = this.socket.id;
 
 		this._client = new OnlineClient();
@@ -69,7 +69,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		ClientsNamespaceManager.onlineClients.push(this._client);
 
-		self.pushStat("Connection","");
+		self.pushStat("Connection");
 	}
 
 	public static getClientsForProfil(profilId : number) : Array<Object> {
@@ -87,7 +87,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 	public onDisconnection() {
 		var self = this;
 
-		self.pushStat("Disconnection","");
+		self.pushStat("Disconnection");
 
 		if (this._client != null) {
 			for (var i = 0; i < ClientsNamespaceManager.onlineClients.length; i++) {
@@ -169,7 +169,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 									if (nbZones == zones.length) {
 										self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
 										self._client.setSDIid(sdi.getId());
-										self.pushStat("Send SDI Description","Hash: "+self._client.getHash());
+										self.pushStat("Send SDI Description");
 									}
 								}
 							};
@@ -262,7 +262,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 																	if (nbZC == zoneContents.length) {
 																		self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
 
-																		self.pushStat("Send Profil description",self._client.getHash());
+																		self.pushStat("Send Profil description");
 																	}
 																}
 															}
@@ -282,7 +282,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 															if (nbZC == zoneContents.length) {
 																self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
-																self.pushStat("Send Profil description",self._client.getHash());
+																self.pushStat("Send Profil description");
 															}
 														}
 													}
@@ -297,7 +297,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 														if (nbZC == zoneContents.length) {
 															self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
-															self.pushStat("Send Profil description",self._client.getHash());
+															self.pushStat("Send Profil description");
 														}
 													}
 												}
@@ -347,7 +347,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var self = this;
 
 		self.socket.emit("RefreshClient", self.formatResponse(true, ""));
-		self.pushStat("Refresh client",self._client.getHash());
+		self.pushStat("Refresh client");
 	}
 
 	/**
@@ -358,7 +358,7 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 		var self = this;
 
 		self.socket.emit("IdentifyClient", self.formatResponse(true, clientId.toString()));
-		self.pushStat("Identify client",self._client.getHash());
+		self.pushStat("Identify client");
 	}
 
 
