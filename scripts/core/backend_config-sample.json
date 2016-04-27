@@ -1,5 +1,5 @@
 {
-    "jwtSecret" : "BabelCast",
+    "jwtSecret" : "42",
     "CMS": {
         "host": "http://localhost:8000/"
     },
