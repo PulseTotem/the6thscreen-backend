@@ -32,6 +32,14 @@ class ConstraintParamType extends ModelItf {
 	private _description : string;
 
 	/**
+	 * Values property.
+	 *
+	 * @property _values
+	 * @type string
+	 */
+	private _values : string;
+
+	/**
 	 * Type property: a constraint only apply on a specific type.
 	 *
 	 * @property _type
@@ -56,11 +64,12 @@ class ConstraintParamType extends ModelItf {
 	 * @param {string} createdAt - The ConstraintParamType's createdAt.
 	 * @param {string} updatedAt - The ConstraintParamType's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+	constructor(name : string = "", description : string = "", values : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
+		this.setValues(values);
 
 		this._type = null;
 		this._type_loaded = false;
@@ -85,6 +94,16 @@ class ConstraintParamType extends ModelItf {
 	}
 
 	/**
+	 * Set the ConstraintParamType's values.
+	 *
+	 * @method setValues
+	 * @param values
+     */
+	setValues(values : string) {
+		this._values = values;
+	}
+
+	/**
 	 * Return the ConstraintParamType's name.
      *
      * @method name
@@ -100,6 +119,14 @@ class ConstraintParamType extends ModelItf {
 	 */
 	description() {
 		return this._description;
+	}
+
+	/**
+	 * Return the ConstraintParamType's values
+	 * @returns {string}
+     */
+	values() {
+		return this._values;
 	}
 
 	/**
@@ -198,6 +225,7 @@ class ConstraintParamType extends ModelItf {
 			"id": this.getId(),
 			"name": this.name(),
 			"description": this.description(),
+			"values": this.values(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
 			"updatedAt" : this.getUpdatedAt()
@@ -380,7 +408,7 @@ class ConstraintParamType extends ModelItf {
 	 * @return {Call} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : ConstraintParamType {
-		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new ConstraintParamType(jsonObject.name, jsonObject.description, jsonObject.values, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**
