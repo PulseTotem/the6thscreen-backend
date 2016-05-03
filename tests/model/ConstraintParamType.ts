@@ -34,14 +34,20 @@ describe('ConstraintParamType', function() {
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
+		it('should store the values', function(){
+			var values = "machin";
+			var c = new ConstraintParamType("","", values);
+			assert.equal(c.values(), values, "The values is not stored correctly.");
+		});
+
 		it('should store the ID', function() {
 			var id = 52;
-			var c = new ConstraintParamType("","",id);
+			var c = new ConstraintParamType("","","",id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete value', function() {
-			var c = new ConstraintParamType("tze","tete",42,true);
+			var c = new ConstraintParamType("tze","tete","bla",42,true);
 			assert.equal(c.isComplete(), true, "The complete value is not stored.");
 		});
 
@@ -53,7 +59,7 @@ describe('ConstraintParamType', function() {
 
 	describe('#checkCompleteness', function() {
 		it('should consider the object as complete if it has an ID, a name and a complete type', function(done) {
-			var cpt = new ConstraintParamType("bidule", null, 52);
+			var cpt = new ConstraintParamType("bidule", null, null, 52);
 
 			var response : any = {
 					"id":12,
@@ -79,7 +85,7 @@ describe('ConstraintParamType', function() {
 		});
 
 		it('should not consider the object as complete if it has an ID, a name and a type which is not complete itself', function(done) {
-			var cpt = new ConstraintParamType("bidule", "Description de bidule", 52);
+			var cpt = new ConstraintParamType("bidule", "Description de bidule", "", 52);
 
 			var response : any = {
 					"id":12,
@@ -107,7 +113,7 @@ describe('ConstraintParamType', function() {
 		it('should not consider the object as complete if it has no id', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new ConstraintParamType("bidule", "Description de bidule");
+			var cpt = new ConstraintParamType("bidule", "Description de bidule", "fdf");
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -124,7 +130,7 @@ describe('ConstraintParamType', function() {
 		it('should not consider the object as complete if it has an empty name', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new ConstraintParamType("", "Description de bidule",24);
+			var cpt = new ConstraintParamType("", "Description de bidule", "toto", 24);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -141,7 +147,7 @@ describe('ConstraintParamType', function() {
 		it('should not consider the object as complete if it has a null name', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new ConstraintParamType(null, "Description de bidule",24);
+			var cpt = new ConstraintParamType(null, "Description de bidule", "toto", 24);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -175,7 +181,7 @@ describe('ConstraintParamType', function() {
 
     describe("#type", function() {
         it('should be null at initialization', function(done) {
-            var cpt = new ConstraintParamType("bidule", "Description de bidule", 52);
+            var cpt = new ConstraintParamType("bidule", "Description de bidule","bla", 52);
 
             var response : any = [];
 
@@ -206,11 +212,12 @@ describe('ConstraintParamType', function() {
 				"id": 42,
 				"name": "toto",
 				"description": "blabla",
+				"values": "ba",
 				"complete": true
 			};
 
 			var callRetrieve = ConstraintParamType.fromJSONObject(json);
-			var callExpected = new ConstraintParamType("toto","blabla",42,true);
+			var callExpected = new ConstraintParamType("toto","blabla","ba",42,true);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve constraintParamType ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -220,11 +227,12 @@ describe('ConstraintParamType', function() {
 				"id": 42,
 				"name": "",
 				"description": null,
+				"values":"test",
 				"complete": false
 			};
 
 			var callRetrieve = ConstraintParamType.fromJSONObject(json);
-			var callExpected = new ConstraintParamType("",null,42);
+			var callExpected = new ConstraintParamType("",null,"test",42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve constraintParamType ("+callRetrieve+") does not match with the expected one ("+callExpected+")");
 		});
@@ -232,10 +240,11 @@ describe('ConstraintParamType', function() {
 
 	describe('#toJsonObject', function() {
 		it('should create the expected JSON Object', function() {
-			var c = new ConstraintParamType("toto","blabla", 52);
+			var c = new ConstraintParamType("toto","blabla","toto", 52);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
+				"values": "toto",
 				"id": 52,
 				"complete": false,
 				"createdAt":null,
@@ -249,7 +258,7 @@ describe('ConstraintParamType', function() {
 
 	describe('#linkType', function() {
 		it('should call the right request', function(done) {
-			var c = new ConstraintParamType("toto","machin", 52);
+			var c = new ConstraintParamType("toto","machin","bla", 52);
 			var s = new TypeParamType("toto", 42);
 
 			var response1 : any = [];
@@ -293,7 +302,7 @@ describe('ConstraintParamType', function() {
 
 	describe('#unlinkType', function() {
 		it('should call the right request', function(done) {
-			var c = new ConstraintParamType("toto","machin", 52);
+			var c = new ConstraintParamType("toto","machin","bla", 52);
 			var s = new TypeParamType("toto", 42);
 
 			var response1 : any = s.toJSONObject();

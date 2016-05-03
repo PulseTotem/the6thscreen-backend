@@ -303,7 +303,7 @@ describe('ParamType', function() {
 	describe('#linkConstraint', function() {
 		it('should call the right request', function(done) {
 			var c = new ParamType("toto","machin", 52);
-			var s = new ConstraintParamType("toto","tata" ,42);
+			var s = new ConstraintParamType("toto","tata" , "bla", 42);
 
 			var response1 : any = [];
 
@@ -348,7 +348,7 @@ describe('ParamType', function() {
 	describe('#unlinkConstraint', function() {
 		it('should call the right request', function(done) {
 			var c = new ParamType("toto","machin", 52);
-			var s = new ConstraintParamType("toto","tata", 42);
+			var s = new ConstraintParamType("toto","tata","", 42);
 
 			var response1 : any = s.toJSONObject();
 
