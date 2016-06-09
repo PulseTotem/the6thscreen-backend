@@ -344,7 +344,12 @@ class ParamType extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadType(successAsso, fail);
+                if (!self._type_loaded) {
+                    self.loadType(successAsso, fail);
+                } else {
+                    successAsso();
+                }
+
 			} else {
 				self._complete = false;
 				successCallback();
@@ -472,7 +477,19 @@ class ParamType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	linkDefaultValue(defaultValueId : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(ParamType, ParamValue, defaultValueId, successCallback, failCallback);
+        var self = this;
+        var successReadParamValue = function (paramValue : ParamValue) {
+            var successLinkParamType = function () {
+                var successCheck = function () {
+                    self.associateObject(ParamType, ParamValue, defaultValueId, successCallback, failCallback);
+                };
+
+                paramValue.checkCompleteness(successCheck, failCallback);
+            };
+
+            paramValue.linkParamType(self.getId(), successLinkParamType, failCallback);
+        };
+        ParamValue.read(defaultValueId, successReadParamValue, failCallback);
 	}
 
 	/**
@@ -535,6 +552,23 @@ class ParamType extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+
+        var self = this;
+
+        var successLoadDefaultValue = function () {
+            if (self.defaultValue() == null) {
+                ModelItf.deleteObject(ParamType, self.getId(), successCallback, failCallback, attemptNumber);
+            } else {
+                var successDeleteParamValue = function () {
+                    ModelItf.deleteObject(ParamType, self.getId(), successCallback, failCallback, attemptNumber);
+                };
+
+                self.defaultValue().delete(successDeleteParamValue, failCallback);
+            }
+        };
+
+
+        this.loadDefaultValue(successLoadDefaultValue, failCallback);
         return ModelItf.deleteObject(ParamType, this.getId(), successCallback, failCallback, attemptNumber);
     }
 

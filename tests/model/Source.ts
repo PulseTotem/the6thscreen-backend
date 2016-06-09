@@ -32,14 +32,26 @@ describe('Source', function() {
 			assert.equal(c.method(), method, "The method is not stored correctly.");
 		});
 
+		it('should store the refresh time', function () {
+			var refreshTime = 34;
+			var c = new Source("", "", "", refreshTime);
+			assert.equal(c.refreshTime(), refreshTime, "The refreshTime is not stored correctly.");
+		});
+
+		it('should store the isStatic value', function () {
+			var isStatic = true;
+			var c = new Source("", "", "", 0, isStatic);
+			assert.equal(c.isStatic(), isStatic, "The isStatic is not stored correctly.");
+		});
+
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Source("", "", "", id);
+			var c = new Source("", "", "", 12, true, id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete value', function () {
-			var c = new Source("a", "v", "c", 234, true);
+			var c = new Source("a", "v", "c", 12, true, 234, true);
 			assert.equal(c.isComplete(), true, "The complete value is not stored.");
 		});
 
@@ -56,11 +68,13 @@ describe('Source', function() {
 				"name": "machin",
 				"description": "desc",
 				"method": "method",
+				"refreshTime": 42,
+				"isStatic": true,
 				"complete": true
 			};
 
 			var userRetrieve = Source.fromJSONObject(json);
-			var userExpected = new Source("machin", "desc", "method", 28, true);
+			var userExpected = new Source("machin", "desc", "method", 42, true, 28, true);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
@@ -71,11 +85,13 @@ describe('Source', function() {
 				"name": null,
 				"description": "desc",
 				"method": "",
+				"refreshTime": 10,
+				"isStatic": false,
 				"complete": false
 			};
 
 			var userRetrieve = Source.fromJSONObject(json);
-			var userExpected = new Source(null, "desc", "", 28, false);
+			var userExpected = new Source(null, "desc", "", 10, false, 28, false);
 
 			assert.deepEqual(userRetrieve, userExpected, "The retrieve Source (" + userRetrieve + ") does not match with the expected one (" + userExpected + ")");
 		});
@@ -83,13 +99,15 @@ describe('Source', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Source("machin", "desc", "method", 28, true);
+			var c = new Source("machin", "desc", "method", 32, true, 28, true);
 			var expected = {
 				"id": 28,
 				"name": "machin",
 				"description": "desc",
 				"method": "method",
 				"complete": true,
+				"refreshTime": 32,
+				"isStatic": true,
 				"createdAt":null,
 				"updatedAt":null
 			};
@@ -101,23 +119,20 @@ describe('Source', function() {
 
 	describe('#checkCompleteness', function() {
 		it('should consider the object as complete if it has an ID, a name, a method, a complete infotype and a complete service', function(done) {
-			var cpt = new Source("machin", null, "method", 28);
+			var cpt = new Source("machin", null, "method", 42, false, 28);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id":12,
 					"name": "type",
 					"complete": true
-				}
-			};
+				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
 				.reply(200, JSON.stringify(response));
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+			var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
 				.reply(200, JSON.stringify(response));
 
 			var success = function() {
@@ -134,33 +149,59 @@ describe('Source', function() {
 			cpt.checkCompleteness(success, fail);
 		});
 
-		it('should not consider the object as complete if it has an ID, a name, a method, a complete service and an infotype which is not complete itself', function(done) {
-			var cpt = new Source("machin", null, "method", 28);
+		it('should consider the object as complete if it has an ID, a name, a complete infotype and a complete service but no method as it is a static source', function(done) {
+			var cpt = new Source("machin", null, "", 42, true, 28);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
+					"id":12,
+					"name": "type",
+					"complete": true
+				};
+
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMock2.isDone(), "The mock2 request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+
+		it('should not consider the object as complete if it has an ID, a name, a method, a complete service and an infotype which is not complete itself', function(done) {
+			var cpt = new Source("machin", null, "method", 42, false, 28);
+
+			var response : any = {
 					"id":12,
 					"name": "type",
 					"complete": false
-				}
-			};
+				};
 
-			var response2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response2 : any = {
 					"id":12,
 					"name": "service",
 					"complete": true
-				}
-			};
+				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
 				.reply(200, JSON.stringify(response));
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+			var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
 				.reply(200, JSON.stringify(response2));
 
 			var success = function() {
@@ -178,32 +219,26 @@ describe('Source', function() {
 		});
 
 		it('should not consider the object as complete if it has an ID, a name, a method, a complete infotype and a service which is not complete itself', function(done) {
-			var cpt = new Source("machin", null, "method", 28);
+			var cpt = new Source("machin", null, "method", 42, false, 28);
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id":12,
 					"name": "type",
 					"complete": true
-				}
-			};
+				};
 
-			var response2 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response2 : any = {
 					"id":12,
 					"name": "service",
 					"complete": false
-				}
-			};
+				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
 				.reply(200, JSON.stringify(response));
 
-			var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+			var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
 				.reply(200, JSON.stringify(response2));
 
 			var success = function() {
@@ -220,10 +255,48 @@ describe('Source', function() {
 			cpt.checkCompleteness(success, fail);
 		});
 
+		it('should not consider the object as complete if it has an ID, a name, a complete infotype, a complete service and an empty method as it is not a static source', function(done) {
+			var cpt = new Source("machin", null, "", 42, false, 28);
+
+			var response : any = {
+					"id":12,
+					"name": "type",
+					"complete": true
+				};
+
+			var response2 : any = {
+					"id":12,
+					"name": "service",
+					"complete": true
+				};
+
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), cpt.getId().toString(), InfoType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
+			var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), cpt.getId().toString(), Service.getTableName()))
+				.reply(200, JSON.stringify(response2));
+
+			var success = function() {
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.ok(restClientMock2.isDone(), "The mock2 request has not been done to get the type");
+				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				done();
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			cpt.checkCompleteness(success, fail);
+		});
+
+
 		it('should not consider the object as complete if it has no id', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new Source("machin", null, "method");
+			var cpt = new Source("machin", null, "method", 43, false);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -240,7 +313,7 @@ describe('Source', function() {
 		it('should not consider the object as complete if it has an empty name', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new Source("", null, "method", 28);
+			var cpt = new Source("", null, "method", 43, false, 28);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -257,41 +330,7 @@ describe('Source', function() {
 		it('should not consider the object as complete if it has a null name', function(done) {
 			nock.disableNetConnect();
 
-			var cpt = new Source(null, null, "method", 28);
-
-			var success = function() {
-				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
-				done();
-			};
-
-			var fail = function(err) {
-				done(err);
-			};
-
-			cpt.checkCompleteness(success, fail);
-		});
-
-		it('should not consider the object as complete if it has an empty method', function(done) {
-			nock.disableNetConnect();
-
-			var cpt = new Source("test", null, "", 28);
-
-			var success = function() {
-				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
-				done();
-			};
-
-			var fail = function(err) {
-				done(err);
-			};
-
-			cpt.checkCompleteness(success, fail);
-		});
-
-		it('should not consider the object as complete if it has a null method', function(done) {
-			nock.disableNetConnect();
-
-			var cpt = new Source("test", null, null, 28);
+			var cpt = new Source(null, null, "method", 43, false, 28);
 
 			var success = function() {
 				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -325,16 +364,13 @@ describe('Source', function() {
 
 	describe('#linkService', function () {
 		it('should call the right request', function (done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var s = new Service("toto", "machin", "blabla", true, "provider", "", 42);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1:any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
 			var success = function () {
@@ -342,14 +378,11 @@ describe('Source', function() {
 				assert.equal(service, null, "The service is not a null value: " + JSON.stringify(service));
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-					.put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.put(BackendConfig.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
 
 				var success2 = function () {
 					//assert.ok(retour, "The return of the setInfoType is false.");
@@ -375,32 +408,25 @@ describe('Source', function() {
 
 	describe('#unlinkService', function () {
 		it('should call the right request', function (done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
+			var response1:any = s.toJSONObject();
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
 			var success = function() {
 				var service = c.service();
 				assert.deepEqual(service, s, "The service is not the expected value");
 				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
-				var spy = sinon.spy(service, "desynchronize");
 
-				var response2:SequelizeRestfulResponse = {
-					"status": "success",
-					"data": {}
-				};
+				var emptyResponse : any = {};
 
-				var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-					.delete(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
-					.reply(200, JSON.stringify(response2));
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.delete(BackendConfig.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
 
 
 				var success2 = function() {
@@ -426,17 +452,13 @@ describe('Source', function() {
 
 	describe('#linkInfoType', function () {
 		it('should call the right request', function (done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var s = new InfoType("toto", 42);
-			var spy = sinon.spy(s, "desynchronize");
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1:any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), InfoType.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), InfoType.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -444,14 +466,11 @@ describe('Source', function() {
                 assert.equal(infoType, null, "The infoType is not a null value: " + JSON.stringify(infoType));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the infoType");
 
-                var response2:SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), InfoType.getTableName(), s.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), InfoType.getTableName(), s.getId().toString()))
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the linkInfoType is false.");
@@ -477,32 +496,25 @@ describe('Source', function() {
 
 	describe('#unlinkInfoType', function () {
 		it('should call the right request', function (done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var s = new InfoType("toto", 42);
 
-			var response1:SequelizeRestfulResponse = {
-				"status": "success",
-				"data": s.toJSONObject()
-			};
+			var response1:any = s.toJSONObject();
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), InfoType.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), InfoType.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
                 var infoType = c.infoType();
                 assert.deepEqual(infoType, s, "The infoType is not the expected value");
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the infoType");
-                var spy = sinon.spy(infoType, "desynchronize");
 
-                var response2:SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), InfoType.getTableName(), s.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), InfoType.getTableName(), s.getId().toString()))
+                    .reply(200, JSON.stringify(emptyResponse));
 
 
                 var success2 = function() {
@@ -529,17 +541,13 @@ describe('Source', function() {
 
 	describe('#addParamType', function() {
 		it('should call the right request', function(done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var pv = new ParamType("mavaleur", "toto", 12);
-			var spy = sinon.spy(pv, "desynchronize");
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var response1 : any = [];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamType.getTableName()))
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamType.getTableName()))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -548,14 +556,11 @@ describe('Source', function() {
                 assert.deepEqual(paramTypes, [], "The paramType is not an empty array: "+JSON.stringify(paramTypes));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramTypes");
 
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamType.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamType.getTableName(), pv.getId().toString()))
+                    .reply(200, JSON.stringify(emptyResponse));
 
 
                 var success2 = function() {
@@ -581,46 +586,50 @@ describe('Source', function() {
 
 	describe('#removeParamType', function() {
 		it('should call the right request', function(done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var pv = new ParamType("mavaleur", "machin", 12);
 
-			var response1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
+			var response1 : any = [
 					{
 						"name": "mavaleur",
 						"description": "machin",
 						"id": 12,
 						"complete": false
 					}
-				]
-			};
+				];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamType.getTableName()))
+
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamType.getTableName()))
 				.reply(200, JSON.stringify(response1));
+
+
 
             var success = function() {
                 var paramTypes = c.paramTypes();
 
+	            var response2 : any = [];
+
+	            var restClientMockCT = nock(BackendConfig.getDBBaseURL())
+		            .get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), CallType.getTableName()))
+		            .reply(200, JSON.stringify(response2));
+
                 assert.deepEqual(paramTypes, [pv], "The paramType array is not an array fill only with PV: "+JSON.stringify(paramTypes));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramTypes");
 
-                var spy = sinon.spy(pv, "desynchronize");
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamType.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamType.getTableName(), pv.getId().toString()))
+                    .reply(200, JSON.stringify(emptyResponse));
 
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the removeParamType is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramType in database.");
-                    done();
+	                assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramType in database.");
+	                assert.ok(restClientMockCT.isDone(), "The mock request has not been done to retrieve callTypes.");
+	                done();
                 };
 
                 var fail2 = function(err) {
@@ -640,17 +649,13 @@ describe('Source', function() {
 
     describe('#addParamValue', function() {
         it('should call the right request', function(done) {
-	        var c = new Source("machin", "desc", "method", 28);
+	        var c = new Source("machin", "desc", "method", 43, false, 28);
             var pv = new ParamValue("mavaleur",12);
-            var spy = sinon.spy(pv, "desynchronize");
 
-            var response1 : SequelizeRestfulResponse = {
-                "status": "success",
-                "data": []
-            };
+            var response1 : any = [];
 
-            var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-                .get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName()))
+            var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+                .get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName()))
                 .reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -658,14 +663,11 @@ describe('Source', function() {
                 assert.deepEqual(paramValues, [], "The paramValue is not an empty array: "+JSON.stringify(paramValues));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
 
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the addParamValue is false.");
@@ -690,23 +692,20 @@ describe('Source', function() {
 
 	describe('#removeParamValue', function() {
 		it('should call the right request', function(done) {
-			var c = new Source("machin", "desc", "method", 28);
+			var c = new Source("machin", "desc", "method", 43, false, 28);
 			var pv = new ParamValue("mavaleur", 12);
 
-			var reponse1 : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": [
+			var response1 : any = [
 					{
 						"value": "mavaleur",
 						"id": 12,
 						"complete": false
 					}
-				]
-			};
+				];
 
-			var restClientMock1 = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName()))
-				.reply(200, JSON.stringify(reponse1));
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName()))
+				.reply(200, JSON.stringify(response1));
 
             var success = function() {
                 var paramValues = c.paramValues();
@@ -714,15 +713,11 @@ describe('Source', function() {
                 assert.deepEqual(paramValues, [pv], "The paramValue array is not an array fill only with PV: "+JSON.stringify(paramValues));
                 assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
 
-                var spy = sinon.spy(pv, "desynchronize");
-                var response2 : SequelizeRestfulResponse = {
-                    "status": "success",
-                    "data": {}
-                };
+				var emptyResponse : any = {};
 
-                var restClientMock2 = nock(DatabaseConnection.getBaseURL())
-                    .delete(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(response2));
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), ParamValue.getTableName(), pv.getId().toString()))
+                    .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the removeParamValue is false.");
@@ -748,7 +743,7 @@ describe('Source', function() {
 
 	describe('#updateAttribute', function () {
 		it('should update the service when asking but not the object as it remains not complete', function (done) {
-			var model = new Source("toto", "bla", "method", 12);
+			var model = new Source("toto", "bla", "method", 43, false, 12);
 			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var newInfo = {
@@ -757,35 +752,26 @@ describe('Source', function() {
 				'value': s.getId()
 			};
 
-			var responseReadSource : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": model.toJSONObject()
-			};
+			var responseReadSource : any = model.toJSONObject();
 
-			var restClientMockReadSource = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(Source.getTableName(), model.getId().toString()))
+			var restClientMockReadSource = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(Source.getTableName(), model.getId().toString()))
 				.reply(200, JSON.stringify(responseReadSource));
 
-			var responseUpdate : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+			var emptyResponse : any = {};
 
-			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName(), s.getId().toString()))
-				.reply(200, JSON.stringify(responseUpdate));
+			var restClientMockUpdate = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.associatedObjectEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName(), s.getId().toString()))
+				.reply(200, JSON.stringify(emptyResponse));
 
-			var responseCheckAsso : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var responseCheckAsso : any = [];
 
-			var restClientMockAssoService = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName()))
+			var restClientMockAssoService = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName()))
 				.reply(200, JSON.stringify(responseCheckAsso));
 
-			var restClientMockAssoInfoType = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), InfoType.getTableName()))
+			var restClientMockAssoInfoType = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), model.getId().toString(), InfoType.getTableName()))
 				.reply(200, JSON.stringify(responseCheckAsso));
 
 			var success : Function = function () {
@@ -804,8 +790,8 @@ describe('Source', function() {
 		});
 
 		it('should update the source to link a service when asking and update the source if it becomes complete', function (done) {
-			var model = new Source("toto", "bla", "method", 12);
-			var modelUpdated = new Source("toto", "bla", "method", 12, true);
+			var model = new Source("toto", "bla", "method", 43, false, 12);
+			var modelUpdated = new Source("toto", "bla", "method", 43, false, 12, true);
 			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var newInfo = {
@@ -814,44 +800,32 @@ describe('Source', function() {
 				'value': s.getId()
 			};
 
-			var responseReadSource : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": model.toJSONObject()
-			};
+			var responseReadSource : any = model.toJSONObject();
 
-			var restClientMockReadSource = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(Source.getTableName(), model.getId().toString()))
+			var restClientMockReadSource = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(Source.getTableName(), model.getId().toString()))
 				.reply(200, JSON.stringify(responseReadSource));
 
-			var responseUpdate : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+			var emptyResponse : any = {};
 
-			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName(), s.getId().toString()))
-				.reply(200, JSON.stringify(responseUpdate));
+			var restClientMockUpdate = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.associatedObjectEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName(), s.getId().toString()))
+				.reply(200, JSON.stringify(emptyResponse));
 
-			var responseCheckAsso : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {"id": 12, "name": "toto", "complete": true}
-			};
+			var responseCheckAsso : any = {"id": 12, "name": "toto", "complete": true};
 
-			var restClientMockAssoService = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName()))
+			var restClientMockAssoService = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName()))
 				.reply(200, JSON.stringify(responseCheckAsso));
 
-			var restClientMockAssoInfoType = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), InfoType.getTableName()))
+			var restClientMockAssoInfoType = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), model.getId().toString(), InfoType.getTableName()))
 				.reply(200, JSON.stringify(responseCheckAsso));
 
-			var responseReadSource : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": model.toJSONObject()
-			};
+			var responseReadSource : any = model.toJSONObject();
 
-			var restClientMockUpdateSource = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(Source.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
+			var restClientMockUpdateSource = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(Source.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
 				.reply(200, JSON.stringify(responseReadSource));
 
 			var success : Function = function () {
@@ -871,7 +845,7 @@ describe('Source', function() {
 		});
 
 		it('should update the source to unlink a service when asking and do not update the source', function (done) {
-			var model = new Source("toto", "bla", "method", 12);
+			var model = new Source("toto", "bla", "method", 43, false, 12);
 			var s = new Service("toto", "machin", "blabla", true, "provider","", 42);
 
 			var newInfo = {
@@ -880,35 +854,26 @@ describe('Source', function() {
 				'value': s.getId()
 			};
 
-			var responseReadSource : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": model.toJSONObject()
-			};
+			var responseReadSource : any = model.toJSONObject();
 
-			var restClientMockReadSource = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(Source.getTableName(), model.getId().toString()))
+			var restClientMockReadSource = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(Source.getTableName(), model.getId().toString()))
 				.reply(200, JSON.stringify(responseReadSource));
 
-			var responseUpdate : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+			var emptyResponse : any = {};
 
-			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName(), s.getId().toString()))
-				.reply(200, JSON.stringify(responseUpdate));
+			var restClientMockUpdate = nock(BackendConfig.getDBBaseURL())
+				.delete(BackendConfig.associatedObjectEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName(), s.getId().toString()))
+				.reply(200, JSON.stringify(emptyResponse));
 
-			var responseCheckAsso : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var responseCheckAsso : any = [];
 
-			var restClientMockAssoService = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName()))
+			var restClientMockAssoService = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName()))
 				.reply(200, JSON.stringify(responseCheckAsso));
 
-			var restClientMockAssoInfoType = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), InfoType.getTableName()))
+			var restClientMockAssoInfoType = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), model.getId().toString(), InfoType.getTableName()))
 				.reply(200, JSON.stringify(responseCheckAsso));
 
 
@@ -928,15 +893,12 @@ describe('Source', function() {
 		});
 
 		it('should launch an exception if the information method does not exist', function (done) {
-			var model = new Source("toto", "bla", "method", 12);
+			var model = new Source("toto", "bla", "method", 43, false, 12);
 
-			var responseReadSource : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": model.toJSONObject()
-			};
+			var responseReadSource : any = model.toJSONObject();
 
-			var restClientMockReadSource = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(Source.getTableName(), model.getId().toString()))
+			var restClientMockReadSource = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(Source.getTableName(), model.getId().toString()))
 				.reply(200, JSON.stringify(responseReadSource));
 
 			var success = function() {
@@ -963,7 +925,7 @@ describe('Source', function() {
 		});
 
 		it('should update the source to add a ParamType when asking', function (done) {
-			var model = new Source("toto", "bla", "method", 12);
+			var model = new Source("toto", "bla", "method", 43, false, 12);
 			var s = new ParamType("toto", "machin", 42);
 
 			var newInfo = {
@@ -972,35 +934,26 @@ describe('Source', function() {
 				'value': s.getId()
 			};
 
-			var responseReadSource : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": model.toJSONObject()
-			};
+			var responseReadSource : any = model.toJSONObject();
 
-			var restClientMockReadSource = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(Source.getTableName(), model.getId().toString()))
+			var restClientMockReadSource = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(Source.getTableName(), model.getId().toString()))
 				.reply(200, JSON.stringify(responseReadSource));
 
-			var responseUpdate : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+			var emptyResponse : any = {};
 
-			var restClientMockUpdate = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(Source.getTableName(), model.getId().toString(), ParamType.getTableName(), s.getId().toString()))
-				.reply(200, JSON.stringify(responseUpdate));
+			var restClientMockUpdate = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.associatedObjectEndpoint(Source.getTableName(), model.getId().toString(), ParamType.getTableName(), s.getId().toString()))
+				.reply(200, JSON.stringify(emptyResponse));
 
-			var responseCheckAsso : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var responseCheckAsso : any = [];
 
-			var restClientMockAssoService = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName()))
+			var restClientMockAssoService = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), model.getId().toString(), Service.getTableName()))
 				.reply(200, JSON.stringify(responseCheckAsso));
 
-			var restClientMockAssoInfoType = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(Source.getTableName(), model.getId().toString(), InfoType.getTableName()))
+			var restClientMockAssoInfoType = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), model.getId().toString(), InfoType.getTableName()))
 				.reply(200, JSON.stringify(responseCheckAsso));
 
 			var success : Function = function () {

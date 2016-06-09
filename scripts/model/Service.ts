@@ -283,16 +283,6 @@ class Service extends ModelItf {
 		this.loadSources(success, fail);
 	}
 
-	/**
-	 * Set the object as desynchronized given the different lazy properties.
-	 *
-	 * @method desynchronize
-	 */
-	desynchronize() : void {
-		super.desynchronize();
-		this._sources_loaded = false;
-	}
-
 
 	/**
 	 * Return a Service instance as a JSON Object

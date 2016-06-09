@@ -200,7 +200,12 @@ class AbsoluteTimeline extends ModelItf {
                     failCallback(error);
                 };
 
-                self.loadAbsoluteEvents(success, fail);
+                if (!self._absoluteEvents_loaded) {
+                    self.loadAbsoluteEvents(success, fail);
+                } else {
+                    success();
+                }
+
             } else {
                 self._complete = false;
                 successCallback();

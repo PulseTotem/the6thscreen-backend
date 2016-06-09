@@ -40,6 +40,22 @@ class ParamValue extends ModelItf {
 	private _paramType_loaded : boolean;
 
     /**
+     * Origine paramValue if the current object is a clone
+     *
+     * @property _origineParamValue
+     * @type ParamValue
+     */
+    private _origineParamValue : ParamValue;
+
+    /**
+     * Lazy loading for origineParamValue attribute
+     *
+     * @property _origineParamValue_loaded
+     * @type boolean
+     */
+    private _origineParamValue_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -55,6 +71,9 @@ class ParamValue extends ModelItf {
 
 	    this._paramType = null;
 	    this._paramType_loaded = false;
+
+        this._origineParamValue = null;
+        this._origineParamValue_loaded = false;
     }
 
 	// TODO : Check the value type here?
@@ -119,6 +138,50 @@ class ParamValue extends ModelItf {
         }
     }
 
+    /**
+     * Return the origineParamValue attribute
+     *
+     * @method origineParamValue
+     * @returns {ParamValue}
+     */
+    origineParamValue() {
+        return this._origineParamValue;
+    }
+
+    /**
+     * Load the origine ParamValue attribute
+     *
+     * @method loadOrigineParamValue
+     * @param successCallback
+     * @param failCallback
+     */
+    loadOrigineParamValue(successCallback : Function, failCallback : Function) {
+        if (! this._origineParamValue_loaded) {
+            var self = this;
+
+            var successLoad = function (origineParamValue) {
+                self._origineParamValue = origineParamValue;
+                self._origineParamValue_loaded = true;
+
+                if (successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail = function (error) {
+                if (failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(ParamValue, ParamValue, successLoad, fail);
+        } else {
+            if (successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -158,6 +221,7 @@ class ParamValue extends ModelItf {
 	 */
 	desynchronize() : void {
 		this._paramType_loaded = false;
+        this._origineParamValue_loaded = false;
 	}
 
 	/**
@@ -188,9 +252,13 @@ class ParamValue extends ModelItf {
 		var self = this;
 
 		var success : Function = function () {
+            Logger.debug("Success super check complete ParamValue");
 			if (self.isComplete() && !!self.value()) {
-				var success:Function = function () {
-					self._complete = (self.paramType() !== undefined && self.paramType().isComplete());
+				var successLoad:Function = function () {
+                    Logger.debug("Success load asso check complete ParamValue");
+					self._complete = (self.paramType() !== null && self.paramType().isComplete());
+                    Logger.debug(JSON.stringify(self.paramType()));
+                    Logger.debug("Obtained complete value : "+self._complete);
 					successCallback();
 				};
 
@@ -198,12 +266,18 @@ class ParamValue extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadAssociations(success, fail);
+                if (!self._paramType_loaded) {
+                    self.loadParamType(successLoad, fail);
+                } else {
+                    successLoad();
+                }
+
 			} else {
 				self._complete = false;
 				successCallback();
 			}
-		}
+		};
+
 		super.checkCompleteness(success, failCallback);
 	}
 
@@ -264,6 +338,30 @@ class ParamValue extends ModelItf {
 	unlinkParamType(typeID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(ParamValue, ParamType, typeID, successCallback, failCallback);
 	}
+
+    /**
+     * Set the origineParamValue of the current object if it is a clone
+     *
+     * @method linkOrigineParamValue
+     * @param origineParamValueId
+     * @param successCallback
+     * @param failCallback
+     */
+    linkOrigineParamValue(origineParamValueId : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(ParamValue, ParamValue, origineParamValueId, successCallback, failCallback);
+    }
+
+    /**
+     * Unset the origineParamValue
+     *
+     * @method unlinkOrigineParamValue
+     * @param origineParamValueId
+     * @param successCallback
+     * @param failCallback
+     */
+    unlinkOrigineParamValue(origineParamValueId : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(ParamValue, ParamValue, origineParamValueId, successCallback, failCallback);
+    }
 
     /**
      * Create model in database.
@@ -350,6 +448,56 @@ class ParamValue extends ModelItf {
 	static fromJSONObject(jsonObject : any) : ParamValue {
 		return new ParamValue(jsonObject.value, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
+
+    /**
+     * Clone a ParamValue: it clones value information, and keep the same ParamType
+     * @param modelClass
+     * @param successCallback
+     * @param failCallback
+     */
+    clone(successCallback : Function, failCallback : Function) {
+        Logger.debug("Start cloning ParamValue with id "+this.getId());
+        var self = this;
+
+        var successCloneParamValue = function (clonedParamValue : ParamValue) {
+            Logger.debug("Obtained clonedParamValue :"+JSON.stringify(clonedParamValue));
+
+            var successLinkOrigine = function () {
+                clonedParamValue._origineParamValue = self;
+                clonedParamValue._origineParamValue_loaded = true;
+
+                var completeParamValue = clonedParamValue.isComplete();
+
+                var successLoadAsso = function () {
+
+                    var successLinkParamType = function () {
+
+                        var successCheckCompleteness = function () {
+                            if (clonedParamValue.isComplete() != completeParamValue) {
+
+                                var successUpdate = function () {
+                                    successCallback(clonedParamValue);
+                                };
+
+                                clonedParamValue.update(successUpdate, failCallback);
+                            } else {
+                                successCallback(clonedParamValue);
+                            }
+                        };
+                        clonedParamValue.desynchronize();
+                        clonedParamValue.checkCompleteness(successCheckCompleteness, failCallback);
+                    };
+
+                    clonedParamValue.linkParamType(self.paramType().getId(), successLinkParamType, failCallback);
+                };
+
+                self.loadAssociations(successLoadAsso, failCallback);
+            };
+
+            clonedParamValue.linkOrigineParamValue(self.getId(), successLinkOrigine, failCallback);
+        };
+        super.cloneObject(ParamValue, successCloneParamValue, failCallback);
+    }
 
     /**
      * Retrieve DataBase Table Name.

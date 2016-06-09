@@ -6,7 +6,7 @@
 /// <reference path="./Call.ts" />
 /// <reference path="./ZoneContent.ts" />
 /// <reference path="./SDI.ts" />
-
+/// <reference path="./AuthorizedClient.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
@@ -24,6 +24,14 @@ class Profil extends ModelItf {
      * @type string
      */
     private _name : string;
+
+	/**
+	 * Hash property.
+	 *
+	 * @property _hash
+	 * @type string
+	 */
+	private _hash : string;
 
     /**
      * Description property.
@@ -65,20 +73,54 @@ class Profil extends ModelItf {
      */
     private _sdi_loaded : boolean;
 
+	/**
+	 * AuthorizedClients property.
+	 *
+	 * @property _authorizedClients
+	 * @type Array<AuthorizedClient>
+	 */
+	private _authorizedClients : Array<AuthorizedClient>;
+
+	/**
+	 * Lazy loading for authorizedClients property.
+	 *
+	 * @property _authorizedClients_loaded
+	 * @type boolean
+	 */
+	private _authorizedClients_loaded : boolean;
+
+	/**
+	 * The original profil if the current object is a clone
+	 *
+	 * @property _origineProfil
+	 * @type Profil
+	 */
+	private _origineProfil : Profil;
+
+	/**
+	 * Lazy loading for origineProfil
+	 *
+	 * @property origineProfilLoaded
+	 * @type boolean
+	 */
+	private _origineProfil_loaded : boolean;
+
     /**
      * Constructor.
      *
      * @constructor
      * @param {string} name - The Profil's name.
+	 * @param {string} hash - The Profil's hash.
      * @param {string} description - The Profil's description.
      * @param {number} id - The Profil's ID.
 	 * @param {string} createdAt - The Profil's createdAt.
 	 * @param {string} updatedAt - The Profil's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", hash : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
+		this.setHash(hash);
         this.setDescription(description);
 
         this._zoneContents = new Array<ZoneContent>();
@@ -86,6 +128,12 @@ class Profil extends ModelItf {
 
 	    this._sdi = null;
 	    this._sdi_loaded = false;
+
+	    this._authorizedClients = new Array<AuthorizedClient>();
+	    this._authorizedClients_loaded = false;
+
+	    this._origineProfil = null;
+	    this._origineProfil_loaded = false;
     }
 
     /**
@@ -106,6 +154,25 @@ class Profil extends ModelItf {
     setName(name : string) {
         this._name = name;
     }
+
+	/**
+	 * Return the Profil's hash.
+	 *
+	 * @method hash
+	 * @return {string} The Profil's hash.
+	 */
+	hash() {
+		return this._hash;
+	}
+
+	/**
+	 * Set the Profil's hash.
+	 *
+	 * @method setHash
+	 */
+	setHash(hash : string) {
+		this._hash = hash;
+	}
 
     /**
      * Return the Profil's description.
@@ -211,10 +278,96 @@ class Profil extends ModelItf {
 		}
 	}
 
+	/**
+	 * Return the Profil's authorizedClients.
+	 *
+	 * @method authorizedClients
+	 * @return {Array<AuthorizedClient>} The Profil's authorizedClients.
+	 */
+	authorizedClients() : Array<AuthorizedClient> {
+		return this._authorizedClients;
+	}
+
+	/**
+	 * Load the Profil's authorizedClients.
+	 *
+	 * @method loadAuthorizedClients
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	loadAuthorizedClients(successCallback : Function, failCallback : Function) {
+		if(! this._authorizedClients_loaded) {
+			var self = this;
+			var success : Function = function(authorizedClients) {
+				self._authorizedClients = authorizedClients;
+				self._authorizedClients_loaded = true;
+				if(successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail : Function = function(error) {
+				if(failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getAssociatedObjects(Profil, AuthorizedClient, success, fail);
+		} else {
+			if(successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
+	/**
+	 * Return the original profil if the current object is a clone
+	 *
+	 * @method origineProfil
+	 * @returns {Profil}
+	 */
+	origineProfil() : Profil {
+		return this._origineProfil;
+	}
+
+	/**
+	 * Load origineProfil
+	 *
+	 * @method loadOrigineProfil
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	loadOrigineProfil(successCallback : Function, failCallback : Function) {
+		if (!this._origineProfil_loaded) {
+			var self = this;
+
+			var successLoad = function (origineProfil) {
+				self._origineProfil = origineProfil;
+				self._origineProfil_loaded = true;
+
+				if (successCallback != null) {
+					successCallback();
+				}
+			};
+
+			var fail = function (error) {
+				if (failCallback != null) {
+					failCallback(error);
+				}
+			};
+
+			this.getUniquelyAssociatedObject(Profil, Profil, successLoad, fail);
+		} else {
+			if (successCallback != null) {
+				successCallback();
+			}
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Load all the lazy loading properties of the object.
+	 * Load all the lazy loading properties of the object except statuses
 	 * Useful when you want to get a complete object.
      *
      * @method loadAssociations
@@ -252,6 +405,7 @@ class Profil extends ModelItf {
 	desynchronize() : void {
 		this._zoneContents_loaded = false;
 		this._sdi_loaded = false;
+		this._origineProfil_loaded = false;
 	}
 
 	/**
@@ -264,6 +418,7 @@ class Profil extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
+			"hash": this.hash(),
 			"description": this.description(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
@@ -280,19 +435,19 @@ class Profil extends ModelItf {
 		var self = this;
 
 		var success : Function = function () {
-			if (self.isComplete() && !!self.name()) {
+			if (self.isComplete() && !!self.name() && !!self.hash()) {
 				var fail:Function = function (error) {
 					failCallback(error);
 				};
 
-				var success:Function = function () {
+				var successLoad :Function = function () {
 					if (self._zoneContents_loaded && self._sdi_loaded ) {
 						self._complete = self.isComplete() && self.sdi() != null;
 
 						var successSDILoadZones:Function = function () {
 							self._complete = self.isComplete() && self.sdi().zones().length == self.zoneContents().length;
 							successCallback();
-						}
+						};
 
 						if(self.isComplete()) {
 							self.sdi().loadZones(successSDILoadZones, fail);
@@ -302,10 +457,17 @@ class Profil extends ModelItf {
 					}
 				};
 
+				if (self._zoneContents_loaded && self._sdi_loaded ) {
+					successLoad();
+				}
 
+				if (!self._zoneContents_loaded) {
+					self.loadZoneContents(successLoad, fail);
+				}
 
-				self.loadZoneContents(success, fail);
-				self.loadSDI(success, fail);
+				if (!self._sdi_loaded) {
+					self.loadSDI(successLoad, fail);
+				}
 			} else {
 				self._complete = false;
 				successCallback();
@@ -342,6 +504,7 @@ class Profil extends ModelItf {
 	/**
 	 * Add a new ZoneContent to the Profil and associate it in the database.
 	 * A ZoneContent can only be added once.
+	 * This method also launch the checkCompleteness method on the ZoneContent object which is added.
 	 *
      * @method addCall
 	 * @param {Call} c The ZoneContent to add inside the Profil. It cannot be a null value.
@@ -349,7 +512,33 @@ class Profil extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	addZoneContent(zoneContentID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
+		var self = this;
+
+		var finalSuccess = function () {
+			self.associateObject(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
+		};
+
+		var successReadZC = function (zc : ZoneContent) {
+			if (zc.isComplete()) {
+				finalSuccess();
+			} else {
+				var successCheckCompleteness = function () {
+					if (zc.isComplete()) {
+						var successUpdate = function () {
+							finalSuccess();
+						};
+						zc.update(successUpdate, failCallback);
+					} else {
+						finalSuccess();
+					}
+				};
+
+				zc.checkCompleteness(successCheckCompleteness, failCallback);
+			}
+		};
+
+		ZoneContent.read(zoneContentID, successReadZC, failCallback);
+
 	}
 
 	/**
@@ -364,6 +553,7 @@ class Profil extends ModelItf {
 	removeZoneContent(zoneContentID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Profil, ZoneContent, zoneContentID, successCallback, failCallback);
 	}
+
 
 	/**
 	 * Set the SDI of the Profil.
@@ -389,6 +579,30 @@ class Profil extends ModelItf {
 	 */
 	unlinkSDI(sdiId : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Profil, SDI, sdiId, successCallback, failCallback);
+	}
+
+	/**
+	 * Set the origineProfil
+	 *
+	 * @method linkOrigineProfil
+	 * @param profilID
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	linkOrigineProfil(profilID : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(Profil, Profil, profilID, successCallback, failCallback);
+	}
+
+	/**
+	 * Unset the origineProfil
+	 *
+	 * @method unlinkOrigineProfil
+	 * @param profilId
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	unlinkOrigineProfil(profilId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(Profil, Profil, profilId, successCallback, failCallback);
 	}
 
     /**
@@ -456,7 +670,7 @@ class Profil extends ModelItf {
 						 if(zoneContentsUnlinkNumber == zoneContentsNumber) {
 							 ModelItf.deleteObject(Profil, self.getId(), successCallback, failCallback, attemptNumber);
 						 }
-					 }
+					 };
 
 					self.removeZoneContent(zoneContent.getId(), successUnlink, fail);
 				});
@@ -480,6 +694,18 @@ class Profil extends ModelItf {
         return this.allObjects(Profil, successCallback, failCallback, attemptNumber);
     }
 
+	/**
+	 * Find One Profil by hash.
+	 *
+	 * @method findOneByHash
+	 * @param {string} hash - The Profil's hash
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	static findOneByHash(hash : string, successCallback : Function, failCallback : Function) {
+		return this.findOneBy(Profil, "hash", hash, successCallback, failCallback);
+	}
+
     /**
      * Return a Profil instance from a JSON string.
      *
@@ -501,8 +727,129 @@ class Profil extends ModelItf {
      * @return {Profil} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Profil {
-	    return new Profil(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+	    return new Profil(jsonObject.name, jsonObject.hash, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
+
+	/**
+	 * Clone a profil: it clones profil information, cloning ZoneContents.
+	 * However it does not keep information on AuthorizedClient or Clients.
+	 * If the profilInfo argument is given, the clonedProfil will be linked to the SDI id contained in ProfilInfo.
+	 *
+	 * @method clone
+	 * @param modelClass
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	clone(successCallback : Function, failCallback : Function, profilInfo : any) {
+		Logger.debug("Start cloning Profil with id "+this.getId());
+		var self = this;
+
+		var successCloneProfil = function (clonedProfil : Profil) {
+			var successLinkOrigine = function () {
+				clonedProfil._origineProfil = self;
+				clonedProfil._origineProfil_loaded = true;
+
+				var completeProfil = clonedProfil.isComplete();
+
+				var successLoad = function () {
+					Logger.debug("Obtained clonedProfil :" + JSON.stringify(clonedProfil));
+					var successAssociateSDI = function () {
+						var nbZoneContents = self.zoneContents().length;
+
+						var counterClonedZC = 0;
+
+						var successCloneZoneContent = function (clonedZC:ZoneContent) {
+							var successAssociateZoneContent = function () {
+								counterClonedZC++;
+
+								if (counterClonedZC == nbZoneContents) {
+
+									var successCheckCompleteness = function () {
+										Logger.debug("Check completeness profil...");
+										if (clonedProfil.isComplete() != completeProfil) {
+
+											var successUpdateProfil = function () {
+												successCallback(clonedProfil);
+											};
+
+											clonedProfil.update(successUpdateProfil, failCallback);
+										} else {
+											successCallback(clonedProfil);
+										}
+									};
+									clonedProfil.desynchronize();
+									clonedProfil.checkCompleteness(successCheckCompleteness, failCallback);
+								}
+							};
+
+							clonedProfil.addZoneContent(clonedZC.getId(), successAssociateZoneContent, failCallback);
+						};
+
+						self.zoneContents().forEach(function (zoneContent:ZoneContent) {
+							zoneContent.clone(successCloneZoneContent, failCallback, profilInfo);
+						});
+					};
+
+					if (profilInfo == null) {
+						clonedProfil.linkSDI(self.sdi().getId(), successAssociateSDI, failCallback);
+					} else {
+						clonedProfil.linkSDI(profilInfo["SDI"], successAssociateSDI, failCallback);
+					}
+
+				};
+
+				self.loadAssociations(successLoad, failCallback);
+			};
+			clonedProfil.linkOrigineProfil(self.getId(), successLinkOrigine, failCallback);
+		};
+
+		this.cloneObject(Profil, successCloneProfil, failCallback);
+	}
+
+	/**
+	 * Clone a profil resetting the hash attribute
+	 * @param modelClass
+	 * @param successCallbackModelItf
+	 * @param failCallback
+	 */
+	cloneObject(modelClass : any, successCallbackModelItf : Function, failCallback : Function) {
+		Logger.debug("Clone de modelITF avec "+this.getId());
+		if (!modelClass) {
+			failCallback(new ModelException("The modelClasse argument must be given to clone the object."));
+			return;
+		}
+
+		if (!this.isComplete()) {
+			Logger.error("Error when cloning with object: "+JSON.stringify(this));
+			failCallback(new ModelException("The model must be complete in order to be cloned. ModelClass : "+modelClass.getTableName()));
+			return;
+		}
+
+		var self = this;
+		var jsonInfo : any = this.toJSONObject();
+		jsonInfo.id = null;
+		jsonInfo.complete = false;
+		jsonInfo.hash = null;
+		var clone = modelClass.fromJSONObject(jsonInfo);
+
+		var successUpdateModelItf = function () {
+			Logger.debug("Success update profil ! "+self.getId());
+			successCallbackModelItf(clone);
+		};
+
+		var successCheckCompletenessModelItf = function () {
+			Logger.debug("Success check completeness profil ! "+self.getId());
+			clone.setHash(clone.getId());
+			clone.update(successUpdateModelItf, failCallback);
+		};
+
+		var successCreateModelItf = function (data : any) {
+			Logger.debug("Success create model profil ! "+self.getId());
+			clone.checkCompleteness(successCheckCompletenessModelItf, failCallback);
+		};
+
+		clone.create(successCreateModelItf, failCallback);
+	}
 
     /**
      * Retrieve DataBase Table Name.

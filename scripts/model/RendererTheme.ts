@@ -1,19 +1,20 @@
 /**
- * @author Simon Urli <simon@the6thscreen.fr>
- * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Christian Brel <christian@pulsetotem.fr, ch.brel@gmail.com>
  */
 
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./InfoType.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
+
 /**
- * Model : Widget
+ * Model : RendererTheme
  *
- * @class Widget
+ * @class RendererTheme
  * @extends ModelItf
  */
-class Widget extends ModelItf {
+class RendererTheme extends ModelItf {
 
     /**
      * Name property.
@@ -24,31 +25,22 @@ class Widget extends ModelItf {
     private _name : string;
 
     /**
-     * Description property.
-     *
-     * @property _description
-     * @type string
-     */
-    private _description : string;
-
-    /**
      * Constructor.
      *
      * @constructor
-     * @param {string} name - The Widget's name.
-     * @param {number} id - The Widget's ID.
-	 * @param {string} createdAt - The Widget's createdAt.
-	 * @param {string} updatedAt - The Widget's updatedAt.
+     * @param {string} name - The RendererTheme's name.
+     * @param {number} id - The RendererTheme's ID.
+	 * @param {string} createdAt - The RendererTheme's createdAt.
+	 * @param {string} updatedAt - The RendererTheme's updatedAt.
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
-        this.setDescription(description);
     }
 
 	/**
-	 * Set the Widget's name.
+	 * Set the RendererTheme's name.
 	 *
 	 * @method setName
 	 */
@@ -57,7 +49,7 @@ class Widget extends ModelItf {
 	}
 
     /**
-     * Return the Widget's name.
+     * Return the RendererTheme's name.
      *
      * @method name
      */
@@ -65,28 +57,10 @@ class Widget extends ModelItf {
         return this._name;
     }
 
-    /**
-     * Set the Widget's description.
-     *
-     * @method setDescription
-     */
-    setDescription(description : string) {
-        this._description = description;
-    }
-
-    /**
-     * Return the Widget's description.
-     *
-     * @method description
-     */
-    description() {
-        return this._description;
-    }
-
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
 	/**
-	 * Return a Widget instance as a JSON Object
+	 * Return a RendererTheme instance as a JSON Object
 	 *
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
@@ -95,7 +69,6 @@ class Widget extends ModelItf {
 		var data = {
 			"id": this.getId(),
 			"name": this.name(),
-            "description": this.description(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
 			"updatedAt" : this.getUpdatedAt()
@@ -104,10 +77,14 @@ class Widget extends ModelItf {
 	}
 
 	/**
-	 * Compute the completeness of a Widget.
-	 * The completeness is given by the presence of an ID and a name.
+	 * Check whether the object is complete or not
+	 *
+	 * A RendererTheme is complete if it has an ID, and a name.
+	 *
+	 * @param successCallback The function to call in case of success.
+	 * @param failCallback The function to call in case of failure.
 	 */
-	checkCompleteness(successCallback : Function, failCallback : Function) : void {
+	checkCompleteness(successCallback : Function, failCallback : Function) {
 		var self = this;
 
 		var success : Function = function () {
@@ -115,7 +92,7 @@ class Widget extends ModelItf {
 			successCallback();
 		}
 
-		super.checkCompleteness(success,failCallback);
+		super.checkCompleteness(success, failCallback);
 	}
 
     /**
@@ -127,7 +104,7 @@ class Widget extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        this.createObject(Widget, this.toJSONObject(), successCallback, failCallback);
+        this.createObject(RendererTheme, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -141,7 +118,7 @@ class Widget extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static read(id : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        ModelItf.readObject(Widget, id, successCallback, failCallback, attemptNumber);
+        ModelItf.readObject(RendererTheme, id, successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -153,7 +130,7 @@ class Widget extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.updateObject(Widget, this.toJSONObject(), successCallback, failCallback, attemptNumber);
+        return this.updateObject(RendererTheme, this.toJSONObject(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -165,7 +142,7 @@ class Widget extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Widget, this.getId(), successCallback, failCallback, attemptNumber);
+        return ModelItf.deleteObject(RendererTheme, this.getId(), successCallback, failCallback, attemptNumber);
     }
 
     /**
@@ -177,31 +154,31 @@ class Widget extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return this.allObjects(Widget, successCallback, failCallback, attemptNumber);
+        return this.allObjects(RendererTheme, successCallback, failCallback, attemptNumber);
     }
 
 	/**
-	 * Return a Widget instance from a JSON string.
+	 * Return a RendererTheme instance from a JSON string.
 	 *
 	 * @method parseJSON
 	 * @static
 	 * @param {string} json - The JSON string
-	 * @return {Widget} The model instance.
+	 * @return {RendererTheme} The model instance.
 	 */
-	static parseJSON(jsonString : string) : Widget {
-		return Widget.fromJSONObject(JSON.parse(jsonString));
+	static parseJSON(jsonString : string) : RendererTheme {
+		return RendererTheme.fromJSONObject(JSON.parse(jsonString));
 	}
 
 	/**
-	 * Return a Widget instance from a JSON Object.
+	 * Return a RendererTheme instance from a JSON Object.
 	 *
 	 * @method fromJSONObject
 	 * @static
 	 * @param {JSONObject} json - The JSON Object
-	 * @return {Widget} The model instance.
+	 * @return {RendererTheme} The model instance.
 	 */
-	static fromJSONObject(jsonObject : any) : Widget {
-		return new Widget(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+	static fromJSONObject(jsonObject : any) : RendererTheme {
+		return new RendererTheme(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**
@@ -211,6 +188,6 @@ class Widget extends ModelItf {
      * @return {string} The DataBase Table Name corresponding to Model.
      */
     static getTableName() : string {
-        return "Widgets";
+        return "RendererThemes";
     }
 }

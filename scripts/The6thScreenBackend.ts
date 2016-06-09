@@ -9,6 +9,8 @@
 /// <reference path="./namespacemanager/SourcesNamespaceManager.ts" />
 /// <reference path="./namespacemanager/AdminsNamespaceManager.ts" />
 
+/// <reference path="./routers/ContactFormRouter.ts" />
+
 /// <reference path="./core/BackendConfig.ts" />
 /// <reference path="./model/User.ts" />
 
@@ -140,18 +142,18 @@ class The6thScreenBackend extends Server {
     }
 
     /**
-     * Method to init the RSSFeedReader server.
+     * Method to init the Backend server.
      *
      * @method init
      */
     init() {
         var self = this;
 
-        this.addNamespace("clients", ClientsNamespaceManager);
-        this.addNamespace("sources", SourcesNamespaceManager);
-        var adminNamespace : any = this.addNamespace("admins", AdminsNamespaceManager);
+        self.addNamespace("clients", ClientsNamespaceManager);
+        self.addNamespace("sources", SourcesNamespaceManager);
+        var adminNamespace : any = self.addNamespace("admins", AdminsNamespaceManager);
 
-		//console.log("BYPASS CHECKING JWT Token !!!!!!!!! // TODO // TO FIX");
+        //console.log("BYPASS CHECKING JWT Token !!!!!!!!! // TODO // TO FIX");
         adminNamespace.use(socketioJwt.authorize({
             secret: BackendConfig.getJWTSecret(),
             handshake: true
@@ -161,11 +163,15 @@ class The6thScreenBackend extends Server {
             var handshakeData : any = socket.request;
 
             var success = function(user) {
-				console.log("check : ");
-				console.log(handshakeData.client._peername.address);
-				console.log("BYPASS CHECKING IP ADDRESS !!!!!!!!! // TODO // TO FIX");
-				//if(user.lastIp() == handshakeData.client._peername.address) {
-                    next();
+                console.log("3 methods to get IP: ");
+                console.log(handshakeData.client._peername.address);
+                console.log(socket.handshake.headers['x-forwarded-for']);
+                console.log(socket.handshake.address.address);
+                console.log("BYPASS CHECKING IP ADDRESS !!!!!!!!! // TODO // TO FIX");
+                //if(user.lastIp() == handshakeData.client._peername.address) {
+                socket.connectedUser = user;
+
+                next();
                 //} else {
                 //    next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));
                 //}
@@ -175,8 +181,8 @@ class The6thScreenBackend extends Server {
                 next(error);
             };
 
-			console.log("token : ");
-			console.log(handshakeData._query.token);
+            console.log("token : ");
+            console.log(handshakeData._query.token);
 
             User.findOneByToken(handshakeData._query.token, success, fail);
             // make sure the handshake data looks good as before
@@ -184,6 +190,8 @@ class The6thScreenBackend extends Server {
             // next(new Error('not authorized');
             // else just call next
         });
+
+        self.addAPIEndpoint("contact", ContactFormRouter);
     }
 }
 

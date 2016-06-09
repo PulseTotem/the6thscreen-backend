@@ -5,10 +5,9 @@
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/RestClient.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/RestClientResponse.ts" />
-/// <reference path="../core/DatabaseConnection.ts" />
+/// <reference path="../core/BackendConfig.ts" />
 /// <reference path="../exceptions/DataException.ts" />
 /// <reference path="../exceptions/RequestException.ts" />
-/// <reference path="../exceptions/ResponseException.ts" />
 /// <reference path="../exceptions/ModelException.ts" />
 
 /**
@@ -141,25 +140,26 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
-                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when creating an object with URL: "+urlCreateObject+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
-                } else {
-                    self._id = response.data.id;
-					self._createdAt = response.data.createdAt;
-					self._updatedAt = response.data.updatedAt;
-                    successCallback(response.data);
-                }
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nMessage : "+JSON.stringify(response)), attemptNumber);
-            }
+
+			if(response === undefined || Object.keys(response).length == 0 || response.id === undefined) {
+				failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when creating an object with URL: "+urlCreateObject+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response)), attemptNumber);
+			} else {
+				self._id = response.id;
+				self._createdAt = response.createdAt;
+				self._updatedAt = response.updatedAt;
+				successCallback(response);
+			}
         };
 
         var fail : Function = function(result) {
             failCallback(new RequestException("The request failed when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-	    var urlCreateObject = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
+	    var urlCreateObject = BackendConfig.getDBBaseURL() + BackendConfig.modelEndpoint(modelClass.getTableName());
+
+		delete(data["id"]);
+		delete(data["createdAt"]);
+		delete(data["updatedAt"]);
 
         RestClient.post(urlCreateObject, data, success, fail);
     }
@@ -183,22 +183,18 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                if(response.data === undefined || Object.keys(response.data).length == 0 ||response.data.id === undefined) {
-                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response.data)), id, attemptNumber);
-                } else {
-                    successCallback(modelClass.fromJSONObject(response.data));
-                }
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to read an object with URL:"+urlReadObject+".\nMessage : "+JSON.stringify(response)), id, attemptNumber);
-            }
+			if(response === undefined || Object.keys(response).length == 0 ||response.id === undefined) {
+				failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when reading an object with URL: "+urlReadObject+"\nResponse data: "+JSON.stringify(response)), id, attemptNumber);
+			} else {
+				successCallback(modelClass.fromJSONObject(response));
+			}
         };
 
         var fail : Function = function(result) {
             failCallback(new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), id, attemptNumber);
         };
 
-        var urlReadObject = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), id.toString());
+        var urlReadObject = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(modelClass.getTableName(), id.toString());
 
         RestClient.get(urlReadObject, success, fail);
     }
@@ -222,36 +218,32 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                if(response.data === undefined || Object.keys(response.data).length == 0 || response.count === undefined || !(response.data instanceof Array) ) {
-                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when searching an object with URL: "+urlSearchObject+"\nResponse data: "+JSON.stringify(response.data)));
-                } else {
-                    var allModelItfs : any = new Array();
+			if(response === undefined || Object.keys(response).length == 0 || !(response instanceof Array) ) {
+				failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when searching an object with URL: "+urlSearchObject+"\nResponse data: "+JSON.stringify(response)));
+			} else {
+				var allModelItfs : any = new Array();
 
-                    if(response.count > 0) {
-                        for (var i = 0; i < response.data.length; i++) {
-                            var obj = response.data[i];
-                            if (obj.id === undefined) {
-                                failCallback(new DataException("One data does not have any ID when searching objects with URL: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response.data)));
-                                return;
-                            } else {
-                                allModelItfs.push(modelClass.fromJSONObject(obj));
-                            }
-                        }
-                    }
+				if(response.length > 0) {
+					for (var i = 0; i < response.length; i++) {
+						var obj = response[i];
+						if (obj.id === undefined) {
+							failCallback(new DataException("One data does not have any ID when searching objects with URL: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response)));
+							return;
+						} else {
+							allModelItfs.push(modelClass.fromJSONObject(obj));
+						}
+					}
+				}
 
-                    successCallback(allModelItfs);
-                }
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to find an object with URL:"+urlSearchObject+".\nMessage : "+JSON.stringify(response)));
-            }
+				successCallback(allModelItfs);
+			}
         };
 
         var fail : Function = function(result) {
             failCallback(new RequestException("The request failed when trying to find an object with URL:"+urlSearchObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
         };
 
-        var urlSearchObject = DatabaseConnection.getBaseURL() + DatabaseConnection.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
+        var urlSearchObject = BackendConfig.getDBBaseURL() + BackendConfig.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
 
         RestClient.get(urlSearchObject, success, fail);
     }
@@ -275,36 +267,32 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                if(response.data === undefined || Object.keys(response.data).length == 0 || response.count === undefined || !(response.data instanceof Array) ) {
-                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when searching an object with URL: "+urlSearchObject+"\nResponse data: "+JSON.stringify(response.data)));
-                } else {
-                    if(response.count > 0) {
-                        if(response.count == 1) {
-                            var obj = response.data[0];
-                            if (obj.id === undefined) {
-                                failCallback(new DataException("Found data does not have any ID when searching objects with URL: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response.data)));
-                                return;
-                            } else {
-                                successCallback(modelClass.fromJSONObject(obj));
-                            }
-                        } else {
-                            failCallback(new DataException("More than one object was found: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response.data)));
-                        }
-                    } else {
-                        failCallback(new DataException("No object was found with URL: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response.data)));
-                    }
-                }
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to find an object with URL:"+urlSearchObject+".\nMessage : "+JSON.stringify(response)));
-            }
+			if(response === undefined || Object.keys(response).length == 0 || !(response instanceof Array) ) {
+				failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when searching an object with URL: "+urlSearchObject+"\nResponse data: "+JSON.stringify(response)));
+			} else {
+				if(response.length > 0) {
+					if(response.length == 1) {
+						var obj = response[0];
+						if (obj.id === undefined) {
+							failCallback(new DataException("Found data does not have any ID when searching objects with URL: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response)));
+							return;
+						} else {
+							successCallback(modelClass.fromJSONObject(obj));
+						}
+					} else {
+						failCallback(new DataException("More than one object was found: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response)));
+					}
+				} else {
+					failCallback(new DataException("No object was found with URL: " + urlSearchObject + "\nResponse data: " + JSON.stringify(response)));
+				}
+			}
         };
 
         var fail : Function = function(result) {
             failCallback(new RequestException("The request failed when trying to find an object with URL:"+urlSearchObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
         };
 
-        var urlSearchObject = DatabaseConnection.getBaseURL() + DatabaseConnection.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
+        var urlSearchObject = BackendConfig.getDBBaseURL() + BackendConfig.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
 
         RestClient.get(urlSearchObject, success, fail);
     }
@@ -335,23 +323,19 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                if(response.data === undefined || Object.keys(response.data).length == 0 || response.data.id === undefined) {
-                    failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when updating an object with URL: "+urlUpdate+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
-                } else {
-					self._updatedAt = response.data.updatedAt;
-                    successCallback();
-                }
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nMessage : "+JSON.stringify(response)), attemptNumber);
-            }
+			if(response === undefined || Object.keys(response).length == 0 || response.id === undefined) {
+				failCallback(new DataException("The response is a success but the data appears to be empty or does not have the right signature when updating an object with URL: "+urlUpdate+" and datas: "+JSON.stringify(data)+"\nResponse data: "+JSON.stringify(response)), attemptNumber);
+			} else {
+				self._updatedAt = response.updatedAt;
+				successCallback();
+			}
         };
 
         var fail : Function = function(result) {
             failCallback(new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-	    var urlUpdate = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), this.getId().toString());
+	    var urlUpdate = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(modelClass.getTableName(), this.getId().toString());
 	    //Logger.debug("[ModelItf] Update an object with the URL : "+urlUpdate+" and data : "+JSON.stringify(data));
 
         RestClient.put(urlUpdate, data, success, fail);
@@ -380,18 +364,14 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                successCallback();
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to delete an object with URL:"+urlDelete+".\nMessage : "+JSON.stringify(response)), attemptNumber);
-            }
+			successCallback();
         };
 
         var fail : Function = function(result) {
             failCallback(new RequestException("The request failed when trying to delete an object with URL:"+urlDelete+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-	    var urlDelete = DatabaseConnection.getBaseURL() + DatabaseConnection.objectEndpoint(modelClass.getTableName(), objectId.toString());
+	    var urlDelete = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(modelClass.getTableName(), objectId.toString());
 	    //Logger.debug("[ModelItf] Delete an object with the URL : "+urlDelete);
 
         RestClient.delete(urlDelete, success, fail);
@@ -415,35 +395,30 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                var allModelItfs : any = new Array();
-                if(response.data === undefined || response.count === undefined || !(response.data instanceof Array)) {
-                    failCallback(new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAll+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
-                } else {
-                    if(response.count > 0) {
-                        for (var i = 0; i < response.data.length; i++) {
-                            var obj = response.data[i];
-                            if (obj.id === undefined) {
-                                failCallback(new DataException("One data does not have any ID when retrieving all objects with URL: " + urlAll + "\nResponse data: " + JSON.stringify(response.data)), attemptNumber);
-                                return;
-                            } else {
-                                allModelItfs.push(modelClass.fromJSONObject(obj));
-                            }
-                        }
-                    }
-                    successCallback(allModelItfs);
-                }
-
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to retrieve all objects with URL:"+urlAll+".\nMessage : "+JSON.stringify(response)), attemptNumber);
-            }
+			var allModelItfs : any = new Array();
+			if(response === undefined || !(response instanceof Array)) {
+				failCallback(new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAll+"\nResponse data: "+JSON.stringify(response)), attemptNumber);
+			} else {
+				if(response.length > 0) {
+					for (var i = 0; i < response.length; i++) {
+						var obj = response[i];
+						if (obj.id === undefined) {
+							failCallback(new DataException("One data does not have any ID when retrieving all objects with URL: " + urlAll + "\nResponse: " + JSON.stringify(response)), attemptNumber);
+							return;
+						} else {
+							allModelItfs.push(modelClass.fromJSONObject(obj));
+						}
+					}
+				}
+				successCallback(allModelItfs);
+			}
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to retrieve all objects with URL:"+urlAll+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to retrieve all objects with URL:"+urlAll+".\nCode : "+result.statusCode()+"\nMessage : " + result.response()+"\nData : "+JSON.stringify(result.data())), attemptNumber);
         };
 
-		var urlAll = DatabaseConnection.getBaseURL() + DatabaseConnection.modelEndpoint(modelClass.getTableName());
+		var urlAll = BackendConfig.getDBBaseURL() + BackendConfig.modelEndpoint(modelClass.getTableName());
 
 		RestClient.get(urlAll, success, fail);
 	}
@@ -472,18 +447,14 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                successCallback();
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to associate objects with URL:"+associationURL+".\nMessage : "+JSON.stringify(response)), attemptNumber);
-            }
+			successCallback();
         };
 
         var fail : Function = function(result) {
             failCallback(new RequestException("The request failed when trying to associate objects with URL:"+associationURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-		var associationURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
+		var associationURL = BackendConfig.getDBBaseURL() + BackendConfig.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
 
 		RestClient.put(associationURL, {}, success, fail);
 	}
@@ -512,18 +483,14 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                successCallback();
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to delete an association between objects with URL:"+deleteAssoURL+".\nMessage : "+JSON.stringify(response)), attemptNumber);
-            }
+			successCallback();
         };
 
         var fail : Function = function(result) {
             failCallback(new RequestException("The request failed when trying to delete an association between objects with URL:"+deleteAssoURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-		var deleteAssoURL = DatabaseConnection.getBaseURL() + DatabaseConnection.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
+		var deleteAssoURL = BackendConfig.getDBBaseURL() + BackendConfig.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
 
 		RestClient.delete(deleteAssoURL, success, fail);
 	}
@@ -551,32 +518,28 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
-                if(response.data === undefined || !(response.data instanceof Array)) {
-                    failCallback(new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAssociatedObjects+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
-                } else {
-                    var assoName : Array<ModelItf> = new Array<ModelItf>();
-                    for(var i = 0; i < response.data.length; i++) {
-                        var object = response.data[i];
-                        if (object.id === undefined) {
-                            failCallback(new DataException("One data does not have any ID when retrieving all objects with URL: "+urlAssociatedObjects+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
-                            return;
-                        } else {
-                            assoName.push(modelClassAssociated.fromJSONObject(object));
-                        }
-                    }
-                    successCallback(assoName);
-                }
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to retrieve all objects with URL:"+urlAssociatedObjects+".\nMessage : "+JSON.stringify(response)), attemptNumber);
-            }
+			if(response === undefined || !(response instanceof Array)) {
+				failCallback(new DataException("The data appears to be empty or does not have the right signature when retrieving all objects with URL: "+urlAssociatedObjects+"\nResponse data: "+JSON.stringify(response)), attemptNumber);
+			} else {
+				var assoName : Array<ModelItf> = new Array<ModelItf>();
+				for(var i = 0; i < response.length; i++) {
+					var object = response[i];
+					if (object.id === undefined) {
+						failCallback(new DataException("One data does not have any ID when retrieving all objects with URL: "+urlAssociatedObjects+"\nResponse data: "+JSON.stringify(response)), attemptNumber);
+						return;
+					} else {
+						assoName.push(modelClassAssociated.fromJSONObject(object));
+					}
+				}
+				successCallback(assoName);
+			}
         };
 
         var fail : Function = function(result) {
             failCallback(new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-        var urlAssociatedObjects = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
+        var urlAssociatedObjects = BackendConfig.getDBBaseURL() + BackendConfig.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
 
         RestClient.get(urlAssociatedObjects, success, fail);
     }
@@ -604,28 +567,24 @@ class ModelItf {
 
         var success : Function = function(result) {
             var response = result.data();
-            if(response.status == "success") {
 
-                // in that case there is no data to retrieve
-                if ((response.data instanceof Array) && (response.data.length == 0)) {
-                    successCallback(null);
-                    return;
-                }
-                if(response.data === undefined || response.data.id === undefined) {
-                    failCallback(new DataException("The response is a success but the data does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response.data)), attemptNumber);
-                } else {
-                    successCallback(modelClassAssociated.fromJSONObject(response.data));
-                }
-            } else {
-                failCallback(new ResponseException("The request failed on the server when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nMessage : "+JSON.stringify(response)), attemptNumber);
-            }
+			// in that case there is no data to retrieve
+			if (((response instanceof Array) && (response.length == 0)) || JSON.stringify(response) == "{}") {
+				successCallback(null);
+				return;
+			}
+			if(response === undefined || response.id === undefined) {
+				failCallback(new DataException("The response is a success but the data does not have the right signature when retrieving a uniquely associated object with URL: "+urlUniqueAssociatedOject+"\nResponse data: "+JSON.stringify(response)), attemptNumber);
+			} else {
+				successCallback(modelClassAssociated.fromJSONObject(response));
+			}
         };
 
         var fail : Function = function(result) {
             failCallback(new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-        var urlUniqueAssociatedOject = DatabaseConnection.getBaseURL() + DatabaseConnection.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
+        var urlUniqueAssociatedOject = BackendConfig.getDBBaseURL() + BackendConfig.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
 
         RestClient.get(urlUniqueAssociatedOject, success, fail);
     }
@@ -735,6 +694,7 @@ class ModelItf {
      */
     create(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - create : Method need to be implemented.");
+        this.createObject(ModelItf, this.toJSONObject(), successCallback, failCallback);
     }
 
     /**
@@ -761,6 +721,10 @@ class ModelItf {
      */
     update(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         Logger.error("ModelItf - update : Method need to be implemented.");
+	    // for tests
+	    if (successCallback != null) {
+		    successCallback();
+	    }
     }
 
     /**
@@ -851,7 +815,7 @@ class ModelItf {
 	 * @method toJSONObject
 	 * @returns {Object} a JSON Object representing the instance
 	 */
-	toJSONObject() : Object {
+	toJSONObject() : any {
 		var data = {
 			"id": this.getId(),
 			"complete": this.isComplete(),
@@ -909,6 +873,48 @@ class ModelItf {
         Logger.warn("ModelItf - fromJSONObject : Method need to be implemented.");
         var model = new ModelItf(jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt); // for passing the tests with modelItf
 	    return model;
+    }
+
+    cloneObject(modelClass : any, successCallbackModelItf : Function, failCallback : Function) {
+	    Logger.debug("Clone de modelITF avec "+this.getId());
+        if (!modelClass) {
+            failCallback(new ModelException("The modelClasse argument must be given to clone the object."));
+            return;
+        }
+
+	    if (!this.isComplete()) {
+		    Logger.error("Error when cloning with object: "+JSON.stringify(this));
+		    failCallback(new ModelException("The model must be complete in order to be cloned. ModelClass : "+modelClass.getTableName()));
+		    return;
+	    }
+
+	    var self = this;
+        var jsonInfo : any = this.toJSONObject();
+        jsonInfo.id = null;
+	    jsonInfo.complete = false;
+        var clone = modelClass.fromJSONObject(jsonInfo);
+
+	    var successUpdateModelItf = function () {
+		    Logger.debug("Success update model itf ! "+self.getId());
+		    successCallbackModelItf(clone);
+	    };
+
+	    var successCheckCompletenessModelItf = function () {
+		    Logger.debug("Success check completeness model itf ! "+self.getId());
+
+		    if (clone.isComplete()) {
+			    clone.update(successUpdateModelItf, failCallback);
+		    } else {
+			    successUpdateModelItf();
+		    }
+	    };
+
+	    var successCreateModelItf = function (data : any) {
+		    Logger.debug("Success create model itf ! "+self.getId());
+		    clone.checkCompleteness(successCheckCompletenessModelItf, failCallback);
+	    };
+
+        clone.create(successCreateModelItf, failCallback);
     }
 
     /**

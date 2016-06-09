@@ -1,9 +1,13 @@
 /**
- * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Christian Brel <christian@pulsetotem.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@pulsetotem.fr>
  */
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
+/// <reference path="../../t6s-core/core-backend/scripts/stats/StatObject.ts" />
 
+/// <reference path="../core/StatsClient.ts" />
+/// <reference path="../core/OnlineClient.ts" />
 /// <reference path="./ShareNamespaceManager.ts" />
 
 /// <reference path="../model/Profil.ts" />
@@ -14,6 +18,10 @@
 /// <reference path="../model/CallType.ts" />
 
 class ClientsNamespaceManager extends ShareNamespaceManager {
+
+	static onlineClients : Array<OnlineClient> = [];
+
+	private _client : OnlineClient = null;
 
     /**
      * Constructor.
@@ -26,16 +34,70 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
         var self = this;
 
-        this.addListenerToSocket('RetrieveProfilDescription', function(description) { self.sendProfilDescription(description); });
-        this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendUserDescription(description); });
-        this.addListenerToSocket('RetrieveSDIDescription', function(description) { self.sendSDIDescription(description); });
-        this.addListenerToSocket('RetrieveZoneDescription', function(description) { self.sendZoneDescription(description); });
-        this.addListenerToSocket('RetrieveCallDescription', function(description) { self.sendCallDescription(description); });
-        this.addListenerToSocket('RetrieveCallTypeDescription', function(description) { self.sendCallTypeDescription(description); });
-
-
 		this.addListenerToSocket('HashDescription', function(description) { self.manageHashDescription(description); });
+
+	    this.createClient();
     }
+
+	private pushStat(status: string) : void {
+		var result : StatObject = new StatObject();
+
+		result.setCollection("clients");
+		result.setIp(this._client.getIP());
+		result.setSocketId(this.socket.id);
+
+		result.setProfilId(this._client.getProfilId());
+		result.setSDIId(this._client.getSDIId());
+		result.setHash(this._client.getHash());
+
+		var data = {};
+		data["status"] = status;
+		result.setData(data);
+
+		StatsClient.pushStats(result);
+	}
+
+
+	private createClient() {
+		var self = this;
+		var ip : string = this.getIP();
+		var socketId : string = this.socket.id;
+
+		this._client = new OnlineClient();
+		this._client.setIp(ip);
+		this._client.setSocketId(socketId);
+
+		ClientsNamespaceManager.onlineClients.push(this._client);
+
+		self.pushStat("Connection");
+	}
+
+	public static getClientsForProfil(profilId : number) : Array<Object> {
+		var clients = ClientsNamespaceManager.onlineClients.filter(function (client : OnlineClient) {
+			return (client.getProfilId() == profilId.toString());
+		});
+
+		var result = [];
+		for (var i = 0; i < clients.length; i++) {
+			result.push(clients[i].toJSON());
+		}
+		return result;
+	}
+
+	public onDisconnection() {
+		var self = this;
+
+		self.pushStat("Disconnection");
+
+		if (this._client != null) {
+			for (var i = 0; i < ClientsNamespaceManager.onlineClients.length; i++) {
+				var client = ClientsNamespaceManager.onlineClients[i];
+				if (client.getSocketId() == this._client.getSocketId()) {
+					delete ClientsNamespaceManager.onlineClients[i];
+				}
+			}
+		}
+	}
 
 
 ////////////////////// Begin: Manage HashDescription //////////////////////
@@ -53,12 +115,11 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		var hash = hashDescription.hash;
 
-		//TODO : Manage Hash
-		var sdiId = 1;
-		var profilId = hash;
+		this._client.setHashValue(hash);
 
 		var fail = function (err) {
-			Logger.debug("SocketId: " + self.socket.id + " - manageHashDescription : send done with fail status for Profil with Id : " + profilId + " : "+err);
+			Logger.debug("SocketId: " + self.socket.id + " - manageHashDescription : send done with fail status for Profil with Hash : " + hash + " : "+err);
+			Logger.debug(err);
 			self.socket.emit("SDIDescription", self.formatResponse(false, err));
 		};
 
@@ -107,6 +168,8 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 									if (nbZones == zones.length) {
 										self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
+										self._client.setSDIid(sdi.getId());
+										self.pushStat("Send SDI Description");
 									}
 								}
 							};
@@ -135,201 +198,169 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 			var zoneContents : Array<ZoneContent> = profil.zoneContents();
 			var nbZC = 0;
 
-			zoneContents.forEach(function (zoneContent) {
-				var zcDesc = zoneContent.toJSONObject();
+			if(zoneContents.length > 0) {
+
+				zoneContents.forEach(function (zoneContent) {
+					var zcDesc = zoneContent.toJSONObject();
 
 
-				var successZCLoadAsso = function () {
-					zcDesc["zone"] = zoneContent.zone().toJSONObject();
-					zcDesc["widget"] = null;
-					zcDesc["absoluteTimeline"] = null;
+					var successZCLoadAsso = function () {
+						zcDesc["zone"] = zoneContent.zone().toJSONObject();
+						zcDesc["widget"] = null;
+						zcDesc["absoluteTimeline"] = null;
 
-					var relativeTL : RelativeTimeline = zoneContent.relativeTimeline();
+						var relativeTL:RelativeTimeline = zoneContent.relativeTimeline();
 
-					zcDesc["relativeTimeline"] = relativeTL.toJSONObject();
-					zcDesc["relativeTimeline"]["relativeEvents"] = [];
+						zcDesc["relativeTimeline"] = relativeTL.toJSONObject();
+						zcDesc["relativeTimeline"]["relativeEvents"] = [];
 
-					var successRelativeTLLoadAsso = function () {
-						zcDesc["relativeTimeline"]["timelineRunner"] = relativeTL.timelineRunner().toJSONObject();
-						zcDesc["relativeTimeline"]["systemTrigger"] = relativeTL.systemTrigger().toJSONObject();
-						zcDesc["relativeTimeline"]["userTrigger"] = relativeTL.userTrigger().toJSONObject();
+						var successRelativeTLLoadAsso = function () {
+							zcDesc["relativeTimeline"]["timelineRunner"] = relativeTL.timelineRunner().toJSONObject();
+							zcDesc["relativeTimeline"]["systemTrigger"] = relativeTL.systemTrigger().toJSONObject();
+							zcDesc["relativeTimeline"]["userTrigger"] = relativeTL.userTrigger().toJSONObject();
 
-						var relativeEvents : Array<RelativeEvent> = relativeTL.relativeEvents();
+							var relativeEvents:Array<RelativeEvent> = relativeTL.relativeEvents();
 
-						var nbRelEv = 0;
-						relativeEvents.forEach(function (relativeEvent) {
+							var nbRelEv = 0;
 
-							var relEvDesc = relativeEvent.toJSONObject();
+							if (relativeEvents.length > 0) {
 
-							var successRelativeEventLoadAsso = function () {
-								var call : Call = relativeEvent.call();
+								relativeEvents.forEach(function (relativeEvent) {
 
-								var callDesc = call.toJSONObject();
+									var relEvDesc = relativeEvent.toJSONObject();
 
-								var successCallLoadAsso = function () {
-									callDesc["callType"] = {
-										"id": call.callType().getId()
+									var successRelativeEventLoadAsso = function () {
+										var call:Call = relativeEvent.call();
+
+										var callDesc = call.toJSONObject();
+
+										var successCallLoadAsso = function () {
+											callDesc["rendererTheme"] = (call.rendererTheme() !== null) ? call.rendererTheme().toJSONObject() : null;
+
+											var successCallTypeLoadAsso = function () {
+												callDesc["callType"] = {
+													"id": call.callType().getId()
+												};
+
+												if (call.callType().source().isStatic()) {
+													callDesc["paramValues"] = [];
+
+													if (call.paramValues().length > 0) {
+														var successParamValueComplete = function (paramValueComplete) {
+															callDesc["paramValues"].push(paramValueComplete);
+
+															if (callDesc["paramValues"].length == call.paramValues().length) {
+
+																relEvDesc["call"] = callDesc;
+																zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+																nbRelEv++;
+
+																if (nbRelEv == relativeEvents.length) {
+																	profilDesc["zoneContents"].push(zcDesc);
+																	nbZC++;
+
+																	if (nbZC == zoneContents.length) {
+																		self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+
+																		self.pushStat("Send Profil description");
+																	}
+																}
+															}
+														};
+
+														call.paramValues().forEach(function (paramValue:ParamValue) {
+															paramValue.toCompleteJSONObject(successParamValueComplete, fail);
+														});
+													} else {
+														relEvDesc["call"] = callDesc;
+														zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+														nbRelEv++;
+
+														if (nbRelEv == relativeEvents.length) {
+															profilDesc["zoneContents"].push(zcDesc);
+															nbZC++;
+
+															if (nbZC == zoneContents.length) {
+																self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+																self.pushStat("Send Profil description");
+															}
+														}
+													}
+												} else {
+													relEvDesc["call"] = callDesc;
+													zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
+													nbRelEv++;
+
+													if (nbRelEv == relativeEvents.length) {
+														profilDesc["zoneContents"].push(zcDesc);
+														nbZC++;
+
+														if (nbZC == zoneContents.length) {
+															self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
+															self.pushStat("Send Profil description");
+														}
+													}
+												}
+											};
+
+											call.callType().loadAssociations(successCallTypeLoadAsso, fail);
+										};
+
+										call.loadAssociations(successCallLoadAsso, fail);
 									};
 
-									relEvDesc["call"] = callDesc;
-									zcDesc["relativeTimeline"]["relativeEvents"].push(relEvDesc);
-									nbRelEv++;
-
-									if (nbRelEv == relativeEvents.length) {
-										profilDesc["zoneContents"].push(zcDesc);
-										nbZC++;
-
-										if (nbZC == zoneContents.length) {
-											self.socket.emit("ProfilDescription", self.formatResponse(true, profilDesc));
-										}
-									}
-								};
-
-								call.loadAssociations(successCallLoadAsso, fail);
+									relativeEvent.loadAssociations(successRelativeEventLoadAsso, fail);
+								});
+							} else {
+								fail(new Error("RelativeTimeline have NO events !"));
 							}
+						};
 
-							relativeEvent.loadAssociations(successRelativeEventLoadAsso, fail);
-						});
+						relativeTL.loadAssociations(successRelativeTLLoadAsso, fail);
 					};
 
-					relativeTL.loadAssociations(successRelativeTLLoadAsso, fail);
-				};
-
-				zoneContent.loadAssociations(successZCLoadAsso, fail);
-			});
+					zoneContent.loadAssociations(successZCLoadAsso, fail);
+				});
+			} else {
+				fail(new Error("Profil has NO ZoneContent !"));
+			}
 		};
 
 		var successReadProfil = function (pro : Profil) {
 			profil = pro;
-
+			self._client.setProfilId(pro.getId());
 			profil.loadAssociations(successLoadAssoProfil, fail);
 		};
 
-		Profil.read(profilId, successReadProfil, fail);
+		//Profil.read(hash, successReadProfil, fail);
 
+		Profil.findOneByHash(hash, successReadProfil, fail);
 	}
 
 ////////////////////// End: Manage HashDescription //////////////////////
 
-////////////////////// Begin: Manage SendProfilDescription //////////////////////
+	/**
+	 * Send command to refresh the client
+	 */
+	refreshClient() {
+		// callTypeDescription : {"callTypeId" : string}
+		var self = this;
 
-    /**
-     * Retrieve Profil instance description and send it to client.
-     *
-     * @method sendProfilDescription
-     * @param {any} profilDescription - The Profil Description.
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
-    sendProfilDescription(profilDescription : any, self : ClientsNamespaceManager = null) {
-        // profilDescription : {"profilId" : string}
-        var self = this;
+		self.socket.emit("RefreshClient", self.formatResponse(true, ""));
+		self.pushStat("Refresh client");
+	}
 
-        var profilId = profilDescription.profilId;
+	/**
+	 * Send command to identify the client
+	 */
+	identifyClient(clientId : string) {
+		// callTypeDescription : {"callTypeId" : string}
+		var self = this;
 
-        self.sendObjectDescriptionFromId(Profil, profilId, "ProfilDescription");
-    }
+		self.socket.emit("IdentifyClient", self.formatResponse(true, clientId.toString()));
+		self.pushStat("Identify client");
+	}
 
-////////////////////// End: Manage SendProfilDescription //////////////////////
-
-////////////////////// Begin: Manage SendUserDescription //////////////////////
-
-    /**
-     * Retrieve User instance description and send it to client.
-     *
-     * @method sendUserDescription
-     * @param {any} userDescription - The User Description.
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
-    sendUserDescription(userDescription : any, self : ClientsNamespaceManager = null) {
-        // userDescription : {"userId" : string}
-        var self = this;
-
-        var userId = userDescription.userId;
-
-        self.sendObjectDescriptionFromId(User, userId, "UserDescription");
-    }
-
-////////////////////// End: Manage SendUserDescription //////////////////////
-
-////////////////////// Begin: Manage SendSDIDescription //////////////////////
-
-    /**
-     * Retrieve SDI instance description and send it to client.
-     *
-     * @method sendSDIDescription
-     * @param {any} sdiDescription - The SDI Description.
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
-    sendSDIDescription(sdiDescription : any, self : ClientsNamespaceManager = null) {
-        // sdiDescription : {"sdiId" : string}
-        var self = this;
-
-        var sdiId = sdiDescription.sdiId;
-
-        self.sendObjectDescriptionFromId(SDI, sdiId, "SDIDescription");
-    }
-
-////////////////////// End: Manage SendSDIDescription //////////////////////
-
-////////////////////// Begin: Manage SendZoneDescription //////////////////////
-
-    /**
-     * Retrieve Zone instance description and send it to client.
-     *
-     * @method sendZoneDescription
-     * @param {any} zoneDescription - The Zone Description.
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
-    sendZoneDescription(zoneDescription : any, self : ClientsNamespaceManager = null) {
-        // zoneDescription : {"zoneId" : string}
-        var self = this;
-
-        var zoneId = zoneDescription.zoneId;
-
-        self.sendObjectDescriptionFromId(Zone, zoneId, "ZoneDescription");
-    }
-
-////////////////////// End: Manage SendZoneDescription //////////////////////
-
-////////////////////// Begin: Manage SendCallDescription //////////////////////
-
-    /**
-     * Retrieve Call instance description and send it to client.
-     *
-     * @method sendCallDescription
-     * @param {any} callDescription - The Call Description.
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
-    sendCallDescription(callDescription : any, self : ClientsNamespaceManager = null) {
-        // callDescription : {"callId" : string}
-        var self = this;
-
-        var callId = callDescription.callId;
-
-        self.sendObjectDescriptionFromId(Call, callId, "CallDescription");
-    }
-
-////////////////////// End: Manage SendCallDescription //////////////////////
-
-////////////////////// Begin: Manage SendCallTypeDescription //////////////////////
-
-    /**
-     * Retrieve CallType instance description and send it to client.
-     *
-     * @method sendCallTypeDescription
-     * @param {any} callTypeDescription - The CallType Description
-     * @param {ClientsNamespaceManager} self - The ClientsNamespaceManager instance.
-     */
-    sendCallTypeDescription(callTypeDescription : any, self : ClientsNamespaceManager = null) {
-        // callTypeDescription : {"callTypeId" : string}
-        var self = this;
-
-        var callTypeId = callTypeDescription.callTypeId;
-
-        self.sendObjectDescriptionFromId(CallType, callTypeId, "CallTypeDescription");
-    }
-
-////////////////////// End: Manage SendCallTypeDescription //////////////////////
 
 
 

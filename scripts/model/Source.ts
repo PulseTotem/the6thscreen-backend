@@ -7,6 +7,7 @@
 /// <reference path="./ParamType.ts" />
 /// <reference path="./ParamValue.ts" />
 /// <reference path="./Service.ts" />
+/// <reference path="./CallType.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -35,12 +36,28 @@ class Source extends ModelItf {
     private _description : string;
 
 	/**
-	 * Methode property.
+	 * Method property.
 	 *
 	 * @property _method
 	 * @type string
 	 */
 	private _method : string;
+
+	/**
+	 * RefreshTime property.
+	 *
+	 * @property _refreshTime
+	 * @type number
+	 */
+	private _refreshTime : number;
+
+    /**
+     * IsStatic property.
+     *
+     * @property _isStatic
+     * @type boolean
+     */
+    private _isStatic : boolean;
 
 	/**
 	 * Service property
@@ -107,24 +124,41 @@ class Source extends ModelItf {
     private _param_values_loaded : boolean;
 
     /**
+     * CallTypes property
+     *
+     * @property _call_types
+     * @type Array<CallType>
+     */
+    private _call_types : Array<CallType>;
+
+    /**
+     * Lazy loading for CallType property
+     *
+     * @property _call_types_loaded
+     * @type boolean
+     */
+    private _call_types_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
      * @param {string} name - The Source's name.
-     * @param {string} service - The Source's service.
      * @param {string} description - The Source's description.
-     * @param {string} host - The Source's host.
-     * @param {number} port - The Source's port.
-     * @param {number} id - The Source's ID.
+	 * @param {string} method - The Source's method.
+	 * @param {number} id - The Source's ID.
+     * @param {number} refreshTime - The Source's refreshTime.
 	 * @param {string} createdAt - The Source's createdAt.
 	 * @param {string} updatedAt - The Source's updatedAt.
      */
-    constructor(name : string = "", description : string = "", method : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", description : string = "", method : string = "", refreshTime : number = 60, isStatic : boolean = false, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
 	    this.setDescription(description);
 	    this.setMethod(method);
+		this.setRefreshTime(refreshTime);
+        this.setIsStatic(isStatic);
 
 	    this._service = null;
 	    this._service_loaded = false;
@@ -137,6 +171,9 @@ class Source extends ModelItf {
 
         this._param_values = new Array<ParamValue>();
         this._param_values_loaded = false;
+
+        this._call_types = new Array<CallType>();
+        this._call_types_loaded = false;
     }
 
 	/**
@@ -167,6 +204,26 @@ class Source extends ModelItf {
 	}
 
 	/**
+	 * Set the Source's refreshTime.
+	 *
+	 * @method setRefreshTime
+	 * @param {number} refreshTime - New Source's refreshTime.
+	 */
+	setRefreshTime(refreshTime : number) {
+		this._refreshTime = refreshTime;
+	}
+
+    /**
+     * Set the Source's isStatic property
+     *
+     * @method setIsStatic
+     * @param isStatic
+     */
+    setIsStatic(isStatic : boolean) {
+        this._isStatic = isStatic;
+    }
+
+	/**
      * Return the Source's name.
      *
      * @method name
@@ -194,6 +251,15 @@ class Source extends ModelItf {
 	}
 
 	/**
+	 * Return the Source's refreshTime.
+	 *
+	 * @method refreshTime
+	 */
+	refreshTime() {
+		return this._refreshTime;
+	}
+
+	/**
 	 * Return the Source's service.
 	 *
 	 * @method service
@@ -201,6 +267,15 @@ class Source extends ModelItf {
 	service() {
 		return this._service;
 	}
+
+    /**
+     * Return the source's isStatic property
+     *
+     * @returns {boolean}
+     */
+    isStatic() {
+        return this._isStatic;
+    }
 
 	/**
 	 * Load the Source's service.
@@ -361,6 +436,46 @@ class Source extends ModelItf {
         }
     }
 
+    /**
+     * Return the Source's callTypes
+     *
+     * @method callTypes
+     * @returns {Array<CallType>}
+     */
+    callTypes() {
+        return this._call_types;
+    }
+
+    /**
+     * Load the source's callTypes
+     * @param successCallback
+     * @param failCallback
+     */
+    loadCallTypes(successCallback : Function, failCallback : Function) {
+        if(! this._call_types_loaded) {
+            var self = this;
+            var success : Function = function(callTypes) {
+                self._call_types = callTypes;
+                self._call_types_loaded = true;
+                if(successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail : Function = function(error) {
+                if(failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getAssociatedObjects(Source, CallType, success, fail);
+        } else {
+            if(successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -421,6 +536,8 @@ class Source extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"method": this.method(),
+            "isStatic": this.isStatic(),
+			"refreshTime": this.refreshTime(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
 			"updatedAt" : this.getUpdatedAt()
@@ -440,11 +557,15 @@ class Source extends ModelItf {
 		var self = this;
 
 		var success : Function = function () {
-			if (self.isComplete() && !!self.name() && !!self.method()) {
+			if (self.isComplete() && !!self.name()) {
 
 				var success:Function = function () {
 					if (self._info_type_loaded && self._service_loaded) {
-						self._complete = (!!self.infoType() && self.infoType().isComplete() && !!self.service() && self.service().isComplete());
+						self._complete = (!!self.infoType() && self.infoType().isComplete()) ;
+                        if (!self.isStatic()) {
+                           self._complete = self._complete && !!self.service() && self.service().isComplete() && !!self.method();
+                        }
+
 						successCallback();
 					}
 				};
@@ -453,8 +574,16 @@ class Source extends ModelItf {
 					failCallback(error);
 				};
 
-				self.loadInfoType(success, fail);
-				self.loadService(success, fail);
+                if (self._info_type_loaded && self._service_loaded) {
+                    success();
+                }
+
+                if (!self._info_type_loaded) {
+                    self.loadInfoType(success, fail);
+                }
+				if (!self._service_loaded) {
+                    self.loadService(success, fail);
+                }
 			} else {
 				self._complete = false;
 				successCallback();
@@ -570,7 +699,69 @@ class Source extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	removeParamType(paramID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(Source, ParamType, paramID, successCallback, failCallback);
+        var self = this;
+
+        var fail : Function = function (error) {
+            failCallback(error);
+        };
+
+        var successLoadCT : Function = function () {
+            var ctCount = 0;
+            var callTypes : Array<CallType> = self.callTypes();
+
+            if (callTypes.length == 0) {
+                self.deleteObjectAssociation(Source, ParamType, paramID, successCallback, failCallback);
+            }
+
+            callTypes.forEach(function (ct) {
+                var successLoadCall : Function = function() {
+                    var callCount = 0;
+                    var calls : Array<Call> = ct.calls();
+
+                    if (calls.length == 0) {
+                        self.deleteObjectAssociation(Source, ParamType, paramID, successCallback, failCallback);
+                    }
+
+                    calls.forEach(function (call) {
+                        var successLoadParamValues : Function = function () {
+                            var pvCount = 0;
+                            var params : Array<ParamValue> = call.paramValues();
+
+                            params.forEach(function (param) {
+
+                                var successLoadPT : Function = function () {
+                                    if (param.paramType().getId() === paramID) {
+                                        var successDelete:Function = function () {
+                                            Logger.debug("Delete successfully obsolete ParamValue");
+                                        };
+                                        param.delete(successDelete, fail);
+                                    }
+                                    pvCount++;
+
+                                    if (pvCount == params.length) {
+                                        callCount++;
+                                        if (callCount == calls.length) {
+                                            ctCount++;
+                                            if (ctCount == callTypes.length) {
+                                                self.deleteObjectAssociation(Source, ParamType, paramID, successCallback, failCallback);
+                                            }
+                                        }
+                                    }
+                                };
+
+                                param.loadParamType(successLoadPT, fail);
+                            });
+
+                        };
+
+                        call.loadParamValues(successLoadParamValues, fail);
+                    });
+                };
+
+                ct.loadCalls(successLoadCall, fail);
+            });
+        };
+        this.loadCallTypes(successLoadCT, fail);
 	}
 
     /**
@@ -682,7 +873,7 @@ class Source extends ModelItf {
 	 * @return {Source} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Source {
-		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new Source(jsonObject.name, jsonObject.description, jsonObject.method, jsonObject.refreshTime, jsonObject.isStatic, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
     /**

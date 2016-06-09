@@ -54,6 +54,22 @@ class RelativeEvent extends ModelItf {
      */
     private _call_loaded : boolean;
 
+    /**
+     * The origine relativeEvent if the current object is a clone
+     *
+     * @property _origineRelativeEvent
+     * @type RelativeEvent
+     */
+    private _origineRelativeEvent : RelativeEvent;
+
+    /**
+     * Lazy loading for the origineRelativeEvent property
+     *
+     * @property _origineRelativeEvent_loaded
+     * @type boolean
+     */
+    private _origineRelativeEvent_loaded : boolean;
+
 
     /**
      * Constructor.
@@ -73,6 +89,9 @@ class RelativeEvent extends ModelItf {
 
         this._call = null;
         this._call_loaded = false;
+
+        this._origineRelativeEvent = null;
+        this._origineRelativeEvent_loaded = false;
     }
 
 	/**
@@ -172,6 +191,50 @@ class RelativeEvent extends ModelItf {
         }
     }
 
+    /**
+     * Return the original relativeEvent if the current object is a clone
+     *
+     * @method origineRelativeEvent
+     * @returns {RelativeEvent}
+     */
+    origineRelativeEvent() {
+        return this._origineRelativeEvent;
+    }
+
+    /**
+     * Load the origine relativeEvent attribute
+     *
+     * @method loadOrigineRelativeEvent
+     * @param successCallback
+     * @param failCallback
+     */
+    loadOrigineRelativeEvent(successCallback : Function, failCallback : Function) {
+        if (! this._origineRelativeEvent_loaded) {
+            var self = this;
+
+            var successLoad = function (origineRelativeEvent) {
+                self._origineRelativeEvent = origineRelativeEvent;
+                self._origineRelativeEvent_loaded = true;
+
+                if (successCallback != null) {
+                    successCallback();
+                }
+            };
+
+            var fail = function (error) {
+                if (failCallback != null) {
+                    failCallback(error);
+                }
+            };
+
+            this.getUniquelyAssociatedObject(RelativeEvent, RelativeEvent, successLoad, fail);
+        } else {
+            if (successCallback != null) {
+                successCallback();
+            }
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -211,6 +274,7 @@ class RelativeEvent extends ModelItf {
      */
     desynchronize() : void {
         this._call_loaded = false;
+        this._origineRelativeEvent_loaded = false;
     }
 
 
@@ -243,7 +307,7 @@ class RelativeEvent extends ModelItf {
 
 		var success : Function = function () {
             if (self.isComplete() && !!self.name()) {
-                var success:Function = function () {
+                var successLoad:Function = function () {
                     if (self._call_loaded) {
                         self._complete = (!!self.call() && self.call().isComplete());
                         successCallback();
@@ -254,7 +318,12 @@ class RelativeEvent extends ModelItf {
                     failCallback(error);
                 };
 
-                self.loadCall(success, fail);
+                if (self._call_loaded) {
+                    successLoad();
+                } else {
+                    self.loadCall(successLoad, fail);
+                }
+
             } else {
                 self._complete = false;
                 successCallback();
@@ -316,6 +385,30 @@ class RelativeEvent extends ModelItf {
      */
     unlinkCall(sourceID : number, successCallback : Function, failCallback : Function) {
         this.deleteObjectAssociation(RelativeEvent, Call, sourceID, successCallback, failCallback);
+    }
+
+    /**
+     * Set the origine relativeEvent if the current object is a clone
+     *
+     * @method linkOrigineRelativeEvent
+     * @param relativeEventId
+     * @param successCallback
+     * @param failCallback
+     */
+    linkOrigineRelativeEvent(relativeEventId : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(RelativeEvent, RelativeEvent, relativeEventId, successCallback, failCallback);
+    }
+
+    /**
+     * Unset the origine relativeEvent attribute
+     *
+     * @method unlinkOrigineRelativeEvent
+     * @param relativeEventId
+     * @param successCallback
+     * @param failCallback
+     */
+    unlinkOrigineRelativeEvent(relativeEventId : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(RelativeEvent, RelativeEvent, relativeEventId, successCallback, failCallback);
     }
 
     /**
@@ -417,6 +510,63 @@ class RelativeEvent extends ModelItf {
 	static fromJSONObject(jsonObject : any) : RelativeEvent {
 		return new RelativeEvent(jsonObject.name, jsonObject.position, jsonObject.duration, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
+
+    /**
+     * Clone a RelativeEvent: it clones RelativeEvent information, cloning the Call.
+     *
+     * @method clone
+     * @param modelClass
+     * @param successCallback
+     * @param failCallback
+     */
+    clone(successCallback : Function, failCallback : Function, profilInfo : any) {
+        Logger.debug("Start cloning RelativeEvent with id "+this.getId());
+        var self = this;
+
+        var successCloneRelativeEvent = function (clonedRelativeEvent : RelativeEvent) {
+            Logger.debug("Obtained clonedRelativeEvent :"+JSON.stringify(clonedRelativeEvent));
+
+            var successLinkOrigine = function () {
+                Logger.debug("Success link relativeEvent to origine");
+                clonedRelativeEvent._origineRelativeEvent = self;
+                clonedRelativeEvent._origineRelativeEvent_loaded = true;
+
+                var completeRelativeEvent = clonedRelativeEvent.isComplete();
+
+                var successLoadAsso = function () {
+                    var successCloneCall = function (clonedCall:Call) {
+                        var successLinkCall = function () {
+
+                            var successCheckCompleteness = function () {
+                                if (clonedRelativeEvent.isComplete() != completeRelativeEvent) {
+
+                                    var successUpdate = function () {
+                                        successCallback(clonedRelativeEvent);
+                                    };
+
+                                    clonedRelativeEvent.update(successUpdate, failCallback);
+                                } else {
+                                    successCallback(clonedRelativeEvent);
+                                }
+                            };
+                            clonedRelativeEvent.desynchronize();
+                            clonedRelativeEvent.checkCompleteness(successCheckCompleteness, failCallback);
+
+                        };
+
+                        clonedRelativeEvent.linkCall(clonedCall.getId(), successLinkCall, failCallback);
+                    };
+
+                    self.call().clone(successCloneCall, failCallback, profilInfo);
+                };
+
+                self.loadAssociations(successLoadAsso, failCallback);
+            };
+            clonedRelativeEvent.linkOrigineRelativeEvent(self.getId(), successLinkOrigine, failCallback);
+        };
+
+        super.cloneObject(RelativeEvent, successCloneRelativeEvent, failCallback);
+    }
 
     /**
      * Retrieve DataBase Table Name.

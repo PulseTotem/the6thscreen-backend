@@ -5,13 +5,17 @@
 /// <reference path="../../libsdef/mocha.d.ts" />
 /// <reference path="../../libsdef/nock.d.ts" />
 
-/// <reference path="../../scripts/core/DatabaseConnection.ts" />
+/// <reference path="../../scripts/core/BackendConfig.ts" />
 /// <reference path="../../scripts/model/ModelItf.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");
 
 describe('ModelItf', function() {
+    beforeEach(function() {
+        nock.cleanAll();
+    });
+
 	describe('#constructor(id)', function() {
 		it('should store the given id', function() {
 			var id = 12;
@@ -94,14 +98,16 @@ describe('ModelItf', function() {
 			var modelName = ModelItf;
 			var jsonParam = model.toJSONObject();
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": model.toJSONObject()
-			};
-			response.data['id'] = 42;
+			var response : any = model.toJSONObject();
+			response['id'] = 42;
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), model.toJSONObject())
+			var realParams : any = model.toJSONObject();
+			delete(realParams["id"]);
+			delete(realParams["createdAt"]);
+			delete(realParams["updatedAt"]);
+
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -191,8 +197,13 @@ describe('ModelItf', function() {
 			var modelName = ModelItf;
 			var jsonParam = model.toJSONObject();
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-			 .post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), model.toJSONObject())
+			var realParams : any = model.toJSONObject();
+			delete(realParams["id"]);
+			delete(realParams["createdAt"]);
+			delete(realParams["updatedAt"]);
+
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+			 .post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
 			 .reply(500, JSON.stringify('Server error'));
 
 
@@ -206,46 +217,13 @@ describe('ModelItf', function() {
                             throw err;
                         }
                     },
-                    ResponseException, "The ResponseException has not been thrown");
+                    RequestException, "The RequestException has not been thrown");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
 
             model.createObject(modelName, jsonParam, success, fail);
 
-		});
-
-		it('should throw an error if the request failed on the server', function(done) {
-			var model = new ModelItf(null);
-
-			var modelName = ModelItf;
-			var jsonParam = model.toJSONObject();
-
-			var response : SequelizeRestfulResponse = {
-				"status": "error",
-				"data": {}
-			};
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), model.toJSONObject())
-				.reply(200, JSON.stringify(response));
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ResponseException, "The ResponseException has not been thrown");
-                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-                done();
-            };
-
-            model.createObject(modelName, jsonParam, success, fail);
 		});
 
 		it('should throw an error if the request succeed but the data field is missing on the response', function(done) {
@@ -258,8 +236,13 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), model.toJSONObject())
+			var realParams : any = model.toJSONObject();
+			delete(realParams["id"]);
+			delete(realParams["createdAt"]);
+			delete(realParams["updatedAt"]);
+
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -291,8 +274,13 @@ describe('ModelItf', function() {
 				"data": {}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), model.toJSONObject())
+			var realParams : any = model.toJSONObject();
+			delete(realParams["id"]);
+			delete(realParams["createdAt"]);
+			delete(realParams["updatedAt"]);
+
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -319,7 +307,7 @@ describe('ModelItf', function() {
 			var modelName = ModelItf;
 			var jsonParam = model.toJSONObject();
 
-			var response : SequelizeRestfulResponse = {
+			var response : any = {
 				"status": "success",
 				"data": {
 					"bidule": "blabla",
@@ -327,8 +315,13 @@ describe('ModelItf', function() {
 				}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.post(DatabaseConnection.modelEndpoint(ModelItf.getTableName()), model.toJSONObject())
+			var realParams : any = model.toJSONObject();
+			delete(realParams["id"]);
+			delete(realParams["createdAt"]);
+			delete(realParams["updatedAt"]);
+
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -357,13 +350,10 @@ describe('ModelItf', function() {
 
 			var modelName = ModelItf;
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {"id": 42, "complete": false}
-			};
+			var response : any = {"id": 42, "complete": false}
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(ModelItf.getTableName(),id.toString()))
 				.reply(200, JSON.stringify(response));
 
             var success = function(model2) {
@@ -444,8 +434,8 @@ describe('ModelItf', function() {
 		it('should throw an error if the request failed', function(done) {
 			var id = 42;
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(ModelItf.getTableName(),id.toString()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -458,36 +448,7 @@ describe('ModelItf', function() {
                             throw err;
                         }
                     },
-                    ResponseException, "The ResponseException has not been thrown.");
-                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-                done();
-            };
-
-            ModelItf.readObject(ModelItf, id, success, fail);
-		});
-
-		it('should throw an error if the request failed on the server', function(done) {
-			var id = 42;
-			var response : SequelizeRestfulResponse = {
-				"status": "error",
-				"data": {}
-			};
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()))
-				.reply(200, JSON.stringify(response));
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ResponseException, "The ResponseException has not been thrown.");
+                    RequestException, "The RequestException has not been thrown.");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
@@ -501,8 +462,8 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -530,8 +491,8 @@ describe('ModelItf', function() {
 				"data": {}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -562,8 +523,8 @@ describe('ModelItf', function() {
 				}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -613,13 +574,10 @@ describe('ModelItf', function() {
 			var modelName = ModelItf;
 			var jsonParam = model.toJSONObject();
 
-			var response : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": model.toJSONObject()
-			};
+			var response : any = model.toJSONObject();
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -709,8 +667,8 @@ describe('ModelItf', function() {
 			var modelName = ModelItf;
 			var jsonParam = model.toJSONObject();
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -723,41 +681,7 @@ describe('ModelItf', function() {
                             throw err;
                         }
                     },
-                    ResponseException, "The ResponseException has not been thrown.");
-                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-                done();
-            };
-
-            model.updateObject(modelName, jsonParam, success, fail);
-		});
-
-		it('should throw an error if the request failed on the server', function(done) {
-			var id = 42;
-			var model = new ModelItf(id);
-
-			var modelName = ModelItf;
-			var jsonParam = model.toJSONObject();
-
-			var response : SequelizeRestfulResponse = {
-				"status": "error",
-				"data": {}
-			};
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()), model.toJSONObject())
-				.reply(200, JSON.stringify(response));
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ResponseException, "The ResponseException has not been thrown.");
+                    RequestException, "The RequestException has not been thrown.");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
@@ -776,8 +700,8 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -810,8 +734,8 @@ describe('ModelItf', function() {
 				"data": {}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -846,8 +770,8 @@ describe('ModelItf', function() {
 				}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.objectEndpoint(ModelItf.getTableName(),id.toString()), model.toJSONObject())
 				.reply(200, JSON.stringify(response));
 
 
@@ -897,13 +821,13 @@ describe('ModelItf', function() {
 
 			var modelName = ModelItf;
 
-			var response : SequelizeRestfulResponse = {
+			var response : any = {
 				"status": "success",
 				"data": {}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.delete(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -970,8 +894,8 @@ describe('ModelItf', function() {
 
 			var modelName = ModelItf;
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.delete(BackendConfig.objectEndpoint(ModelItf.getTableName(), id.toString()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -984,40 +908,7 @@ describe('ModelItf', function() {
                             throw err;
                         }
                     },
-                    ResponseException, "The ResponseException has not been thrown.");
-                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-                done();
-            };
-
-			ModelItf.deleteObject(modelName, id, success, fail);
-		});
-
-		it('should throw an error if the request failed on the server', function(done) {
-			var id = 42;
-			var model = new ModelItf(id);
-
-			var modelName = ModelItf;
-
-			var response : SequelizeRestfulResponse = {
-				"status": "error",
-				"data": {}
-			};
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.objectEndpoint(ModelItf.getTableName(), id.toString()))
-				.reply(200, JSON.stringify(response));
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ResponseException, "The ResponseException has not been thrown.");
+                    RequestException, "The RequestException has not been thrown.");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
@@ -1039,15 +930,11 @@ describe('ModelItf', function() {
 
 			var modelName = ModelItf;
 
-			var reponse : SequelizeRestfulResponse = {
-				"status": "success",
-				"count": 4,
-				"data": data
-			};
+			var response : any = data;
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
-				.reply(200, JSON.stringify(reponse));
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.modelEndpoint(ModelItf.getTableName()))
+				.reply(200, JSON.stringify(response));
 
             var success = function(allmodels) {
                 assert.deepEqual(allmodels, models, "The array of models is not the same : "+JSON.stringify(allmodels)+ " and "+JSON.stringify(models));
@@ -1104,8 +991,8 @@ describe('ModelItf', function() {
 		});
 
 		it('should throw an error if the request failed', function(done) {
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.modelEndpoint(ModelItf.getTableName()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -1118,35 +1005,7 @@ describe('ModelItf', function() {
                             throw err;
                         }
                     },
-                    ResponseException, "The ResponseException has not been thrown.");
-                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-                done();
-            };
-
-            ModelItf.allObjects(ModelItf, success, fail);
-		});
-
-		it('should throw an error if the request failed on the server', function(done) {
-			var response : SequelizeRestfulResponse = {
-				"status": "error",
-				"data": {}
-			};
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
-				.reply(200, JSON.stringify(response));
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ResponseException, "The ResponseException has not been thrown.");
+                    RequestException, "The RequestException has not been thrown.");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
@@ -1159,8 +1018,8 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.modelEndpoint(ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1190,8 +1049,8 @@ describe('ModelItf', function() {
 				}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.modelEndpoint(ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1226,8 +1085,8 @@ describe('ModelItf', function() {
 				]
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.modelEndpoint(ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.modelEndpoint(ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1339,14 +1198,12 @@ describe('ModelItf', function() {
 			var id2 = 24;
 			var model = new ModelItf(id);
 
-			var reponse : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+			var emptyResponse : any = {};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
-				.reply(200, JSON.stringify(reponse));
+
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+				.reply(200, JSON.stringify(emptyResponse));
 
             var success = function() {
                 //assert.ok(retour, "The association did not return true");
@@ -1388,8 +1245,8 @@ describe('ModelItf', function() {
 			var id2 = 24;
 			var model = new ModelItf(id);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.put(BackendConfig.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -1402,39 +1259,7 @@ describe('ModelItf', function() {
                             throw err;
                         }
                     },
-                    ResponseException, "The ResponseException has not been thrown.");
-                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-                done();
-            };
-
-            model.associateObject(ModelItf, ModelItf, id2, success, fail);
-		});
-
-		it('should throw an error if the request failed on the server', function(done) {
-			var id = 42;
-			var id2 = 24;
-			var model = new ModelItf(id);
-
-			var response : SequelizeRestfulResponse = {
-				"status": "error",
-				"data": {}
-			};
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.put(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
-				.reply(200, JSON.stringify(response));
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ResponseException, "The ResponseException has not been thrown.");
+                    RequestException, "The RequestException has not been thrown.");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
@@ -1532,14 +1357,12 @@ describe('ModelItf', function() {
 			var id2 = 24;
 			var model = new ModelItf(id);
 
-			var reponse : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {}
-			};
+			var emptyResponse : any = {};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
-				.reply(200, JSON.stringify(reponse));
+
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.delete(BackendConfig.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+				.reply(200, JSON.stringify(emptyResponse));
 
             var success = function() {
                 //assert.ok(retour, "The association did not return true");
@@ -1583,8 +1406,8 @@ describe('ModelItf', function() {
 			var id2 = 24;
 			var model = new ModelItf(id);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.delete(BackendConfig.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -1597,39 +1420,7 @@ describe('ModelItf', function() {
                             throw err;
                         }
                     },
-                    ResponseException, "The ResponseException has not been thrown.");
-                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-                done();
-            };
-
-            model.deleteObjectAssociation(ModelItf, ModelItf, id2, success, fail);
-		});
-
-		it('should throw an error if the request failed on the server', function(done) {
-			var id = 42;
-			var id2 = 24;
-			var model = new ModelItf(id);
-
-			var response : SequelizeRestfulResponse = {
-				"status": "error",
-				"data": {}
-			};
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.delete(DatabaseConnection.associatedObjectEndpoint(ModelItf.getTableName(), id.toString(), ModelItf.getTableName(), id2.toString()))
-				.reply(200, JSON.stringify(response));
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ResponseException, "The ResponseException has not been thrown.");
+                    RequestException, "The RequestException has not been thrown.");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
@@ -1714,14 +1505,11 @@ describe('ModelItf', function() {
 				data.push({"id": id});
 			}
 
-			var reponse : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": data
-			};
+			var response : any = data;
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
-				.reply(200, JSON.stringify(reponse));
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+				.reply(200, JSON.stringify(response));
 
             var success = function(allmodels) {
                 assert.deepEqual(allmodels, models, "The array of models is not the same.");
@@ -1763,8 +1551,8 @@ describe('ModelItf', function() {
 			var originID = 12;
 			var model = new ModelItf(originID);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -1777,44 +1565,13 @@ describe('ModelItf', function() {
                             throw err;
                         }
                     },
-                    ResponseException, "The ResponseException has not been thrown.");
+                    RequestException, "The RequestException has not been thrown.");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
 
             model.getAssociatedObjects(ModelItf, ModelItf, success, fail);
 
-		});
-
-		it('should throw an error if the request failed on the server', function(done) {
-			var originID = 12;
-			var model = new ModelItf(originID);
-
-			var response : SequelizeRestfulResponse = {
-				"status": "error",
-				"data": {}
-			};
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
-				.reply(200, JSON.stringify(response));
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ResponseException, "The ResponseException has not been thrown.");
-                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-                done();
-            };
-
-            model.getAssociatedObjects(ModelItf, ModelItf, success, fail);
 		});
 
 		it('should throw an error if the request succeed but the data field is missing on the response', function(done) {
@@ -1825,8 +1582,8 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1858,8 +1615,8 @@ describe('ModelItf', function() {
 				}
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1897,8 +1654,8 @@ describe('ModelItf', function() {
 				]
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -1989,16 +1746,13 @@ describe('ModelItf', function() {
 
 			var model = new ModelItf(originID);
 
-			var reponse : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"id": targetID
-				}
-			};
+				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
-				.reply(200, JSON.stringify(reponse));
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+				.reply(200, JSON.stringify(response));
 
             var expected = new ModelItf(targetID);
 
@@ -2020,14 +1774,11 @@ describe('ModelItf', function() {
 
 			var model = new ModelItf(originID);
 
-			var reponse : SequelizeRestfulResponse = {
-				"status": "success",
-				"data": []
-			};
+			var emptyResponse : any = {};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
-				.reply(200, JSON.stringify(reponse));
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+				.reply(200, JSON.stringify(emptyResponse));
 
             var success = function(result) {
                 assert.deepEqual(result, null, "The retrieve of associated objects doesn't return null.");
@@ -2069,8 +1820,8 @@ describe('ModelItf', function() {
 			var originID = 12;
 			var model = new ModelItf(originID);
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(500, JSON.stringify('Server error'));
 
             var success = function() {
@@ -2083,44 +1834,13 @@ describe('ModelItf', function() {
                             throw err;
                         }
                     },
-                    ResponseException, "The ResponseException has not been thrown.");
+                    RequestException, "The RequestException has not been thrown.");
                 assert.ok(restClientMock.isDone(), "The mock request has not been done.");
                 done();
             };
 
             model.getUniquelyAssociatedObject(ModelItf, ModelItf, success, fail);
 
-		});
-
-		it('should throw an error if the request failed on the server', function(done) {
-			var originID = 12;
-			var model = new ModelItf(originID);
-
-			var response : SequelizeRestfulResponse = {
-				"status": "error",
-				"data": {}
-			};
-
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
-				.reply(200, JSON.stringify(response));
-
-            var success = function() {
-                done(new Error("Test failed."));
-            };
-
-            var fail = function(err) {
-                assert.throws(function() {
-                        if(err) {
-                            throw err;
-                        }
-                    },
-                    ResponseException, "The ResponseException has not been thrown.");
-                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
-                done();
-            };
-
-            model.getUniquelyAssociatedObject(ModelItf, ModelItf, success, fail);
 		});
 
 		it('should throw an error if the request succeed but the data field is missing on the response', function(done) {
@@ -2131,8 +1851,8 @@ describe('ModelItf', function() {
 				"status": "success"
 			};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -2157,15 +1877,12 @@ describe('ModelItf', function() {
 			var originID = 12;
 			var model = new ModelItf(originID);
 
-			var response = {
-				"status": "success",
-				"data": {
+			var response : any = {
 					"toto": "bidule"
-				}
-			};
+				};
 
-			var restClientMock = nock(DatabaseConnection.getBaseURL())
-				.get(DatabaseConnection.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ModelItf.getTableName(), originID.toString(), ModelItf.getTableName()))
 				.reply(200, JSON.stringify(response));
 
             var success = function() {
@@ -2470,4 +2187,96 @@ describe('ModelItf', function() {
 			ModelItf.updateAttribute(ModelItf, info, success, fail);
 		});
 	});
+
+    describe('#cloneObject', function () {
+        it('should launch an exception if the modelClass is undefined.', function (done) {
+            var model : ModelItf = new ModelItf(12);
+            var success = function () {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function (err) {
+                assert.throws(function () {
+                        if (err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The DataException has not been thrown.");
+                done();
+            };
+
+            model.cloneObject(undefined, success, fail);
+        });
+
+        it('should launch an exception if the modelClass is null.', function (done) {
+            var model : ModelItf = new ModelItf(12);
+            var success = function () {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function (err) {
+                assert.throws(function () {
+                        if (err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The DataException has not been thrown.");
+                done();
+            };
+
+            model.cloneObject(null, success, fail);
+        });
+
+        it('should launch an exception if the object is not complete', function (done) {
+            var model : ModelItf = new ModelItf(12);
+            var success = function () {
+                done(new Error("Test failed."));
+            };
+
+            var fail = function (err) {
+                assert.throws(function () {
+                        if (err) {
+                            throw err;
+                        }
+                    },
+                    ModelException, "The DataException has not been thrown.");
+                done();
+            };
+
+            model.cloneObject(ModelItf, success, fail);
+        });
+
+        it('should create an object with a different id.', function (done) {
+
+            var emptyModel = new ModelItf();
+            var model = new ModelItf(12, true);
+            var id = 42;
+
+            var response : any = model.toJSONObject();
+            response['id'] = id;
+
+			var realParams : any = emptyModel.toJSONObject();
+			delete(realParams["id"]);
+			delete(realParams["createdAt"]);
+			delete(realParams["updatedAt"]);
+
+            var restClientMock = nock(BackendConfig.getDBBaseURL())
+                .post(BackendConfig.modelEndpoint(ModelItf.getTableName()), realParams)
+                .reply(200, JSON.stringify(response));
+
+            var success = function(obtainedData : any) {
+                //assert.ok(retour, "The creation did not return true");
+                assert.ok(restClientMock.isDone(), "The mock request has not been done.");
+                assert.equal(obtainedData._id, id, "The ID is not recorded in the object : "+JSON.stringify(obtainedData));
+                assert.notEqual(model.getId(), obtainedData.id, "The ID of original object and created one are different.");
+                done();
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            model.cloneObject(ModelItf, success, fail);
+        });
+    });
 });

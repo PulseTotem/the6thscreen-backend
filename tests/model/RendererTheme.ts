@@ -1,48 +1,42 @@
 /**
- * @author Simon Urli <simon@the6thscreen.fr>
+ * @author Christian Brel <christian@pulsetotem.fr, ch.brel@gmail.com>
  */
 
 /// <reference path="../../libsdef/mocha.d.ts" />
 /// <reference path="../../libsdef/nock.d.ts" />
 /// <reference path="../../libsdef/sinon.d.ts" />
 
-/// <reference path="../../scripts/model/Behaviour.ts" />
+/// <reference path="../../scripts/model/RendererTheme.ts" />
 
 var assert = require("assert");
 var nock : any = require("nock");
 var sinon : SinonStatic = require("sinon");
 
-describe('Behaviour', function() {
+describe('RendererTheme', function() {
 	describe('#constructor', function () {
 		it('should store the name', function () {
 			var name = "machin";
-			var c = new Behaviour(name, "");
+			var c = new RendererTheme(name);
 			assert.equal(c.name(), name, "The name is not stored correctly.");
-		});
-
-		it('should store the description', function () {
-			var desc = "machin";
-			var c = new Behaviour("", desc);
-			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Behaviour("", "", id);
+			var c = new RendererTheme("", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete attribute', function () {
-			var c = new Behaviour("", "", 12, true);
+			var c = new RendererTheme("", 12, true);
 			assert.equal(c.isComplete(), true, "The complete attribute is not stored.");
 		});
 	});
 
 	describe('#checkCompleteness()', function() {
 		it('should return false if the object is empty', function(done) {
-			var b =  new Behaviour();
+			var b =  new RendererTheme();
 			var success = function () {
-				assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+				assert.equal(b.isComplete(), false, "The rendererTheme should not be complete.");
 				done();
 			};
 
@@ -53,10 +47,10 @@ describe('Behaviour', function() {
 
 		});
 
-		it('should return true if the object has a name and an ID but no description', function(done) {
-			var b = new Behaviour('toto', null, 12);
+		it('should return true if the object has a name and an Id', function(done) {
+			var b = new RendererTheme('toto', 12);
 			var success = function () {
-				assert.equal(b.isComplete(), true, "The behaviour should be complete.");
+				assert.equal(b.isComplete(), true, "The rendererTheme should be complete.");
 				done();
 			};
 
@@ -66,10 +60,10 @@ describe('Behaviour', function() {
 			b.checkCompleteness(success, fail);
 		});
 
-		it('should return false if the object has an empty name and an ID but no description', function(done) {
-			var b = new Behaviour('', null, 12);
+		it('should return false if the object has an empty name and an Id', function(done) {
+			var b = new RendererTheme('', 12);
 			var success = function () {
-				assert.equal(b.isComplete(), false, "The behaviour should not be complete.");
+				assert.equal(b.isComplete(), false, "The rendererTheme should not be complete.");
 				done();
 			};
 
@@ -85,37 +79,34 @@ describe('Behaviour', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": "blabla",
 				"complete":true
 			};
 
-			var callRetrieve = Behaviour.fromJSONObject(json);
-			var callExpected = new Behaviour("toto", "blabla", 42,true);
+			var retrieve = RendererTheme.fromJSONObject(json);
+			var expected = new RendererTheme("toto", 42, true);
 
-			assert.deepEqual(callRetrieve, callExpected, "The retrieve renderer (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+			assert.deepEqual(retrieve, expected, "The retrieve rendererTheme (" + retrieve + ") does not match with the expected one (" + expected + ")");
 		});
 
 		it('should create the right object even if it is not complete', function () {
 			var json = {
 				"id": 42,
 				"name": "toto",
-				"description": null,
 				"complete":false
 			};
 
-			var callRetrieve = Behaviour.fromJSONObject(json);
-			var callExpected = new Behaviour("toto", null, 42);
+			var retrieve = RendererTheme.fromJSONObject(json);
+			var expected = new RendererTheme("toto", 42);
 
-			assert.deepEqual(callRetrieve, callExpected, "The retrieve renderer (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
+			assert.deepEqual(retrieve, expected, "The retrieve rendererTheme (" + retrieve + ") does not match with the expected one (" + expected + ")");
 		});
 	});
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Behaviour("toto", "blabla", 52);
+			var c = new RendererTheme("toto", 52);
 			var expected = {
 				"name": "toto",
-				"description": "blabla",
 				"id": 52,
 				"complete": false,
 				"createdAt":null,
@@ -129,13 +120,13 @@ describe('Behaviour', function() {
 
 	describe('#updateAttribute', function () {
 		it('should update the name when asking', function (done) {
-			var model = new Behaviour("", "", 12);
-			var modelUpdated = new Behaviour("tata", "", 12, true);
+			var model = new RendererTheme("", 12);
+			var modelUpdated = new RendererTheme("tata", 12, true);
 
 			var responseRead : any = model.toJSONObject();
 
 			var restClientMockRead = nock(BackendConfig.getDBBaseURL())
-				.get(BackendConfig.objectEndpoint(Behaviour.getTableName(), model.getId().toString()))
+				.get(BackendConfig.objectEndpoint(RendererTheme.getTableName(), model.getId().toString()))
 				.reply(200, JSON.stringify(responseRead));
 
 			var newInfo = {
@@ -147,7 +138,7 @@ describe('Behaviour', function() {
 			var responseUpdate : any = modelUpdated.toJSONObject();
 
 			var restClientMockUpdate = nock(BackendConfig.getDBBaseURL())
-				.put(BackendConfig.objectEndpoint(Behaviour.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
+				.put(BackendConfig.objectEndpoint(RendererTheme.getTableName(), model.getId().toString()), modelUpdated.toJSONObject())
 				.reply(200, JSON.stringify(responseUpdate));
 
 			var success : Function = function () {
@@ -160,7 +151,7 @@ describe('Behaviour', function() {
 				done(error);
 			};
 
-			ModelItf.updateAttribute(Behaviour, newInfo, success, fail);
+			ModelItf.updateAttribute(RendererTheme, newInfo, success, fail);
 		});
 	});
 });

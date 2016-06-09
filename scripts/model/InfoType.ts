@@ -202,17 +202,6 @@ class InfoType extends ModelItf {
         this.loadRenderers(success, fail);
     }
 
-    /**
-     * Set the object as desynchronized given the different lazy properties.
-     *
-     * @method desynchronize
-     */
-    desynchronize() : void {
-        super.desynchronize();
-        this._sources_loaded = false;
-        this._renderers_loaded = false;
-    }
-
 	/**
 	 * Return a InfoType instance as a JSON Object
 	 *

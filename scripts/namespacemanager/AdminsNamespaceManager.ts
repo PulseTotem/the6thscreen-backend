@@ -3,6 +3,7 @@
  */
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
+/// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="./ShareNamespaceManager.ts" />
 /// <reference path="../model/User.ts" />
 /// <reference path="../model/SDI.ts" />
@@ -13,12 +14,14 @@
 /// <reference path="../model/OAuthKey.ts" />
 /// <reference path="../model/Call.ts" />
 /// <reference path="../model/Renderer.ts" />
+/// <reference path="../model/RendererTheme.ts" />
 /// <reference path="../model/Profil.ts" />
 /// <reference path="../model/InfoType.ts" />
 /// <reference path="../model/Policy.ts" />
 /// <reference path="../model/Behaviour.ts" />
 /// <reference path="../model/ThemeZone.ts" />
 /// <reference path="../model/ThemeSDI.ts" />
+/// <reference path="../model/TimelineRunner.ts" />
 
 
 class AdminsNamespaceManager extends ShareNamespaceManager {
@@ -53,6 +56,12 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveProfilDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Profil, "profilId", description, "ProfilDescription"); });
 		this.addListenerToSocket('RetrieveInfoTypeDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(InfoType, "infoTypeId", description, "InfoTypeDescription"); });
 		this.addListenerToSocket('RetrievePolicyDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(Policy, "PolicyId", description, "PolicyDescription"); });
+		this.addListenerToSocket('RetrieveThemeZoneDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(ThemeZone, "themeZoneId", description, "ThemeZoneDescription"); });
+		this.addListenerToSocket('RetrieveThemeSDIDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(ThemeSDI, "themeSDIId", description, "ThemeSDIDescription"); });
+		this.addListenerToSocket('RetrieveSystemTriggerDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(SystemTrigger, "systemTriggerId", description, "SystemTriggerDescription"); });
+		this.addListenerToSocket('RetrieveUserTriggerDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(UserTrigger, "userTriggerId", description, "UserTriggerDescription"); });
+		this.addListenerToSocket('RetrieveUserDescription', function(description) { self.sendObjectDescriptionFromJSONDescriptionWithID(User, "userId", description, "UserDescription"); });
+
 
 		// Retrieve all objects
 	    this.addListenerToSocket('RetrieveAllSourceDescription', function() { self.sendAllObjectDescription(Source, "AllSourceDescription"); });
@@ -69,6 +78,14 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveAllTimelineRunnerDescription', function() { self.sendAllObjectDescription(TimelineRunner, "AllTimelineRunnerDescription"); });
 		this.addListenerToSocket('RetrieveAllSystemTriggerDescription', function() { self.sendAllObjectDescription(SystemTrigger, "AllSystemTriggerDescription"); });
 		this.addListenerToSocket('RetrieveAllUserTriggerDescription', function() { self.sendAllObjectDescription(UserTrigger, "AllUserTriggerDescription"); });
+		this.addListenerToSocket('RetrieveAllTypeParamTypeDescription', function() { self.sendAllObjectDescription(TypeParamType, "AllTypeParamTypeDescription"); });
+		this.addListenerToSocket('RetrieveAllConstraintParamTypeDescription', function() { self.sendAllObjectDescription(ConstraintParamType, "AllConstraintParamTypeDescription"); });
+		this.addListenerToSocket('RetrieveAllTypeParamTypeDescription', function() { self.sendAllObjectDescription(TypeParamType, "AllTypeParamTypeDescription"); });
+		this.addListenerToSocket('RetrieveAllSystemTriggerDescription', function() { self.sendAllObjectDescription(SystemTrigger, "AllSystemTriggerDescription"); });
+		this.addListenerToSocket('RetrieveAllUserTriggerDescription', function() { self.sendAllObjectDescription(UserTrigger, "AllUserTriggerDescription"); });
+		this.addListenerToSocket('RetrieveAllUserDescription', function() { self.sendAllObjectDescription(User, "AllUserDescription"); });
+		this.addListenerToSocket('RetrieveAllSDIDescription', function() { self.sendAllObjectDescription(SDI, "AllSDIDescription"); });
+
 
 		// Create object
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
@@ -80,15 +97,21 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateZoneContent', function(data) { self.createObject(ZoneContent, data, "AnswerCreateZoneContent"); });
 		this.addListenerToSocket('CreateRelativeTimeline', function(data) { self.createObject(RelativeTimeline, data, "AnswerCreateRelativeTimeline"); });
 		this.addListenerToSocket('CreateProfil', function(data) { self.createObject(Profil, data, "AnswerCreateProfil"); });
-
-	    this.addListenerToSocket('CreateSourceDescription', function(data) { self.createObject(Source, data, "SourceDescription"); });
-
-	    this.addListenerToSocket('CreateServiceDescription', function(data) { self.createObject(Service, data, "ServiceDescription"); });
-		this.addListenerToSocket('CreateCallDescription', function(data) { self.createObject(Call, data, "CallDescription"); });
-		this.addListenerToSocket('CreateRendererDescription', function(data) { self.createObject(Renderer, data, "RendererDescription"); });
-		this.addListenerToSocket('CreateProfilDescription', function(data) { self.createObject(Profil, data, "ProfilDescription"); });
-		this.addListenerToSocket('CreateInfoTypeDescription', function(data) { self.createObject(InfoType, data, "InfoTypeDescription"); });
-		this.addListenerToSocket('CreatePolicyDescription', function(data) { self.createObject(Policy, data, "PolicyDescription"); });
+		this.addListenerToSocket('CreateThemeZone', function(data) { self.createObject(ThemeZone, data, "AnswerCreateThemeZone"); });
+		this.addListenerToSocket('CreateThemeSDI', function(data) { self.createObject(ThemeSDI, data, "AnswerCreateThemeSDI"); });
+		this.addListenerToSocket('CreateParamType', function(data) { self.createObject(ParamType, data, "AnswerCreateParamType"); });
+		this.addListenerToSocket('CreateConstraintParamType', function(data) { self.createObject(ConstraintParamType, data, "AnswerCreateConstraintParamType"); });
+		this.addListenerToSocket('CreateTypeParamType', function(data) { self.createObject(TypeParamType, data, "AnswerCreateTypeParamType"); });
+		this.addListenerToSocket('CreateInfoType', function(data) { self.createObject(InfoType, data, "AnswerCreateInfoType"); });
+		this.addListenerToSocket('CreateService', function(data) { self.createObject(Service, data, "AnswerCreateService"); });
+		this.addListenerToSocket('CreateSource', function(data) { self.createObject(Source, data, "AnswerCreateSource"); });
+		this.addListenerToSocket('CreateRenderer', function(data) { self.createObject(Renderer, data, "AnswerCreateRenderer"); });
+		this.addListenerToSocket('CreateBehaviour', function(data) { self.createObject(Behaviour, data, "AnswerCreateBehaviour"); });
+		this.addListenerToSocket('CreatePolicy', function(data) { self.createObject(Policy, data, "AnswerCreatePolicy"); });
+		this.addListenerToSocket('CreateSystemTrigger', function(data) { self.createObject(SystemTrigger, data, "AnswerCreateSystemTrigger"); });
+		this.addListenerToSocket('CreateUserTrigger', function(data) { self.createObject(UserTrigger, data, "AnswerCreateUserTrigger"); });
+		this.addListenerToSocket('CreateUser', function(data) { self.createObject(User, data, "AnswerCreateUser"); });
+		this.addListenerToSocket('CreateTimelineRunner', function(data) { self.createObject(TimelineRunner, data, "AnswerCreateTimelineRunner"); });
 
 		// Update object
 		this.addListenerToSocket('UpdateSDI', function(data) { self.updateObjectAttribute(SDI, data, "AnswerUpdateSDI"); });
@@ -100,36 +123,54 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateParamValue', function(data) { self.updateObjectAttribute(ParamValue, data, "AnswerUpdateParamValue"); });
 		this.addListenerToSocket('UpdateZoneContent', function(data) { self.updateObjectAttribute(ZoneContent, data, "AnswerUpdateZoneContent"); });
 		this.addListenerToSocket('UpdateProfil', function(data) { self.updateObjectAttribute(Profil, data, "AnswerUpdateProfil"); });
+		this.addListenerToSocket('UpdateThemeZone', function(data) { self.updateObjectAttribute(ThemeZone, data, "AnswerUpdateThemeZone"); });
+		this.addListenerToSocket('UpdateThemeSDI', function(data) { self.updateObjectAttribute(ThemeSDI, data, "AnswerUpdateThemeSDI"); });
+		this.addListenerToSocket('UpdateParamType', function(data) { self.updateObjectAttribute(ParamType, data, "AnswerUpdateParamType"); });
+		this.addListenerToSocket('UpdateConstraintParamType', function(data) { self.updateObjectAttribute(ConstraintParamType, data, "AnswerUpdateConstraintParamType"); });
+		this.addListenerToSocket('UpdateTypeParamType', function(data) { self.updateObjectAttribute(TypeParamType, data, "AnswerUpdateTypeParamType"); });
+		this.addListenerToSocket('UpdateInfoType', function(data) { self.updateObjectAttribute(InfoType, data, "AnswerUpdateInfoType"); });
+		this.addListenerToSocket('UpdateService', function(data) { self.updateObjectAttribute(Service, data, "AnswerUpdateService"); });
+		this.addListenerToSocket('UpdateSource', function(data) { self.updateObjectAttribute(Source, data, "AnswerUpdateSource"); });
+		this.addListenerToSocket('UpdateRenderer', function(data) { self.updateObjectAttribute(Renderer, data, "AnswerUpdateRenderer"); });
+		this.addListenerToSocket('UpdateBehaviour', function(data) { self.updateObjectAttribute(Behaviour, data, "AnswerUpdateBehaviour"); });
+		this.addListenerToSocket('UpdatePolicy', function(data) { self.updateObjectAttribute(Policy, data, "AnswerUpdatePolicy"); });
+		this.addListenerToSocket('UpdateSystemTrigger', function(data) { self.updateObjectAttribute(SystemTrigger, data, "AnswerUpdateSystemTrigger"); });
+		this.addListenerToSocket('UpdateUserTrigger', function(data) { self.updateObjectAttribute(UserTrigger, data, "AnswerUpdateUserTrigger"); });
+		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
+		this.addListenerToSocket('UpdateTimelineRunner', function(data) { self.updateObjectAttribute(TimelineRunner, data, "AnswerUpdateTimelineRunner"); });
 
-	    this.addListenerToSocket('UpdateSourceDescription', function(data) { self.updateObjectAttribute(Source, data, "SourceDescription"); });
-	    this.addListenerToSocket('UpdateServiceDescription', function(data) { self.updateObjectAttribute(Service, data, "ServiceDescription"); });
-		this.addListenerToSocket('UpdateCallDescription', function(data) { self.updateObjectAttribute(Call, data, "CallDescription"); });
-		this.addListenerToSocket('UpdateParamValueDescription', function(data) { self.updateObjectAttribute(ParamValue, data, "ParamValueDescription"); });
-		this.addListenerToSocket('UpdateRendererDescription', function(data) { self.updateObjectAttribute(Renderer, data, "RendererDescription"); });
-		this.addListenerToSocket('UpdateProfilDescription', function(data) { self.updateObjectAttribute(Profil, data, "ProfilDescription"); });
-		this.addListenerToSocket('UpdateInfoTypeDescription', function(data) { self.updateObjectAttribute(InfoType, data, "InfoTypeDescription"); });
-		this.addListenerToSocket('UpdatePolicyDescription', function(data) { self.updateObjectAttribute(Policy, data, "PolicyDescription"); });
 
 		// Delete object
 		this.addListenerToSocket('DeleteRelativeEvent', function(idRelativeEvent) { self.deleteObjectFromDescription(RelativeEvent, "relativeEventId", idRelativeEvent, "AnswerDeleteRelativeEvent"); });
 		this.addListenerToSocket('DeleteZoneContent', function(idZoneContent) { self.deleteObjectFromDescription(ZoneContent, "zoneContentId", idZoneContent, "AnswerDeleteZoneContent"); });
 		this.addListenerToSocket('DeleteProfil', function(idProfil) { self.deleteObjectFromDescription(Profil, "profilId", idProfil, "AnswerDeleteProfil"); });
-
-		this.addListenerToSocket('DeleteZone', function(idZone) { self.deleteObjectFromDescription(Zone, "zoneId", idZone, "deletedZone"); });
-		this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "deletedSource"); });
-	    this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteObjectFromDescription(CallType, "callTypeId", idCallType, "deletedCallType"); });
-	    this.addListenerToSocket('DeleteService', function(idService) { self.deleteObjectFromDescription(Service, "serviceId", idService, "deletedService"); });
-		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "deletedSDI"); });
-		this.addListenerToSocket('DeleteOAuthKey', function(idOAuthKey) { self.deleteObjectFromDescription(OAuthKey, "oauthKeyId", idOAuthKey, "deletedOAuthKey"); });
-		this.addListenerToSocket('DeleteCall', function(idCall) { self.deleteObjectFromDescription(Call, "callId", idCall, "deletedCall"); });
-		this.addListenerToSocket('DeleteRenderer', function(idRenderer) { self.deleteObjectFromDescription(Renderer, "rendererId", idRenderer, "deletedRenderer"); });
-		this.addListenerToSocket('DeleteInfoType', function(idInfoType) { self.deleteObjectFromDescription(InfoType, "infoTypeId", idInfoType, "deletedInfoType"); });
-		this.addListenerToSocket('DeletePolicy', function(idPolicy) { self.deleteObjectFromDescription(Policy, "policyId", idPolicy, "deletedPolicy"); });
+		this.addListenerToSocket('DeleteThemeZone', function(idThemeZone) { self.deleteObjectFromDescription(ThemeZone, "themeZoneId", idThemeZone, "AnswerDeleteThemeZone"); });
+		this.addListenerToSocket('DeleteThemeSDI', function(idThemeSDI) { self.deleteObjectFromDescription(ThemeSDI, "themeSDIId", idThemeSDI, "AnswerDeleteThemeSDI"); });
+		this.addListenerToSocket('DeleteParamType', function(idParamType) { self.deleteObjectFromDescription(ParamType, "paramTypeId", idParamType, "AnswerDeleteParamType"); });
+		this.addListenerToSocket('DeleteConstraintParamType', function(idConstraintParamType) { self.deleteObjectFromDescription(ConstraintParamType, "constraintParamTypeId", idConstraintParamType, "AnswerDeleteConstraintParamType"); });
+		this.addListenerToSocket('DeleteParamValue', function(idParamValue) { self.deleteObjectFromDescription(ParamValue, "paramValueId", idParamValue, "AnswerDeleteParamValue"); });
+		this.addListenerToSocket('DeleteTypeParamType', function(idTypeParamType) { self.deleteObjectFromDescription(TypeParamType, "typeParamTypeId", idTypeParamType, "AnswerDeleteTypeParamType"); });
+		this.addListenerToSocket('DeleteInfoType', function(idInfoType) { self.deleteObjectFromDescription(InfoType, "infoTypeId", idInfoType, "AnswerDeleteInfoType"); });
+		this.addListenerToSocket('DeleteService', function(idService) { self.deleteObjectFromDescription(Service, "serviceId", idService, "AnswerDeleteService"); });
+		this.addListenerToSocket('DeleteSource', function(idSource) { self.deleteObjectFromDescription(Source, "sourceId", idSource, "AnswerDeleteSource"); });
+		this.addListenerToSocket('DeleteRenderer', function(idRenderer) { self.deleteObjectFromDescription(Renderer, "rendererId", idRenderer, "AnswerDeleteRenderer"); });
+		this.addListenerToSocket('DeleteZone', function(idZone) { self.deleteObjectFromDescription(Zone, "zoneId", idZone, "AnswerDeleteZone"); });
+		this.addListenerToSocket('DeleteCallType', function(idCallType) { self.deleteObjectFromDescription(CallType, "callTypeId", idCallType, "AnswerDeleteCallType"); });
+		this.addListenerToSocket('DeleteOAuthKey', function(idOAuthKey) { self.deleteObjectFromDescription(OAuthKey, "oauthKeyId", idOAuthKey, "AnswerDeleteOAuthKey"); });
+		this.addListenerToSocket('DeleteBehaviour', function(idBehaviour) { self.deleteObjectFromDescription(Behaviour, "behaviourId", idBehaviour, "AnswerDeleteBehaviour"); });
+		this.addListenerToSocket('DeletePolicy', function(idPolicy) { self.deleteObjectFromDescription(Policy, "policyId", idPolicy, "AnswerDeletePolicy"); });
+		this.addListenerToSocket('DeleteSystemTrigger', function(idSystemTrigger) { self.deleteObjectFromDescription(SystemTrigger, "systemTriggerId", idSystemTrigger, "AnswerDeleteSystemTrigger"); });
+		this.addListenerToSocket('DeleteUserTrigger', function(idUserTrigger) { self.deleteObjectFromDescription(UserTrigger, "userTriggerId", idUserTrigger, "AnswerDeleteUserTrigger"); });
+		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "AnswerDeleteSDI"); });
+		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteUser(idUser["userId"]); });
+		this.addListenerToSocket('DeleteTimelineRunner', function(idTimelineRunner) { self.deleteObjectFromDescription(TimelineRunner, "timelineRunnerId", idTimelineRunner, "AnswerDeleteTimelineRunner"); });
 
 
 		// Custom requests
 		this.addListenerToSocket('RetrieveSourcesFromServiceId', function(serviceIdDescription) { self.sendSourcesFromServiceId(serviceIdDescription); });
 		this.addListenerToSocket('RetrieveRenderersFromSourceId', function(sourceIdDescription) { self.sendRenderersFromSourceId(sourceIdDescription); });
+		this.addListenerToSocket('RetrieveRendererThemesFromRendererId', function(rendererIdDescription) { self.sendRendererThemesFromRendererId(rendererIdDescription); });
+
 		this.addListenerToSocket('RetrieveCallTypesFromZoneId', function(zoneIdDescription) { self.sendCallTypesFromZoneId(zoneIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteRelativeTimeline', function(timelineIdDescription) { self.sendCompleteRelativeTimeline(timelineIdDescription); });
 		this.addListenerToSocket('RetrieveCompleteAbsoluteTimeline', function(timelineIdDescription) { self.sendCompleteAbsoluteTimeline(timelineIdDescription); });
@@ -140,15 +181,25 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveOAuthKeysFromServiceAndUser', function(serviceUserDescription) { self.sendOAuthKeysFromServiceAndUser(serviceUserDescription); });
 		this.addListenerToSocket('RetrieveCompleteProfilDescription', function(profilIdDescription) { self.sendCompleteProfil(profilIdDescription); });
 		this.addListenerToSocket('RetrieveZoneContentsFromZoneId', function(zoneIdDescription) { self.sendZoneContentsFromZoneId(zoneIdDescription); });
+		this.addListenerToSocket('AddThemeToRenderer', function(newThemeDescription) { self.addThemeToRenderer(newThemeDescription); });
+		this.addListenerToSocket('RemoveThemeFromRenderer', function(themeDescription) { self.removeThemeFromRenderer(themeDescription); });
 
-
-
+		this.addListenerToSocket('RetrieveConnectedClientOfProfil', function (profilIdDescription) { self.sendConnectedClients(profilIdDescription); });
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
 		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
 		this.addListenerToSocket('RetrieveParamTypesFromCallType', function (callTypeDescription) { self.sendParamTypesDescriptionFromCallType(callTypeDescription); });
 		this.addListenerToSocket('CreateParamValueDescription', function (paramValueDescription) { self.createParamValueDescription(paramValueDescription); });
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
+		this.addListenerToSocket('ResetUserPassword', function (passwordDescription) { self.resetUserPassword(passwordDescription); });
+
+		this.addListenerToSocket('CloneProfil', function(data) { self.cloneProfil(data); });
+		this.addListenerToSocket('CloneSDI', function(data) { self.cloneSDI(data); });
+
+
+		// Remote control to the client
+		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
+		this.addListenerToSocket('IdentifyCommand', function (clientDescription) { self.sendIdentifyCommandToClient(clientDescription); });
 
 	}
 
@@ -181,6 +232,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	deleteObjectFromDescription(modelClass : any, propertyName : string, jsonDescription : any, channelResponse : string) {
 		var self = this;
 		var objectId = jsonDescription[propertyName];
+
 		self.deleteObject(modelClass, objectId, channelResponse);
 	}
 
@@ -537,6 +589,42 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage sendRenderersFromSourceId //////////////////////
 
+////////////////////// Begin: Manage sendRendererThemesFromRendererId //////////////////////
+
+	/**
+	 * Retrieve RendererThemes from a given Renderer Id.
+	 * Send the result on the channel "RendererThemesDescriptionFromRenderer"
+	 *
+	 * @method sendRendererThemesFromRendererId
+	 * @param rendererIdDescription
+	 */
+	sendRendererThemesFromRendererId(rendererIdDescription : any) {
+		// rendererIdDescription : { "rendererId": number }
+		var self = this;
+
+		var rendererId = rendererIdDescription.rendererId;
+
+		var fail : Function = function(error) {
+			self.socket.emit("RendererThemesDescriptionFromRenderer", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendRendererThemesFromRendererId failed ");
+		};
+
+		var successRead = function (renderer : Renderer) {
+
+			var successLoadRendererThemes : Function = function () {
+				var rendererThemes : Array<RendererTheme> = renderer.rendererThemes();
+
+				self.socket.emit("RendererThemesDescriptionFromRenderer", self.formatResponse(true, renderer.serializeArray(rendererThemes)));
+			};
+
+			renderer.loadRendererThemes(successLoadRendererThemes, fail);
+		};
+
+		Renderer.read(rendererId, successRead, fail);
+	}
+
+////////////////////// End: Manage sendRenderersFromSourceId //////////////////////
+
 ////////////////////// Begin: Manage sendCallTypesFromZoneId //////////////////////
 
 	/**
@@ -868,6 +956,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 			var successLoadAssociations = function() {
 
+				cTJSON["renderer"] = (callType.renderer() !== null) ? callType.renderer().toJSONObject() : null;
+				cTJSON["rendererTheme"] = (callType.rendererTheme() !== null) ? callType.rendererTheme().toJSONObject() : null;
+
 				var successSourceCompleteDescription = function(sourceCompleteDesc) {
 					cTJSON["source"] = sourceCompleteDesc;
 
@@ -1059,19 +1150,33 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				}
 
 				var successCreateParamValue = function() {
+					var finalSuccess = function () {
+						self.socket.emit("AnswerCreateEmptyParamValueForParamTypeId", self.formatResponse(true, pV.toJSONObject()));
+					};
 
 					var successlinkParamType = function() {
-						self.socket.emit("AnswerCreateEmptyParamValueForParamTypeId", self.formatResponse(true, pV.toJSONObject()));
-					}
+						var successCheckCompleteness = function () {
+							if (pV.isComplete()) {
+								var successUpdate = function () {
+									finalSuccess();
+								};
+								pV.update(successUpdate, fail);
+							} else {
+								finalSuccess();
+							}
+						};
+
+						pV.checkCompleteness(successCheckCompleteness, fail);
+					};
 
 					pV.linkParamType(paramTypeId, successlinkParamType, fail);
-				}
+				};
 
 				pV.create(successCreateParamValue, fail);
 			};
 
 			paramType.loadAssociations(successLoadParamTypeAssociations, fail);
-		}
+		};
 
 		ParamType.read(paramTypeId, successReadParamType, fail);
 
@@ -1246,5 +1351,383 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage sendZoneContentsFromZoneId //////////////////////
 
+////////////////////// Begin: Manage sendConnectedClients //////////////////////
+
+	sendConnectedClients(profilIdDescription : any) {
+		// profilIdDescription : { "profilId": number }
+
+		var self = this;
+		var profilId = profilIdDescription.profilId;
+		var onlineClients : Array<Object> = ClientsNamespaceManager.getClientsForProfil(profilId);
+
+		self.socket.emit("ConnectedClientOfProfil", self.formatResponse(true, onlineClients));
+	}
+
+////////////////////// End: Manage sendConnectedClients //////////////////////
+
+////////////////////// Begin: Manage sendRefreshCommandToClient //////////////////////
+
+	sendRefreshCommandToClient(clientIdDescription : any) {
+		// clientIdDescription : { "clientId": number }
+
+		var self = this;
+		var clientId = clientIdDescription.socketId;
+
+		var nms : NamespaceManager = self.server().retrieveNamespaceManagerFromSocketId(clientId);
+
+		if (nms !== undefined && nms['refreshClient'] !== undefined) {
+			Logger.debug("Send command to refresh client : "+clientId);
+			self.socket.emit("AnswerRefreshCommand", self.formatResponse(true, ""));
+			nms['refreshClient']();
+		} else {
+			Logger.error("Unable to retrieve namespace manager associated to client "+clientId);
+			self.socket.emit("AnswerRefreshCommand", self.formatResponse(false, ""));
+		}
+	}
+
+////////////////////// Begin: Manage sendRefreshCommandToClient //////////////////////
+
+////////////////////// Begin: Manage sendIdentifyCommandToClient //////////////////////
+
+	sendIdentifyCommandToClient(clientIdDescription : any) {
+		// clientIdDescription : { "clientId": number }
+
+		var self = this;
+		var clientId = clientIdDescription.socketId;
+
+		var nms : NamespaceManager = self.server().retrieveNamespaceManagerFromSocketId(clientId);
+
+		if (nms !== undefined && nms['identifyClient'] !== undefined) {
+			Logger.debug("Send command to identify client : "+clientId);
+			self.socket.emit("AnswerIdentifyCommand", self.formatResponse(true, ""));
+			nms['identifyClient'](clientId);
+		} else {
+			Logger.error("Unable to retrieve namespace manager associated to client "+clientId);
+			self.socket.emit("AnswerIdentifyCommand", self.formatResponse(false, ""));
+		}
+	}
+
+////////////////////// END: Manage sendIdentifyCommandToClient //////////////////////
+
+////////////////////// Begin: Manage resetUserPassword //////////////////////
+
+	resetUserPassword(passwordDescription : any) {
+		// passwordDescription : { 'userId': number, 'password': encryptedPassword }
+		var userId = passwordDescription.userId;
+		var encryptedPassword = passwordDescription.password;
+		var self = this;
+
+		var fail : Function = function (error) {
+			Logger.error("Error when identifying the user : "+userId);
+			self.socket.emit("AnswerResetUserPassword", self.formatResponse(false, error));
+		};
+
+		var successReadUser = function (user : User) {
+			var successSetPassword = function () {
+				self.socket.emit("AnswerResetUserPassword", self.formatResponse(true, {}));
+			};
+
+			user.setPassword(encryptedPassword, successSetPassword, fail);
+		};
+
+		User.read(userId, successReadUser, fail);
+	}
+
+////////////////////// END: Manage resetUserPassword //////////////////////
+
+////////////////////// Begin: Manage cloneProfil //////////////////////
+
+	cloneProfil(profilDescription : any) {
+		// profilDescription : { 'profilId': number }
+		var profilId = profilDescription.profilId;
+		var self = this;
+
+		var fail : Function = function (error) {
+			Logger.error("Error when reading the profil "+profilId);
+			Logger.error(error);
+			self.socket.emit("AnswerCloneProfil", self.formatResponse(false, error));
+		};
+
+		var successReadProfil = function (profil : Profil) {
+			var successCloneProfil = function (clonedProfil : Profil) {
+				Logger.debug("Answer to admin for cloning profil");
+				self.socket.emit("AnswerCloneProfil", self.formatResponse(true, clonedProfil.toJSONObject()));
+			};
+
+			profil.clone(successCloneProfil, fail, null);
+		};
+
+		Profil.read(profilId, successReadProfil, fail);
+	}
+
+////////////////////// END: Manage cloneProfil //////////////////////
+
+////////////////////// Begin: Manage cloneSDI //////////////////////
+
+	cloneSDI(SDIDescription : any) {
+		// SDIDescription : { 'SDIId': number }
+		var sdiId = SDIDescription.SDIId;
+		var self = this;
+
+		var fail : Function = function (error) {
+			Logger.error("Error when reading the SDI "+sdiId);
+			Logger.error(error);
+			self.socket.emit("AnswerCloneSDI", self.formatResponse(false, error));
+		};
+
+		var successReadSDI = function (sdi : SDI) {
+			var successCloneSDI = function (clonedSDI : SDI) {
+				Logger.debug("Answer to admin for cloning sdi");
+				self.socket.emit("AnswerCloneSDI", self.formatResponse(true, clonedSDI.toJSONObject()));
+			};
+
+			sdi.clone(successCloneSDI, fail);
+		};
+
+		SDI.read(sdiId, successReadSDI, fail);
+	}
+
+////////////////////// END: Manage cloneSDI //////////////////////
+
+////////////////////// Begin: Manage updateUser //////////////////////
+
+	/**
+	 * Update User from given data.
+	 * Save new User in CMS.
+	 * Send the result on the channel "AnswerUpdateUser"
+	 *
+	 * @method updateUser
+	 * @param {JSONObject} userDescription - User description to update
+	 */
+	updateUser(userDescription : any) {
+		var self = this;
+
+		var fail = function(error) {
+			self.socket.emit("AnswerUpdateUser", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with fail status.");
+		};
+
+		var successUserCompleteDesc = function(userCompleteDesc) {
+			self.socket.emit("AnswerUpdateUser", self.formatResponse(true, userCompleteDesc));
+			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with success status.");
+		};
+
+		var successUserRead = function(user : User) {
+
+			if(user.cmsId() != "" && user.cmsAuthkey() != "") {
+				if(user.username() != "" && user.email() != "") {
+					var updateUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
+
+					var args = {
+						"data": {
+							"username": user.username(),
+							"email": user.email()
+						},
+						"headers": {
+							"Content-Type": "application/json",
+							"Authorization": self.socket.connectedUser.cmsAuthkey()
+						}
+					};
+
+					var req = RestClient.getClient().put(updateUserUrl, args, function (data, response) {
+						if (response.statusCode >= 200 && response.statusCode < 300) {
+							user.toCompleteJSONObject(successUserCompleteDesc, fail);
+						} else {
+							fail(new RestClientResponse(false, data));
+						}
+					});
+					req.on('error', fail);
+				} else {
+					user.toCompleteJSONObject(successUserCompleteDesc, fail);
+				}
+			} else {
+				if(user.username() != "" && user.email() != "") {
+					var createUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath();
+
+					var args = {
+						"data": {
+							"username" : user.username(),
+							"email" : user.email()
+						},
+						"headers": {
+							"Content-Type": "application/json",
+							"Authorization": self.socket.connectedUser.cmsAuthkey()
+						}
+					};
+
+					var req = RestClient.getClient().post(createUserUrl, args, function(data, response) {
+						if(response.statusCode >= 200 && response.statusCode < 300) {
+
+							Logger.debug(data.id);
+							Logger.debug(data.authkey);
+
+							user.setCmsId(data.id);
+							user.setCmsAuthkey(data.authkey);
+
+							var successUpdate = function() {
+								user.toCompleteJSONObject(successUserCompleteDesc, fail);
+							};
+
+							Logger.debug(user.toJSONObject());
+
+							user.update(successUpdate, fail);
+						} else {
+							fail(new RestClientResponse(false, data));
+						}
+					});
+					req.on('error', fail);
+				} else {
+					user.toCompleteJSONObject(successUserCompleteDesc, fail);
+				}
+			}
+		};
+
+		var successUpdateUser = function() {
+			User.read(userDescription.id, successUserRead, fail);
+		};
+
+		ModelItf.updateAttribute(User, userDescription, successUpdateUser, fail);
+	}
+
+////////////////////// End: Manage updateUser //////////////////////
+
+////////////////////// Begin: Manage deleteUser //////////////////////
+
+	/**
+	 * Delete User from given id.
+	 * Delete User in CMS.
+	 * Send the result on the channel "AnswerDeleteUser"
+	 *
+	 * @method deleteUser
+	 * @param {number} userId - User's Id to delete
+	 */
+	deleteUser(userId : number) {
+		var self = this;
+
+		var fail = function(error) {
+			self.socket.emit("AnswerDeleteUser", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - deleteUser : send done with fail status.");
+		};
+
+		var successDelete = function () {
+			self.socket.emit("AnswerDeleteUser", self.formatResponse(true, userId));
+		};
+
+		var successReadObject = function (user) {
+
+			if(user.cmsId() != "") {
+
+				var deleteUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
+
+				var args = {
+					"data" : {
+
+					},
+					"headers": {
+						"Content-Type": "application/json",
+						"Authorization": self.socket.connectedUser.cmsAuthkey()
+					}
+				};
+
+				var req = RestClient.getClient().delete(deleteUserUrl, args, function (data, response) {
+					if (response.statusCode >= 200 && response.statusCode < 300) {
+						user.delete(successDelete, fail);
+					} else {
+						fail(new RestClientResponse(false, data));
+					}
+				});
+				req.on('error', fail);
+			} else {
+				user.delete(successDelete, fail);
+			}
+		};
+
+		User.read(userId, successReadObject, fail);
+	}
+
+////////////////////// End: Manage deleteUser //////////////////////
+
+////////////////////// Begin: Manage RendererThemes of Renderer //////////////////////
+
+	/**
+	 * Add a new RendererTheme to a given Renderer Id.
+	 * Send the result on the channel "AnswerUpdateRenderer"
+	 *
+	 * @method addThemeToRenderer
+	 * @param {JSONObject} newThemeDescription - new RendererTheme description
+	 */
+	addThemeToRenderer(newThemeDescription : any) {
+		// newThemeDescription : { "name": string, "id" : number }
+		var self = this;
+
+		var rendererId = newThemeDescription.id;
+
+		var fail : Function = function(error) {
+			self.socket.emit("AnswerUpdateRenderer", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - addThemeToRenderer failed ");
+		};
+
+		var successRead = function (renderer : Renderer) {
+
+			var themeName = newThemeDescription.name;
+
+			var newTheme : RendererTheme = new RendererTheme(themeName);
+
+			var successCreateTheme = function() {
+
+				var successAddRendererTheme = function() {
+					self.sendObjectDescriptionFromId(Renderer, rendererId, "AnswerUpdateRenderer", false);
+				};
+
+				renderer.addRendererTheme(newTheme.getId(), successAddRendererTheme, fail);
+			};
+
+			newTheme.create(successCreateTheme, fail);
+		};
+
+		Renderer.read(rendererId, successRead, fail);
+	}
+
+	/**
+	 * Remove RendererTheme from a given Renderer Id.
+	 * Send the result on the channel "AnswerUpdateRenderer"
+	 *
+	 * @method removeThemeFromRenderer
+	 * @param {JSONObject} newThemeDescription - new RendererTheme description
+	 */
+	removeThemeFromRenderer(themeDescription : any) {
+		// themeDescription : { "themeId": number, "id" : number }
+		var self = this;
+
+		var themeId = themeDescription.themeId;
+		var rendererId = themeDescription.id;
+
+		var fail:Function = function (error) {
+			self.socket.emit("AnswerUpdateRenderer", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - removeThemeFromRenderer failed ");
+		};
+
+		var successReadRT = function(rendererTheme : RendererTheme) {
+			var successRead = function(renderer : Renderer) {
+
+				var successRemoveRendererTheme = function () {
+
+					var successDelete = function() {
+						self.sendObjectDescriptionFromId(Renderer, rendererId, "AnswerUpdateRenderer", false);
+					};
+
+					rendererTheme.delete(successDelete, fail);
+				};
+
+				renderer.removeRendererTheme(rendererTheme.getId(), successRemoveRendererTheme, fail);
+			};
+
+			Renderer.read(rendererId, successRead, fail);
+		};
+
+		RendererTheme.read(themeId, successReadRT, fail)
+	}
+
+////////////////////// End: Manage RendererThemes of Renderer //////////////////////
 
 }
