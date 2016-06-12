@@ -6,7 +6,6 @@
 /// <reference path="../core/BackendConfig.ts" />
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./Role.ts" />
 /// <reference path="./SDI.ts" />
 /// <reference path="./OAuthKey.ts" />
 
@@ -71,22 +70,6 @@ class User extends ModelItf {
 	private _cmsAuthkey : string;
 
     /**
-     * Roles property.
-     *
-     * @property _roles
-     * @type Array<Role>
-     */
-    private _roles : Array<Role>;
-
-    /**
-     * Lazy loading for Roles property.
-     *
-     * @property _roles_loaded
-     * @type boolean
-     */
-    private _roles_loaded : boolean;
-
-    /**
      * SDIs property.
      *
      * @property _sdis
@@ -140,9 +123,6 @@ class User extends ModelItf {
 
 	    this._token = null;
 	    this._lastIp = null;
-
-        this._roles = new Array<Role>();
-        this._roles_loaded = false;
 
         this._sdis = new Array<SDI>();
         this._sdis_loaded = false;
@@ -260,47 +240,6 @@ class User extends ModelItf {
 	}
 
     /**
-     * Return the User's roles.
-     *
-     * @method roles
-     */
-    roles() {
-        return this._roles;
-    }
-
-    /**
-     * Load the User's roles.
-     *
-     * @method loadRoles
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    loadRoles(successCallback : Function, failCallback : Function) {
-        if(! this._roles_loaded) {
-            var self = this;
-            var success : Function = function(roles) {
-                self._roles = roles;
-                self._roles_loaded = true;
-                if(successCallback != null) {
-                    successCallback();
-                }
-            };
-
-            var fail : Function = function(error) {
-                if(failCallback != null) {
-                    failCallback(error);
-                }
-            };
-
-            this.getAssociatedObjects(User, Role, success, fail);
-        } else {
-            if(successCallback != null) {
-                successCallback();
-            }
-        }
-    }
-
-    /**
      * Return the SDIs owned by the User.
      *
      * @method sdis
@@ -396,7 +335,7 @@ class User extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._roles_loaded && self._sdis_loaded && self._oauthkeys_loaded) {
+            if(self._sdis_loaded && self._oauthkeys_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -410,8 +349,6 @@ class User extends ModelItf {
                 Logger.error(JSON.stringify(error));
             }
         };
-
-        this.loadRoles(success, fail);
         this.loadSdis(success, fail);
         this.loadOAuthKeys(success, fail);
     }
@@ -422,7 +359,6 @@ class User extends ModelItf {
      * @method desynchronize
 	 */
 	desynchronize() : void {
-		this._roles_loaded = false;
 		this._sdis_loaded = false;
         this._oauthkeys_loaded = false;
 	}
@@ -490,7 +426,6 @@ class User extends ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["roles"] = self.serializeArray(self.roles(), onlyId);
             data["sdis"] = self.serializeArray(self.sdis(), onlyId);
 			data["oauthkeys"] = self.serializeArray(self.oauthkeys(), onlyId);
 
@@ -647,32 +582,6 @@ class User extends ModelItf {
     removeOAuthKey(oauthkeyID : number, successCallback : Function, failCallback : Function) {
         this.deleteObjectAssociation(User, OAuthKey, oauthkeyID, successCallback, failCallback);
     }
-
-	/**
-	 * Add a new Role to the User and associate it in the database.
-	 * A Role can only be added once.
-	 *
-     * @method addRole
-	 * @param {Role} r The Role to link with the User. It cannot be a null value.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	addRole(roleID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(User, Role, roleID, successCallback, failCallback);
-	}
-
-	/**
-	 * Remove a Role from the User: the association is removed both in the object and in database.
-	 * The Role can only be removed if it exists first in the list of associated Roles, else an exception is thrown.
-	 *
-     * @method removeRole
-	 * @param {Role} r The Role to remove from that User
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	removeRole(roleID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(User, Role, roleID, successCallback, failCallback);
-	}
 
 	/**
      * Create model in database.
