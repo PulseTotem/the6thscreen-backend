@@ -42,18 +42,6 @@ class Team extends ModelItf {
      */
     private _users_loaded : boolean;
 
-    /**
-     * @property _sdis : All SDI owned by the team
-     * @private
-     */
-    private _sdis : Array<SDI>;
-
-    /**
-     * @property _sdis_loaded : Determine if the list of SDIs has been loaded
-     * @private
-     */
-    private _sdis_loaded : boolean;
-
     constructor(name : string, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
         super(id, complete, createdAt, updatedAt);
 
@@ -64,9 +52,6 @@ class Team extends ModelItf {
 
         this._users = new Array<User>();
         this._users_loaded = false;
-
-        this._sdis = new Array<SDI>();
-        this._sdis_loaded = false;
     }
 
     setName(name : string) {
@@ -94,7 +79,30 @@ class Team extends ModelItf {
                 failCallback(error);
             };
 
-            this.getUniquelyAssociatedObject("")
+            this.getUniquelyAssociatedObject(Team, User, success, fail, 0, "Owners");
+        } else {
+            successCallback();
+        }
+    }
+
+    users() : Array<User> {
+        return this._users;
+    }
+
+    loadUsers(successCallback : Function, failCallback : Function) {
+        if (this._users_loaded) {
+            var self = this;
+            var success = function (users) {
+                self._users = users;
+                self._users_loaded = true;
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getAssociatedObjects(Team, User, success, fail);
         } else {
             successCallback();
         }
