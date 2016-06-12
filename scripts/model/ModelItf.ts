@@ -434,7 +434,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
 	 */
-	associateObject(modelClass1 : any, modelClass2: any, id2 : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+	associateObject(modelClass1 : any, modelClass2: any, id2 : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0, linkName : string = null) {
 		if (!this.getId()) {
             failCallback(new ModelException("The object to be associated does not exist yet. The association can't be created."), attemptNumber);
             return;
@@ -454,7 +454,13 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to associate objects with URL:"+associationURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-		var associationURL = BackendConfig.getDBBaseURL() + BackendConfig.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
+		var associationURL;
+
+		if (linkName == null) {
+			associationURL = BackendConfig.getDBBaseURL() + BackendConfig.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
+		} else {
+			associationURL = BackendConfig.getDBBaseURL() + BackendConfig.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), linkName, id2.toString());
+		}
 
 		RestClient.put(associationURL, {}, success, fail);
 	}
@@ -470,7 +476,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
 	 */
-	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+	deleteObjectAssociation(modelClass1 : any, modelClass2 : any, id2 : number, successCallback : Function, failCallback : Function, attemptNumber : number = 0, linkName : string = null) {
 		if (!this.getId()) {
             failCallback(new ModelException("An association can't be deleted if the object does not exist."), attemptNumber);
             return;
@@ -490,7 +496,13 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to delete an association between objects with URL:"+deleteAssoURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-		var deleteAssoURL = BackendConfig.getDBBaseURL() + BackendConfig.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
+		var deleteAssoURL;
+
+		if (linkName == null) {
+			deleteAssoURL = BackendConfig.getDBBaseURL() + BackendConfig.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), modelClass2.getTableName(), id2.toString());
+		} else {
+			deleteAssoURL = BackendConfig.getDBBaseURL() + BackendConfig.associatedObjectEndpoint(modelClass1.getTableName(), this.getId().toString(), linkName, id2.toString());
+		}
 
 		RestClient.delete(deleteAssoURL, success, fail);
 	}
@@ -505,7 +517,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    getAssociatedObjects(modelClass : any, modelClassAssociated : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+    getAssociatedObjects(modelClass : any, modelClassAssociated : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0, linkName : string = null) {
         if (!this.getId()) {
             failCallback(new ModelException("You cannot retrieve associated objects if the object does not exist."), attemptNumber);
             return;
@@ -539,7 +551,13 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-        var urlAssociatedObjects = BackendConfig.getDBBaseURL() + BackendConfig.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
+        var urlAssociatedObjects;
+
+		if (linkName == null) {
+			urlAssociatedObjects = BackendConfig.getDBBaseURL() + BackendConfig.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
+		} else {
+			urlAssociatedObjects = BackendConfig.getDBBaseURL() + BackendConfig.associationEndpoint(modelClass.getTableName(), this.getId().toString(), linkName);
+		}
 
         RestClient.get(urlAssociatedObjects, success, fail);
     }
@@ -554,7 +572,7 @@ class ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+    getUniquelyAssociatedObject(modelClass : any, modelClassAssociated : any, successCallback : Function, failCallback : Function, attemptNumber : number = 0, linkName : string = null) {
         if (!this.getId()) {
             failCallback(new ModelException("You cannot retrieve uniquely associated object if the object does not exist."), attemptNumber);
             return;
@@ -584,7 +602,13 @@ class ModelItf {
             failCallback(new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
         };
 
-        var urlUniqueAssociatedOject = BackendConfig.getDBBaseURL() + BackendConfig.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
+        var urlUniqueAssociatedOject;
+
+		if (linkName == null) {
+			urlUniqueAssociatedOject = BackendConfig.getDBBaseURL() + BackendConfig.associationEndpoint(modelClass.getTableName(), this.getId().toString(), modelClassAssociated.getTableName());
+		} else {
+			urlUniqueAssociatedOject =  BackendConfig.getDBBaseURL() + BackendConfig.associationEndpoint(modelClass.getTableName(), this.getId().toString(), linkName);
+		}
 
         RestClient.get(urlUniqueAssociatedOject, success, fail);
     }
