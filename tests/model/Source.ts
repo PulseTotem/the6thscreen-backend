@@ -539,6 +539,95 @@ describe('Source', function() {
 
 	});
 
+	describe('#linkProvider', function () {
+		it('should call the right request', function (done) {
+			var c = new Source("machin", "desc", "method", 43, false, 28);
+			var s = new Provider("toto", "titi", 42);
+
+			var response1:any = [];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), Provider.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var provider = c.provider();
+				assert.equal(provider, null, "The provider is not a null value: " + JSON.stringify(provider));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the provider");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.put(BackendConfig.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), Provider.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the linkInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the provider in database.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.linkProvider(s.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadProvider(success, fail);
+		});
+
+	});
+
+	describe('#unlinkProvider', function () {
+		it('should call the right request', function (done) {
+			var c = new Source("machin", "desc", "method", 43, false, 28);
+			var s = new Provider("toto", "titi", 42);
+
+			var response1:any = s.toJSONObject();
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Source.getTableName(), c.getId().toString(), Provider.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var provider = c.provider();
+				assert.deepEqual(provider, s, "The provider is not the expected value");
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the provider");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.delete(BackendConfig.associatedObjectEndpoint(Source.getTableName(), c.getId().toString(), Provider.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the unlinkInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.unlinkProvider(s.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadProvider(success, fail);
+		});
+
+	});
+
 	describe('#addParamType', function() {
 		it('should call the right request', function(done) {
 			var c = new Source("machin", "desc", "method", 43, false, 28);

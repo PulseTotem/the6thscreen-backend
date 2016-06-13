@@ -1,9 +1,10 @@
 /**
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@pulsetotem.fr>
  */
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./Service.ts" />
+/// <reference path="./Provider.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -40,20 +41,18 @@ class OAuthKey extends ModelItf {
     private _value : string;
 
     /**
-     * Service property.
-     *
-     * @property _service
-     * @type Service
+     * @property _provider : the Provider associated to the oauthKey
+     * @type Provider
      */
-    private _service : Service;
+    private _provider : Provider;
 
     /**
-     * Lazy loading for Service property.
+     * Lazy loading for Provider property.
      *
-     * @property _service_loaded
+     * @property _provider_loaded
      * @type boolean
      */
-    private _service_loaded : boolean;
+    private _provider_loaded : boolean;
 
     /**
      * Constructor.
@@ -73,8 +72,8 @@ class OAuthKey extends ModelItf {
         this.setDescription(description);
         this.setValue(value);
 
-        this._service = null;
-        this._service_loaded = false;
+        this._provider = null;
+        this._provider_loaded = false;
     }
 
     /**
@@ -132,29 +131,29 @@ class OAuthKey extends ModelItf {
     }
 
     /**
-     * Return the OAuthKey's service.
+     * Return the OAuthKey's provider.
      *
-     * @method service
+     * @method provider
      */
-    service() {
-        return this._service;
+    provider() {
+        return this._provider;
     }
 
     /**
-     * Load the OAuthKey's service.
+     * Load the OAuthKey's provider.
      *
-     * @method loadService
+     * @method loadProvider
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    loadService(successCallback : Function, failCallback : Function) {
-        if(! this._service_loaded) {
+    loadProvider(successCallback : Function, failCallback : Function) {
+        if(! this._provider_loaded) {
             var self = this;
-            var success : Function = function(service) {
-                if(!!service) {
-                    self._service = service;
+            var success : Function = function(provider) {
+                if(!!provider) {
+                    self._provider = provider;
                 }
-                self._service_loaded = true;
+                self._provider_loaded = true;
                 if(successCallback != null) {
                     successCallback();
                 }
@@ -166,7 +165,7 @@ class OAuthKey extends ModelItf {
                 }
             };
 
-            this.getUniquelyAssociatedObject(OAuthKey, Service, success, fail);
+            this.getUniquelyAssociatedObject(OAuthKey, Provider, success, fail);
         } else {
             if(successCallback != null) {
                 successCallback();
@@ -188,7 +187,7 @@ class OAuthKey extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._service_loaded) {
+            if(self._provider) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -203,7 +202,7 @@ class OAuthKey extends ModelItf {
             }
         };
 
-        this.loadService(success, fail);
+        this.loadProvider(success, fail);
     }
 
     /**
@@ -212,7 +211,7 @@ class OAuthKey extends ModelItf {
      * @method desynchronize
      */
     desynchronize() : void {
-        this._service_loaded = false;
+        this._provider_loaded = false;
     }
 
     /**
@@ -249,7 +248,7 @@ class OAuthKey extends ModelItf {
             if (self.isComplete() && !!self.name()) {
 
                 var successAsso : Function = function () {
-                    self._complete = (!!self.service() && self.service().isComplete());
+                    self._complete = (!!self.provider() && self.provider().isComplete());
                     successCallback();
                 };
 
@@ -257,12 +256,7 @@ class OAuthKey extends ModelItf {
                     failCallback(error);
                 };
 
-                if (!self._service_loaded) {
-                    self.loadService(successAsso, fail);
-                } else {
-                    successAsso();
-                }
-
+                self.loadProvider(successAsso, fail);
             } else {
                 self._complete = false;
                 successCallback();
@@ -281,12 +275,16 @@ class OAuthKey extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    toCompleteJSONObject(successCallback : Function, failCallback : Function) {
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
         var self = this;
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["service"] = (self.service() !== null) ? self.service().toJSONObject() : null;
+            if (onlyId) {
+                data["provider"] = (self.provider() !== null) ? self.provider().getId() : null;
+            } else {
+                data["provider"] = (self.provider() !== null) ? self.provider().toJSONObject() : null;
+            }
             successCallback(data);
         };
 
@@ -298,30 +296,27 @@ class OAuthKey extends ModelItf {
     }
 
     /**
-     * Set the Service of the OAuthKey.
-     * As a OAuthKey can only have one Service, if the value is already set, this method throws an exception: you need first to unset the Service.
-     * Moreover the given service must be created in database.
+     * Set the Provider of the OAuthKey.
      *
-     * @method linkService
-     * @param {Service} serviceID - The Service to associate with the OAuthKey.
+     * @method linkProvider
+     * @param {number} providerID - The provider to associate with the OAuthKey.
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    linkService(serviceID : number, successCallback : Function, failCallback : Function) {
-        this.associateObject(OAuthKey, Service, serviceID, successCallback, failCallback);
+    linkProvider(providerID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(OAuthKey, Provider, providerID, successCallback, failCallback);
     }
 
     /**
-     * Unset the current Service from the OAuthKey.
-     * It both sets a null value for the object property and remove the association in database.
-     * A Service must have been set before using it, else an exception is thrown.
+     * Unset the current Provider from the OAuthKey.
      *
-     * @method unlinkService
+     * @method unlinkProvider
+     * @param {number} providerID - The provider to dissociate with the OAuthKey.
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    unlinkService(serviceID : number, successCallback : Function, failCallback : Function) {
-        this.deleteObjectAssociation(OAuthKey, Service, serviceID, successCallback, failCallback);
+    unlinkProvider(providerID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(OAuthKey, Provider, providerID, successCallback, failCallback);
     }
 
     /**

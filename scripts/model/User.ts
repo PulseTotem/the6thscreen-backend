@@ -1,14 +1,15 @@
 /**
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@pulsetotem.fr>
  */
 
 /// <reference path="../core/BackendConfig.ts" />
 /// <reference path="../core/BackendConfig.ts" />
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./Role.ts" />
 /// <reference path="./SDI.ts" />
 /// <reference path="./OAuthKey.ts" />
+/// <reference path="./Team.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -71,38 +72,6 @@ class User extends ModelItf {
 	private _cmsAuthkey : string;
 
     /**
-     * Roles property.
-     *
-     * @property _roles
-     * @type Array<Role>
-     */
-    private _roles : Array<Role>;
-
-    /**
-     * Lazy loading for Roles property.
-     *
-     * @property _roles_loaded
-     * @type boolean
-     */
-    private _roles_loaded : boolean;
-
-    /**
-     * SDIs property.
-     *
-     * @property _sdis
-     * @type Array<SDI>
-     */
-    private _sdis : Array<SDI>;
-
-    /**
-     * Lazy loading for SDIs property.
-     *
-     * @property _sdis_loaded
-     * @type boolean
-     */
-    private _sdis_loaded : boolean;
-
-    /**
      * OAuthKeys property.
      *
      * @property _oauthkeys
@@ -117,6 +86,32 @@ class User extends ModelItf {
      * @type boolean
      */
     private _oauthkeys_loaded : boolean;
+
+    /**
+     * @property _defaultTeam : default team of the user
+     * @private
+     * @type Team
+     */
+    private _defaultTeam : Team;
+
+    /**
+     * @property _defaultTeam_loaded : lazy loading for default team
+     * @private
+     */
+    private _defaultTeam_loaded : boolean;
+
+    /**
+     * @property _teams : Teams the user belongs to
+     * @private
+     * @type Array<Team>
+     */
+    private _teams : Array<Team>;
+
+    /**
+     * @property _teams_loaded : lazy loading for team property
+     * @private
+     */
+    private _teams_loaded : boolean;
 
 
     /**
@@ -141,14 +136,14 @@ class User extends ModelItf {
 	    this._token = null;
 	    this._lastIp = null;
 
-        this._roles = new Array<Role>();
-        this._roles_loaded = false;
-
-        this._sdis = new Array<SDI>();
-        this._sdis_loaded = false;
-
         this._oauthkeys = new Array<OAuthKey>();
         this._oauthkeys_loaded = false;
+
+        this._defaultTeam = null;
+        this._defaultTeam_loaded = false;
+
+        this._teams = new Array<Team>();
+        this._teams_loaded = false;
     }
 
 	/**
@@ -260,88 +255,6 @@ class User extends ModelItf {
 	}
 
     /**
-     * Return the User's roles.
-     *
-     * @method roles
-     */
-    roles() {
-        return this._roles;
-    }
-
-    /**
-     * Load the User's roles.
-     *
-     * @method loadRoles
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    loadRoles(successCallback : Function, failCallback : Function) {
-        if(! this._roles_loaded) {
-            var self = this;
-            var success : Function = function(roles) {
-                self._roles = roles;
-                self._roles_loaded = true;
-                if(successCallback != null) {
-                    successCallback();
-                }
-            };
-
-            var fail : Function = function(error) {
-                if(failCallback != null) {
-                    failCallback(error);
-                }
-            };
-
-            this.getAssociatedObjects(User, Role, success, fail);
-        } else {
-            if(successCallback != null) {
-                successCallback();
-            }
-        }
-    }
-
-    /**
-     * Return the SDIs owned by the User.
-     *
-     * @method sdis
-     */
-    sdis() {
-        return this._sdis;
-    }
-
-    /**
-     * Load the SDIs owned by the User.
-     *
-     * @method loadSdis
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    loadSdis(successCallback : Function, failCallback : Function) {
-        if(! this._sdis_loaded) {
-            var self = this;
-            var success : Function = function(sdis) {
-                self._sdis = sdis;
-                self._sdis_loaded = true;
-                if(successCallback != null) {
-                    successCallback();
-                }
-            };
-
-            var fail : Function = function(error) {
-                if(failCallback != null) {
-                    failCallback(error);
-                }
-            };
-
-            this.getAssociatedObjects(User, SDI, success, fail);
-        } else {
-            if(successCallback != null) {
-                successCallback();
-            }
-        }
-    }
-
-    /**
      * Return the OAuthKeys owned by the User.
      *
      * @method oauthkeys
@@ -382,6 +295,79 @@ class User extends ModelItf {
         }
     }
 
+    /**
+     * Return the default team of the user
+     * @returns {Team}
+     * @method defaultTeam
+     */
+    defaultTeam() {
+        return this._defaultTeam;
+    }
+
+    /**
+     * Load the default team of the User
+     *
+     * @method loadDefaultTeam
+     * @param successCallback
+     * @param failCallback
+     */
+    loadDefaultTeam(successCallback : Function, failCallback : Function) {
+        if (!this._defaultTeam_loaded) {
+            var self = this;
+            var success = function (defaultTeam) {
+                self._defaultTeam = defaultTeam;
+                self._defaultTeam_loaded = true;
+
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getUniquelyAssociatedObject(User, Team, success, fail, 0, "DefaultTeams");
+        } else {
+            successCallback();
+        }
+    }
+
+    /**
+     * Return the team of the user
+     *
+     * @method teams
+     * @returns {Array<Team>}
+     */
+    teams() {
+        return this._teams;
+    }
+
+    /**
+     * Load the teams of the user
+     *
+     * @method loadTeam
+     * @param successCallback
+     * @param failCallback
+     */
+    loadTeams(successCallback : Function, failCallback : Function) {
+        if (!this._teams_loaded) {
+            var self = this;
+            var success = function (teams) {
+                self._teams = teams;
+                self._teams_loaded = true;
+
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getAssociatedObjects(User, Team, success, fail);
+        } else {
+            successCallback();
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -396,7 +382,7 @@ class User extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._roles_loaded && self._sdis_loaded && self._oauthkeys_loaded) {
+            if(self._oauthkeys_loaded && self._defaultTeam_loaded && self._teams_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -411,9 +397,9 @@ class User extends ModelItf {
             }
         };
 
-        this.loadRoles(success, fail);
-        this.loadSdis(success, fail);
         this.loadOAuthKeys(success, fail);
+        this.loadDefaultTeam(success, fail);
+        this.loadTeams(success, fail);
     }
 
 	/**
@@ -422,9 +408,9 @@ class User extends ModelItf {
      * @method desynchronize
 	 */
 	desynchronize() : void {
-		this._roles_loaded = false;
-		this._sdis_loaded = false;
         this._oauthkeys_loaded = false;
+        this._defaultTeam_loaded = false;
+        this._teams_loaded = false;
 	}
 
 	/**
@@ -490,9 +476,13 @@ class User extends ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["roles"] = self.serializeArray(self.roles(), onlyId);
-            data["sdis"] = self.serializeArray(self.sdis(), onlyId);
-			data["oauthkeys"] = self.serializeArray(self.oauthkeys(), onlyId);
+            data["oauthkeys"] = self.serializeArray(self.oauthkeys(), onlyId);
+            if (onlyId) {
+                data["defaultTeam"] = (self.defaultTeam() !== null) ? self.defaultTeam().getId() : null;
+            } else {
+                data["defaultTeam"] = (self.defaultTeam() !== null) ? self.defaultTeam().toJSONObject() : null;
+            }
+            data["teams"] = self.serializeArray(self.teams(), onlyId);
 
             successCallback(data);
         };
@@ -596,32 +586,6 @@ class User extends ModelItf {
         RestClient.get(urlReadObject, success, fail);
     }
 
-	/**
-	 * Add a new SDI to the User and associate it in the database.
-	 * A SDI can only be added once.
-	 *
-     * @method addSDI
-	 * @param {SDI} s The SDI to link with the User. It cannot be a null value.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	addSDI(sdiID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(User, SDI, sdiID, successCallback, failCallback);
-	}
-
-	/**
-	 * Remove a SDI from the User: the association is removed both in the object and in database.
-	 * The SDI can only be removed if it exists first in the list of associated SDIs, else an exception is thrown.
-	 *
-     * @method removeSDI
-	 * @param {SDI} s The SDI to remove from that User
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	removeSDI(sdiID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(User, SDI, sdiID, successCallback, failCallback);
-	}
-
     /**
      * Add a new OAuthKey to the User and associate it in the database.
      * A OAuthKey can only be added once.
@@ -648,31 +612,54 @@ class User extends ModelItf {
         this.deleteObjectAssociation(User, OAuthKey, oauthkeyID, successCallback, failCallback);
     }
 
-	/**
-	 * Add a new Role to the User and associate it in the database.
-	 * A Role can only be added once.
-	 *
-     * @method addRole
-	 * @param {Role} r The Role to link with the User. It cannot be a null value.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	addRole(roleID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(User, Role, roleID, successCallback, failCallback);
-	}
+    /**
+     * Link the defaultTeam to the User.
+     *
+     * @method linkDefaultTeam
+     * @param defaultTeamID : The id of the default team to link with the user
+     * @param successCallback - Callback functin when success
+     * @param failCallback - Callback function when failure
+     */
+    linkDefaultTeam(defaultTeamID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(User, Team, defaultTeamID, successCallback, failCallback, 0, "DefaultTeams");
+    }
 
-	/**
-	 * Remove a Role from the User: the association is removed both in the object and in database.
-	 * The Role can only be removed if it exists first in the list of associated Roles, else an exception is thrown.
-	 *
-     * @method removeRole
-	 * @param {Role} r The Role to remove from that User
-	 * @param {Function} successCallback - The callback function when success.
+    /**
+     * Unlink the defaultTeam of the user
+     *
+     * @method unlinkDefaultTeam
+     * @param defaultTeamID : The id of the default team to unlink
+     * @param successCallback - Callback function when success
+     * @param failCallback - Callback function when failure
+     */
+    unlinkDefaultTeam(defaultTeamID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(User, Team, defaultTeamID, successCallback, failCallback, 0, "DefaultTeams");
+    }
+
+    /**
+     * Add a new Team to the User and associate it in the database.
+     * A Team can only be added once.
+     *
+     * @method addTeam
+     * @param {number} teamId - The Team to link with the User. It cannot be a null value.
+     * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
-	 */
-	removeRole(roleID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(User, Role, roleID, successCallback, failCallback);
-	}
+     */
+    addTeam(teamID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(User, Team, teamID, successCallback, failCallback);
+    }
+
+    /**
+     * Remove a Team from the User: the association is removed both in the object and in database.
+     *
+     * @method removeTeam
+     * @param {number} teamID - The team to remove from that User
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    removeTeam(teamID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(User, Team, teamID, successCallback, failCallback);
+    }
 
 	/**
      * Create model in database.

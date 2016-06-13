@@ -100,25 +100,22 @@ describe('OAuthKey', function() {
     });
 
     describe('#checkCompleteness', function() {
-        it('should consider the object as complete if it has an ID, a name and a complete Service', function(done) {
+        it('should consider the object as complete if it has an ID, a name and a complete Provider', function(done) {
             var cpt = new OAuthKey("test","", "", 52);
 
             var response : any = {
                     "id":12,
-                    "name": "service",
-                    "description": "serviceDesc",
-                    "host": "serviceHost",
-					"oauth": true,
-					"provider": "provider",
+                    "name": "provider",
+                    "description": "providerDesc",
                     "complete": true
                 };
 
             var restClientMock = nock(BackendConfig.getDBBaseURL())
-                .get(BackendConfig.associationEndpoint(OAuthKey.getTableName(), cpt.getId().toString(), Service.getTableName()))
+                .get(BackendConfig.associationEndpoint(OAuthKey.getTableName(), cpt.getId().toString(), Provider.getTableName()))
                 .reply(200, JSON.stringify(response));
 
             var success = function() {
-                assert.ok(restClientMock.isDone(), "The mock request has not been done to get the service");
+                assert.ok(restClientMock.isDone(), "The mock request has not been done to get the provider");
                 assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
                 done();
             };
@@ -130,25 +127,22 @@ describe('OAuthKey', function() {
             cpt.checkCompleteness(success, fail);
         });
 
-        it('should not consider the object as complete if it has an ID, a name and an Service which is not complete itself', function(done) {
+        it('should not consider the object as complete if it has an ID, a name and a Provider which is not complete itself', function(done) {
             var cpt = new OAuthKey("test","", "", 52);
 
             var response : any = {
                     "id":12,
-                    "name": "service",
-                    "description": "serviceDesc",
-                    "host": "serviceHost",
-					"oauth": true,
-					"provider": "provider",
+                    "name": "provider",
+                    "description": "provider",
                     "complete": false
                 };
 
             var restClientMock = nock(BackendConfig.getDBBaseURL())
-                .get(BackendConfig.associationEndpoint(OAuthKey.getTableName(), cpt.getId().toString(), Service.getTableName()))
+                .get(BackendConfig.associationEndpoint(OAuthKey.getTableName(), cpt.getId().toString(), Provider.getTableName()))
                 .reply(200, JSON.stringify(response));
 
             var success = function() {
-                assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+                assert.ok(restClientMock.isDone(), "The mock request has not been done to get the provider");
                 assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
                 done();
             };
@@ -229,31 +223,31 @@ describe('OAuthKey', function() {
         });
     });
 
-    describe('#linkService', function () {
+    describe('#linkProvider', function () {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
-            var s = new Service("service", "serviceDesc", "serviceHost", true, "provider", "logo", 42);
+            var s = new Provider("provider", "providerDesc", 42);
 
             var response1:any = [];
 
             var restClientMock1 = nock(BackendConfig.getDBBaseURL())
-                .get(BackendConfig.associationEndpoint(OAuthKey.getTableName(), c.getId().toString(), Service.getTableName()))
+                .get(BackendConfig.associationEndpoint(OAuthKey.getTableName(), c.getId().toString(), Provider.getTableName()))
                 .reply(200, JSON.stringify(response1));
 
             var success = function() {
-                var service = c.service();
-                assert.equal(service, null, "The service is not a null value: " + JSON.stringify(service));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+                var provider = c.provider();
+                assert.equal(provider, null, "The provider is not a null value: " + JSON.stringify(provider));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the provider");
 
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
-                    .put(BackendConfig.associatedObjectEndpoint(OAuthKey.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
+                    .put(BackendConfig.associatedObjectEndpoint(OAuthKey.getTableName(), c.getId().toString(), Provider.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
                 var success2 = function() {
                     //assert.ok(retour, "The return of the linkService is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the service in database.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the provider in database.");
                     done();
                 };
 
@@ -261,37 +255,37 @@ describe('OAuthKey', function() {
                     done(err);
                 };
 
-                c.linkService(s.getId(), success2, fail2);
+                c.linkProvider(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
                 done(err);
             };
 
-            c.loadService(success, fail);
+            c.loadProvider(success, fail);
         });
     });
 
-    describe('#unlinkService', function () {
+    describe('#unlinkProvider', function () {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
-            var s = new Service("service", "serviceDesc", "serviceHost", true, "provider", "logo", 42);
+            var s = new Provider("provider", "providerDesc", 42);
 
             var response1:any = s.toJSONObject();
 
             var restClientMock1 = nock(BackendConfig.getDBBaseURL())
-                .get(BackendConfig.associationEndpoint(OAuthKey.getTableName(), c.getId().toString(), Service.getTableName()))
+                .get(BackendConfig.associationEndpoint(OAuthKey.getTableName(), c.getId().toString(), Provider.getTableName()))
                 .reply(200, JSON.stringify(response1));
 
             var success = function() {
-                var service = c.service();
-                assert.deepEqual(service, s, "The service is not the expected value");
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the service");
+                var provider = c.provider();
+                assert.deepEqual(provider, s, "The provider is not the expected value");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the provider");
 
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
-                    .delete(BackendConfig.associatedObjectEndpoint(OAuthKey.getTableName(), c.getId().toString(), Service.getTableName(), s.getId().toString()))
+                    .delete(BackendConfig.associatedObjectEndpoint(OAuthKey.getTableName(), c.getId().toString(), Provider.getTableName(), s.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
 
@@ -305,14 +299,14 @@ describe('OAuthKey', function() {
                     done(err);
                 };
 
-                c.unlinkService(s.getId(), success2, fail2);
+                c.unlinkProvider(s.getId(), success2, fail2);
             };
 
             var fail = function(err) {
                 done(err);
             };
 
-            c.loadService(success, fail);
+            c.loadProvider(success, fail);
         });
 
     });

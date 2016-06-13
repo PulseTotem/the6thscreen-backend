@@ -1,13 +1,13 @@
 /**
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@pulsetotem.fr>
  */
 
 /// <reference path="./ModelItf.ts" />
-/// <reference path="./User.ts" />
+/// <reference path="./Team.ts" />
 /// <reference path="./Zone.ts" />
 /// <reference path="./Profil.ts" />
 /// <reference path="./ThemeSDI.ts" />
-/// <reference path="./AuthorizedClient.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -42,22 +42,6 @@ class SDI extends ModelItf {
      * @type string
      */
     private _allowedHost : string;
-
-    /**
-     * Users property.
-     *
-     * @property _users
-     * @type Array<User>
-     */
-    private _users : Array<User>;
-
-    /**
-     * Lazy loading for Users property.
-     *
-     * @property _users_loaded
-     * @type boolean
-     */
-    private _users_loaded : boolean;
 
     /**
      * Zones property.
@@ -108,20 +92,18 @@ class SDI extends ModelItf {
     private _theme_loaded : boolean;
 
     /**
-     * AuthorizedClients property
-     *
-     * @property _authorizedClients
-     * @type Array<AuthorizedClient>
+     * @property _team : The team who manages this SDI
+     * @type Team
+     * @private
      */
-    private _authorizedClients : Array<AuthorizedClient>;
+    private _team : Team;
 
     /**
-     * Lazy loading for authorizedClients property
-     *
-     * @property _authorizedClients_loaded
+     * @property _team_loaded : lazy loading for team property
      * @type boolean
+     * @private
      */
-    private _authorizedClients_loaded : boolean;
+    private _team_loaded : boolean;
 
     /**
      * Origine SDI information if cloned
@@ -157,9 +139,6 @@ class SDI extends ModelItf {
 	    this.setDescription(description);
 	    this.setAllowedHost(allowedHost);
 
-        this._users = new Array<User>();
-        this._users_loaded = false;
-
         this._zones = new Array<Zone>();
         this._zones_loaded = false;
 
@@ -169,8 +148,8 @@ class SDI extends ModelItf {
         this._theme = null;
         this._theme_loaded = false;
 
-        this._authorizedClients = new Array<AuthorizedClient>();
-        this._authorizedClients_loaded = false;
+        this._team = null;
+        this._team_loaded = false;
 
         this._origineSDI = null;
         this._origineSDI_loaded = false;
@@ -228,47 +207,6 @@ class SDI extends ModelItf {
      */
     allowedHost() {
         return this._allowedHost;
-    }
-
-    /**
-     * Return the Users
-     *
-     * @method users
-     */
-    users() {
-        return this._users;
-    }
-
-    /**
-     * Load the SDI's users.
-     *
-     * @method loadUsers
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    loadUsers(successCallback : Function, failCallback : Function) {
-        if(! this._users_loaded) {
-            var self = this;
-            var success : Function = function(users) {
-                self._users = users;
-                self._users_loaded = true;
-                if(successCallback != null) {
-                    successCallback();
-                }
-            };
-
-            var fail : Function = function(error) {
-                if(failCallback != null) {
-                    failCallback(error);
-                }
-            };
-
-            this.getAssociatedObjects(SDI, User, success, fail);
-        } else {
-            if(successCallback != null) {
-                successCallback();
-            }
-        }
     }
 
     /**
@@ -395,43 +333,38 @@ class SDI extends ModelItf {
     }
 
     /**
-     * Return the SDI's authorized clients.
-     *
-     * @method authorizedClients
+     * Return the SDI team
+     * @method team
+     * @returns {Team}
      */
-    authorizedClients() {
-        return this._authorizedClients;
+    team() {
+        return this._team;
     }
 
     /**
-     * Load the SDI's authorizedClients.
+     * Load the SDI's team
      *
-     * @method loadAuthorizedClients
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
+     * @method loadTeam
+     * @param successCallback
+     * @param failCallback
      */
-    loadAuthorizedClients(successCallback : Function, failCallback : Function) {
-        if(! this._authorizedClients_loaded) {
+    loadTeam(successCallback : Function, failCallback : Function) {
+        if (!this._team_loaded) {
             var self = this;
-            var success : Function = function(authorizedClients) {
-                self._authorizedClients = authorizedClients;
-                self._authorizedClients_loaded = true;
-                if(successCallback != null) {
-                    successCallback();
-                }
-            };
+            var success = function (team) {
+                self._team = team;
+                self._team_loaded = true;
 
-            var fail : Function = function(error) {
-                if(failCallback != null) {
-                    failCallback(error);
-                }
-            };
-
-            this.getAssociatedObjects(SDI, AuthorizedClient, success, fail);
-        } else {
-            if(successCallback != null) {
                 successCallback();
-            }
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getUniquelyAssociatedObject(SDI, Team, success, fail);
+        } else {
+            successCallback();
         }
     }
 
@@ -486,7 +419,7 @@ class SDI extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._users_loaded && self._profils_loaded && self._zones_loaded && self._theme_loaded) {
+            if(self._profils_loaded && self._zones_loaded && self._theme_loaded && self._team_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -501,10 +434,10 @@ class SDI extends ModelItf {
             }
         };
 
-        this.loadUsers(success, fail);
         this.loadProfils(success, fail);
         this.loadZones(success, fail);
         this.loadTheme(success, fail);
+        this.loadTeam(success, fail);
     }
 
 	/**
@@ -514,7 +447,6 @@ class SDI extends ModelItf {
 	 */
 	desynchronize() : void {
 		this._profils_loaded = false;
-		this._users_loaded = false;
 		this._zones_loaded = false;
         this._theme_loaded = false;
         this._origineSDI_loaded = false;
@@ -569,12 +501,13 @@ class SDI extends ModelItf {
 
             if (onlyId) {
                 data["theme"] = (self.theme() !== null) ? self.theme().getId() : null;
+                data["team"] = (self.team() !== null) ? self.team().getId() : null;
             } else {
                 data["theme"] = (self.theme() !== null) ? self.theme().toJSONObject() : null;
+                data["team"] = (self.theme() !== null) ? self.team().toJSONObject() : null;
             }
 
             data["profils"] = self.serializeArray(self.profils(), onlyId);
-            data["users"] = self.serializeArray(self.users(), onlyId);
             data["zones"] = self.serializeArray(self.zones(), onlyId);
 
             successCallback(data);
@@ -586,32 +519,6 @@ class SDI extends ModelItf {
 
         this.loadAssociations(success, fail);
     }
-
-	/**
-	 * Add a new User to the SDI and associate it in the database.
-	 * A User can only be added once.
-	 *
-     * @method addUser
-	 * @param {User} u The User to add inside the SDI. It cannot be a null value.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	addUser(userID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(SDI, User, userID, successCallback, failCallback);
-	}
-
-	/**
-	 * Remove a User from the SDI: the association is removed both in the object and in database.
-	 * The User can only be removed if it exists first in the list of associated Users, else an exception is thrown.
-	 *
-     * @method removeUser
-	 * @param {User} u The User to remove from that SDI
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	removeUser(userID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(SDI, User, userID, successCallback, failCallback);
-	}
 
 	/**
 	 * Add a new Zone to the SDI and associate it in the database.
@@ -686,6 +593,29 @@ class SDI extends ModelItf {
      */
     unlinkTheme(themeSDIID : number, successCallback : Function, failCallback : Function) {
         this.deleteObjectAssociation(SDI, ThemeSDI, themeSDIID, successCallback, failCallback);
+    }
+
+    /**
+     * Set the Team of the SDI.
+     *
+     * @method linkTeam
+     * @param {number} teamID The id of the team  to associate with the SDI.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    linkTeam(teamID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(SDI, Team, teamID, successCallback, failCallback);
+    }
+
+    /**
+     * Unset the current Team from the SDI.
+     *
+     * @method unlinkTeam
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    unlinkTeam(teamID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(SDI, Team, teamID, successCallback, failCallback);
     }
 
     /**
@@ -822,161 +752,152 @@ class SDI extends ModelItf {
                     var successLinkThemeSDI = function () {
                         Logger.debug("Success link theme SDI");
 
-                        var userSize = self.users().length;
-                        var counterUsers = 0;
+                        var successLinkTeam = function () {
+                            Logger.debug("Success link team");
 
-                        var successAddUser = function () {
-                            Logger.debug("Success add user ("+counterUsers+" / "+userSize+")");
+                            var zoneSize = self.zones().length;
+                            var counterZones = 0;
 
-                            counterUsers++;
-                            if (counterUsers >= userSize) {
+                            var profilInfo = {
+                                "SDI": clonedSDI.getId(),
+                                "ZoneContents": {
+                                },
+                                "Calls": {
 
-                                var zoneSize = self.zones().length;
-                                var counterZones = 0;
+                                }
+                            };
 
-                                var profilInfo = {
-                                    "SDI": clonedSDI.getId(),
-                                    "ZoneContents": {
-                                    },
-                                    "Calls": {
+                            var successCloneZone = function (clonedZone : Zone) {
+                                Logger.debug("Success clone zone ");
 
-                                    }
-                                };
-
-                                var successCloneZone = function (clonedZone : Zone) {
+                                var successLoadOrigineZone = function () {
                                     Logger.debug("Success clone zone ");
 
-                                    var successLoadOrigineZone = function () {
-                                        Logger.debug("Success clone zone ");
+                                    var successLoadZAsso = function () {
+                                        Logger.debug("Success load zone asso");
 
-                                        var successLoadZAsso = function () {
-                                            Logger.debug("Success load zone asso");
+                                        var successLoadCT = function () {
+                                            Logger.debug("Success load CT ");
 
-                                            var successLoadCT = function () {
-                                                Logger.debug("Success load CT ");
+                                            var successLoadOrigineCT = function () {
+                                                var successLoadCall = function () {
 
-                                                var successLoadOrigineCT = function () {
-                                                    var successLoadCall = function () {
+                                                    var successAssoZone = function () {
+                                                        counterZones++;
 
-                                                        var successAssoZone = function () {
-                                                            counterZones++;
+                                                        if (counterZones >= zoneSize) {
 
-                                                            if (counterZones >= zoneSize) {
+                                                            var profilSize = self.profils().length;
+                                                            var counterProfil = 0;
 
-                                                                var profilSize = self.profils().length;
-                                                                var counterProfil = 0;
+                                                            var successCheckComplete = function () {
+                                                                var finalSuccess = function () {
+                                                                    successCallback(clonedSDI);
+                                                                };
 
-                                                                var successCheckComplete = function () {
-                                                                    var finalSuccess = function () {
-                                                                        successCallback(clonedSDI);
-                                                                    };
+                                                                if (clonedSDI.isComplete() != isComplete) {
+                                                                   clonedZone.update(finalSuccess, failCallback);
+                                                                } else {
+                                                                    finalSuccess();
+                                                                }
+                                                            };
 
-                                                                    if (clonedSDI.isComplete() != isComplete) {
-                                                                       clonedZone.update(finalSuccess, failCallback);
-                                                                    } else {
-                                                                        finalSuccess();
+                                                            var successCloneProfil = function (clonedProfil:Profil) {
+
+                                                                var successAssoProfil = function () {
+                                                                    counterProfil++;
+
+                                                                    if (counterProfil >= profilSize) {
+                                                                        clonedSDI.checkCompleteness(successCheckComplete, failCallback);
                                                                     }
                                                                 };
 
-                                                                var successCloneProfil = function (clonedProfil:Profil) {
+                                                                clonedSDI.addProfil(clonedProfil.getId(), successAssoProfil, failCallback);
+                                                            };
 
-                                                                    var successAssoProfil = function () {
-                                                                        counterProfil++;
-
-                                                                        if (counterProfil >= profilSize) {
-                                                                            clonedSDI.checkCompleteness(successCheckComplete, failCallback);
-                                                                        }
-                                                                    };
-
-                                                                    clonedSDI.addProfil(clonedProfil.getId(), successAssoProfil, failCallback);
-                                                                };
-
-                                                                if (profilSize > 0) {
-                                                                    Logger.debug("Profil info : "+JSON.stringify(profilInfo));
-                                                                    self.profils().forEach(function (profil:Profil) {
-                                                                        profil.clone(successCloneProfil, failCallback, profilInfo);
-                                                                    });
-                                                                } else {
-                                                                    clonedSDI.checkCompleteness(successCheckComplete, failCallback);
-                                                                }
+                                                            if (profilSize > 0) {
+                                                                Logger.debug("Profil info : "+JSON.stringify(profilInfo));
+                                                                self.profils().forEach(function (profil:Profil) {
+                                                                    profil.clone(successCloneProfil, failCallback, profilInfo);
+                                                                });
+                                                            } else {
+                                                                clonedSDI.checkCompleteness(successCheckComplete, failCallback);
                                                             }
-                                                        };
-
-                                                        counterCTCall++;
-
-                                                        if (counterCTCall >= nbCTs) {
-                                                            for (var i = 0; i < nbCTs; i++) {
-                                                                var callType = clonedZone.callTypes()[i];
-                                                                var callTypeOrigine = callType.origineCallType();
-
-                                                                for (var j = 0; j < callTypeOrigine.calls().length; j++) {
-                                                                    var call = callTypeOrigine.calls()[j];
-                                                                    profilInfo["Calls"][call.getId()] = callType.getId();
-                                                                }
-                                                            }
-                                                            clonedSDI.addZone(clonedZone.getId(), successAssoZone, failCallback);
                                                         }
-
                                                     };
 
-                                                    counterCTs++;
-                                                    var counterCTCall = 0;
+                                                    counterCTCall++;
 
-                                                    if (counterCTs >= nbCTs) {
+                                                    if (counterCTCall >= nbCTs) {
                                                         for (var i = 0; i < nbCTs; i++) {
                                                             var callType = clonedZone.callTypes()[i];
                                                             var callTypeOrigine = callType.origineCallType();
 
-                                                            Logger.debug("Obtained callType : "+callType.getId());
-                                                            Logger.debug("Obtained origine : "+JSON.stringify(callTypeOrigine));
-
-                                                            callTypeOrigine.loadCalls(successLoadCall, failCallback);
+                                                            for (var j = 0; j < callTypeOrigine.calls().length; j++) {
+                                                                var call = callTypeOrigine.calls()[j];
+                                                                profilInfo["Calls"][call.getId()] = callType.getId();
+                                                            }
                                                         }
+                                                        clonedSDI.addZone(clonedZone.getId(), successAssoZone, failCallback);
                                                     }
 
                                                 };
 
-                                                for (var i = 0; i < clonedZone.origineZone().zoneContents().length; i++) {
-                                                    var zoneContent = clonedZone.origineZone().zoneContents()[i];
+                                                counterCTs++;
+                                                var counterCTCall = 0;
 
-                                                    profilInfo["ZoneContents"][zoneContent.getId()] = clonedZone.getId();
+                                                if (counterCTs >= nbCTs) {
+                                                    for (var i = 0; i < nbCTs; i++) {
+                                                        var callType = clonedZone.callTypes()[i];
+                                                        var callTypeOrigine = callType.origineCallType();
+
+                                                        Logger.debug("Obtained callType : "+callType.getId());
+                                                        Logger.debug("Obtained origine : "+JSON.stringify(callTypeOrigine));
+
+                                                        callTypeOrigine.loadCalls(successLoadCall, failCallback);
+                                                    }
                                                 }
 
-                                                var nbCTs = clonedZone.callTypes().length;
-                                                var counterCTs = 0;
-
-                                                Logger.debug("NBCTS : "+nbCTs);
-
-                                                for (var i = 0; i < nbCTs; i++) {
-                                                    Logger.debug("Loop loadOrigine :"+i);
-                                                    var ct = clonedZone.callTypes()[i];
-                                                    Logger.debug("Clone : load origine for callType : "+ct.getId());
-                                                    ct.loadOrigineCallType(successLoadOrigineCT, failCallback);
-                                                }
                                             };
 
-                                            clonedZone.loadCallTypes(successLoadCT, failCallback);
+                                            for (var i = 0; i < clonedZone.origineZone().zoneContents().length; i++) {
+                                                var zoneContent = clonedZone.origineZone().zoneContents()[i];
+
+                                                profilInfo["ZoneContents"][zoneContent.getId()] = clonedZone.getId();
+                                            }
+
+                                            var nbCTs = clonedZone.callTypes().length;
+                                            var counterCTs = 0;
+
+                                            Logger.debug("NBCTS : "+nbCTs);
+
+                                            for (var i = 0; i < nbCTs; i++) {
+                                                Logger.debug("Loop loadOrigine :"+i);
+                                                var ct = clonedZone.callTypes()[i];
+                                                Logger.debug("Clone : load origine for callType : "+ct.getId());
+                                                ct.loadOrigineCallType(successLoadOrigineCT, failCallback);
+                                            }
                                         };
 
-                                        clonedZone.origineZone().desynchronize();
-                                        clonedZone.origineZone().loadAssociations(successLoadZAsso, failCallback);
+                                        clonedZone.loadCallTypes(successLoadCT, failCallback);
                                     };
 
-                                    clonedZone.loadOrigineZone(successLoadOrigineZone, failCallback);
+                                    clonedZone.origineZone().desynchronize();
+                                    clonedZone.origineZone().loadAssociations(successLoadZAsso, failCallback);
                                 };
 
-                                self.zones().forEach(function (zone : Zone) {
-                                    zone.clone(successCloneZone, failCallback);
-                                });
-                            }
+                                clonedZone.loadOrigineZone(successLoadOrigineZone, failCallback);
+                            };
+
+                            self.zones().forEach(function (zone : Zone) {
+                                zone.clone(successCloneZone, failCallback);
+                            });
                         };
 
-                        if (userSize > 0) {
-                            self.users().forEach( function (user : User) {
-                                clonedSDI.addUser(user.getId(), successAddUser, failCallback);
-                            });
+                        if (self.team() != null) {
+                            clonedSDI.linkTeam(self.team().getId(), successLinkTeam, failCallback);
                         } else {
-                            successAddUser();
+                            successLinkTeam();
                         }
 
                     };

@@ -1,5 +1,6 @@
 /**
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@pulsetotem.fr>
  */
 
 /// <reference path="./ModelItf.ts" />
@@ -8,6 +9,7 @@
 /// <reference path="./ParamValue.ts" />
 /// <reference path="./Service.ts" />
 /// <reference path="./CallType.ts" />
+/// <reference path="./Provider.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -140,6 +142,20 @@ class Source extends ModelItf {
     private _call_types_loaded : boolean;
 
     /**
+     * @property _provider : the provider of this source
+     * @type Provider
+     * @private
+     */
+    private _provider : Provider;
+
+    /**
+     * @property _provider_loaded : lazy loading for provider property
+     * @type boolean
+     * @private
+     */
+    private _provider_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -174,6 +190,9 @@ class Source extends ModelItf {
 
         this._call_types = new Array<CallType>();
         this._call_types_loaded = false;
+
+        this._provider = null;
+        this._provider_loaded = false;
     }
 
 	/**
@@ -476,6 +495,43 @@ class Source extends ModelItf {
         }
     }
 
+    /**
+     * Return the provider of this source
+     *
+     * @method provider
+     * @returns {Provider}
+     */
+    provider() {
+        return this._provider;
+    }
+
+    /**
+     * Load the provider of this source
+     *
+     * @method loadProvider
+     * @param successCallback
+     * @param failCallback
+     */
+    loadProvider(successCallback : Function, failCallback : Function) {
+        if (! this._provider_loaded) {
+            var self = this;
+            var success = function (provider) {
+                self._provider = provider;
+                self._provider_loaded = true;
+
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getUniquelyAssociatedObject(Source, Provider, success, fail);
+        } else {
+            successCallback();
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -490,7 +546,7 @@ class Source extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._param_types_loaded && self._param_values_loaded && self._info_type_loaded && self._service_loaded) {
+            if(self._param_types_loaded && self._param_values_loaded && self._info_type_loaded && self._service_loaded && self._provider_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -510,6 +566,7 @@ class Source extends ModelItf {
         this.loadParamValues(success, fail);
         this.loadInfoType(success, fail);
 	    this.loadService(success, fail);
+        this.loadProvider(success, fail);
     }
 
 	/**
@@ -522,6 +579,7 @@ class Source extends ModelItf {
 		this._param_types_loaded = false;
 		this._param_values_loaded = false;
 		this._service_loaded = false;
+        this._provider_loaded = false;
 	}
 
 	/**
@@ -608,9 +666,11 @@ class Source extends ModelItf {
 	        if (onlyId) {
 		        data["service"] = (self.service() !== null) ? self.service().getId() : null;
 		        data["infoType"] = (self.infoType() !== null) ? self.infoType().getId() : null;
+                data["provider"] = (self.provider() !== null) ? self.provider().getId() : null;
 	        } else {
 		        data["service"] = (self.service() !== null) ? self.service().toJSONObject() : null;
 		        data["infoType"] = (self.infoType() !== null) ? self.infoType().toJSONObject() : null;
+                data["provider"] = (self.provider() !== null) ? self.provider().toJSONObject() : null;
 	        }
 
             data["paramTypes"] = self.serializeArray(self.paramTypes(), onlyId);
@@ -675,6 +735,31 @@ class Source extends ModelItf {
 	unlinkInfoType(typeID : number, successCallback : Function, failCallback : Function) {
 		this.deleteObjectAssociation(Source, InfoType, typeID, successCallback, failCallback);
 	}
+
+    /**
+     * Set the Provider of the Source.
+     * As a Source can only have one Provider.
+     *
+     * @method linkProvider
+     * @param {number} providerID The provider to associate with the Source.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    linkProvider(providerID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(Source, Provider, providerID, successCallback, failCallback);
+    }
+
+    /**
+     * Unset the current Provider from the Source.
+     *
+     * @method unlinkProvider
+     * * @param {number} providerID The provider to dissociate with the Source.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    unlinkProvider(providerID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(Source, Provider, providerID, successCallback, failCallback);
+    }
 
 	/**
 	 * Add a new ParamType to the Source and associate it in the database.
