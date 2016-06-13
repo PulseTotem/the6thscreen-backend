@@ -6,7 +6,6 @@
 /// <reference path="./Call.ts" />
 /// <reference path="./ZoneContent.ts" />
 /// <reference path="./SDI.ts" />
-/// <reference path="./AuthorizedClient.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
@@ -74,22 +73,6 @@ class Profil extends ModelItf {
     private _sdi_loaded : boolean;
 
 	/**
-	 * AuthorizedClients property.
-	 *
-	 * @property _authorizedClients
-	 * @type Array<AuthorizedClient>
-	 */
-	private _authorizedClients : Array<AuthorizedClient>;
-
-	/**
-	 * Lazy loading for authorizedClients property.
-	 *
-	 * @property _authorizedClients_loaded
-	 * @type boolean
-	 */
-	private _authorizedClients_loaded : boolean;
-
-	/**
 	 * The original profil if the current object is a clone
 	 *
 	 * @property _origineProfil
@@ -128,9 +111,6 @@ class Profil extends ModelItf {
 
 	    this._sdi = null;
 	    this._sdi_loaded = false;
-
-	    this._authorizedClients = new Array<AuthorizedClient>();
-	    this._authorizedClients_loaded = false;
 
 	    this._origineProfil = null;
 	    this._origineProfil_loaded = false;
@@ -271,48 +251,6 @@ class Profil extends ModelItf {
 			};
 
 			this.getUniquelyAssociatedObject(Profil, SDI, success, fail);
-		} else {
-			if(successCallback != null) {
-				successCallback();
-			}
-		}
-	}
-
-	/**
-	 * Return the Profil's authorizedClients.
-	 *
-	 * @method authorizedClients
-	 * @return {Array<AuthorizedClient>} The Profil's authorizedClients.
-	 */
-	authorizedClients() : Array<AuthorizedClient> {
-		return this._authorizedClients;
-	}
-
-	/**
-	 * Load the Profil's authorizedClients.
-	 *
-	 * @method loadAuthorizedClients
-	 * @param {Function} successCallback - The callback function when success.
-	 * @param {Function} failCallback - The callback function when fail.
-	 */
-	loadAuthorizedClients(successCallback : Function, failCallback : Function) {
-		if(! this._authorizedClients_loaded) {
-			var self = this;
-			var success : Function = function(authorizedClients) {
-				self._authorizedClients = authorizedClients;
-				self._authorizedClients_loaded = true;
-				if(successCallback != null) {
-					successCallback();
-				}
-			};
-
-			var fail : Function = function(error) {
-				if(failCallback != null) {
-					failCallback(error);
-				}
-			};
-
-			this.getAssociatedObjects(Profil, AuthorizedClient, success, fail);
 		} else {
 			if(successCallback != null) {
 				successCallback();
