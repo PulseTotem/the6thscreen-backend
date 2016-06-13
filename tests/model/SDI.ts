@@ -141,103 +141,6 @@ describe('SDI', function() {
 		})
 	});
 
-	describe('#addUser', function() {
-		it('should call the right request', function(done) {
-			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("mavaleur", "", "", "", 12);
-
-			var response1 : any = [];
-
-			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
-				.get(BackendConfig.associationEndpoint(SDI.getTableName(), c.getId().toString(), User.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var users = c.users();
-
-                assert.deepEqual(users, [], "The user is not an empty array: "+JSON.stringify(users));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the users");
-
-				var emptyResponse : any = {};
-
-				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
-                    .put(BackendConfig.associatedObjectEndpoint(SDI.getTableName(), c.getId().toString(), User.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(emptyResponse));
-
-
-                var success2 = function() {
-                    //assert.ok(retour, "The return of the addUser is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the user in database.");
-                    done();
-                };
-
-                var fail2 = function(err) {
-                    done(err);
-                };
-
-                c.addUser(pv.getId(), success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadUsers(success, fail);
-		});
-	});
-
-	describe('#removeUser', function() {
-		it('should call the right request', function(done) {
-			var c = new SDI("toto", "blabla", "toto", 52);
-			var pv = new User("mavaleur", "", "", "", 12);
-
-			var response1 : any = [
-					{
-						"username": "mavaleur",
-						"id": 12,
-						"complete": false
-					}
-				];
-
-			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
-				.get(BackendConfig.associationEndpoint(SDI.getTableName(), c.getId().toString(), User.getTableName()))
-				.reply(200, JSON.stringify(response1));
-
-            var success = function() {
-                var users = c.users();
-
-                assert.deepEqual(users, [pv], "The user array is not an array fill only with PV: "+JSON.stringify(users));
-                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the users");
-
-				var emptyResponse : any = {};
-
-				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
-                    .delete(BackendConfig.associatedObjectEndpoint(SDI.getTableName(), c.getId().toString(), User.getTableName(), pv.getId().toString()))
-                    .reply(200, JSON.stringify(emptyResponse));
-
-
-                var success2 = function() {
-                    //assert.ok(retour, "The return of the removeUser is false.");
-                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the user in database.");
-                    done();
-                };
-
-                var fail2 = function(err) {
-                    done(err);
-                };
-
-                c.removeUser(pv.getId(), success2, fail2);
-            };
-
-            var fail = function(err) {
-                done(err);
-            };
-
-			c.loadUsers(success, fail);
-		});
-
-	});
-
 	describe('#addZone', function() {
 		it('should call the right request', function(done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
@@ -520,6 +423,94 @@ describe('SDI', function() {
 			};
 
 			c.loadTheme(success, fail);
+		});
+	});
+
+	describe('#linkTeam', function () {
+		it('should call the right request', function (done) {
+			var c = new SDI("toto", "blabla", "toto", 52);
+			var s = new Team("toto",52);
+
+			var response1:any = [];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(SDI.getTableName(), c.getId().toString(), Team.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function () {
+				var team = c.team();
+				assert.equal(team, null, "The team is not a null value: " + JSON.stringify(team));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the team");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.put(BackendConfig.associatedObjectEndpoint(SDI.getTableName(), c.getId().toString(), Team.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+				var success2 = function () {
+					//assert.ok(retour, "The return of the setInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the team in database.");
+					done();
+				};
+
+				var fail2 = function (err) {
+					done(err);
+				};
+
+				c.linkTeam(s.getId(), success2, fail2);
+			};
+
+			var fail = function (err) {
+				done(err);
+			};
+
+			c.loadTeam(success, fail);
+		});
+
+	});
+
+	describe('#unlinkTeamZone', function () {
+		it('should call the right request', function (done) {
+			var c = new SDI("toto", "blabla", "toto", 52);
+			var s = new Team("toto", 52);
+
+			var response1:any = s.toJSONObject();
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(SDI.getTableName(), c.getId().toString(), Team.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var team = c.team();
+				assert.deepEqual(team, s, "The team is not the expected value");
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the team");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.delete(BackendConfig.associatedObjectEndpoint(SDI.getTableName(), c.getId().toString(), Team.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the unsetInfoType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.unlinkTeam(s.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadTeam(success, fail);
 		});
 	});
 });
