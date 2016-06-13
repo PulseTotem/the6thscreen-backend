@@ -504,7 +504,7 @@ class SDI extends ModelItf {
                 data["team"] = (self.team() !== null) ? self.team().getId() : null;
             } else {
                 data["theme"] = (self.theme() !== null) ? self.theme().toJSONObject() : null;
-                data["team"] = (self.theme() !== null) ? self.team().toJSONObject() : null;
+                data["team"] = (self.team() !== null) ? self.team().toJSONObject() : null;
             }
 
             data["profils"] = self.serializeArray(self.profils(), onlyId);
