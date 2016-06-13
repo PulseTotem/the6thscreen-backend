@@ -70,22 +70,6 @@ class User extends ModelItf {
 	private _cmsAuthkey : string;
 
     /**
-     * SDIs property.
-     *
-     * @property _sdis
-     * @type Array<SDI>
-     */
-    private _sdis : Array<SDI>;
-
-    /**
-     * Lazy loading for SDIs property.
-     *
-     * @property _sdis_loaded
-     * @type boolean
-     */
-    private _sdis_loaded : boolean;
-
-    /**
      * OAuthKeys property.
      *
      * @property _oauthkeys
@@ -123,9 +107,6 @@ class User extends ModelItf {
 
 	    this._token = null;
 	    this._lastIp = null;
-
-        this._sdis = new Array<SDI>();
-        this._sdis_loaded = false;
 
         this._oauthkeys = new Array<OAuthKey>();
         this._oauthkeys_loaded = false;
@@ -240,47 +221,6 @@ class User extends ModelItf {
 	}
 
     /**
-     * Return the SDIs owned by the User.
-     *
-     * @method sdis
-     */
-    sdis() {
-        return this._sdis;
-    }
-
-    /**
-     * Load the SDIs owned by the User.
-     *
-     * @method loadSdis
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    loadSdis(successCallback : Function, failCallback : Function) {
-        if(! this._sdis_loaded) {
-            var self = this;
-            var success : Function = function(sdis) {
-                self._sdis = sdis;
-                self._sdis_loaded = true;
-                if(successCallback != null) {
-                    successCallback();
-                }
-            };
-
-            var fail : Function = function(error) {
-                if(failCallback != null) {
-                    failCallback(error);
-                }
-            };
-
-            this.getAssociatedObjects(User, SDI, success, fail);
-        } else {
-            if(successCallback != null) {
-                successCallback();
-            }
-        }
-    }
-
-    /**
      * Return the OAuthKeys owned by the User.
      *
      * @method oauthkeys
@@ -335,7 +275,7 @@ class User extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._sdis_loaded && self._oauthkeys_loaded) {
+            if(self._oauthkeys_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -349,7 +289,6 @@ class User extends ModelItf {
                 Logger.error(JSON.stringify(error));
             }
         };
-        this.loadSdis(success, fail);
         this.loadOAuthKeys(success, fail);
     }
 
@@ -359,7 +298,6 @@ class User extends ModelItf {
      * @method desynchronize
 	 */
 	desynchronize() : void {
-		this._sdis_loaded = false;
         this._oauthkeys_loaded = false;
 	}
 
@@ -426,7 +364,6 @@ class User extends ModelItf {
 
         var success : Function = function() {
             var data = self.toJSONObject();
-            data["sdis"] = self.serializeArray(self.sdis(), onlyId);
 			data["oauthkeys"] = self.serializeArray(self.oauthkeys(), onlyId);
 
             successCallback(data);
@@ -530,32 +467,6 @@ class User extends ModelItf {
 
         RestClient.get(urlReadObject, success, fail);
     }
-
-	/**
-	 * Add a new SDI to the User and associate it in the database.
-	 * A SDI can only be added once.
-	 *
-     * @method addSDI
-	 * @param {SDI} s The SDI to link with the User. It cannot be a null value.
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	addSDI(sdiID : number, successCallback : Function, failCallback : Function) {
-		this.associateObject(User, SDI, sdiID, successCallback, failCallback);
-	}
-
-	/**
-	 * Remove a SDI from the User: the association is removed both in the object and in database.
-	 * The SDI can only be removed if it exists first in the list of associated SDIs, else an exception is thrown.
-	 *
-     * @method removeSDI
-	 * @param {SDI} s The SDI to remove from that User
-	 * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-	 */
-	removeSDI(sdiID : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(User, SDI, sdiID, successCallback, failCallback);
-	}
 
     /**
      * Add a new OAuthKey to the User and associate it in the database.
