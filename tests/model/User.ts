@@ -280,4 +280,193 @@ describe('User', function() {
             c.loadOAuthKeys(success, fail);
         });
     });
+
+	describe('#addTeam', function() {
+		it('should call the right request', function(done) {
+			var c = new User("toto", "bla", "", "", 52);
+			var pv = new Team("mavaleur", 12);
+
+			var response1 : any = [];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(User.getTableName(), c.getId().toString(), Team.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var teams = c.teams();
+
+				assert.deepEqual(teams, [], "The teams is not an empty array: "+JSON.stringify(teams));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the teams");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.put(BackendConfig.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), Team.getTableName(), pv.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+				var success2 = function() {
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the team in database.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.addTeam(pv.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadTeams(success, fail);
+		});
+
+	});
+
+	describe('#removeTeam', function() {
+		it('should call the right request', function(done) {
+			var c = new User("toto", "bla", "", "", 52);
+			var pv = new Team("mavaleur", 12);
+
+			var response1 : any = [
+				{
+					"name": "mavaleur",
+					"complete": false,
+					"id": 12
+				}
+			];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(User.getTableName(), c.getId().toString(), Team.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var teams = c.teams();
+
+				assert.deepEqual(teams, [pv], "The team array is not an array fill only with PV: "+JSON.stringify(teams));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the teams");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.delete(BackendConfig.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), Team.getTableName(), pv.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the removeOAuthKey is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the team in database.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.removeTeam(pv.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadTeams(success, fail);
+		});
+	});
+
+	describe('#linkDefaultTeam', function() {
+		it('should call the right request', function(done) {
+			var c = new User("toto", "bla", "", "", 52);
+			var pv = new Team("mavaleur", 12);
+			var linkName = "DefaultTeams";
+
+			var response1 : any = [];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(User.getTableName(), c.getId().toString(), linkName))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var defaultTeam = c.defaultTeam();
+
+				assert.deepEqual(defaultTeam, null, "The default team is not null: "+JSON.stringify(defaultTeam));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the defaultTeam");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.put(BackendConfig.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), linkName, pv.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+				var success2 = function() {
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the default in database.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.linkDefaultTeam(pv.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadDefaultTeam(success, fail);
+		});
+
+	});
+
+	describe('#unlinkDefaultTeam', function() {
+		it('should call the right request', function(done) {
+			var c = new User("toto", "bla", "", "", 52);
+			var pv = new Team("mavaleur", 12);
+			var linkName = "DefaultTeams";
+
+			var response1 : any =
+				{
+					"name": "mavaleur",
+					"complete": false,
+					"id": 12
+				};
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(User.getTableName(), c.getId().toString(), linkName))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var defaultTeam = c.defaultTeam();
+
+				assert.deepEqual(defaultTeam, pv, "The default team is not  PV: "+JSON.stringify(defaultTeam));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the default team");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.delete(BackendConfig.associatedObjectEndpoint(User.getTableName(), c.getId().toString(), linkName, pv.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the removeOAuthKey is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the default team in database.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.unlinkDefaultTeam(pv.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadDefaultTeam(success, fail);
+		});
+	});
 });
