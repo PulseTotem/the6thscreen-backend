@@ -187,7 +187,12 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveConnectedClientOfProfil', function (profilIdDescription) { self.sendConnectedClients(profilIdDescription); });
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
-		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
+
+		// TODO: Create back the oauthkey
+		//this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
+
+
+
 		this.addListenerToSocket('RetrieveParamTypesFromCallType', function (callTypeDescription) { self.sendParamTypesDescriptionFromCallType(callTypeDescription); });
 		this.addListenerToSocket('CreateParamValueDescription', function (paramValueDescription) { self.createParamValueDescription(paramValueDescription); });
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
@@ -348,6 +353,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	 * @param {any} oauthKeyDescription - The information containing info of the OAuthKey to create.
 	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
 	 */
+	/*
 	createOAuthKey(oauthKeyDescription : any, self : AdminsNamespaceManager = null) {
 		// oauthKeyDescription : {"userId" : string, "serviceId" : string, "name" : string, "description" : string, "value" : any (JSONObject)}
 		var self = this;
@@ -394,7 +400,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		};
 
 		newOAuthKey.create(successCreateOAuthKey, function (error) { self.createObjectFail(error, "OAuthKeyDescription"); });
-	}
+	}*/
 
 ////////////////////// End: Manage createOAuthKey //////////////////////
 
