@@ -298,6 +298,55 @@ class Team extends ModelItf {
     }
 
     /**
+     * Determine if the current team is a default team of the owner
+     *
+     * @param successCallback
+     * @param failCallback
+     */
+    isDefaultTeam(successCallback : Function, failCallback : Function) {
+        var self = this;
+
+        var fail = function (error) {
+            failCallback(error);
+        };
+
+        var successLoadOwner = function () {
+
+            var successDefaultTeam = function () {
+                var result = (self.getId() == self.owner().defaultTeam().getId());
+                successCallback(result);
+            };
+
+            self.owner().loadDefaultTeam(successDefaultTeam, fail);
+        };
+
+        this.loadOwner(successLoadOwner, fail);
+    }
+
+    /**
+     * Return data of the team with information about wheter it is or not a default team
+     * @param successCallback
+     * @param failCallback
+     * @param onlyId
+     */
+    toCompleteJSONObjectWithDefaultTeam(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
+        var self = this;
+
+        var successComplete = function (data) {
+            var successIsDefault = function (isDefault) {
+                data["isDefaultTeam"] = isDefault;
+
+                successCallback(data);
+            };
+
+            self.isDefaultTeam(successIsDefault, failCallback);
+        };
+
+
+        this.toCompleteJSONObject(successComplete, failCallback, onlyId);
+    }
+
+    /**
      * Set the Owner of the Team.
      *
      * @method linkOwner

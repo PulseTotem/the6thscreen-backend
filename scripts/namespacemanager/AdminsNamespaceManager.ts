@@ -22,6 +22,7 @@
 /// <reference path="../model/ThemeZone.ts" />
 /// <reference path="../model/ThemeSDI.ts" />
 /// <reference path="../model/TimelineRunner.ts" />
+/// <reference path="../model/Team.ts" />
 
 
 class AdminsNamespaceManager extends ShareNamespaceManager {
@@ -85,7 +86,6 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveAllUserTriggerDescription', function() { self.sendAllObjectDescription(UserTrigger, "AllUserTriggerDescription"); });
 		this.addListenerToSocket('RetrieveAllUserDescription', function() { self.sendAllObjectDescription(User, "AllUserDescription"); });
 		this.addListenerToSocket('RetrieveAllSDIDescription', function() { self.sendAllObjectDescription(SDI, "AllSDIDescription"); });
-
 
 		// Create object
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
@@ -187,6 +187,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveConnectedClientOfProfil', function (profilIdDescription) { self.sendConnectedClients(profilIdDescription); });
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
+
+		this.addListenerToSocket('RetrieveAllTeamDescription', function() { self.sendAllTeamDescription(); });
 
 		// TODO: Create back the oauthkey
 		//this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
@@ -1735,5 +1737,40 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 ////////////////////// End: Manage RendererThemes of Renderer //////////////////////
+
+////////////////////// End: Manage //////////////////////
+
+
+
+	sendAllTeamDescription() {
+		var self = this;
+
+		var fail = function (error) {
+			self.socket.emit("AllTeamDescription", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - sendAllTeamDescription failed");
+			Logger.debug(error);
+		};
+
+		var successReadAllTeams = function (allTeams : Array<Team>) {
+			var result = [];
+			var nbTeam = allTeams.length;
+
+			var successCompleteWithDefault = function (data : any) {
+				result.push(data);
+				nbTeam--;
+
+				if (nbTeam == 0) {
+					self.socket.emit("AllTeamDescription", self.formatResponse(true, result));
+				}
+			};
+
+			allTeams.forEach(function (team : Team) {
+				Logger.debug("Get data for team : "+team.name());
+				team.toCompleteJSONObjectWithDefaultTeam(successCompleteWithDefault, fail);
+			});
+		};
+
+		Team.all(successReadAllTeams, fail);
+	}
 
 }
