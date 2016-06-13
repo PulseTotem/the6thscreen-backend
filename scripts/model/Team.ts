@@ -311,13 +311,18 @@ class Team extends ModelItf {
         };
 
         var successLoadOwner = function () {
+            if (self.owner() != null) {
+                var successDefaultTeam = function () {
+                    var result = (self.getId() == self.owner().defaultTeam().getId());
+                    successCallback(result);
+                };
 
-            var successDefaultTeam = function () {
-                var result = (self.getId() == self.owner().defaultTeam().getId());
-                successCallback(result);
-            };
+                self.owner().loadDefaultTeam(successDefaultTeam, fail);
+            } else {
+                Logger.error("Owner is null for team "+self.name());
+                successCallback(false);
+            }
 
-            self.owner().loadDefaultTeam(successDefaultTeam, fail);
         };
 
         this.loadOwner(successLoadOwner, fail);
