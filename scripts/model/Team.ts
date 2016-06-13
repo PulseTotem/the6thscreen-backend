@@ -16,7 +16,7 @@ class Team extends ModelItf {
      * @property _name : Name of the team
      * @private
      */
-    private _name : String;
+    private _name : string;
 
     /**
      * @property _owner : User owner of the team
@@ -62,7 +62,7 @@ class Team extends ModelItf {
      * @param createdAt
      * @param updatedAt
      */
-    constructor(name : string, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
         super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
@@ -139,7 +139,7 @@ class Team extends ModelItf {
      * @param failCallback
      */
     loadUsers(successCallback : Function, failCallback : Function) {
-        if (this._users_loaded) {
+        if (!this._users_loaded) {
             var self = this;
             var success = function (users) {
                 self._users = users;
@@ -171,7 +171,7 @@ class Team extends ModelItf {
      * @param failCallback
      */
     loadSDIS(successCallback : Function, failCallback : Function) {
-        if (this._sdis_loaded) {
+        if (!this._sdis_loaded) {
             var self = this;
             var success = function (sdis) {
                 self._sdis = sdis;
@@ -305,7 +305,7 @@ class Team extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    linkTheme(ownerId : number, successCallback : Function, failCallback : Function) {
+    linkOwner(ownerId : number, successCallback : Function, failCallback : Function) {
         this.associateObject(Team, User, ownerId, successCallback, failCallback, 0, "Owners");
     }
 
@@ -317,7 +317,7 @@ class Team extends ModelItf {
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
      */
-    unlinkTheme(ownerId : number, successCallback : Function, failCallback : Function) {
+    unlinkOwner(ownerId : number, successCallback : Function, failCallback : Function) {
         this.deleteObjectAssociation(Team, User, ownerId, successCallback, failCallback, 0, "Owners");
     }
 
