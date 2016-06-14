@@ -23,6 +23,7 @@
 /// <reference path="../model/ThemeSDI.ts" />
 /// <reference path="../model/TimelineRunner.ts" />
 /// <reference path="../model/Team.ts" />
+/// <reference path="../model/Provider.ts" />
 
 
 class AdminsNamespaceManager extends ShareNamespaceManager {
@@ -86,6 +87,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveAllUserTriggerDescription', function() { self.sendAllObjectDescription(UserTrigger, "AllUserTriggerDescription"); });
 		this.addListenerToSocket('RetrieveAllUserDescription', function() { self.sendAllObjectDescription(User, "AllUserDescription"); });
 		this.addListenerToSocket('RetrieveAllSDIDescription', function() { self.sendAllObjectDescription(SDI, "AllSDIDescription"); });
+		this.addListenerToSocket('RetrieveAllProviderDescription', function() { self.sendAllObjectDescription(Provider, "AllProviderDescription"); });
 
 		// Create object
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
@@ -112,6 +114,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreateUserTrigger', function(data) { self.createObject(UserTrigger, data, "AnswerCreateUserTrigger"); });
 		this.addListenerToSocket('CreateTimelineRunner', function(data) { self.createObject(TimelineRunner, data, "AnswerCreateTimelineRunner"); });
 		this.addListenerToSocket('CreateTeam', function(data) { self.createObject(Team, data, "AnswerCreateTeam"); });
+		this.addListenerToSocket('CreateProvider', function(data) { self.createObject(Provider, data, "AnswerCreateProvider"); });
+
 
 		// Update object
 		this.addListenerToSocket('UpdateSDI', function(data) { self.updateObjectAttribute(SDI, data, "AnswerUpdateSDI"); });
@@ -139,6 +143,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
 		this.addListenerToSocket('UpdateTimelineRunner', function(data) { self.updateObjectAttribute(TimelineRunner, data, "AnswerUpdateTimelineRunner"); });
 		this.addListenerToSocket('UpdateTeam', function(data) { self.updateObjectAttribute(Team, data, "AnswerUpdateTeam"); });
+		this.addListenerToSocket('UpdateProvider', function(data) { self.updateObjectAttribute(Provider, data, "AnswerUpdateProvider"); });
 
 
 		// Delete object
@@ -163,10 +168,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteSystemTrigger', function(idSystemTrigger) { self.deleteObjectFromDescription(SystemTrigger, "systemTriggerId", idSystemTrigger, "AnswerDeleteSystemTrigger"); });
 		this.addListenerToSocket('DeleteUserTrigger', function(idUserTrigger) { self.deleteObjectFromDescription(UserTrigger, "userTriggerId", idUserTrigger, "AnswerDeleteUserTrigger"); });
 		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "AnswerDeleteSDI"); });
-		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteUser(idUser["userId"]); });
 		this.addListenerToSocket('DeleteTimelineRunner', function(idTimelineRunner) { self.deleteObjectFromDescription(TimelineRunner, "timelineRunnerId", idTimelineRunner, "AnswerDeleteTimelineRunner"); });
 		this.addListenerToSocket('DeleteTeam', function(idTeam) { self.deleteObjectFromDescription(Team, "teamId", idTeam, "AnswerDeleteTeam"); });
-
+		this.addListenerToSocket('DeleteProvider', function(idProvider) { self.deleteObjectFromDescription(Provider, "providerId", idProvider, "AnswerDeleteProvider"); });
 
 		// Custom requests
 		this.addListenerToSocket('RetrieveSourcesFromServiceId', function(serviceIdDescription) { self.sendSourcesFromServiceId(serviceIdDescription); });
@@ -192,6 +196,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 		this.addListenerToSocket('RetrieveAllTeamDescription', function() { self.sendAllTeamDescription(); });
 		this.addListenerToSocket('CreateUser', function(data) { self.createUser(data); });
+		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteUser(idUser["userId"]); });
+
 
 
 		// TODO: Create back the oauthkey
