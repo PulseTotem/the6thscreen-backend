@@ -86,6 +86,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveAllUserTriggerDescription', function() { self.sendAllObjectDescription(UserTrigger, "AllUserTriggerDescription"); });
 		this.addListenerToSocket('RetrieveAllUserDescription', function() { self.sendAllObjectDescription(User, "AllUserDescription"); });
 		this.addListenerToSocket('RetrieveAllSDIDescription', function() { self.sendAllObjectDescription(SDI, "AllSDIDescription"); });
+		this.addListenerToSocket('RetrieveAllProviderDescription', function() { self.sendAllObjectDescription(Provider, "AllProviderDescription"); });
 
 		// Create object
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
@@ -138,6 +139,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdateUserTrigger', function(data) { self.updateObjectAttribute(UserTrigger, data, "AnswerUpdateUserTrigger"); });
 		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
 		this.addListenerToSocket('UpdateTimelineRunner', function(data) { self.updateObjectAttribute(TimelineRunner, data, "AnswerUpdateTimelineRunner"); });
+		this.addListenerToSocket('UpdateOAuthKey', function(data) { self.updateObjectAttribute(OAuthKey, data, "AnswerUpdateOAuthKey"); });
 
 
 		// Delete object
@@ -190,8 +192,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 		this.addListenerToSocket('RetrieveAllTeamDescription', function() { self.sendAllTeamDescription(); });
 
-		// TODO: Create back the oauthkey
-		//this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
+		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
 
 
 
@@ -355,9 +356,8 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	 * @param {any} oauthKeyDescription - The information containing info of the OAuthKey to create.
 	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
 	 */
-	/*
 	createOAuthKey(oauthKeyDescription : any, self : AdminsNamespaceManager = null) {
-		// oauthKeyDescription : {"userId" : string, "serviceId" : string, "name" : string, "description" : string, "value" : any (JSONObject)}
+		// oauthKeyDescription : {"userId" : string, "providerId" : string, "name" : string, "description" : string, "value" : any (JSONObject)}
 		var self = this;
 
 		var fail : Function = function(error) {
@@ -376,7 +376,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		var newOAuthKey = OAuthKey.fromJSONObject(informations);
 
 		var successCreateOAuthKey : Function = function(oauthKeyResult) {
-			var successLinkService : Function = function() {
+			var successLinkProvider : Function = function() {
 				var userId = oauthKeyDescription.userId;
 
 				var successRetrieveUser : Function = function(user) {
@@ -385,24 +385,21 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 						var successOAuthKeyCompleteJSON : Function = function(oauthKeyCompleteJSON) {
 							self.socket.emit("OAuthKeyDescription", self.formatResponse(true, oauthKeyCompleteJSON));
-							Logger.debug("SocketId: " + self.socket.id + " - createOAuthKey : send done with success status for OAuthKey with Id : " + newOAuthKey.getId());
 						};
 
 						newOAuthKey.toCompleteJSONObject(successOAuthKeyCompleteJSON, fail);
 					}
 
 					user.addOAuthKey(newOAuthKey.getId(),successUserAssociation, fail);
-
-
 				};
 
 				User.read(userId, successRetrieveUser, fail);
 			};
-			newOAuthKey.linkService(oauthKeyDescription.serviceId, successLinkService, fail);
+			newOAuthKey.linkProvider(oauthKeyDescription.providerId, successLinkProvider, fail);
 		};
 
 		newOAuthKey.create(successCreateOAuthKey, function (error) { self.createObjectFail(error, "OAuthKeyDescription"); });
-	}*/
+	}
 
 ////////////////////// End: Manage createOAuthKey //////////////////////
 

@@ -332,7 +332,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.data()), attemptNumber);
         };
 
 	    var urlUpdate = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(modelClass.getTableName(), this.getId().toString());
