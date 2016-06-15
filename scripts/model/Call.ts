@@ -809,7 +809,12 @@ class Call extends ModelItf {
 										}
 									};
 
-									clonedCall.linkRendererTheme(self.rendererTheme().getId(), successLinkRendererTheme, failCallback);
+									if (self.rendererTheme()) {
+										clonedCall.linkRendererTheme(self.rendererTheme().getId(), successLinkRendererTheme, failCallback);
+									} else {
+										successLinkRendererTheme();
+									}
+
 								}
 							};
 
