@@ -1223,32 +1223,35 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		var successReadSDI = function(sdi : SDI) {
 
 			var successLoadSDIAssociations = function() {
+				var oauthkeys = [];
+				if(sdi.team() != null) {
+					var successLoadTeamAssociations = function() {
+						if(sdi.team().oauthkeys().length > 0) {
+							var done = [];
+							sdi.team().oauthkeys().forEach(function(oauthkey : OAuthKey) {
+								var successLoadOAuthKeyCompleteDesc = function(oauthkeyDesc) {
+									done.push(oauthkeyDesc);
 
-				var successLoadTeamAssociations = function() {
-					var oauthkeys = [];
-					if(sdi.team().oauthkeys().length > 0) {
-						var done = [];
-						sdi.team().oauthkeys().forEach(function(oauthkey : OAuthKey) {
-							var successLoadOAuthKeyCompleteDesc = function(oauthkeyDesc) {
-								done.push(oauthkeyDesc);
+									if(oauthkeyDesc.provider.id == providerId && oauthkeyDesc.value != null && oauthkeyDesc.value != "") {
+										oauthkeys.push(oauthkeyDesc);
+									}
 
-								if(oauthkeyDesc.provider.id == providerId && oauthkeyDesc.value != null && oauthkeyDesc.value != "") {
-									oauthkeys.push(oauthkeyDesc);
-								}
+									if(done.length == sdi.team().oauthkeys().length) {
+										self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(true, oauthkeys));
+									}
+								};
 
-								if(done.length == sdi.team().oauthkeys().length) {
-									self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(true, oauthkeys));
-								}
-							};
+								oauthkey.toCompleteJSONObject(successLoadOAuthKeyCompleteDesc, fail);
+							});
+						} else {
+							self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(true, oauthkeys));
+						}
+					};
 
-							oauthkey.toCompleteJSONObject(successLoadOAuthKeyCompleteDesc, fail);
-						});
-					} else {
-						self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(true, oauthkeys));
-					}
-				};
-
-				sdi.team().loadAssociations(successLoadTeamAssociations, fail);
+					sdi.team().loadAssociations(successLoadTeamAssociations, fail);
+				} else {
+					self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(true, oauthkeys));
+				}
 			};
 
 			sdi.loadAssociations(successLoadSDIAssociations, fail);
