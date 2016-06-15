@@ -184,7 +184,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveCompleteCall', function(callIdDescription) { self.sendCompleteCall(callIdDescription); });
 		this.addListenerToSocket('UpdateZonePosition', function(data) { self.updateZonePosition(data); });
 		this.addListenerToSocket('CreateEmptyParamValueForParamTypeId', function(paramTypeIdDescription) { self.createEmptyParamValue(paramTypeIdDescription); });
-		this.addListenerToSocket('RetrieveOAuthKeysFromServiceAndUser', function(serviceUserDescription) { self.sendOAuthKeysFromServiceAndUser(serviceUserDescription); });
+		this.addListenerToSocket('RetrieveOAuthKeysFromProviderAndSDI', function(providerSDIDescription) { self.sendOAuthKeysFromProviderAndSDI(providerSDIDescription); });
 		this.addListenerToSocket('RetrieveCompleteProfilDescription', function(profilIdDescription) { self.sendCompleteProfil(profilIdDescription); });
 		this.addListenerToSocket('RetrieveZoneContentsFromZoneId', function(zoneIdDescription) { self.sendZoneContentsFromZoneId(zoneIdDescription); });
 		this.addListenerToSocket('AddThemeToRenderer', function(newThemeDescription) { self.addThemeToRenderer(newThemeDescription); });
@@ -213,7 +213,6 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 		this.addListenerToSocket('CloneProfil', function(data) { self.cloneProfil(data); });
 		this.addListenerToSocket('CloneSDI', function(data) { self.cloneSDI(data); });
-
 
 		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
@@ -1200,62 +1199,65 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage createEmptyParamValue //////////////////////
 
-////////////////// Begin: Manage sendOAuthKeysFromServiceAndUser //////////////////////
+////////////////// Begin: Manage sendOAuthKeysFromProviderAndSDI //////////////////////
 
 	/**
 	 * Create an empty ParamValue and associate it to ParamType in param.
-	 * Send the result on the channel "OAuthKeysFromServiceAndUser"
+	 * Send the result on the channel "OAuthKeysFromProviderAndSDI"
 	 *
-	 * @method sendOAuthKeysFromServiceAndUser
-	 * @param {JSONObject} serviceUserDescription - Represents OAuthKey to retrieve
+	 * @method sendOAuthKeysFromProviderAndSDI
+	 * @param {JSONObject} providerSDIDescription - Represents OAuthKey to retrieve
 	 */
-	sendOAuthKeysFromServiceAndUser(serviceUserDescription : any) {
-		// serviceUserDescription : { "userId": number, "serviceId": number }
+	sendOAuthKeysFromProviderAndSDI(providerSDIDescription : any) {
+		// providerSDIDescription : { "sdiId": number, "providerId": number }
 		var self = this;
 
-		var userId = serviceUserDescription.userId;
-		var serviceId = serviceUserDescription.serviceId;
+		var sdiId = providerSDIDescription.sdiId;
+		var providerId = providerSDIDescription.providerId;
 
 		var fail : Function = function(error) {
-			self.socket.emit("OAuthKeysFromServiceAndUser", self.formatResponse(false, error));
-			Logger.debug("SocketId: " + self.socket.id + " - sendOAuthKeysFromServiceAndUser failed ");
+			self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendOAuthKeysFromProviderAndSDI failed ");
 		};
 
-		var successReadUser = function(user : User) {
+		var successReadSDI = function(sdi : SDI) {
 
-			var successLoadUserAssociations = function() {
-				var oauthkeys = [];
-				if(user.oauthkeys().length > 0) {
-					var done = [];
-					user.oauthkeys().forEach(function(oauthkey : OAuthKey) {
-						var successLoadOAuthKeyCompleteDesc = function(oauthkeyDesc) {
-							done.push(oauthkeyDesc);
+			var successLoadSDIAssociations = function() {
 
-							if(oauthkeyDesc.service.id == serviceId) {
-								oauthkeys.push(oauthkeyDesc);
-							}
+				var successLoadTeamAssociations = function() {
+					var oauthkeys = [];
+					if(sdi.team().oauthkeys().length > 0) {
+						var done = [];
+						sdi.team().oauthkeys().forEach(function(oauthkey : OAuthKey) {
+							var successLoadOAuthKeyCompleteDesc = function(oauthkeyDesc) {
+								done.push(oauthkeyDesc);
 
-							if(done.length == user.oauthkeys().length) {
-								self.socket.emit("OAuthKeysFromServiceAndUser", self.formatResponse(true, oauthkeys));
-							}
-						};
+								if(oauthkeyDesc.provider.id == providerId && oauthkeyDesc.value != null && oauthkeyDesc.value != "") {
+									oauthkeys.push(oauthkeyDesc);
+								}
 
-						oauthkey.toCompleteJSONObject(successLoadOAuthKeyCompleteDesc, fail);
-					});
-				} else {
-					self.socket.emit("OAuthKeysFromServiceAndUser", self.formatResponse(true, oauthkeys));
-				}
+								if(done.length == sdi.team().oauthkeys().length) {
+									self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(true, oauthkeys));
+								}
+							};
+
+							oauthkey.toCompleteJSONObject(successLoadOAuthKeyCompleteDesc, fail);
+						});
+					} else {
+						self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(true, oauthkeys));
+					}
+				};
+
+				sdi.team().loadAssociations(successLoadTeamAssociations, fail);
 			};
 
-			user.loadAssociations(successLoadUserAssociations, fail);
-		}
+			sdi.loadAssociations(successLoadSDIAssociations, fail);
+		};
 
-		User.read(userId, successReadUser, fail);
-
-
+		SDI.read(sdiId, successReadSDI, fail);
 	}
 
-////////////////////// End: Manage sendOAuthKeysFromServiceAndUser //////////////////////
+////////////////////// End: Manage sendOAuthKeysFromProviderAndSDI //////////////////////
 
 ////////////////////// Begin: Manage sendCompleteProfil //////////////////////
 
