@@ -100,8 +100,8 @@ describe('OAuthKey', function() {
     });
 
     describe('#checkCompleteness', function() {
-        it('should consider the object as complete if it has an ID, a name and a complete Provider', function(done) {
-            var cpt = new OAuthKey("test","", "", 52);
+        it('should consider the object as complete if it has an ID, a name, a value and a complete Provider', function(done) {
+            var cpt = new OAuthKey("test","", "mon token d'oauth", 52);
 
             var response : any = {
                     "id":12,
@@ -128,7 +128,7 @@ describe('OAuthKey', function() {
         });
 
         it('should not consider the object as complete if it has an ID, a name and a Provider which is not complete itself', function(done) {
-            var cpt = new OAuthKey("test","", "", 52);
+            var cpt = new OAuthKey("test","", "mon token", 52);
 
             var response : any = {
                     "id":12,
@@ -157,7 +157,7 @@ describe('OAuthKey', function() {
         it('should not consider the object as complete if it has no id', function(done) {
             nock.disableNetConnect();
 
-            var cpt = new OAuthKey("test","", "");
+            var cpt = new OAuthKey("test","", "mon token");
 
             var success = function() {
                 assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -174,7 +174,7 @@ describe('OAuthKey', function() {
         it('should not consider the object as complete if it has an empty name', function(done) {
             nock.disableNetConnect();
 
-            var cpt = new OAuthKey("","", "", 52);
+            var cpt = new OAuthKey("","", "mon token", 52);
 
             var success = function() {
                 assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -191,7 +191,41 @@ describe('OAuthKey', function() {
         it('should not consider the object as complete if it has a null name', function(done) {
             nock.disableNetConnect();
 
-            var cpt = new OAuthKey(null,"", "", 52);
+            var cpt = new OAuthKey(null,"", "mon token", 52);
+
+            var success = function() {
+                assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+                done();
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            cpt.checkCompleteness(success, fail);
+        });
+
+        it('should not consider the object as complete if it has an empty value', function(done) {
+            nock.disableNetConnect();
+
+            var cpt = new OAuthKey("toto","", "", 52);
+
+            var success = function() {
+                assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+                done();
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            cpt.checkCompleteness(success, fail);
+        });
+
+        it('should not consider the object as complete if it has a null value', function(done) {
+            nock.disableNetConnect();
+
+            var cpt = new OAuthKey("toto","", null, 52);
 
             var success = function() {
                 assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
@@ -307,6 +341,94 @@ describe('OAuthKey', function() {
             };
 
             c.loadProvider(success, fail);
+        });
+
+    });
+
+    describe('#addTeam', function () {
+        it('should call the right request', function (done) {
+            var c = new OAuthKey("toto", "machin", "heyhey", 52);
+            var s = new Team("team", 42);
+
+            var response1:any = [];
+
+            var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+                .get(BackendConfig.associationEndpoint(OAuthKey.getTableName(), c.getId().toString(), Team.getTableName()))
+                .reply(200, JSON.stringify(response1));
+
+            var success = function() {
+                var teams = c.teams();
+                assert.deepEqual(teams, [], "The teams is not a null value: " + JSON.stringify(teams));
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the teams");
+
+                var emptyResponse : any = {};
+
+                var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .put(BackendConfig.associatedObjectEndpoint(OAuthKey.getTableName(), c.getId().toString(), Team.getTableName(), s.getId().toString()))
+                    .reply(200, JSON.stringify(emptyResponse));
+
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the linkService is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the team in database.");
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.addTeam(s.getId(), success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadTeams(success, fail);
+        });
+    });
+
+    describe('#removeTeam', function () {
+        it('should call the right request', function (done) {
+            var c = new OAuthKey("toto", "machin", "heyhey", 52);
+            var s = new Team("provider", 42);
+
+            var response1:any = [s.toJSONObject()];
+
+            var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+                .get(BackendConfig.associationEndpoint(OAuthKey.getTableName(), c.getId().toString(), Team.getTableName()))
+                .reply(200, JSON.stringify(response1));
+
+            var success = function() {
+                var teams = c.teams();
+                assert.deepEqual(teams, [s], "The teams is not the expected value");
+                assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the teams");
+
+                var emptyResponse : any = {};
+
+                var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+                    .delete(BackendConfig.associatedObjectEndpoint(OAuthKey.getTableName(), c.getId().toString(), Team.getTableName(), s.getId().toString()))
+                    .reply(200, JSON.stringify(emptyResponse));
+
+
+                var success2 = function() {
+                    //assert.ok(retour, "The return of the unlinkService is false.");
+                    assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+                    done();
+                };
+
+                var fail2 = function(err) {
+                    done(err);
+                };
+
+                c.removeTeam(s.getId(), success2, fail2);
+            };
+
+            var fail = function(err) {
+                done(err);
+            };
+
+            c.loadTeams(success, fail);
         });
 
     });
