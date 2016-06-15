@@ -598,18 +598,17 @@ class Profil extends ModelItf {
 
 		var successLoadZoneContents = function() {
 			if(self.zoneContents().length > 0) {
-				var zoneContentsUnlinkNumber = 0;
 				var zoneContentsNumber = self.zoneContents().length;
 
+				var successUnlink = function() {
+					zoneContentsNumber--;
+
+					if(zoneContentsNumber == 0) {
+						ModelItf.deleteObject(Profil, self.getId(), successCallback, failCallback, attemptNumber);
+					}
+				};
+
 				self.zoneContents().forEach(function(zoneContent : ZoneContent) {
-					 var successUnlink = function() {
-						 zoneContentsUnlinkNumber++;
-
-						 if(zoneContentsUnlinkNumber == zoneContentsNumber) {
-							 ModelItf.deleteObject(Profil, self.getId(), successCallback, failCallback, attemptNumber);
-						 }
-					 };
-
 					self.removeZoneContent(zoneContent.getId(), successUnlink, fail);
 				});
 			} else {

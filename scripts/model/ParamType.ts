@@ -1,11 +1,13 @@
 /**
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@pulsetotem.fr>
  */
 
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./TypeParamType.ts" />
 /// <reference path="./ConstraintParamType.ts" />
 /// <reference path="./ParamValue.ts" />
+/// <reference path="./Source.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -84,6 +86,34 @@ class ParamType extends ModelItf {
 	 */
 	private _default_value_loaded : boolean;
 
+	/**
+	 * @property _sources : The sources in which the paramType is used.
+	 * @type Array<Source>
+	 * @private
+	 */
+	private _sources : Array<Source>;
+
+	/**
+	 * @property _sources_loaded : lazy loading for sources
+	 * @type boolean
+	 * @private
+	 */
+	private _sources_loaded : boolean;
+
+	/**
+	 * @property _paramValues : paramvalues associated with this paramType
+	 * @type Array<ParamValue>
+	 * @private
+	 */
+	private _paramValues : Array<ParamValue>;
+
+	/**
+	 * @roperty _paramValues_loaded : lazy loading for paramValue
+	 * @type boolean
+	 * @private
+	 */
+	private _paramValues_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -108,6 +138,12 @@ class ParamType extends ModelItf {
 
 	    this._type = null;
 	    this._type_loaded = false;
+
+		this._sources = new Array<Source>();
+		this._sources_loaded = false;
+
+		this._paramValues = new Array<ParamValue>();
+		this._paramValues_loaded = false;
     }
 
 	/**
@@ -267,13 +303,88 @@ class ParamType extends ModelItf {
                 }
             };
 
-            this.getUniquelyAssociatedObject(ParamType, ParamValue, success, fail);
+            this.getUniquelyAssociatedObject(ParamType, ParamValue, success, fail, 0, "DefaultValues");
         } else {
             if(successCallback != null) {
                 successCallback();
             }
         }
     }
+
+	/**
+	 * Get sources of the paramtype
+	 *
+	 * @method sources
+	 * @returns {Array<Source>}
+     */
+	sources() {
+		return this._sources;
+	}
+
+	/**
+	 * Load source for this param type
+	 *
+	 * @method loadSources
+	 * @param successCallback
+	 * @param failCallback
+     */
+	loadSources(successCallback : Function, failCallback : Function) {
+		if (!this._sources_loaded) {
+			var self = this;
+			var success = function (sources) {
+				self._sources = sources;
+				self._sources_loaded = true;
+
+				successCallback();
+			};
+
+			var fail = function (error) {
+				failCallback(error);
+			};
+
+			this.getAssociatedObjects(ParamType, Source, success, fail);
+		} else {
+			successCallback();
+		}
+	}
+
+	/**
+	 * Get paramValue for this paramType
+	 *
+	 * @method paramValues
+	 * @returns {Array<ParamValue>}
+     */
+	paramValues() {
+		return this._paramValues;
+	}
+
+	/**
+	 * Load paramValue for this paramType
+	 *
+	 * @method loadParamValues
+	 * @param successCallback
+	 * @param failCallback
+     */
+	loadParamValues(successCallback : Function, failCallback : Function) {
+		if (!this._paramValues_loaded) {
+			var self = this;
+
+			var success = function (paramValues) {
+				self._paramValues = paramValues;
+				self._paramValues_loaded = true;
+
+				successCallback();
+			};
+
+			var fail = function (error) {
+				failCallback(error);
+			};
+
+			this.getAssociatedObjects(ParamType, ParamValue, success, fail);
+		} else {
+			successCallback();
+		}
+	}
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -289,7 +400,7 @@ class ParamType extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._type_loaded && self._constraint_loaded && self._default_value_loaded) {
+            if(self._type_loaded && self._constraint_loaded && self._default_value_loaded && self._sources_loaded && self._paramValues_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -307,6 +418,8 @@ class ParamType extends ModelItf {
         this.loadType(success, fail);
         this.loadConstraint(success, fail);
         this.loadDefaultValue(success, fail);
+		this.loadSources(success, fail);
+		this.loadParamValues(success, fail);
     }
 
 	/**
@@ -402,6 +515,8 @@ class ParamType extends ModelItf {
 		        data["defaultValue"] = (self.defaultValue() !== null) ? self.defaultValue().toJSONObject() : null;
 	        }
 
+			data["sources"] = self.serializeArray(self.sources(), onlyId);
+			data["paramValues"] = self.serializeArray(self.paramValues(), onlyId);
             successCallback(data);
         };
 
@@ -481,7 +596,7 @@ class ParamType extends ModelItf {
         var successReadParamValue = function (paramValue : ParamValue) {
             var successLinkParamType = function () {
                 var successCheck = function () {
-                    self.associateObject(ParamType, ParamValue, defaultValueId, successCallback, failCallback);
+                    self.associateObject(ParamType, ParamValue, defaultValueId, successCallback, failCallback, 0, "DefaultValues");
                 };
 
                 paramValue.checkCompleteness(successCheck, failCallback);
@@ -502,7 +617,51 @@ class ParamType extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
 	 */
 	unlinkDefaultValue(defaultValueId : number, successCallback : Function, failCallback : Function) {
-		this.deleteObjectAssociation(ParamType, ParamValue, defaultValueId, successCallback, failCallback);
+		this.deleteObjectAssociation(ParamType, ParamValue, defaultValueId, successCallback, failCallback, 0, "DefaultValues");
+	}
+
+	/**
+	 * Add a source to the ParamType.
+	 *
+	 * @param sourceId : the id of the source to add
+	 * @param successCallback
+	 * @param failCallback
+     */
+	addSource(sourceId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(ParamType, Source, sourceId, successCallback, failCallback);
+	}
+
+	/**
+	 * Remove a source to the ParamType
+	 *
+	 * @param sourceId : the id of the source to remove
+	 * @param successCallback
+	 * @param failCallback
+     */
+	removeSource(sourceId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ParamType, Source, sourceId, successCallback, failCallback);
+	}
+
+	/**
+	 * Add a paramValue to the paramType
+	 *
+	 * @param paramValueId : the id of the paramValue to add
+	 * @param successCallback
+	 * @param failCallback
+     */
+	addParamValue(paramValueId : number, successCallback : Function, failCallback : Function) {
+		this.associateObject(ParamType, ParamValue, paramValueId, successCallback, failCallback);
+	}
+
+	/**
+	 * Remove a paramValue from the paramType
+	 *
+	 * @param paramValueId: the id of the paramValue to remove
+	 * @param successCallback
+	 * @param failCallback
+     */
+	removeParamValue(paramValueId : number, successCallback : Function, failCallback : Function) {
+		this.deleteObjectAssociation(ParamType, ParamValue, paramValueId, successCallback, failCallback);
 	}
 
     /**
@@ -555,21 +714,52 @@ class ParamType extends ModelItf {
 
         var self = this;
 
-        var successLoadDefaultValue = function () {
-            if (self.defaultValue() == null) {
-                ModelItf.deleteObject(ParamType, self.getId(), successCallback, failCallback, attemptNumber);
-            } else {
-                var successDeleteParamValue = function () {
-                    ModelItf.deleteObject(ParamType, self.getId(), successCallback, failCallback, attemptNumber);
-                };
+        var successLoadAsso = function () {
+			var successDeleteDefaultParamValue = function () {
+				var nbSources = self.sources().length;
 
-                self.defaultValue().delete(successDeleteParamValue, failCallback);
+				var successRemoveSource = function () {
+					nbSources--;
+
+					if (nbSources <= 0) {
+						var nbParamValues = self.paramValues().length;
+
+						var successDeleteParamValue = function () {
+							nbParamValues--;
+
+							if (nbParamValues <= 0) {
+								ModelItf.deleteObject(ParamType, self.getId(), successCallback, failCallback);
+							}
+						};
+
+						if (nbParamValues == 0) {
+							successDeleteParamValue();
+						} else {
+							self.paramValues().forEach(function (paramValue : ParamValue) {
+								paramValue.delete(successDeleteParamValue, failCallback);
+							});
+						}
+					}
+				};
+
+				if (nbSources == 0) {
+					successRemoveSource();
+				} else {
+					self.sources().forEach( function (source : Source) {
+						self.removeSource(source.getId(), successRemoveSource, failCallback);
+					});
+				}
+			};
+
+            if (self.defaultValue() == null) {
+				successDeleteDefaultParamValue();
+            } else {
+                self.defaultValue().delete(successDeleteDefaultParamValue, failCallback);
             }
         };
 
 
-        this.loadDefaultValue(successLoadDefaultValue, failCallback);
-        return ModelItf.deleteObject(ParamType, this.getId(), successCallback, failCallback, attemptNumber);
+        this.loadAssociations(successLoadAsso, failCallback);
     }
 
     /**
