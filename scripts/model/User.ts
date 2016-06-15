@@ -716,30 +716,39 @@ class User extends ModelItf {
             var successRemoveTeam = function () {
                 nbTeams--;
 
-                if (nbTeams == 0) {
-                    var successDeleteDefaultTeam = function () {
-                        var nbOAuth = self.oauthkeys().length;
+                if (nbTeams <= 0) {
+                    var nbOAuth = self.oauthkeys().length;
 
-                        var successDeleteOAuthKey = function () {
-                            nbOAuth--;
+                    var successDeleteOAuthKey = function () {
+                        nbOAuth--;
 
-                            if (nbOAuth == 0){
+                        if (nbOAuth <= 0){
+                            var successDeleteDefaultTeam = function () {
                                 ModelItf.deleteObject(User, self.getId(), successCallback, failCallback);
-                            }
-                        };
+                            };
 
+                            self.defaultTeam().delete(successDeleteDefaultTeam, failCallback);
+                        }
+                    };
+
+                    if (nbOAuth == 0) {
+                        successDeleteOAuthKey();
+                    } else {
                         self.oauthkeys().forEach(function (oauthKey : OAuthKey) {
                             oauthKey.delete(successDeleteOAuthKey, failCallback);
                         });
-                    };
-
-                    self.defaultTeam().delete(successDeleteDefaultTeam, failCallback);
+                    }
                 }
             };
 
-            self.teams().forEach(function (team : Team) {
-                self.removeTeam(team.getId(), successRemoveTeam, failCallback);
-            });
+            if (nbTeams == 0) {
+                Logger.info("The user "+self.username()+" ("+self.getId()+") has no team. It will be deleted nevertheless.");
+                successRemoveTeam();
+            } else {
+                self.teams().forEach(function (team : Team) {
+                    self.removeTeam(team.getId(), successRemoveTeam, failCallback);
+                });
+            }
         };
 
         self.loadAssociations(successLoadAsso, failCallback);

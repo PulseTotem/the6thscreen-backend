@@ -560,26 +560,36 @@ class Team extends ModelItf {
             var successRemoveUser = function () {
                 nbUsers--;
 
-                if (nbUsers == 0) {
+                if (nbUsers <= 0) {
                     var nbOAuth = self.oauthkeys().length;
 
                     var successRemoveOAuth = function () {
                         nbOAuth--;
 
-                        if (nbOAuth == 0) {
+                        if (nbOAuth <= 0) {
                             ModelItf.deleteObject(Team, self.getId(), successCallback, failCallback);
                         }
                     };
 
-                    self.oauthkeys().forEach( function (oauthKey : OAuthKey) {
-                        self.removeOAuthKey(oauthKey.getId(), successRemoveOAuth, failCallback);
-                    });
+                    if (nbOAuth == 0) {
+                        successRemoveOAuth();
+                    } else {
+                        self.oauthkeys().forEach( function (oauthKey : OAuthKey) {
+                            self.removeOAuthKey(oauthKey.getId(), successRemoveOAuth, failCallback);
+                        });
+                    }
                 }
             };
 
-            self.users().forEach(function (user : User) {
-                self.removeUser(user.getId(), successRemoveUser, failCallback);
-            })
+            if (nbUsers == 0) {
+                Logger.info("The team "+self.name()+" ("+self.getId()+") has no user, neverthless it will be deleted.");
+                successRemoveUser();
+            } else {
+                self.users().forEach(function (user : User) {
+                    self.removeUser(user.getId(), successRemoveUser, failCallback);
+                });
+            }
+
         };
 
         this.loadAssociations(successLoadAsso, failCallback);

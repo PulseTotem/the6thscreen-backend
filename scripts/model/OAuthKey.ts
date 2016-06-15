@@ -457,14 +457,19 @@ class OAuthKey extends ModelItf {
             var successRemoveTeam = function() {
                 nbTeams--;
 
-                if (nbTeams == 0) {
+                if (nbTeams <= 0) {
                     ModelItf.deleteObject(OAuthKey, self.getId(), successCallback, failCallback);
                 }
             };
 
-            self.teams().forEach(function (team : Team) {
-                self.removeTeam(team.getId(), successRemoveTeam, failCallback);
-            });
+            if (nbTeams == 0) {
+                Logger.info("The oAuthKey "+self.name()+" ("+self.getId()+") has no associated team. It will be deleted nevertheless.");
+                successRemoveTeam();
+            } else {
+                self.teams().forEach(function (team : Team) {
+                    self.removeTeam(team.getId(), successRemoveTeam, failCallback);
+                });
+            }
         };
 
         this.loadTeams(successLoadTeams, failCallback);

@@ -1649,7 +1649,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 				self.socket.emit("AnswerDeleteUser", self.formatResponse(true, userId));
 			};
 
-			if(user.cmsId() != "") {
+			if(!!user.cmsId()) {
 				var deleteUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
 
 				var args = {
