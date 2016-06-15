@@ -195,6 +195,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
 
 		this.addListenerToSocket('RetrieveAllTeamDescription', function() { self.sendAllTeamDescription(); });
+		this.addListenerToSocket('RetrieveOAuthKeyDescriptionForTeam', function(teamId) { self.retrieveOAuthKeyDescriptionForTeam(teamId); });
 		this.addListenerToSocket('CreateUser', function(data) { self.createUser(data); });
 		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteUser(idUser["userId"]); });
 		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
@@ -1863,4 +1864,69 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 ////////////////////// END: Manage creating user and her default team //////////////////////
 
+
+	/**
+	 * Return all oauthKeys of users of the team
+	 * @param teamId: information on the form {"teamId": numer}
+     */
+	retrieveOAuthKeyDescriptionForTeam(teamIdData) {
+		var self = this;
+		var teamId = teamIdData.teamId;
+
+		var fail = function (error) {
+			self.socket.emit("OAuthKeyDescriptionForTeam", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - retrieveOAuthKeyDescriptionForTeam failed");
+			Logger.debug(error);
+		};
+
+		var finalSuccess = function (oauthKeys) {
+			self.socket.emit("OAuthKeyDescriptionForTeam", self.formatResponse(true, oauthKeys));
+		};
+
+		var successRead = function (team : Team) {
+			var successLoadAsso = function () {
+				var oAutKeys = [];
+				var nbUsers = team.users().length;
+
+				if (nbUsers == 0) {
+					finalSuccess(oAutKeys);
+				} else {
+					var successLoadOAuth = function () {
+						nbUsers--;
+
+						if (nbUsers == 0) {
+							var nbOAuth = 0;
+
+							for (var i = 0; i < team.users().length; i++) {
+								nbOAuth += team.users()[i].oauthkeys().length;
+							}
+
+							var successCompleteJSON = function (oauthData) {
+								nbOAuth--;
+								oAutKeys.push(oauthData);
+
+								if (nbOAuth == 0) {
+									finalSuccess(oAutKeys);
+								}
+							};
+
+							team.users().forEach(function (user : User) {
+								user.oauthkeys().forEach(function (oauth : OAuthKey) {
+									oauth.toCompleteJSONObject(successCompleteJSON, fail);
+								});
+							});
+						}
+					};
+
+					team.users().forEach(function (user : User) {
+						user.loadOAuthKeys(successLoadOAuth, fail);
+					});
+				}
+			};
+
+			team.loadAssociations(successLoadAsso, fail);
+		};
+
+		Team.read(teamId, successRead, fail);
+	}
 }
