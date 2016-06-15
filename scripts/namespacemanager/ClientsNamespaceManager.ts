@@ -149,33 +149,38 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 						var behaviour : Behaviour = zone.behaviour();
 
-						zoneDesc["behaviour"] = behaviour.toJSONObject();
+						if (behaviour == null) {
+							fail("No behaviour is associated to zone: "+zone.name()+" (id : "+zone.getId()+")");
+						} else {
+							zoneDesc["behaviour"] = behaviour.toJSONObject();
 
-						zoneDesc["callTypes"] = [];
+							zoneDesc["callTypes"] = [];
 
-						var callTypes : Array<CallType> = zone.callTypes();
-						var nbCT = 0;
+							var callTypes : Array<CallType> = zone.callTypes();
+							var nbCT = 0;
 
-						callTypes.forEach( function (callType) {
+							callTypes.forEach( function (callType) {
 
-							var successCallTypeToCompleteJSON = function (data) {
-								zoneDesc["callTypes"].push(data);
-								nbCT++;
-								if (nbCT == callTypes.length) {
-									nbZones++;
+								var successCallTypeToCompleteJSON = function (data) {
+									zoneDesc["callTypes"].push(data);
+									nbCT++;
+									if (nbCT == callTypes.length) {
+										nbZones++;
 
-									sdiDesc["zones"].push(zoneDesc);
+										sdiDesc["zones"].push(zoneDesc);
 
-									if (nbZones == zones.length) {
-										self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
-										self._client.setSDIid(sdi.getId());
-										self.pushStat("Send SDI Description");
+										if (nbZones == zones.length) {
+											self.socket.emit("SDIDescription", self.formatResponse(true, sdiDesc));
+											self._client.setSDIid(sdi.getId());
+											self.pushStat("Send SDI Description");
+										}
 									}
-								}
-							};
+								};
 
-							callType.toCompleteJSONObject(successCallTypeToCompleteJSON, fail);
-						})
+								callType.toCompleteJSONObject(successCallTypeToCompleteJSON, fail);
+							})
+						}
+
 					};
 					zone.loadAssociations(successLoadAssoZone, fail);
 				});
