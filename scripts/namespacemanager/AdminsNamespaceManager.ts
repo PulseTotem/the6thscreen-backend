@@ -140,7 +140,6 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdatePolicy', function(data) { self.updateObjectAttribute(Policy, data, "AnswerUpdatePolicy"); });
 		this.addListenerToSocket('UpdateSystemTrigger', function(data) { self.updateObjectAttribute(SystemTrigger, data, "AnswerUpdateSystemTrigger"); });
 		this.addListenerToSocket('UpdateUserTrigger', function(data) { self.updateObjectAttribute(UserTrigger, data, "AnswerUpdateUserTrigger"); });
-		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
 		this.addListenerToSocket('UpdateTimelineRunner', function(data) { self.updateObjectAttribute(TimelineRunner, data, "AnswerUpdateTimelineRunner"); });
 		this.addListenerToSocket('UpdateTeam', function(data) { self.updateObjectAttribute(Team, data, "AnswerUpdateTeam"); });
 		this.addListenerToSocket('UpdateProvider', function(data) { self.updateObjectAttribute(Provider, data, "AnswerUpdateProvider"); });
@@ -197,6 +196,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveAllTeamDescription', function() { self.sendAllTeamDescription(); });
 		this.addListenerToSocket('CreateUser', function(data) { self.createUser(data); });
 		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteUser(idUser["userId"]); });
+		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
 
 
 
@@ -1530,83 +1530,88 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with success status.");
 		};
 
+		var insertDataToCms = function (url, user, successCallback) {
+			var args = {
+				"data": {
+					"username": user.username(),
+					"email": user.email()
+				},
+				"headers": {
+					"Content-Type": "application/json",
+					"Authorization": self.socket.connectedUser.cmsAuthkey()
+				}
+			};
+
+			var req = RestClient.getClient().put(url, args, function (data, response) {
+				if (response.statusCode >= 200 && response.statusCode < 300) {
+					successCallback(data);
+				} else {
+					fail(new RestClientResponse(false, data));
+				}
+			});
+			req.on('error', function (msg) {
+				Logger.error("Error while connecting to CMS");
+				Logger.debug(msg.toString());
+
+				fail(new RestClientResponse(false, msg.toString()));
+			});
+		};
+
+		var updateUser = function (url, user, successCallback) {
+			if(user.username() != "" && user.email() != "") {
+				var successCompleteUser = function (userCompleteDesc) {
+
+					var success = function (data) {
+						successCallback(userCompleteDesc, data);
+					};
+
+					var successUpdateTeamName = function () {
+						insertDataToCms(url, user, success);
+					};
+
+					var team = user.defaultTeam();
+					if (team == null) {
+						Logger.error("The following error has no default team: "+user.username()+" ("+user.getId()+")");
+					} else {
+						var newTeamName = user.username()+"Team";
+						team.setName(newTeamName);
+						team.update(successUpdateTeamName, fail);
+					}
+				};
+
+				user.toCompleteJSONObject(successCompleteUser, fail);
+			} else {
+				user.toCompleteJSONObject(successUserCompleteDesc, fail);
+			}
+		};
+
 		var successUserRead = function(user : User) {
 
 			if(user.cmsId() != "" && user.cmsAuthkey() != "") {
-				if(user.username() != "" && user.email() != "") {
-					var updateUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
+				var updateUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
+				var successUpdateCMSInfo = function (userCompleteDesc, data) {
+					successUserCompleteDesc(userCompleteDesc);
+				};
 
-					var args = {
-						"data": {
-							"username": user.username(),
-							"email": user.email()
-						},
-						"headers": {
-							"Content-Type": "application/json",
-							"Authorization": self.socket.connectedUser.cmsAuthkey()
-						}
-					};
-
-					var req = RestClient.getClient().put(updateUserUrl, args, function (data, response) {
-						if (response.statusCode >= 200 && response.statusCode < 300) {
-							user.toCompleteJSONObject(successUserCompleteDesc, fail);
-						} else {
-							fail(new RestClientResponse(false, data));
-						}
-					});
-					req.on('error', function (msg) {
-						Logger.error("Error while connecting to CMS");
-						Logger.debug(msg.toString());
-
-						fail(new RestClientResponse(false, msg.toString()));
-					});
-				} else {
-					user.toCompleteJSONObject(successUserCompleteDesc, fail);
-				}
+				updateUser(updateUserUrl, user, successUpdateCMSInfo);
 			} else {
-				if(user.username() != "" && user.email() != "") {
-					var createUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath();
+				var createUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath();
+				var successCreateCMSInfo = function (userCompleteDesc, data) {
+					Logger.debug(data.id);
+					Logger.debug(data.authkey);
 
-					var args = {
-						"data": {
-							"username" : user.username(),
-							"email" : user.email()
-						},
-						"headers": {
-							"Content-Type": "application/json",
-							"Authorization": self.socket.connectedUser.cmsAuthkey()
-						}
+					user.setCmsId(data.id);
+					user.setCmsAuthkey(data.authkey);
+
+					var successUpdate = function() {
+						successUserCompleteDesc(userCompleteDesc);
 					};
 
-					var req = RestClient.getClient().post(createUserUrl, args, function(data, response) {
-						if(response.statusCode >= 200 && response.statusCode < 300) {
+					Logger.debug(user.toJSONObject());
 
-							Logger.debug(data.id);
-							Logger.debug(data.authkey);
-
-							user.setCmsId(data.id);
-							user.setCmsAuthkey(data.authkey);
-
-							var successUpdate = function() {
-								user.toCompleteJSONObject(successUserCompleteDesc, fail);
-							};
-
-							Logger.debug(user.toJSONObject());
-
-							user.update(successUpdate, fail);
-						} else {
-							fail(new RestClientResponse(false, data));
-						}
-					});
-					req.on('error', function (msg) {
-						Logger.error("Error while connecting to CMS");
-						Logger.debug(msg.toString());
-
-						fail(new RestClientResponse(false, msg.toString()));
-					});
-				} else {
-					user.toCompleteJSONObject(successUserCompleteDesc, fail);
-				}
+					user.update(successUpdate, fail);
+				};
+				updateUser(createUserUrl, user, successCreateCMSInfo);
 			}
 		};
 
