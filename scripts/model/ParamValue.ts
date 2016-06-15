@@ -1,5 +1,6 @@
 /**
  * @author Christian Brel <christian@the6thscreen.fr, ch.brel@gmail.com>
+ * @author Simon Urli <simon@pulsetotem.fr>
  */
 
 /// <reference path="./ModelItf.ts" />
@@ -64,7 +65,7 @@ class ParamValue extends ModelItf {
 	 * @param {string} createdAt - The ParamValue's createdAt.
 	 * @param {string} updatedAt - The ParamValue's updatedAt.
      */
-    constructor(value : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(value : string = null, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setValue(value);
@@ -253,12 +254,9 @@ class ParamValue extends ModelItf {
 
 		var success : Function = function () {
             Logger.debug("Success super check complete ParamValue");
-			if (self.isComplete() && !!self.value()) {
+			if (self.isComplete() && self.value() != null) {
 				var successLoad:Function = function () {
-                    Logger.debug("Success load asso check complete ParamValue");
 					self._complete = (self.paramType() !== null && self.paramType().isComplete());
-                    Logger.debug(JSON.stringify(self.paramType()));
-                    Logger.debug("Obtained complete value : "+self._complete);
 					successCallback();
 				};
 
