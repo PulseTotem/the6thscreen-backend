@@ -5,6 +5,7 @@
 
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./Provider.ts" />
+/// <reference path="./Team.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -55,6 +56,20 @@ class OAuthKey extends ModelItf {
     private _provider_loaded : boolean;
 
     /**
+     * @property _teams: the teams in which the oAuth is used
+     * @type Array<Team>
+     * @private
+     */
+    private _teams : Array<Team>;
+
+    /**
+     * @property _teams_loaded: lazy loading for teams property
+     * @type boolean
+     * @private
+     */
+    private _teams_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -74,6 +89,9 @@ class OAuthKey extends ModelItf {
 
         this._provider = null;
         this._provider_loaded = false;
+
+        this._teams = new Array<Team>();
+        this._teams_loaded = false;
     }
 
     /**
@@ -173,6 +191,43 @@ class OAuthKey extends ModelItf {
         }
     }
 
+    /**
+     * Return the OAuthKeys teams
+     *
+     * @method teams
+     * @returns {Array<Team>}
+     */
+    teams() {
+        return this._teams;
+    }
+
+    /**
+     * Load the oAuthkey teams
+     *
+     * @method loadTeams
+     * @param successCallback
+     * @param failCallback
+     */
+    loadTeams(successCallback : Function, failCallback : Function) {
+        if (!this._teams_loaded) {
+            var self = this;
+            var success = function (teams) {
+                self._teams = teams;
+                self._teams_loaded = true;
+
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getAssociatedObjects(OAuthKey, Team, success, fail);
+        } else {
+            successCallback();
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -187,7 +242,7 @@ class OAuthKey extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._provider) {
+            if(self._provider_loaded && self._teams_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -203,6 +258,7 @@ class OAuthKey extends ModelItf {
         };
 
         this.loadProvider(success, fail);
+        this.loadTeams(success, fail);
     }
 
     /**
@@ -212,6 +268,7 @@ class OAuthKey extends ModelItf {
      */
     desynchronize() : void {
         this._provider_loaded = false;
+        this._teams_loaded = false;
     }
 
     /**
@@ -245,7 +302,7 @@ class OAuthKey extends ModelItf {
         var self = this;
 
         var success : Function = function () {
-            if (self.isComplete() && !!self.name()) {
+            if (self.isComplete() && !!self.name() && !!self.value()) {
 
                 var successAsso : Function = function () {
                     self._complete = (!!self.provider() && self.provider().isComplete());
@@ -261,7 +318,7 @@ class OAuthKey extends ModelItf {
                 self._complete = false;
                 successCallback();
             }
-        }
+        };
 
         super.checkCompleteness(success, failCallback);
 
@@ -285,6 +342,8 @@ class OAuthKey extends ModelItf {
             } else {
                 data["provider"] = (self.provider() !== null) ? self.provider().toJSONObject() : null;
             }
+            data["teams"] = self.serializeArray(self.teams(), onlyId);
+
             successCallback(data);
         };
 
@@ -317,6 +376,30 @@ class OAuthKey extends ModelItf {
      */
     unlinkProvider(providerID : number, successCallback : Function, failCallback : Function) {
         this.deleteObjectAssociation(OAuthKey, Provider, providerID, successCallback, failCallback);
+    }
+
+    /**
+     * Associate the oauthkey with a team
+     *
+     * @method addTeam
+     * @param {number} teamID - The team to associate with the OAuthKey.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    addTeam(teamID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(OAuthKey, Team, teamID, successCallback, failCallback);
+    }
+
+    /**
+     * Remove the association between the oauthkey and a team
+     *
+     * @method removeTeam
+     * @param {number} teamID - The team to dissociate with the OAuthKey.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    removeTeam(teamID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(OAuthKey, Team, teamID, successCallback, failCallback);
     }
 
     /**

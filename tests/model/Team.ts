@@ -407,4 +407,101 @@ describe('Team', function() {
 			c.loadOwner(success, fail);
 		});
 	});
+
+	describe('#addOAuthKey', function() {
+		it('should call the right request', function(done) {
+			var t = new Team("blurp", 123);
+			var c = new OAuthKey("toto", "blabla", "toto", 52);
+
+			var response1 : any = [];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Team.getTableName(), t.getId().toString(), OAuthKey.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var oauthkeys = t.oauthkeys();
+
+				assert.deepEqual(oauthkeys, [], "The oauthkeys is not an empty array: "+JSON.stringify(oauthkeys));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the oauthkeys");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.put(BackendConfig.associatedObjectEndpoint(Team.getTableName(), t.getId().toString(), OAuthKey.getTableName(), c.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the addZone is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the oauthkey in database.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				t.addOAuthKey(c.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			t.loadOAuthKeys(success, fail);
+		});
+	});
+
+	describe('#removeOAuthKey', function() {
+		it('should call the right request', function(done) {
+			var t = new Team("blurp", 123);
+			var c = new OAuthKey("toto", "blabla", "toto", 52);
+
+			var response1 : any = [
+				{
+					"id":52,
+					"name": "toto",
+					"description": "blabla",
+					"value": "toto",
+					"complete": false
+				}
+			];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(Team.getTableName(), t.getId().toString(), OAuthKey.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var oauthkeys = t.oauthkeys();
+
+				assert.deepEqual(oauthkeys, [c], "The oauthkeys array is not an array fill only with c: "+JSON.stringify(c));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the oauthkeys");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.delete(BackendConfig.associatedObjectEndpoint(Team.getTableName(), t.getId().toString(), OAuthKey.getTableName(), c.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the removeZone is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the oauthkey in database.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				t.removeOAuthKey(c.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			t.loadOAuthKeys(success, fail);
+		});
+
+	});
 });

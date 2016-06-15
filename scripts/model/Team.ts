@@ -5,6 +5,7 @@
 /// <reference path="./ModelItf.ts" />
 /// <reference path="./User.ts" />
 /// <reference path="./SDI.ts" />
+/// <reference path="./OAuthKey.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
 /**
@@ -55,6 +56,18 @@ class Team extends ModelItf {
     private _sdis_loaded : boolean;
 
     /**
+     * @property _oauthkeys: All oauthkeys managed by the team
+     * @private
+     */
+    private _oauthkeys : Array<OAuthKey>;
+
+    /**
+     * @property _oauthkeys_loaded: lazy loading for oauthkeys
+     * @private
+     */
+    private _oauthkeys_loaded : boolean;
+
+    /**
      * Constructor of a team. Only the name is mandatory.
      * @param name
      * @param id
@@ -75,6 +88,9 @@ class Team extends ModelItf {
 
         this._sdis = new Array<SDI>();
         this._sdis_loaded = false;
+
+        this._oauthkeys = new Array<OAuthKey>();
+        this._oauthkeys_loaded = false;
     }
 
     /**
@@ -189,6 +205,40 @@ class Team extends ModelItf {
         }
     }
 
+    /**
+     * Get the OAuthKeys available for this team
+     *
+     * @returns {Array<OAuthKey>}
+     */
+    oauthkeys() : Array<OAuthKey> {
+        return this._oauthkeys;
+    }
+
+    /**
+     * Load the oauthkeys
+     *
+     * @param successCallback
+     * @param failCallback
+     */
+    loadOAuthKeys(successCallback : Function, failCallback : Function) {
+        if (!this._oauthkeys_loaded) {
+            var self = this;
+            var success = function (oauthkeys) {
+                self._oauthkeys = oauthkeys;
+                self._oauthkeys_loaded = true;
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getAssociatedObjects(Team, OAuthKey, success, fail);
+        } else {
+            successCallback();
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -203,7 +253,7 @@ class Team extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._owner_loaded && self._users_loaded && self._sdis_loaded) {
+            if(self._owner_loaded && self._users_loaded && self._sdis_loaded && self._oauthkeys_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -220,6 +270,7 @@ class Team extends ModelItf {
         this.loadOwner(success, fail);
         this.loadUsers(success, fail);
         this.loadSDIS(success, fail);
+        this.loadOAuthKeys(success, fail);
     }
 
     /**
@@ -231,6 +282,7 @@ class Team extends ModelItf {
         this._sdis_loaded = false;
         this._owner_loaded = false;
         this._users_loaded = false;
+        this._oauthkeys_loaded = false;
     }
 
     /**
@@ -286,6 +338,7 @@ class Team extends ModelItf {
             }
             data["users"] = self.serializeArray(self.users(), onlyId);
             data["sdis"] = self.serializeArray(self.sdis(), onlyId);
+            data["oauthkeys"] = self.serializeArray(self.oauthkeys(), onlyId);
 
             successCallback(data);
         };
@@ -425,6 +478,31 @@ class Team extends ModelItf {
      */
     removeSDI(sdiID : number, successCallback : Function, failCallback : Function) {
         this.deleteObjectAssociation(Team, SDI, sdiID, successCallback, failCallback);
+    }
+
+    /**
+     * Add a new OAuthKey to the Team and associate it in the database.
+     *
+     * @method addOAuthKey
+     * @param {number} oAuthKeyId The id of the OAuthKey to add inside the Team. It cannot be a null value.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    addOAuthKey(oAuthKeyId : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(Team, OAuthKey, oAuthKeyId, successCallback, failCallback);
+    }
+
+    /**
+     * Remove a OAuthKey from the Team: the association is removed both in the object and in database.
+     * The User can only be removed if it exists first in the list of associated Users, else an exception is thrown.
+     *
+     * @method removeOAuthKey
+     * @param {number} oAuthKeyId The id of the OAuthKey to remove from that Team
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    removeOAuthKey(oAuthKeyId : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(Team, OAuthKey, oAuthKeyId, successCallback, failCallback);
     }
 
     /**
