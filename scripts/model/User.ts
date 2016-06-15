@@ -708,10 +708,41 @@ class User extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+        var self = this;
 
+        var successLoadAsso = function () {
+            var nbTeams = self.teams().length;
 
+            var successRemoveTeam = function () {
+                nbTeams--;
 
-        return ModelItf.deleteObject(User, this.getId(), successCallback, failCallback, attemptNumber);
+                if (nbTeams == 0) {
+                    var successDeleteDefaultTeam = function () {
+                        var nbOAuth = self.oauthkeys().length;
+
+                        var successDeleteOAuthKey = function () {
+                            nbOAuth--;
+
+                            if (nbOAuth == 0){
+                                ModelItf.deleteObject(User, self.getId(), successCallback, failCallback);
+                            }
+                        };
+
+                        self.oauthkeys().forEach(function (oauthKey : OAuthKey) {
+                            oauthKey.delete(successDeleteOAuthKey, failCallback);
+                        });
+                    };
+
+                    self.defaultTeam().delete(successDeleteDefaultTeam, failCallback);
+                }
+            };
+
+            self.teams().forEach(function (team : Team) {
+                self.removeTeam(team.getId(), successRemoveTeam, failCallback);
+            });
+        };
+
+        self.loadAssociations(successLoadAsso, failCallback);
     }
 
     /**

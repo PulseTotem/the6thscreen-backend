@@ -449,7 +449,25 @@ class OAuthKey extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(OAuthKey, this.getId(), successCallback, failCallback, attemptNumber);
+        var self = this;
+
+        var successLoadTeams = function () {
+            var nbTeams = self.teams().length;
+
+            var successRemoveTeam = function() {
+                nbTeams--;
+
+                if (nbTeams == 0) {
+                    ModelItf.deleteObject(OAuthKey, self.getId(), successCallback, failCallback);
+                }
+            };
+
+            self.teams().forEach(function (team : Team) {
+                self.removeTeam(team.getId(), successRemoveTeam, failCallback);
+            });
+        };
+
+        this.loadTeams(successLoadTeams, failCallback);
     }
 
     /**

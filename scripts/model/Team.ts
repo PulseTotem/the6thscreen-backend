@@ -552,7 +552,37 @@ class Team extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Team, this.getId(), successCallback, failCallback, attemptNumber);
+        var self = this;
+
+        var successLoadAsso = function () {
+            var nbUsers = self.users().length;
+
+            var successRemoveUser = function () {
+                nbUsers--;
+
+                if (nbUsers == 0) {
+                    var nbOAuth = self.oauthkeys().length;
+
+                    var successRemoveOAuth = function () {
+                        nbOAuth--;
+
+                        if (nbOAuth == 0) {
+                            ModelItf.deleteObject(Team, self.getId(), successCallback, failCallback);
+                        }
+                    };
+
+                    self.oauthkeys().forEach( function (oauthKey : OAuthKey) {
+                        self.removeOAuthKey(oauthKey.getId(), successRemoveOAuth, failCallback);
+                    });
+                }
+            };
+
+            self.users().forEach(function (user : User) {
+                self.removeUser(user.getId(), successRemoveUser, failCallback);
+            })
+        };
+
+        this.loadAssociations(successLoadAsso, failCallback);
     }
 
     /**

@@ -1644,59 +1644,40 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		};
 
 		var successReadUser = function (user : User) {
-			var successLoadAsso = function () {
-				var nbOAuth = user.oauthkeys().length;
 
-				var successDeleteOAuth = function () {
-					nbOAuth--;
+			var successDeleteUser = function () {
+				self.socket.emit("AnswerDeleteUser", self.formatResponse(true, userId));
+			};
 
-					if (nbOAuth <= 0) {
-						var successDeleteDefaultTeam = function () {
-							var successDeleteUser = function () {
-								self.socket.emit("AnswerDeleteUser", self.formatResponse(true, userId));
-							};
+			if(user.cmsId() != "") {
+				var deleteUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
 
-							if(user.cmsId() != "") {
-								var deleteUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
+				var args = {
+					"data" : {
 
-								var args = {
-									"data" : {
-
-									},
-									"headers": {
-										"Content-Type": "application/json",
-										"Authorization": self.socket.connectedUser.cmsAuthkey()
-									}
-								};
-
-								var req = RestClient.getClient().delete(deleteUserUrl, args, function (data, response) {
-									if (response.statusCode >= 200 && response.statusCode < 300) {
-										user.delete(successDeleteUser, fail);
-									} else {
-										fail(new RestClientResponse(false, data));
-									}
-								});
-								req.on('error', fail);
-							} else {
-								user.delete(successDeleteUser, fail);
-							}
-						};
-
-						user.defaultTeam().delete(successDeleteDefaultTeam, fail);
+					},
+					"headers": {
+						"Content-Type": "application/json",
+						"Authorization": self.socket.connectedUser.cmsAuthkey()
 					}
 				};
 
-				if (nbOAuth > 0) {
-					user.oauthkeys().forEach(function (oAuth : OAuthKey) {
-						oAuth.delete(successDeleteOAuth, fail);
-					});
-				} else {
-					successDeleteOAuth();
-				}
+				var req = RestClient.getClient().delete(deleteUserUrl, args, function (data, response) {
+					if (response.statusCode >= 200 && response.statusCode < 300) {
+						user.delete(successDeleteUser, fail);
+					} else {
+						fail(new RestClientResponse(false, data));
+					}
+				});
+				req.on('error', function (msg) {
+					Logger.error("Error while connecting to CMS");
+					Logger.debug(msg.toString());
 
-			};
-
-			user.loadAssociations(successLoadAsso, fail);
+					fail(new RestClientResponse(false, msg.toString()));
+				});
+			} else {
+				user.delete(successDeleteUser, fail);
+			}
 		};
 
 		User.read(userId, successReadUser, fail);
