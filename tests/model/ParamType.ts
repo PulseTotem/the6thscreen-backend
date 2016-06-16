@@ -393,11 +393,12 @@ describe('ParamType', function() {
 		it('should set the given defaultValue', function(done) {
 			var c = new ParamType("toto","machin", 52);
 			var s = new ParamValue("toto" ,42);
+			var linkName = "DefaultValues";
 
 			var response1 : any = [];
 
 			var restClientMockAsso = nock(BackendConfig.getDBBaseURL())
-				.get(BackendConfig.associationEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName()))
+				.get(BackendConfig.associationEndpoint(ParamType.getTableName(), c.getId().toString(), linkName))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -424,7 +425,7 @@ describe('ParamType', function() {
 		            .reply(200, JSON.stringify(emptyResponse));
 
 	            var restClientMockAssoDefaultValue = nock(BackendConfig.getDBBaseURL())
-		            .put(BackendConfig.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName(), s.getId().toString()))
+		            .put(BackendConfig.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), linkName, s.getId().toString()))
 		            .reply(200, JSON.stringify(emptyResponse));
 
 
@@ -458,11 +459,12 @@ describe('ParamType', function() {
 		it('should unset the defaultValue', function(done) {
 			var c = new ParamType("toto","machin", 52);
 			var s = new ParamValue("toto",42);
+			var linkName = "DefaultValues";
 
 			var response1 : any = s.toJSONObject();
 
 			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
-				.get(BackendConfig.associationEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName()))
+				.get(BackendConfig.associationEndpoint(ParamType.getTableName(), c.getId().toString(), linkName))
 				.reply(200, JSON.stringify(response1));
 
             var success = function() {
@@ -473,7 +475,7 @@ describe('ParamType', function() {
 				var emptyResponse : any = {};
 
 				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
-                    .delete(BackendConfig.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName(), s.getId().toString()))
+                    .delete(BackendConfig.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), linkName, s.getId().toString()))
                     .reply(200, JSON.stringify(emptyResponse));
 
 
@@ -501,6 +503,184 @@ describe('ParamType', function() {
             };
 
 			c.loadDefaultValue(success, fail);
+		});
+	});
+
+	describe('#addSource', function() {
+		it('should call the right request', function(done) {
+			var c = new ParamType("toto","machin", 52);
+			var s = new Source("toto","tata" , "bla", 42, false, 32);
+
+			var response1 : any = [];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ParamType.getTableName(), c.getId().toString(), Source.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var sources = c.sources();
+				assert.deepEqual(sources, [], "The sources is not an empty array: "+JSON.stringify(sources));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the sources");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.put(BackendConfig.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), Source.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the linkConstraintParamType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the source in database.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.addSource(s.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadSources(success, fail);
+		});
+
+	});
+
+	describe('#removeSource', function() {
+		it('should call the right request', function(done) {
+			var c = new ParamType("toto","machin", 52);
+			var s = new Source("toto","tata" , "bla", 42, false, 32);
+
+			var response1 : any = [ s.toJSONObject() ];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ParamType.getTableName(), c.getId().toString(), Source.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var sources = c.sources();
+				assert.deepEqual(sources, [s], "The sources is not the array containing a unique info: "+JSON.stringify(sources));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the sources");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.delete(BackendConfig.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), Source.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the unlinkConstraintParamType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.removeSource(s.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadSources(success, fail);
+		});
+	});
+
+	describe('#addParamValue', function() {
+		it('should call the right request', function(done) {
+			var c = new ParamType("toto","machin", 52);
+			var s = new ParamValue("toto", 32);
+
+			var response1 : any = [];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var paramValues = c.paramValues();
+				assert.deepEqual(paramValues, [], "The sources is not an empty array: "+JSON.stringify(paramValues));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.put(BackendConfig.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the linkConstraintParamType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done to associate the paramValue in database.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.addParamValue(s.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadParamValues(success, fail);
+		});
+
+	});
+
+	describe('#removeSource', function() {
+		it('should call the right request', function(done) {
+			var c = new ParamType("toto","machin", 52);
+			var s = new ParamValue("toto", 32);
+
+			var response1 : any = [ s.toJSONObject() ];
+
+			var restClientMock1 = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName()))
+				.reply(200, JSON.stringify(response1));
+
+			var success = function() {
+				var paramValues = c.paramValues();
+				assert.deepEqual(paramValues, [s], "The sources is not the array containing a unique info: "+JSON.stringify(paramValues));
+				assert.ok(restClientMock1.isDone(), "The mock request has not been done to get the paramValues");
+
+				var emptyResponse : any = {};
+
+				var restClientMock2 = nock(BackendConfig.getDBBaseURL())
+					.delete(BackendConfig.associatedObjectEndpoint(ParamType.getTableName(), c.getId().toString(), ParamValue.getTableName(), s.getId().toString()))
+					.reply(200, JSON.stringify(emptyResponse));
+
+
+				var success2 = function() {
+					//assert.ok(retour, "The return of the unlinkConstraintParamType is false.");
+					assert.ok(restClientMock2.isDone(), "The mock request has not been done.");
+					done();
+				};
+
+				var fail2 = function(err) {
+					done(err);
+				};
+
+				c.removeParamValue(s.getId(), success2, fail2);
+			};
+
+			var fail = function(err) {
+				done(err);
+			};
+
+			c.loadParamValues(success, fail);
 		});
 	});
 });

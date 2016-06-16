@@ -22,6 +22,8 @@
 /// <reference path="../model/ThemeZone.ts" />
 /// <reference path="../model/ThemeSDI.ts" />
 /// <reference path="../model/TimelineRunner.ts" />
+/// <reference path="../model/Team.ts" />
+/// <reference path="../model/Provider.ts" />
 
 
 class AdminsNamespaceManager extends ShareNamespaceManager {
@@ -85,7 +87,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveAllUserTriggerDescription', function() { self.sendAllObjectDescription(UserTrigger, "AllUserTriggerDescription"); });
 		this.addListenerToSocket('RetrieveAllUserDescription', function() { self.sendAllObjectDescription(User, "AllUserDescription"); });
 		this.addListenerToSocket('RetrieveAllSDIDescription', function() { self.sendAllObjectDescription(SDI, "AllSDIDescription"); });
-
+		this.addListenerToSocket('RetrieveAllProviderDescription', function() { self.sendAllObjectDescription(Provider, "AllProviderDescription"); });
 
 		// Create object
 		this.addListenerToSocket('CreateSDI', function(data) { self.createObject(SDI, data, "AnswerCreateSDI"); });
@@ -110,8 +112,10 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('CreatePolicy', function(data) { self.createObject(Policy, data, "AnswerCreatePolicy"); });
 		this.addListenerToSocket('CreateSystemTrigger', function(data) { self.createObject(SystemTrigger, data, "AnswerCreateSystemTrigger"); });
 		this.addListenerToSocket('CreateUserTrigger', function(data) { self.createObject(UserTrigger, data, "AnswerCreateUserTrigger"); });
-		this.addListenerToSocket('CreateUser', function(data) { self.createObject(User, data, "AnswerCreateUser"); });
 		this.addListenerToSocket('CreateTimelineRunner', function(data) { self.createObject(TimelineRunner, data, "AnswerCreateTimelineRunner"); });
+		this.addListenerToSocket('CreateTeam', function(data) { self.createObject(Team, data, "AnswerCreateTeam"); });
+		this.addListenerToSocket('CreateProvider', function(data) { self.createObject(Provider, data, "AnswerCreateProvider"); });
+
 
 		// Update object
 		this.addListenerToSocket('UpdateSDI', function(data) { self.updateObjectAttribute(SDI, data, "AnswerUpdateSDI"); });
@@ -136,8 +140,10 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('UpdatePolicy', function(data) { self.updateObjectAttribute(Policy, data, "AnswerUpdatePolicy"); });
 		this.addListenerToSocket('UpdateSystemTrigger', function(data) { self.updateObjectAttribute(SystemTrigger, data, "AnswerUpdateSystemTrigger"); });
 		this.addListenerToSocket('UpdateUserTrigger', function(data) { self.updateObjectAttribute(UserTrigger, data, "AnswerUpdateUserTrigger"); });
-		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
 		this.addListenerToSocket('UpdateTimelineRunner', function(data) { self.updateObjectAttribute(TimelineRunner, data, "AnswerUpdateTimelineRunner"); });
+		this.addListenerToSocket('UpdateOAuthKey', function(data) { self.updateObjectAttribute(OAuthKey, data, "AnswerUpdateOAuthKey"); });
+		this.addListenerToSocket('UpdateTeam', function(data) { self.updateObjectAttribute(Team, data, "AnswerUpdateTeam"); });
+		this.addListenerToSocket('UpdateProvider', function(data) { self.updateObjectAttribute(Provider, data, "AnswerUpdateProvider"); });
 
 
 		// Delete object
@@ -162,9 +168,9 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('DeleteSystemTrigger', function(idSystemTrigger) { self.deleteObjectFromDescription(SystemTrigger, "systemTriggerId", idSystemTrigger, "AnswerDeleteSystemTrigger"); });
 		this.addListenerToSocket('DeleteUserTrigger', function(idUserTrigger) { self.deleteObjectFromDescription(UserTrigger, "userTriggerId", idUserTrigger, "AnswerDeleteUserTrigger"); });
 		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "AnswerDeleteSDI"); });
-		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteUser(idUser["userId"]); });
 		this.addListenerToSocket('DeleteTimelineRunner', function(idTimelineRunner) { self.deleteObjectFromDescription(TimelineRunner, "timelineRunnerId", idTimelineRunner, "AnswerDeleteTimelineRunner"); });
-
+		this.addListenerToSocket('DeleteTeam', function(idTeam) { self.deleteObjectFromDescription(Team, "teamId", idTeam, "AnswerDeleteTeam"); });
+		this.addListenerToSocket('DeleteProvider', function(idProvider) { self.deleteObjectFromDescription(Provider, "providerId", idProvider, "AnswerDeleteProvider"); });
 
 		// Custom requests
 		this.addListenerToSocket('RetrieveSourcesFromServiceId', function(serviceIdDescription) { self.sendSourcesFromServiceId(serviceIdDescription); });
@@ -178,7 +184,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveCompleteCall', function(callIdDescription) { self.sendCompleteCall(callIdDescription); });
 		this.addListenerToSocket('UpdateZonePosition', function(data) { self.updateZonePosition(data); });
 		this.addListenerToSocket('CreateEmptyParamValueForParamTypeId', function(paramTypeIdDescription) { self.createEmptyParamValue(paramTypeIdDescription); });
-		this.addListenerToSocket('RetrieveOAuthKeysFromServiceAndUser', function(serviceUserDescription) { self.sendOAuthKeysFromServiceAndUser(serviceUserDescription); });
+		this.addListenerToSocket('RetrieveOAuthKeysFromProviderAndSDI', function(providerSDIDescription) { self.sendOAuthKeysFromProviderAndSDI(providerSDIDescription); });
 		this.addListenerToSocket('RetrieveCompleteProfilDescription', function(profilIdDescription) { self.sendCompleteProfil(profilIdDescription); });
 		this.addListenerToSocket('RetrieveZoneContentsFromZoneId', function(zoneIdDescription) { self.sendZoneContentsFromZoneId(zoneIdDescription); });
 		this.addListenerToSocket('AddThemeToRenderer', function(newThemeDescription) { self.addThemeToRenderer(newThemeDescription); });
@@ -187,7 +193,19 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RetrieveConnectedClientOfProfil', function (profilIdDescription) { self.sendConnectedClients(profilIdDescription); });
 	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
+
+		this.addListenerToSocket('RetrieveAllTeamDescription', function() { self.sendAllTeamDescription(); });
+		this.addListenerToSocket('RetrieveOAuthKeyDescriptionForTeam', function(teamId) { self.retrieveOAuthKeyDescriptionForTeam(teamId); });
+		this.addListenerToSocket('CreateUser', function(data) { self.createUser(data); });
+		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteUser(idUser["userId"]); });
+		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
+
+
+
 		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
+
+
+
 		this.addListenerToSocket('RetrieveParamTypesFromCallType', function (callTypeDescription) { self.sendParamTypesDescriptionFromCallType(callTypeDescription); });
 		this.addListenerToSocket('CreateParamValueDescription', function (paramValueDescription) { self.createParamValueDescription(paramValueDescription); });
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
@@ -195,7 +213,6 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 		this.addListenerToSocket('CloneProfil', function(data) { self.cloneProfil(data); });
 		this.addListenerToSocket('CloneSDI', function(data) { self.cloneSDI(data); });
-
 
 		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
@@ -349,7 +366,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	 * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
 	 */
 	createOAuthKey(oauthKeyDescription : any, self : AdminsNamespaceManager = null) {
-		// oauthKeyDescription : {"userId" : string, "serviceId" : string, "name" : string, "description" : string, "value" : any (JSONObject)}
+		// oauthKeyDescription : {"userId" : string, "providerId" : string, "name" : string, "description" : string, "value" : any (JSONObject)}
 		var self = this;
 
 		var fail : Function = function(error) {
@@ -368,7 +385,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		var newOAuthKey = OAuthKey.fromJSONObject(informations);
 
 		var successCreateOAuthKey : Function = function(oauthKeyResult) {
-			var successLinkService : Function = function() {
+			var successLinkProvider : Function = function() {
 				var userId = oauthKeyDescription.userId;
 
 				var successRetrieveUser : Function = function(user) {
@@ -377,20 +394,17 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 						var successOAuthKeyCompleteJSON : Function = function(oauthKeyCompleteJSON) {
 							self.socket.emit("OAuthKeyDescription", self.formatResponse(true, oauthKeyCompleteJSON));
-							Logger.debug("SocketId: " + self.socket.id + " - createOAuthKey : send done with success status for OAuthKey with Id : " + newOAuthKey.getId());
 						};
 
 						newOAuthKey.toCompleteJSONObject(successOAuthKeyCompleteJSON, fail);
 					}
 
 					user.addOAuthKey(newOAuthKey.getId(),successUserAssociation, fail);
-
-
 				};
 
 				User.read(userId, successRetrieveUser, fail);
 			};
-			newOAuthKey.linkService(oauthKeyDescription.serviceId, successLinkService, fail);
+			newOAuthKey.linkProvider(oauthKeyDescription.providerId, successLinkProvider, fail);
 		};
 
 		newOAuthKey.create(successCreateOAuthKey, function (error) { self.createObjectFail(error, "OAuthKeyDescription"); });
@@ -1185,62 +1199,68 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage createEmptyParamValue //////////////////////
 
-////////////////// Begin: Manage sendOAuthKeysFromServiceAndUser //////////////////////
+////////////////// Begin: Manage sendOAuthKeysFromProviderAndSDI //////////////////////
 
 	/**
 	 * Create an empty ParamValue and associate it to ParamType in param.
-	 * Send the result on the channel "OAuthKeysFromServiceAndUser"
+	 * Send the result on the channel "OAuthKeysFromProviderAndSDI"
 	 *
-	 * @method sendOAuthKeysFromServiceAndUser
-	 * @param {JSONObject} serviceUserDescription - Represents OAuthKey to retrieve
+	 * @method sendOAuthKeysFromProviderAndSDI
+	 * @param {JSONObject} providerSDIDescription - Represents OAuthKey to retrieve
 	 */
-	sendOAuthKeysFromServiceAndUser(serviceUserDescription : any) {
-		// serviceUserDescription : { "userId": number, "serviceId": number }
+	sendOAuthKeysFromProviderAndSDI(providerSDIDescription : any) {
+		// providerSDIDescription : { "sdiId": number, "providerId": number }
 		var self = this;
 
-		var userId = serviceUserDescription.userId;
-		var serviceId = serviceUserDescription.serviceId;
+		var sdiId = providerSDIDescription.sdiId;
+		var providerId = providerSDIDescription.providerId;
 
 		var fail : Function = function(error) {
-			self.socket.emit("OAuthKeysFromServiceAndUser", self.formatResponse(false, error));
-			Logger.debug("SocketId: " + self.socket.id + " - sendOAuthKeysFromServiceAndUser failed ");
+			self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - sendOAuthKeysFromProviderAndSDI failed ");
 		};
 
-		var successReadUser = function(user : User) {
+		var successReadSDI = function(sdi : SDI) {
 
-			var successLoadUserAssociations = function() {
+			var successLoadSDIAssociations = function() {
 				var oauthkeys = [];
-				if(user.oauthkeys().length > 0) {
-					var done = [];
-					user.oauthkeys().forEach(function(oauthkey : OAuthKey) {
-						var successLoadOAuthKeyCompleteDesc = function(oauthkeyDesc) {
-							done.push(oauthkeyDesc);
+				if(sdi.team() != null) {
+					var successLoadTeamAssociations = function() {
+						if(sdi.team().oauthkeys().length > 0) {
+							var done = [];
+							sdi.team().oauthkeys().forEach(function(oauthkey : OAuthKey) {
+								var successLoadOAuthKeyCompleteDesc = function(oauthkeyDesc) {
+									done.push(oauthkeyDesc);
 
-							if(oauthkeyDesc.service.id == serviceId) {
-								oauthkeys.push(oauthkeyDesc);
-							}
+									if(oauthkeyDesc.provider.id == providerId && oauthkeyDesc.value != null && oauthkeyDesc.value != "") {
+										oauthkeys.push(oauthkeyDesc);
+									}
 
-							if(done.length == user.oauthkeys().length) {
-								self.socket.emit("OAuthKeysFromServiceAndUser", self.formatResponse(true, oauthkeys));
-							}
-						};
+									if(done.length == sdi.team().oauthkeys().length) {
+										self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(true, oauthkeys));
+									}
+								};
 
-						oauthkey.toCompleteJSONObject(successLoadOAuthKeyCompleteDesc, fail);
-					});
+								oauthkey.toCompleteJSONObject(successLoadOAuthKeyCompleteDesc, fail);
+							});
+						} else {
+							self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(true, oauthkeys));
+						}
+					};
+
+					sdi.team().loadAssociations(successLoadTeamAssociations, fail);
 				} else {
-					self.socket.emit("OAuthKeysFromServiceAndUser", self.formatResponse(true, oauthkeys));
+					self.socket.emit("OAuthKeysFromProviderAndSDI", self.formatResponse(true, oauthkeys));
 				}
 			};
 
-			user.loadAssociations(successLoadUserAssociations, fail);
-		}
+			sdi.loadAssociations(successLoadSDIAssociations, fail);
+		};
 
-		User.read(userId, successReadUser, fail);
-
-
+		SDI.read(sdiId, successReadSDI, fail);
 	}
 
-////////////////////// End: Manage sendOAuthKeysFromServiceAndUser //////////////////////
+////////////////////// End: Manage sendOAuthKeysFromProviderAndSDI //////////////////////
 
 ////////////////////// Begin: Manage sendCompleteProfil //////////////////////
 
@@ -1512,73 +1532,88 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with success status.");
 		};
 
+		var insertDataToCms = function (url, user, successCallback) {
+			var args = {
+				"data": {
+					"username": user.username(),
+					"email": user.email()
+				},
+				"headers": {
+					"Content-Type": "application/json",
+					"Authorization": self.socket.connectedUser.cmsAuthkey()
+				}
+			};
+
+			var req = RestClient.getClient().put(url, args, function (data, response) {
+				if (response.statusCode >= 200 && response.statusCode < 300) {
+					successCallback(data);
+				} else {
+					fail(new RestClientResponse(false, data));
+				}
+			});
+			req.on('error', function (msg) {
+				Logger.error("Error while connecting to CMS");
+				Logger.debug(msg.toString());
+
+				fail(new RestClientResponse(false, msg.toString()));
+			});
+		};
+
+		var updateUser = function (url, user, successCallback) {
+			if(user.username() != "" && user.email() != "") {
+				var successCompleteUser = function (userCompleteDesc) {
+
+					var success = function (data) {
+						successCallback(userCompleteDesc, data);
+					};
+
+					var successUpdateTeamName = function () {
+						insertDataToCms(url, user, success);
+					};
+
+					var team = user.defaultTeam();
+					if (team == null) {
+						Logger.error("The following error has no default team: "+user.username()+" ("+user.getId()+")");
+					} else {
+						var newTeamName = user.username()+"Team";
+						team.setName(newTeamName);
+						team.update(successUpdateTeamName, fail);
+					}
+				};
+
+				user.toCompleteJSONObject(successCompleteUser, fail);
+			} else {
+				user.toCompleteJSONObject(successUserCompleteDesc, fail);
+			}
+		};
+
 		var successUserRead = function(user : User) {
 
 			if(user.cmsId() != "" && user.cmsAuthkey() != "") {
-				if(user.username() != "" && user.email() != "") {
-					var updateUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
+				var updateUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
+				var successUpdateCMSInfo = function (userCompleteDesc, data) {
+					successUserCompleteDesc(userCompleteDesc);
+				};
 
-					var args = {
-						"data": {
-							"username": user.username(),
-							"email": user.email()
-						},
-						"headers": {
-							"Content-Type": "application/json",
-							"Authorization": self.socket.connectedUser.cmsAuthkey()
-						}
-					};
-
-					var req = RestClient.getClient().put(updateUserUrl, args, function (data, response) {
-						if (response.statusCode >= 200 && response.statusCode < 300) {
-							user.toCompleteJSONObject(successUserCompleteDesc, fail);
-						} else {
-							fail(new RestClientResponse(false, data));
-						}
-					});
-					req.on('error', fail);
-				} else {
-					user.toCompleteJSONObject(successUserCompleteDesc, fail);
-				}
+				updateUser(updateUserUrl, user, successUpdateCMSInfo);
 			} else {
-				if(user.username() != "" && user.email() != "") {
-					var createUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath();
+				var createUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath();
+				var successCreateCMSInfo = function (userCompleteDesc, data) {
+					Logger.debug(data.id);
+					Logger.debug(data.authkey);
 
-					var args = {
-						"data": {
-							"username" : user.username(),
-							"email" : user.email()
-						},
-						"headers": {
-							"Content-Type": "application/json",
-							"Authorization": self.socket.connectedUser.cmsAuthkey()
-						}
+					user.setCmsId(data.id);
+					user.setCmsAuthkey(data.authkey);
+
+					var successUpdate = function() {
+						successUserCompleteDesc(userCompleteDesc);
 					};
 
-					var req = RestClient.getClient().post(createUserUrl, args, function(data, response) {
-						if(response.statusCode >= 200 && response.statusCode < 300) {
+					Logger.debug(user.toJSONObject());
 
-							Logger.debug(data.id);
-							Logger.debug(data.authkey);
-
-							user.setCmsId(data.id);
-							user.setCmsAuthkey(data.authkey);
-
-							var successUpdate = function() {
-								user.toCompleteJSONObject(successUserCompleteDesc, fail);
-							};
-
-							Logger.debug(user.toJSONObject());
-
-							user.update(successUpdate, fail);
-						} else {
-							fail(new RestClientResponse(false, data));
-						}
-					});
-					req.on('error', fail);
-				} else {
-					user.toCompleteJSONObject(successUserCompleteDesc, fail);
-				}
+					user.update(successUpdate, fail);
+				};
+				updateUser(createUserUrl, user, successCreateCMSInfo);
 			}
 		};
 
@@ -1596,6 +1631,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	/**
 	 * Delete User from given id.
 	 * Delete User in CMS.
+	 * Delete oAuthKeys and defaultTeam.
 	 * Send the result on the channel "AnswerDeleteUser"
 	 *
 	 * @method deleteUser
@@ -1604,19 +1640,19 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	deleteUser(userId : number) {
 		var self = this;
 
-		var fail = function(error) {
+		var fail = function (error) {
 			self.socket.emit("AnswerDeleteUser", self.formatResponse(false, error));
-			Logger.debug("SocketId: " + self.socket.id + " - deleteUser : send done with fail status.");
+			Logger.error("SocketId: "+self.socket.id+" - DeleteUser failed");
+			Logger.debug(error);
 		};
 
-		var successDelete = function () {
-			self.socket.emit("AnswerDeleteUser", self.formatResponse(true, userId));
-		};
+		var successReadUser = function (user : User) {
 
-		var successReadObject = function (user) {
+			var successDeleteUser = function () {
+				self.socket.emit("AnswerDeleteUser", self.formatResponse(true, userId));
+			};
 
-			if(user.cmsId() != "") {
-
+			if(!!user.cmsId()) {
 				var deleteUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
 
 				var args = {
@@ -1631,18 +1667,23 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 				var req = RestClient.getClient().delete(deleteUserUrl, args, function (data, response) {
 					if (response.statusCode >= 200 && response.statusCode < 300) {
-						user.delete(successDelete, fail);
+						user.delete(successDeleteUser, fail);
 					} else {
 						fail(new RestClientResponse(false, data));
 					}
 				});
-				req.on('error', fail);
+				req.on('error', function (msg) {
+					Logger.error("Error while connecting to CMS");
+					Logger.debug(msg.toString());
+
+					fail(new RestClientResponse(false, msg.toString()));
+				});
 			} else {
-				user.delete(successDelete, fail);
+				user.delete(successDeleteUser, fail);
 			}
 		};
 
-		User.read(userId, successReadObject, fail);
+		User.read(userId, successReadUser, fail);
 	}
 
 ////////////////////// End: Manage deleteUser //////////////////////
@@ -1730,4 +1771,148 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
 ////////////////////// End: Manage RendererThemes of Renderer //////////////////////
 
+////////////////////// Begin: Manage retrieving all teams with information on defaultTeam //////////////////////
+
+	sendAllTeamDescription() {
+		var self = this;
+
+		var fail = function (error) {
+			self.socket.emit("AllTeamDescription", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - sendAllTeamDescription failed");
+			Logger.debug(error);
+		};
+
+		var successReadAllTeams = function (allTeams : Array<Team>) {
+			var result = [];
+			var nbTeam = allTeams.length;
+
+			var successCompleteWithDefault = function (data : any) {
+				result.push(data);
+				nbTeam--;
+
+				if (nbTeam == 0) {
+					self.socket.emit("AllTeamDescription", self.formatResponse(true, result));
+				}
+			};
+
+			allTeams.forEach(function (team : Team) {
+				team.toCompleteJSONObjectWithDefaultTeam(successCompleteWithDefault, fail);
+			});
+		};
+
+		Team.all(successReadAllTeams, fail);
+	}
+
+////////////////////// End: Manage retrieving all teams with information on defaultTeam //////////////////////
+////////////////////// Begin: Manage creating user and her default team //////////////////////
+
+	createUser(dataUser) {
+		var self = this;
+
+		var fail = function (error) {
+			self.socket.emit("AnswerCreateUser", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - createUser failed");
+			Logger.debug(error);
+		};
+
+		var successCreateUser = function (userData) {
+
+			var user : User = User.fromJSONObject(userData);
+
+			var successCreateTeam = function (teamData) {
+
+				var team : Team = Team.fromJSONObject(teamData);
+				var successLinkDefaultTeam = function () {
+					var successLinkOwner = function () {
+						var successAddUser = function () {
+							var successCompleteJSONObject = function (data) {
+								self.socket.emit("AnswerCreateUser", self.formatResponse(true, data));
+							};
+
+							user.toCompleteJSONObject(successCompleteJSONObject, fail);
+						};
+
+						team.addUser(user.getId(), successAddUser, fail);
+					};
+
+					team.linkOwner(user.getId(), successLinkOwner, fail);
+				};
+
+				user.linkDefaultTeam(team.getId(), successLinkDefaultTeam, fail);
+			};
+
+			var team = new Team(user.username()+" team");
+			team.create(successCreateTeam, fail);
+		};
+
+		var user = User.fromJSONObject(dataUser);
+		user.create(successCreateUser, fail);
+	}
+////////////////////// END: Manage creating user and her default team //////////////////////
+
+
+	/**
+	 * Return all oauthKeys of users of the team
+	 * @param teamId: information on the form {"teamId": numer}
+     */
+	retrieveOAuthKeyDescriptionForTeam(teamIdData) {
+		var self = this;
+		var teamId = teamIdData.teamId;
+
+		var fail = function (error) {
+			self.socket.emit("OAuthKeyDescriptionForTeam", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - retrieveOAuthKeyDescriptionForTeam failed");
+			Logger.debug(error);
+		};
+
+		var finalSuccess = function (oauthKeys) {
+			self.socket.emit("OAuthKeyDescriptionForTeam", self.formatResponse(true, oauthKeys));
+		};
+
+		var successRead = function (team : Team) {
+			var successLoadAsso = function () {
+				var oAutKeys = [];
+				var nbUsers = team.users().length;
+
+				if (nbUsers == 0) {
+					finalSuccess(oAutKeys);
+				} else {
+					var successLoadOAuth = function () {
+						nbUsers--;
+
+						if (nbUsers == 0) {
+							var nbOAuth = 0;
+
+							for (var i = 0; i < team.users().length; i++) {
+								nbOAuth += team.users()[i].oauthkeys().length;
+							}
+
+							var successCompleteJSON = function (oauthData) {
+								nbOAuth--;
+								oAutKeys.push(oauthData);
+
+								if (nbOAuth == 0) {
+									finalSuccess(oAutKeys);
+								}
+							};
+
+							team.users().forEach(function (user : User) {
+								user.oauthkeys().forEach(function (oauth : OAuthKey) {
+									oauth.toCompleteJSONObject(successCompleteJSON, fail);
+								});
+							});
+						}
+					};
+
+					team.users().forEach(function (user : User) {
+						user.loadOAuthKeys(successLoadOAuth, fail);
+					});
+				}
+			};
+
+			team.loadAssociations(successLoadAsso, fail);
+		};
+
+		Team.read(teamId, successRead, fail);
+	}
 }

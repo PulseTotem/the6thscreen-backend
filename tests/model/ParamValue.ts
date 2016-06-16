@@ -27,7 +27,7 @@ describe('ParamValue', function() {
 		});
 
 		it('should store the complete value', function () {
-			var c = new ParamValue("", 52, true);
+			var c = new ParamValue(null, 52, true);
 			assert.equal(c.isComplete(), true, "The complete value is not stored.");
 		});
 
@@ -135,13 +135,24 @@ describe('ParamValue', function() {
 			cpt.checkCompleteness(success, fail);
 		});
 
-		it('should not consider the object as complete if it has an empty name', function(done) {
+		it('should consider the object as complete if it has an empty name', function(done) {
 			nock.disableNetConnect();
 
 			var cpt = new ParamValue("", 52);
 
+			var response : any = {
+				"id":12,
+				"name": "type",
+				"complete": true
+			};
+
+			var restClientMock = nock(BackendConfig.getDBBaseURL())
+				.get(BackendConfig.associationEndpoint(ParamValue.getTableName(), cpt.getId().toString(), ParamType.getTableName()))
+				.reply(200, JSON.stringify(response));
+
 			var success = function() {
-				assert.equal(cpt.isComplete(), false, "The object should not be considered as complete.");
+				assert.ok(restClientMock.isDone(), "The mock request has not been done to get the type");
+				assert.equal(cpt.isComplete(), true, "The object should be considered as complete.");
 				done();
 			};
 
