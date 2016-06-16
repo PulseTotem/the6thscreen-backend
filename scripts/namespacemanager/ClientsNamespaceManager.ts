@@ -89,11 +89,13 @@ class ClientsNamespaceManager extends ShareNamespaceManager {
 
 		self.pushStat("Disconnection");
 
-		if (this._client != null) {
+		if (this._client) {
 			for (var i = 0; i < ClientsNamespaceManager.onlineClients.length; i++) {
 				var client = ClientsNamespaceManager.onlineClients[i];
-				if (client.getSocketId() == this._client.getSocketId()) {
-					delete ClientsNamespaceManager.onlineClients[i];
+				if (client) {
+					if (client.getSocketId() == this._client.getSocketId()) {
+						delete ClientsNamespaceManager.onlineClients[i];
+					}
 				}
 			}
 		}
