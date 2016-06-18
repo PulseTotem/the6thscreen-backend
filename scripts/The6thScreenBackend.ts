@@ -66,7 +66,12 @@ class The6thScreenBackend extends Server {
                         res.json({token: tokenString});
                     };
 
-                    var successCreate = function(token : Token) {
+                    var now = moment();
+                    var tomorrow = moment().add(24, 'hours');
+
+                    var token : Token = new Token(tokenString, tomorrow.toDate());
+
+                    var successCreate = function(tokenData) {
                         var successAddToken = function () {
                             user.setLastIp(clientIp);
                             user.setLastConnection(now.toDate());
@@ -77,10 +82,6 @@ class The6thScreenBackend extends Server {
                         user.addToken(token.getId(), successAddToken, fail);
                     };
 
-                    var now = moment();
-                    var tomorrow = moment().add(24, 'hours');
-
-                    var token : Token = new Token(tokenString, tomorrow.toDate());
                     token.create(successCreate, fail);
                 };
 
@@ -134,9 +135,9 @@ class The6thScreenBackend extends Server {
                         };
 
                         // we are sending the profile in the token
-                        var token = jwt.sign(profile, BackendConfig.getJWTSecret());
+                        var tokenStr = jwt.sign(profile, BackendConfig.getJWTSecret());
                         var finalSuccess = function () {
-                            res.json({token: token});
+                            res.json({token: tokenStr});
                         };
 
                         var successTokenUpdate = function() {
