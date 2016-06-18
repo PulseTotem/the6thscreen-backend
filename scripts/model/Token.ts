@@ -2,7 +2,9 @@
  * @author Simon Urli <simon@pulsetotem.fr>
  */
 
+/// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="./ModelItf.ts" />
+/// <reference path="./User.ts" />
 
 /**
  * Represent a token for User authentication
@@ -28,6 +30,24 @@ class Token extends ModelItf {
     private _endDate : Date;
 
     /**
+     * User of the token
+     *
+     * @property _user
+     * @type User
+     * @private
+     */
+    private _user : User;
+
+    /**
+     * Lazy loading for user property
+     *
+     * @property _user_loaded
+     * @type boolean
+     * @private
+     */
+    private _user_loaded : boolean;
+
+    /**
      * Constructor of a token
      * @param value
      * @param id
@@ -40,6 +60,9 @@ class Token extends ModelItf {
 
         this.setValue(value);
         this.setEndDate(endDate);
+
+        this._user = null;
+        this._user_loaded = null;
     }
 
     /**
@@ -83,6 +106,85 @@ class Token extends ModelItf {
     }
 
     /**
+     * Get the user associated to this token
+     *
+     * @method user
+     * @returns {User}
+     */
+    user() {
+        return this._user;
+    }
+
+    /**
+     * Load the user associated to this token
+     *
+     * @method loadUser
+     * @param successCallback
+     * @param failCallback
+     */
+    loadUser(successCallback : Function, failCallback : Function) {
+        if (!this._user_loaded) {
+            var self = this;
+
+            var success = function (user) {
+                self._user = user;
+                self._user_loaded = true;
+
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getUniquelyAssociatedObject(Token, User, success, fail);
+        } else {
+            successCallback();
+        }
+    }
+
+    //////////////////// Methods managing model. Connections to database. ///////////////////////////
+
+    /**
+     * Load all the lazy loading properties of the object.
+     * Useful when you want to get a complete object.
+     *
+     * @method loadAssociations
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    loadAssociations(successCallback : Function, failCallback : Function) {
+        var self = this;
+
+        var success : Function = function(models) {
+            if(self._user_loaded) {
+                if (successCallback != null) {
+                    successCallback();
+                } // else //Nothing to do ?
+            }
+        };
+
+        var fail : Function = function(error) {
+            if(failCallback != null) {
+                failCallback(error);
+            } else {
+                Logger.error(JSON.stringify(error));
+            }
+        };
+
+        this.loadUser(success, fail);
+    }
+
+    /**
+     * Set the object as desynchronized given the different lazy properties.
+     *
+     * @method desynchronize
+     */
+    desynchronize() : void {
+        this._user_loaded = false;
+    }
+
+    /**
      * Check completeness of a Token.
      * The completeness is determined by the presence of a value and enDate.
      */
@@ -113,6 +215,35 @@ class Token extends ModelItf {
             "updatedAt" : this.getUpdatedAt()
         };
         return data;
+    }
+
+    /**
+     * Return a User instance as a JSON Object including associated object.
+     * However the method should not be recursive due to cycle in the model.
+     *
+     * @method toCompleteJSONObject
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    toCompleteJSONObject(successCallback : Function, failCallback : Function, onlyId : boolean = false) {
+        var self = this;
+
+        var success : Function = function() {
+            var data = self.toJSONObject();
+            if (onlyId) {
+                data["user"] = (self.user() !== null) ? self.user().getId() : null;
+            } else {
+                data["user"] = (self.user() !== null) ? self.user().toJSONObject() : null;
+            }
+
+            successCallback(data);
+        };
+
+        var fail : Function = function(error) {
+            failCallback(error);
+        };
+
+        this.loadAssociations(success, fail);
     }
 
     /**
@@ -175,6 +306,18 @@ class Token extends ModelItf {
      */
     static all(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
         return this.allObjects(Token, successCallback, failCallback, attemptNumber);
+    }
+
+    /**
+     * Find One Token by value.
+     *
+     * @method findOneByValue
+     * @param {string} token - The User's token
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    static findOneByValue(value : string, successCallback : Function, failCallback : Function) {
+        return this.findOneBy(Token, "value", value, successCallback, failCallback);
     }
 
     /**

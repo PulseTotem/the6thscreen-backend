@@ -276,7 +276,20 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 
         Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken : retrieveUser");
 
-        User.findOneByToken(token, function(user) { self.retrieveUserFromTokenSuccess(user); }, function(error) { self.retrieveUserFromTokenFail(error, token); });
+		var failRetrieveToken = function (error) {
+			self.retrieveUserFromTokenFail(error, token);
+		};
+
+		var successRetrieveToken = function (token : Token) {
+
+			var successLoadUser = function () {
+				self.retrieveUserFromTokenSuccess(token.user(), self);
+			};
+
+			token.loadUser(successLoadUser, failRetrieveToken);
+		};
+
+        Token.findOneByValue(token, successRetrieveToken, failRetrieveToken);
     }
 
     /**

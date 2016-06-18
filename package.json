@@ -23,7 +23,8 @@
   "dependencies": {
     "ipware": "0.0.3",
     "jsonwebtoken": "3.2.2",
-    "socketio-jwt": "2.3.5",
-    "nodemailer": "<=1.8.0"
+    "moment": "^2.13.0",
+    "nodemailer": "<=1.8.0",
+    "socketio-jwt": "2.3.5"
   }
 }

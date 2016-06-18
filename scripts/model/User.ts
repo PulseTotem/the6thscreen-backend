@@ -924,18 +924,6 @@ class User extends ModelItf {
         return this.findOneBy(User, "email", email, successCallback, failCallback);
     }
 
-    /**
-     * Find One User by token.
-     *
-     * @method findOneByToken
-     * @param {string} token - The User's token
-     * @param {Function} successCallback - The callback function when success.
-     * @param {Function} failCallback - The callback function when fail.
-     */
-    static findOneByToken(token : string, successCallback : Function, failCallback : Function) {
-        return this.findOneBy(User, "token", token, successCallback, failCallback);
-    }
-
 	/**
 	 * Return a User instance from a JSON string.
 	 *
