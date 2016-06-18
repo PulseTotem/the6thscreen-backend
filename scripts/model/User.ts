@@ -10,6 +10,7 @@
 /// <reference path="./SDI.ts" />
 /// <reference path="./OAuthKey.ts" />
 /// <reference path="./Team.ts" />
+/// <reference path="./Token.ts" />
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 
@@ -40,14 +41,6 @@ class User extends ModelItf {
     private _email : string;
 
     /**
-     * Token property.
-     *
-     * @property _token
-     * @type string
-     */
-    private _token : string;
-
-    /**
      * LastIp property.
      *
      * @property _lastIp
@@ -70,6 +63,22 @@ class User extends ModelItf {
 	 * @type string
 	 */
 	private _cmsAuthkey : string;
+
+    /**
+     * Determine if User is admin or not
+     *
+     * @property _isAdmin
+     * @type boolean
+     */
+    private _isAdmin : boolean;
+
+    /**
+     * Date of the last connection of the user
+     *
+     * @property _lastConnection
+     * @type Date
+     */
+    private _lastConnection : Date;
 
     /**
      * OAuthKeys property.
@@ -113,6 +122,20 @@ class User extends ModelItf {
      */
     private _teams_loaded : boolean;
 
+    /**
+     * @property _tokens: Authentication tokens of the user
+     * @private
+     * @type Array<Token>
+     */
+    private _tokens : Array<Token>;
+
+    /**
+     * @property _tokens_loaded: lazy loading for the tokens
+     * @private
+     * @type boolean
+     */
+    private _tokens_loaded : boolean;
+
 
     /**
      * Constructor.
@@ -122,19 +145,22 @@ class User extends ModelItf {
      * @param {number} id - The User's ID.
 	 * @param {string} cmsId - The User's cmsId.
 	 * @param {string} cmsAuthkey - The User's cmsAuthkey.
+     * @param {string} lastIp - The User's last IP
+     * @param {boolean} isAdmin - The user isAdmin flag
+     * @param {Date} lastConnection - the user last connection date
 	 * @param {string} createdAt - The User's createdAt.
 	 * @param {string} updatedAt - The User's updatedAt.
      */
-    constructor(username : string = "", email : string = "", cmsId : string = "", cmsAuthkey : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(username : string = "", email : string = "", cmsId : string = "", cmsAuthkey : string = "", lastIp : string = "", isAdmin : boolean = false, lastConnection : Date = null, id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
         this.setUsername(username);
         this.setEmail(email);
 		this.setCmsId(cmsId);
 		this.setCmsAuthkey(cmsAuthkey);
-
-	    this._token = null;
-	    this._lastIp = null;
+        this.setLastIp(lastIp);
+        this.setIsAdmin(isAdmin);
+        this.setLastConnection(lastConnection);
 
         this._oauthkeys = new Array<OAuthKey>();
         this._oauthkeys_loaded = false;
@@ -144,6 +170,9 @@ class User extends ModelItf {
 
         this._teams = new Array<Team>();
         this._teams_loaded = false;
+
+        this._tokens = new Array<Token>();
+        this._tokens_loaded = false;
     }
 
 	/**
@@ -183,24 +212,6 @@ class User extends ModelItf {
     }
 
     /**
-     * Set the User's token.
-     *
-     * @method setToken
-     */
-    setToken(token : string) {
-        this._token = token;
-    }
-
-    /**
-     * Return the User's token.
-     *
-     * @method token
-     */
-    token() {
-        return this._token;
-    }
-
-    /**
      * Set the User's lastIp.
      *
      * @method setLastIp
@@ -216,6 +227,46 @@ class User extends ModelItf {
      */
     lastIp() {
         return this._lastIp;
+    }
+
+    /**
+     * Set the user last connection date
+     *
+     * @method setLastConnection
+     * @param lastConnection
+     */
+    setLastConnection(lastConnection : Date) {
+        this._lastConnection = lastConnection;
+    }
+
+    /**
+     * Get the user last connection date
+     *
+     * @method lastConnection
+     * @returns {Date}
+     */
+    lastConnection() {
+        return this._lastConnection;
+    }
+
+    /**
+     * Get the user isAdmin value
+     *
+     * @method isAdmin
+     * @returns {boolean}
+     */
+    isAdmin() {
+        return this._isAdmin;
+    }
+
+    /**
+     * Set the user isAdmin value
+     *
+     * @method setIsAdmin
+     * @param isAdmin
+     */
+    setIsAdmin(isAdmin : boolean) {
+        this._isAdmin = isAdmin;
     }
 
 	/**
@@ -368,6 +419,43 @@ class User extends ModelItf {
         }
     }
 
+    /**
+     * Return the tokens of the user
+     *
+     * @method tokens
+     * @returns {Array<Token>}
+     */
+    tokens() {
+        return this._tokens;
+    }
+
+    /**
+     * Load the tokens of the user
+     *
+     * @method loadTokens
+     * @param successCallback
+     * @param failCallback
+     */
+    loadTokens(successCallback : Function, failCallback : Function) {
+        if (!this._tokens_loaded) {
+            var self = this;
+            var success = function (tokens) {
+                self._tokens = tokens;
+                self._tokens_loaded = true;
+
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getAssociatedObjects(User, Token, success, fail);
+        } else {
+            successCallback();
+        }
+    }
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -382,7 +470,7 @@ class User extends ModelItf {
         var self = this;
 
         var success : Function = function(models) {
-            if(self._oauthkeys_loaded && self._defaultTeam_loaded && self._teams_loaded) {
+            if(self._oauthkeys_loaded && self._defaultTeam_loaded && self._teams_loaded && self._tokens_loaded) {
                 if (successCallback != null) {
                     successCallback();
                 } // else //Nothing to do ?
@@ -400,6 +488,7 @@ class User extends ModelItf {
         this.loadOAuthKeys(success, fail);
         this.loadDefaultTeam(success, fail);
         this.loadTeams(success, fail);
+        this.loadTokens(success, fail);
     }
 
 	/**
@@ -411,6 +500,7 @@ class User extends ModelItf {
         this._oauthkeys_loaded = false;
         this._defaultTeam_loaded = false;
         this._teams_loaded = false;
+        this._tokens_loaded = false;
 	}
 
 	/**
@@ -439,8 +529,9 @@ class User extends ModelItf {
 			"id": this.getId(),
 			"username": this.username(),
             "email": this.email(),
-            "token": this.token(),
             "lastIp": this.lastIp(),
+            "isAdmin": this.isAdmin(),
+            "lastConnection": this.lastConnection(),
 			"cmsId": this.cmsId(),
 			"cmsAuthkey": this.cmsAuthkey(),
 			"complete": this.isComplete(),
@@ -483,6 +574,7 @@ class User extends ModelItf {
                 data["defaultTeam"] = (self.defaultTeam() !== null) ? self.defaultTeam().toJSONObject() : null;
             }
             data["teams"] = self.serializeArray(self.teams(), onlyId);
+            data["tokens"] = self.serializeArray(self.tokens(), onlyId);
 
             successCallback(data);
         };
@@ -661,6 +753,31 @@ class User extends ModelItf {
         this.deleteObjectAssociation(User, Team, teamID, successCallback, failCallback);
     }
 
+    /**
+     * Add a new Token to the User and associate it in the database.
+     * A Team can only be added once.
+     *
+     * @method addToken
+     * @param {number} tokenId - The token to link with the User. It cannot be a null value.
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    addToken(tokenID : number, successCallback : Function, failCallback : Function) {
+        this.associateObject(User, Token, tokenID, successCallback, failCallback);
+    }
+
+    /**
+     * Remove a Token from the User: the association is removed both in the object and in database.
+     *
+     * @method removeToken
+     * @param {number} teamID - The Token to remove from that User
+     * @param {Function} successCallback - The callback function when success.
+     * @param {Function} failCallback - The callback function when fail.
+     */
+    removeToken(tokenID : number, successCallback : Function, failCallback : Function) {
+        this.deleteObjectAssociation(User, Token, tokenID, successCallback, failCallback);
+    }
+
 	/**
      * Create model in database.
      *
@@ -701,6 +818,7 @@ class User extends ModelItf {
 
     /**
      * Delete in database the model with current id.
+     * Also delete the team of the user, the oauthkeys and the tokens.
      *
      * @method delete
      * @param {Function} successCallback - The callback function when success.
@@ -717,25 +835,41 @@ class User extends ModelItf {
                 nbTeams--;
 
                 if (nbTeams <= 0) {
-                    var nbOAuth = self.oauthkeys().length;
+                    var nbTokens = self.tokens().length;
 
-                    var successDeleteOAuthKey = function () {
-                        nbOAuth--;
+                    var successDeleteTokens = function () {
+                        nbTokens--;
 
-                        if (nbOAuth <= 0){
-                            var successDeleteDefaultTeam = function () {
-                                ModelItf.deleteObject(User, self.getId(), successCallback, failCallback);
+                        if (nbTokens <= 0) {
+                            var nbOAuth = self.oauthkeys().length;
+
+                            var successDeleteOAuthKey = function () {
+                                nbOAuth--;
+
+                                if (nbOAuth <= 0){
+                                    var successDeleteDefaultTeam = function () {
+                                        ModelItf.deleteObject(User, self.getId(), successCallback, failCallback);
+                                    };
+
+                                    self.defaultTeam().delete(successDeleteDefaultTeam, failCallback);
+                                }
                             };
 
-                            self.defaultTeam().delete(successDeleteDefaultTeam, failCallback);
+                            if (nbOAuth == 0) {
+                                successDeleteOAuthKey();
+                            } else {
+                                self.oauthkeys().forEach(function (oauthKey : OAuthKey) {
+                                    oauthKey.delete(successDeleteOAuthKey, failCallback);
+                                });
+                            }
                         }
                     };
 
-                    if (nbOAuth == 0) {
-                        successDeleteOAuthKey();
+                    if (nbTokens == 0) {
+                        successDeleteTokens();
                     } else {
-                        self.oauthkeys().forEach(function (oauthKey : OAuthKey) {
-                            oauthKey.delete(successDeleteOAuthKey, failCallback);
+                        self.tokens().forEach(function (token : Token) {
+                            token.delete(successDeleteTokens, failCallback);
                         });
                     }
                 }
@@ -823,16 +957,7 @@ class User extends ModelItf {
 	 * @return {SDI} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : User {
-		var user = new User(jsonObject.username, jsonObject.email, jsonObject.cmsId, jsonObject.cmsAuthkey, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
-
-        if(!!jsonObject.token) {
-            user.setToken(jsonObject.token);
-        }
-
-        if(!!jsonObject.lastIp) {
-            user.setLastIp(jsonObject.lastIp);
-        }
-
+		var user = new User(jsonObject.username, jsonObject.email, jsonObject.cmsId, jsonObject.cmsAuthkey, jsonObject.lastIp, jsonObject.isAdmin, jsonObject.lastConnection, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
         return user;
 	}
 

@@ -127,7 +127,7 @@ describe('Team', function() {
 	describe('#addUser', function() {
 		it('should call the right request', function(done) {
 			var c = new Team("toto", 52);
-			var pv = new User("mavaleur", "", "", "", 12);
+			var pv = new User("mavaleur", "", "", "","", false, null, 12);
 
 			var response1 : any = [];
 
@@ -172,7 +172,7 @@ describe('Team', function() {
 	describe('#removeUser', function() {
 		it('should call the right request', function(done) {
 			var c = new Team("toto", 52);
-			var pv = new User("mavaleur", "", "", "", 12);
+			var pv = new User("mavaleur", "", "", "","", false, null, 12);
 
 			var response1 : any = [
 					{
@@ -321,7 +321,7 @@ describe('Team', function() {
 	describe('#linkOwner', function () {
 		it('should call the right request', function (done) {
 			var c = new Team("toto", 52);
-			var pv = new User("mavaleur", "", "", "", 12);
+			var pv = new User("mavaleur", "", "", "","", false, null, 12);
 			var linkName = "Owners";
 
 			var response1:any = [];
@@ -366,7 +366,7 @@ describe('Team', function() {
 	describe('#unlinkOwner', function () {
 		it('should call the right request', function (done) {
 			var c = new Team("toto", 52);
-			var pv = new User("mavaleur", "", "", "", 12);
+			var pv = new User("mavaleur", "", "", "","", false, null, 12);
 			var linkName = "Owners";
 
 			var response1:any = pv.toJSONObject();
