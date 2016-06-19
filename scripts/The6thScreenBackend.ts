@@ -149,7 +149,7 @@ class The6thScreenBackend extends Server {
 
                         var newEndDate = moment().add(24, 'hours');
                         token.setEndDate(newEndDate);
-
+                        token.setValue(tokenStr);
                         token.update(successTokenUpdate, fail);
                     };
 
