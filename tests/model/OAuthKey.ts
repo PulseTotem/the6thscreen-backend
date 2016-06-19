@@ -260,7 +260,7 @@ describe('OAuthKey', function() {
     describe('#linkProvider', function () {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
-            var s = new Provider("provider", "providerDesc", 42);
+            var s = new Provider("provider", "providerDesc", "logo", 42);
 
             var response1:any = [];
 
@@ -303,7 +303,7 @@ describe('OAuthKey', function() {
     describe('#unlinkProvider', function () {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
-            var s = new Provider("provider", "providerDesc", 42);
+            var s = new Provider("provider", "providerDesc", "logo", 42);
 
             var response1:any = s.toJSONObject();
 

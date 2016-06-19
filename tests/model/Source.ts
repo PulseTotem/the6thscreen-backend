@@ -542,7 +542,7 @@ describe('Source', function() {
 	describe('#linkProvider', function () {
 		it('should call the right request', function (done) {
 			var c = new Source("machin", "desc", "method", 43, false, 28);
-			var s = new Provider("toto", "titi", 42);
+			var s = new Provider("toto", "titi", "tata", 42);
 
 			var response1:any = [];
 
@@ -586,7 +586,7 @@ describe('Source', function() {
 	describe('#unlinkProvider', function () {
 		it('should call the right request', function (done) {
 			var c = new Source("machin", "desc", "method", 43, false, 28);
-			var s = new Provider("toto", "titi", 42);
+			var s = new Provider("toto", "titi", "tata", 42);
 
 			var response1:any = s.toJSONObject();
 

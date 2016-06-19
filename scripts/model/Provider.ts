@@ -30,6 +30,13 @@ class Provider extends ModelItf {
     private _description : string;
 
     /**
+     * @property _logo: a logo for this provider
+     * @private
+     * @type string
+     */
+    private _logo : string;
+
+    /**
      * @property _sources : all sources available for this provider
      * @private
      * @type Array<Source>
@@ -53,11 +60,12 @@ class Provider extends ModelItf {
      * @param createdAt
      * @param updatedAt
      */
-    constructor(name : string = "", description : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", description : string = "", logo : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
         super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
         this.setDescription(description);
+        this.setLogo(logo);
 
         this._sources = new Array<Source>();
         this._sources_loaded = false;
@@ -98,6 +106,24 @@ class Provider extends ModelItf {
      */
     setDescription(description : string) {
         this._description = description;
+    }
+
+    /**
+     * Get the logo of the provider
+     * @method logo
+     * @returns {string}
+     */
+    logo() {
+        return this._logo;
+    }
+
+    /**
+     * Set the logo of the provider
+     * @method setLogo
+     * @param logo
+     */
+    setLogo(logo : string) {
+        this._logo = logo;
     }
 
     /**
@@ -188,6 +214,7 @@ class Provider extends ModelItf {
             "id": this.getId(),
             "name": this.name(),
             "description": this.description(),
+            "logo": this.logo(),
             "complete": this.isComplete(),
             "createdAt" : this.getCreatedAt(),
             "updatedAt" : this.getUpdatedAt()
@@ -343,7 +370,7 @@ class Provider extends ModelItf {
      * @return {Provider} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Provider {
-        return new Provider(jsonObject.name, jsonObject.description, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+        return new Provider(jsonObject.name, jsonObject.description, jsonObject.logo, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
 
     /**

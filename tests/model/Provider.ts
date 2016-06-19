@@ -26,19 +26,25 @@ describe('Provider', function() {
 			assert.equal(c.description(), desc, "The description is not stored correctly.");
 		});
 
+		it('should store the logo', function () {
+			var logo = "machin";
+			var c = new Provider("", "", logo);
+			assert.equal(c.logo(), logo, "The logo is not stored correctly.");
+		});
+
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Provider("", "", id);
+			var c = new Provider("", "", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete value', function () {
-			var c = new Provider("test", "ba", 34, true);
+			var c = new Provider("test", "ba", "", 34, true);
 			assert.equal(c.isComplete(), true, "The complete value is not stored.");
 		});
 
 		it('should assign a default false complete value', function () {
-			var c = new Provider("test", "ba", 34);
+			var c = new Provider("test", "ba", "", 34);
 			assert.equal(c.isComplete(), false, "The complete value is not stored.");
 		});
 	});
@@ -49,11 +55,12 @@ describe('Provider', function() {
 				"id": 42,
 				"name": "toto",
 				"description": "blabla",
+				"logo": "bidule",
 				"complete": true
 			};
 
 			var callRetrieve = Provider.fromJSONObject(json);
-			var callExpected = new Provider("toto", "blabla", 42, true);
+			var callExpected = new Provider("toto", "blabla", "bidule", 42, true);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve Provider (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
@@ -63,11 +70,12 @@ describe('Provider', function() {
 				"id": 42,
 				"name": "",
 				"description": null,
+				"logo": "toto",
 				"complete": false
 			};
 
 			var callRetrieve = Provider.fromJSONObject(json);
-			var callExpected = new Provider("", null, 42);
+			var callExpected = new Provider("", null, "toto", 42);
 
 			assert.deepEqual(callRetrieve, callExpected, "The retrieve Provider (" + callRetrieve + ") does not match with the expected one (" + callExpected + ")");
 		});
@@ -75,10 +83,11 @@ describe('Provider', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Provider("toto", "blabla", 52, true);
+			var c = new Provider("toto", "blabla", "titi", 52, true);
 			var expected = {
 				"name": "toto",
 				"description": "blabla",
+				"logo": "titi",
 				"id": 52,
 				"complete": true,
 				"createdAt":null,
@@ -105,7 +114,7 @@ describe('Provider', function() {
 		});
 
 		it('should return true if the object has a name, a description and an ID', function(done) {
-			var b = new Provider("toto", "bla", 52);
+			var b = new Provider("toto", "bla", "", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), true, "The provider should be complete.");
 				done();
@@ -118,7 +127,7 @@ describe('Provider', function() {
 		});
 
 		it('should return false if the object has an empty name, a description and an ID', function(done) {
-			var b = new Provider("", "bla", 52);
+			var b = new Provider("", "bla", "toto", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), false, "The provider should be complete.");
 				done();
@@ -131,7 +140,7 @@ describe('Provider', function() {
 		});
 
 		it('should return false if the object has a null name, a description and an ID', function(done) {
-			var b = new Provider(null, "bla", 52);
+			var b = new Provider(null, "bla", "toto", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), false, "The provider should be complete.");
 				done();
@@ -144,7 +153,7 @@ describe('Provider', function() {
 		});
 
 		it('should return true if the object has a name, an empty description and an ID', function(done) {
-			var b = new Provider("test", "", 52);
+			var b = new Provider("test", "", "toto", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), true, "The provider should be complete.");
 				done();
@@ -157,7 +166,7 @@ describe('Provider', function() {
 		});
 
 		it('should return true if the object has a name, a null description and an ID', function(done) {
-			var b = new Provider("test", null, 52);
+			var b = new Provider("test", null, "toto", 52);
 			var success = function () {
 				assert.equal(b.isComplete(), true, "The provider should be complete.");
 				done();
@@ -170,7 +179,7 @@ describe('Provider', function() {
 		});
 
 		it('should return false if the object has a name, a description and no ID', function(done) {
-			var b = new Provider("test", "test");
+			var b = new Provider("test", "test", "toto");
 			var success = function () {
 				assert.equal(b.isComplete(), false, "The provider should not be complete.");
 				done();
@@ -185,7 +194,7 @@ describe('Provider', function() {
 
 	describe('#addSource', function () {
 		it('should call the right request', function (done) {
-			var c = new Provider("toto", "machin", 52);
+			var c = new Provider("toto", "machin", "toto", 52);
 			var s = new Source("toto", "titi", "method", 45, true, 123);
 
 			var response1:any = [];
@@ -228,7 +237,7 @@ describe('Provider', function() {
 
 	describe('#removeSource', function () {
 		it('should call the right request', function (done) {
-			var c = new Provider("toto", "machin", 52);
+			var c = new Provider("toto", "machin", "toto", 52);
 			var s = new Source("toto", "titi", "method", 45, true, 123);
 
 			var response1:any = [
