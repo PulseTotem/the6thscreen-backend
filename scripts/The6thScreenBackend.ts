@@ -8,6 +8,7 @@
 /// <reference path="./namespacemanager/ClientsNamespaceManager.ts" />
 /// <reference path="./namespacemanager/SourcesNamespaceManager.ts" />
 /// <reference path="./namespacemanager/AdminsNamespaceManager.ts" />
+/// <reference path="./namespacemanager/BackendAuthNamespaceManager.ts" />
 
 /// <reference path="./routers/ContactFormRouter.ts" />
 
@@ -205,6 +206,48 @@ class The6thScreenBackend extends Server {
                         Logger.info("The following user: "+user.username()+" is trying to access to the admin. Access refused.");
                         next(new Error('You are not allowed to access to this page.'));
                     }
+                };
+
+                token.loadUser(successLoadUser, fail);
+                //} else {
+                //    next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));
+                //}
+            };
+
+            var fail = function(error) {
+                next(error);
+            };
+
+            console.log("token : ");
+            console.log(handshakeData._query.token);
+
+            Token.findOneByValue(handshakeData._query.token, success, fail);
+            // make sure the handshake data looks good as before
+            // if error do this:
+            // next(new Error('not authorized');
+            // else just call next
+        });
+
+        var backendAuthNamespaceManager : any = self.addNamespace("backendAuth", BackendAuthNamespaceManager);
+
+        backendAuthNamespaceManager.use(socketioJwt.authorize({
+            secret: BackendConfig.getJWTSecret(),
+            handshake: true
+        }));
+
+        backendAuthNamespaceManager.use(function(socket, next) {
+            var handshakeData : any = socket.request;
+
+            var success = function(token : Token) {
+                console.log(socket.handshake.headers['x-forwarded-for']);
+
+                var successLoadUser = function () {
+                    var user = token.user();
+
+                   Logger.debug("Connection of user "+user.username()+" to backend. Access granted.");
+
+                    socket.connectedUser = user;
+                    next();
                 };
 
                 token.loadUser(successLoadUser, fail);
