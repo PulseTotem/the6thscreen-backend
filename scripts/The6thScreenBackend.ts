@@ -90,7 +90,7 @@ class The6thScreenBackend extends Server {
                             user.setLastConnection(now.toDate());
 
                             user.update(finalSuccess, fail);
-                            self.pushStat("POST", clientIp, "Auth by password success", user.getUsername(), user.getId());
+                            self.pushStat("POST", clientIp, "Auth by password success", user.username(), user.getId());
                         };
 
                         user.addToken(token.getId(), successAddToken, fail);
@@ -102,7 +102,7 @@ class The6thScreenBackend extends Server {
                 var failCheckPassword = function (error) {
                     Logger.debug("Fail to check password for user: "+req.body.usernameOrEmail);
                     Logger.debug(error);
-                    self.pushStat("POST", clientIp, "Fail check password", user.getUsername(), user.getId());
+                    self.pushStat("POST", clientIp, "Fail check password", user.username(), user.getId());
                     res.status(403).send({ 'error': "Error in login/password." });
                 };
 
@@ -175,7 +175,7 @@ class The6thScreenBackend extends Server {
                             user.setLastConnection(new Date());
 
                             user.update(finalSuccess, fail);
-                            self.pushStat("POST", clientIp, "Auth by token success", user.getUsername(), user.getId());
+                            self.pushStat("POST", clientIp, "Auth by token success", user.username(), user.getId());
                         };
 
                         var newEndDate = moment().add(7, 'days');
@@ -226,13 +226,13 @@ class The6thScreenBackend extends Server {
                     var user = token.user();
 
                     if (user.isAdmin()) {
-                        self.pushStat(socket.id, clientIp, "Login to admin granted", user.getUsername(), user.getId());
+                        self.pushStat(socket.id, clientIp, "Login to admin granted", user.username(), user.getId());
                         Logger.debug("Connection of user "+user.username()+" to admin. Access granted.");
 
                         socket.connectedUser = user;
                         next();
                     } else {
-                        self.pushStat(socket.id, clientIp, "Login to admin refused", user.getUsername(), user.getId());
+                        self.pushStat(socket.id, clientIp, "Login to admin refused", user.username(), user.getId());
                         Logger.info("The following user: "+user.username()+" is trying to access to the admin. Access refused.");
                         next(new Error('You are not allowed to access to this page.'));
                     }
@@ -270,7 +270,7 @@ class The6thScreenBackend extends Server {
 
                 var successLoadUser = function () {
                     var user = token.user();
-                    self.pushStat(socket.id, clientIp, "Login to backend granted", user.getUsername(), user.getId());
+                    self.pushStat(socket.id, clientIp, "Login to backend granted", user.username(), user.getId());
                    Logger.debug("Connection of user "+user.username()+" to backend. Access granted.");
 
                     socket.connectedUser = user;
