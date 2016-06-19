@@ -68,7 +68,7 @@ class The6thScreenBackend extends Server {
                     };
 
                     var now = moment();
-                    var tomorrow = moment().add(24, 'hours');
+                    var tomorrow = moment().add(7, 'days');
 
                     var token : Token = new Token(tokenString, tomorrow.toDate());
 
@@ -86,11 +86,25 @@ class The6thScreenBackend extends Server {
                     token.create(successCreate, fail);
                 };
 
-                user.checkPassword(req.body.password, successCheck, fail);
+                var failCheckPassword = function (error) {
+                    Logger.debug("Fail to check password for user: "+req.body.usernameOrEmail);
+                    Logger.debug(error);
+
+                    res.status(403).send({ 'error': "Error in login/password." });
+                };
+
+                user.checkPassword(req.body.password, successCheck, failCheckPassword);
             };
 
             var failFindUsername = function(error) {
-                User.findOneByEmail(req.body.usernameOrEmail, success, fail);
+                var failFindUser = function (error) {
+                    Logger.debug("Fail to find user : "+req.body.usernameOrEmail);
+                    Logger.debug(error);
+
+                    res.status(404).send({ 'error': "This user does not exist." });
+                };
+
+                User.findOneByEmail(req.body.usernameOrEmail, success, failFindUser);
             };
 
             User.findOneByUsername(req.body.usernameOrEmail, success, failFindUsername);
@@ -148,7 +162,7 @@ class The6thScreenBackend extends Server {
                             user.update(finalSuccess, fail);
                         };
 
-                        var newEndDate = moment().add(24, 'hours');
+                        var newEndDate = moment().add(7, 'days');
                         token.setEndDate(newEndDate);
                         token.setValue(tokenStr);
                         token.update(successTokenUpdate, fail);
@@ -191,8 +205,6 @@ class The6thScreenBackend extends Server {
 
             var success = function(token : Token) {
                 console.log(socket.handshake.headers['x-forwarded-for']);
-
-
 
                 var successLoadUser = function () {
                     var user = token.user();
