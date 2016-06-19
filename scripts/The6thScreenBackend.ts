@@ -135,6 +135,9 @@ class The6thScreenBackend extends Server {
 
                     Logger.info("Login by token with IP: " + clientIp);
 
+                    var ipHandshake = req.header("x-forwarded-for");
+                    Logger.info("IP HANDSHAKE: "+ipHandshake);
+
                     var failError = function (error) {
                         res.status(500).send({'error': JSON.stringify(error)});
                     };
