@@ -17,7 +17,6 @@
 
 var jwt : any = require('jsonwebtoken');
 var socketioJwt : any = require('socketio-jwt');
-var get_ip : any = require('ipware')().get_ip;
 
 var moment : any = require("moment");
 
@@ -47,9 +46,7 @@ class The6thScreenBackend extends Server {
             var success = function(user : User) {
 
                 var successCheck = function() {
-                    var ip_info = get_ip(req);
-                    // { clientIp: '127.0.0.1', clientIpRoutable: false }
-                    var clientIp = ip_info.clientIp;
+                    var clientIp = req.header("x-forwarded-for");
 
                     Logger.info("Login with following IP: "+clientIp);
 
@@ -129,14 +126,9 @@ class The6thScreenBackend extends Server {
                     token.delete(successDelete, failDelete);
                     res.status(403).send({ 'error': 'The token has expired.' });
                 } else {
-                    var ip_info = get_ip(req);
-                    // { clientIp: '127.0.0.1', clientIpRoutable: false }
-                    var clientIp = ip_info.clientIp;
+                    var clientIp = req.header("x-forwarded-for");
 
                     Logger.info("Login by token with IP: " + clientIp);
-
-                    var ipHandshake = req.header("x-forwarded-for");
-                    Logger.info("IP HANDSHAKE: "+ipHandshake);
 
                     var failError = function (error) {
                         res.status(500).send({'error': JSON.stringify(error)});
