@@ -28,6 +28,22 @@ var moment : any = require("moment");
  */
 class The6thScreenBackend extends Server {
 
+    private pushStat(socket : string, ip : string, status: string, username : string, userId: number) : void {
+        var result : StatObject = new StatObject();
+
+        result.setCollection("backend-auth");
+        result.setIp(ip);
+        result.setSocketId(socket);
+
+        var data = {};
+        data["status"] = status;
+        data["username"] = username;
+        data["userid"] = userId;
+        result.setData(data);
+
+        StatsClient.pushStats(result);
+    }
+
     /**
      * Constructor.
      *
@@ -36,8 +52,11 @@ class The6thScreenBackend extends Server {
      */
     constructor(listeningPort : number, arguments : Array<string>) {
         super(listeningPort, arguments);
+        var self = this;
 
         this.app.post('/login', function (req, res) {
+            var clientIp = req.header("x-forwarded-for");
+            Logger.info("Login with following IP: "+clientIp);
 
             var fail = function(error) {
                 res.status(500).send({ 'error': JSON.stringify(error) });
@@ -46,10 +65,6 @@ class The6thScreenBackend extends Server {
             var success = function(user : User) {
 
                 var successCheck = function() {
-                    var clientIp = req.header("x-forwarded-for");
-
-                    Logger.info("Login with following IP: "+clientIp);
-
                     var profile = {
                         username: user.username(),
                         ip: clientIp,
@@ -75,6 +90,7 @@ class The6thScreenBackend extends Server {
                             user.setLastConnection(now.toDate());
 
                             user.update(finalSuccess, fail);
+                            self.pushStat("POST", clientIp, "Auth by password success", user.getUsername(), user.getId());
                         };
 
                         user.addToken(token.getId(), successAddToken, fail);
@@ -86,7 +102,7 @@ class The6thScreenBackend extends Server {
                 var failCheckPassword = function (error) {
                     Logger.debug("Fail to check password for user: "+req.body.usernameOrEmail);
                     Logger.debug(error);
-
+                    self.pushStat("POST", clientIp, "Fail check password", user.getUsername(), user.getId());
                     res.status(403).send({ 'error': "Error in login/password." });
                 };
 
@@ -98,6 +114,8 @@ class The6thScreenBackend extends Server {
                     Logger.debug("Fail to find user : "+req.body.usernameOrEmail);
                     Logger.debug(error);
 
+                    self.pushStat("POST", clientIp, "Fail find user", req.body.usernameOrEmail, null);
+
                     res.status(404).send({ 'error': "This user does not exist." });
                 };
 
@@ -108,11 +126,15 @@ class The6thScreenBackend extends Server {
         });
 
 		this.app.post('/loginFromToken', function(req, res) {
+            var clientIp = req.header("x-forwarded-for");
+            Logger.info("Login by token with IP: " + clientIp);
+
 			var successFindToken = function(token : Token) {
                 var now = moment();
 
                 if (now.isAfter(token.endDate())) {
                     Logger.info("Login by token: token has expired and will be deleted.");
+                    self.pushStat("POST", clientIp, "Token expired", null, null);
 
                     var successDelete = function () {
                         Logger.debug("Token successfully deleted");
@@ -126,9 +148,7 @@ class The6thScreenBackend extends Server {
                     token.delete(successDelete, failDelete);
                     res.status(403).send({ 'error': 'The token has expired.' });
                 } else {
-                    var clientIp = req.header("x-forwarded-for");
 
-                    Logger.info("Login by token with IP: " + clientIp);
 
                     var failError = function (error) {
                         res.status(500).send({'error': JSON.stringify(error)});
@@ -155,6 +175,7 @@ class The6thScreenBackend extends Server {
                             user.setLastConnection(new Date());
 
                             user.update(finalSuccess, fail);
+                            self.pushStat("POST", clientIp, "Auth by token success", user.getUsername(), user.getId());
                         };
 
                         var newEndDate = moment().add(7, 'days');
@@ -199,17 +220,19 @@ class The6thScreenBackend extends Server {
             var handshakeData : any = socket.request;
 
             var success = function(token : Token) {
-                console.log(socket.handshake.headers['x-forwarded-for']);
+                var clientIp = socket.handshake.headers['x-forwarded-for'];
 
                 var successLoadUser = function () {
                     var user = token.user();
 
                     if (user.isAdmin()) {
+                        self.pushStat(socket.id, clientIp, "Login to admin granted", user.getUsername(), user.getId());
                         Logger.debug("Connection of user "+user.username()+" to admin. Access granted.");
 
                         socket.connectedUser = user;
                         next();
                     } else {
+                        self.pushStat(socket.id, clientIp, "Login to admin refused", user.getUsername(), user.getId());
                         Logger.info("The following user: "+user.username()+" is trying to access to the admin. Access refused.");
                         next(new Error('You are not allowed to access to this page.'));
                     }
@@ -224,9 +247,6 @@ class The6thScreenBackend extends Server {
             var fail = function(error) {
                 next(error);
             };
-
-            console.log("token : ");
-            console.log(handshakeData._query.token);
 
             Token.findOneByValue(handshakeData._query.token, success, fail);
             // make sure the handshake data looks good as before
@@ -246,11 +266,11 @@ class The6thScreenBackend extends Server {
             var handshakeData : any = socket.request;
 
             var success = function(token : Token) {
-                console.log(socket.handshake.headers['x-forwarded-for']);
+                var clientIp = socket.handshake.headers['x-forwarded-for'];
 
                 var successLoadUser = function () {
                     var user = token.user();
-
+                    self.pushStat(socket.id, clientIp, "Login to backend granted", user.getUsername(), user.getId());
                    Logger.debug("Connection of user "+user.username()+" to backend. Access granted.");
 
                     socket.connectedUser = user;
@@ -266,9 +286,6 @@ class The6thScreenBackend extends Server {
             var fail = function(error) {
                 next(error);
             };
-
-            console.log("token : ");
-            console.log(handshakeData._query.token);
 
             Token.findOneByValue(handshakeData._query.token, success, fail);
             // make sure the handshake data looks good as before
