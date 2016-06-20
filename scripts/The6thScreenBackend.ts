@@ -8,6 +8,7 @@
 /// <reference path="./namespacemanager/ClientsNamespaceManager.ts" />
 /// <reference path="./namespacemanager/SourcesNamespaceManager.ts" />
 /// <reference path="./namespacemanager/AdminsNamespaceManager.ts" />
+/// <reference path="./namespacemanager/BackendAuthNamespaceManager.ts" />
 
 /// <reference path="./routers/ContactFormRouter.ts" />
 
@@ -16,7 +17,8 @@
 
 var jwt : any = require('jsonwebtoken');
 var socketioJwt : any = require('socketio-jwt');
-var get_ip : any = require('ipware')().get_ip;
+
+var moment : any = require("moment");
 
 /**
  * Represents The 6th Screen's Backend.
@@ -26,6 +28,22 @@ var get_ip : any = require('ipware')().get_ip;
  */
 class The6thScreenBackend extends Server {
 
+    private pushStat(socket : string, ip : string, status: string, username : string, userId: number) : void {
+        var result : StatObject = new StatObject();
+
+        result.setCollection("backend-auth");
+        result.setIp(ip);
+        result.setSocketId(socket);
+
+        var data = {};
+        data["status"] = status;
+        data["username"] = username;
+        data["userid"] = userId;
+        result.setData(data);
+
+        StatsClient.pushStats(result);
+    }
+
     /**
      * Constructor.
      *
@@ -34,18 +52,19 @@ class The6thScreenBackend extends Server {
      */
     constructor(listeningPort : number, arguments : Array<string>) {
         super(listeningPort, arguments);
+        var self = this;
 
         this.app.post('/login', function (req, res) {
+            var clientIp = req.header("x-forwarded-for");
+            Logger.info("Login with following IP: "+clientIp);
 
-            var success = function(user) {
+            var fail = function(error) {
+                res.status(500).send({ 'error': JSON.stringify(error) });
+            };
+
+            var success = function(user : User) {
 
                 var successCheck = function() {
-                    var ip_info = get_ip(req);
-                    // { clientIp: '127.0.0.1', clientIpRoutable: false }
-                    var clientIp = ip_info.clientIp;
-
-					console.log(clientIp);
-
                     var profile = {
                         username: user.username(),
                         ip: clientIp,
@@ -54,87 +73,126 @@ class The6thScreenBackend extends Server {
                     };
 
                     // we are sending the profile in the token
-                    var token = jwt.sign(profile, BackendConfig.getJWTSecret());
+                    var tokenString = jwt.sign(profile, BackendConfig.getJWTSecret());
 
-                    var successUpdate = function() {
-                        res.json({token: token});
+                    var finalSuccess = function() {
+                        res.json({token: tokenString});
                     };
 
-                    var failUpdate = function(error) {
-                        res.status(500).send({ 'error': JSON.stringify(error) });
+                    var now = moment();
+                    var tomorrow = moment().add(7, 'days');
+
+                    var token : Token = new Token(tokenString, tomorrow.toDate());
+
+                    var successCreate = function(tokenData) {
+                        var successAddToken = function () {
+                            user.setLastIp(clientIp);
+                            user.setLastConnection(now.toDate());
+
+                            user.update(finalSuccess, fail);
+                            self.pushStat("POST", clientIp, "Auth by password success", user.username(), user.getId());
+                        };
+
+                        user.addToken(token.getId(), successAddToken, fail);
                     };
 
-                    user.setLastIp(clientIp);
-                    user.setToken(token);
-
-                    user.update(successUpdate, failUpdate);
+                    token.create(successCreate, fail);
                 };
 
-                var failCheck = function(error) {
-                    res.status(500).send({ 'error': JSON.stringify(error) });
+                var failCheckPassword = function (error) {
+                    Logger.debug("Fail to check password for user: "+req.body.usernameOrEmail);
+                    Logger.debug(error);
+                    self.pushStat("POST", clientIp, "Fail check password", user.username(), user.getId());
+                    res.status(403).send({ 'error': "Error in login/password." });
                 };
 
-                user.checkPassword(req.body.password, successCheck, failCheck);
+                user.checkPassword(req.body.password, successCheck, failCheckPassword);
             };
 
-            var fail = function(error) {
-                var fail2 = function(error) {
-                    res.status(500).send({ 'error': JSON.stringify(error) });
-                }
+            var failFindUsername = function(error) {
+                var failFindUser = function (error) {
+                    Logger.debug("Fail to find user : "+req.body.usernameOrEmail);
+                    Logger.debug(error);
 
-                User.findOneByEmail(req.body.usernameOrEmail, success, fail2);
+                    self.pushStat("POST", clientIp, "Fail find user", req.body.usernameOrEmail, null);
+
+                    res.status(404).send({ 'error': "This user does not exist." });
+                };
+
+                User.findOneByEmail(req.body.usernameOrEmail, success, failFindUser);
             };
 
-            User.findOneByUsername(req.body.usernameOrEmail, success, fail);
+            User.findOneByUsername(req.body.usernameOrEmail, success, failFindUsername);
         });
 
 		this.app.post('/loginFromToken', function(req, res) {
-			var success = function(user) {
+            var clientIp = req.header("x-forwarded-for");
+            Logger.info("Login by token with IP: " + clientIp);
 
-				/* TODO: ADDED UpdatedAt and CreatedAt in all models.
-				var now : any = new Date();
-				var lastUserUpdated : any = new Date(user.getUpdatedAt());
-				var diffDate = now - lastUserUpdated;
+			var successFindToken = function(token : Token) {
+                var now = moment();
 
-				if( !req.body.tmp || ( diffDate <= 1000*60*60*2 ) ) {*/
-					var ip_info = get_ip(req);
-					// { clientIp: '127.0.0.1', clientIpRoutable: false }
-					var clientIp = ip_info.clientIp;
+                if (now.isAfter(token.endDate())) {
+                    Logger.info("Login by token: token has expired and will be deleted.");
+                    self.pushStat("POST", clientIp, "Token expired", null, null);
 
-					var profile = {
-						username: user.username(),
-						ip: clientIp,
-						id: user.getId(),
-						date: new Date()
-					};
+                    var successDelete = function () {
+                        Logger.debug("Token successfully deleted");
+                    };
 
-					// we are sending the profile in the token
-					var token = jwt.sign(profile, BackendConfig.getJWTSecret());
+                    var failDelete = function (error) {
+                        Logger.error("Error while deleting a token");
+                        Logger.debug(error);
+                    };
 
-					var successUpdate = function () {
-						res.json({token: token});
-					};
+                    token.delete(successDelete, failDelete);
+                    res.status(403).send({ 'error': 'The token has expired.' });
+                } else {
 
-					var failUpdate = function (error) {
-						res.status(500).send({'error': JSON.stringify(error)});
-					};
 
-					user.setLastIp(clientIp);
-					user.setToken(token);
+                    var failError = function (error) {
+                        res.status(500).send({'error': JSON.stringify(error)});
+                    };
 
-					user.update(successUpdate, failUpdate);
-				/* TODO: ADDED UpdatedAt and CreatedAt in all models.
+                    var successLoadUser = function () {
+                        var user = token.user();
 
-				} else {
-					res.status(401).send({'error': 'Session expired.'});
-				}*/
+                        var profile = {
+                            username: user.username(),
+                            ip: clientIp,
+                            id: user.getId(),
+                            date: new Date()
+                        };
+
+                        // we are sending the profile in the token
+                        var tokenStr = jwt.sign(profile, BackendConfig.getJWTSecret());
+                        var finalSuccess = function () {
+                            res.json({token: tokenStr});
+                        };
+
+                        var successTokenUpdate = function() {
+                            user.setLastIp(clientIp);
+                            user.setLastConnection(new Date());
+
+                            user.update(finalSuccess, fail);
+                            self.pushStat("POST", clientIp, "Auth by token success", user.username(), user.getId());
+                        };
+
+                        var newEndDate = moment().add(7, 'days');
+                        token.setEndDate(newEndDate);
+                        token.setValue(tokenStr);
+                        token.update(successTokenUpdate, fail);
+                    };
+
+                    token.loadUser(successLoadUser, failError);
+                }
 			};
 
 			var fail = function(error) {
 				res.status(404).send({ 'error': JSON.stringify(error) });
-			}
+			};
 
-			User.findOneByToken(req.body.token, success, fail);
+			Token.findOneByValue(req.body.token, successFindToken, fail);
 		});
 
 
@@ -153,7 +211,6 @@ class The6thScreenBackend extends Server {
         self.addNamespace("sources", SourcesNamespaceManager);
         var adminNamespace : any = self.addNamespace("admins", AdminsNamespaceManager);
 
-        //console.log("BYPASS CHECKING JWT Token !!!!!!!!! // TODO // TO FIX");
         adminNamespace.use(socketioJwt.authorize({
             secret: BackendConfig.getJWTSecret(),
             handshake: true
@@ -162,16 +219,26 @@ class The6thScreenBackend extends Server {
         adminNamespace.use(function(socket, next) {
             var handshakeData : any = socket.request;
 
-            var success = function(user) {
-                console.log("3 methods to get IP: ");
-                console.log(handshakeData.client._peername.address);
-                console.log(socket.handshake.headers['x-forwarded-for']);
-                console.log(socket.handshake.address.address);
-                console.log("BYPASS CHECKING IP ADDRESS !!!!!!!!! // TODO // TO FIX");
-                //if(user.lastIp() == handshakeData.client._peername.address) {
-                socket.connectedUser = user;
+            var success = function(token : Token) {
+                var clientIp = socket.handshake.headers['x-forwarded-for'];
 
-                next();
+                var successLoadUser = function () {
+                    var user = token.user();
+
+                    if (user.isAdmin()) {
+                        self.pushStat(socket.id, clientIp, "Login to admin granted", user.username(), user.getId());
+                        Logger.debug("Connection of user "+user.username()+" to admin. Access granted.");
+
+                        socket.connectedUser = user;
+                        next();
+                    } else {
+                        self.pushStat(socket.id, clientIp, "Login to admin refused", user.username(), user.getId());
+                        Logger.info("The following user: "+user.username()+" is trying to access to the admin. Access refused.");
+                        next(new Error('You are not allowed to access to this page.'));
+                    }
+                };
+
+                token.loadUser(successLoadUser, fail);
                 //} else {
                 //    next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));
                 //}
@@ -181,10 +248,46 @@ class The6thScreenBackend extends Server {
                 next(error);
             };
 
-            console.log("token : ");
-            console.log(handshakeData._query.token);
+            Token.findOneByValue(handshakeData._query.token, success, fail);
+            // make sure the handshake data looks good as before
+            // if error do this:
+            // next(new Error('not authorized');
+            // else just call next
+        });
 
-            User.findOneByToken(handshakeData._query.token, success, fail);
+        var backendAuthNamespaceManager : any = self.addNamespace("backendAuth", BackendAuthNamespaceManager);
+
+        backendAuthNamespaceManager.use(socketioJwt.authorize({
+            secret: BackendConfig.getJWTSecret(),
+            handshake: true
+        }));
+
+        backendAuthNamespaceManager.use(function(socket, next) {
+            var handshakeData : any = socket.request;
+
+            var success = function(token : Token) {
+                var clientIp = socket.handshake.headers['x-forwarded-for'];
+
+                var successLoadUser = function () {
+                    var user = token.user();
+                    self.pushStat(socket.id, clientIp, "Login to backend granted", user.username(), user.getId());
+                   Logger.debug("Connection of user "+user.username()+" to backend. Access granted.");
+
+                    socket.connectedUser = user;
+                    next();
+                };
+
+                token.loadUser(successLoadUser, fail);
+                //} else {
+                //    next(new Error('Peer Ip Address is not same as last known Ip address (when retrieve token).'));
+                //}
+            };
+
+            var fail = function(error) {
+                next(error);
+            };
+
+            Token.findOneByValue(handshakeData._query.token, success, fail);
             // make sure the handshake data looks good as before
             // if error do this:
             // next(new Error('not authorized');

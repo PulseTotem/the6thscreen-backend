@@ -4,7 +4,7 @@
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
-/// <reference path="./ShareNamespaceManager.ts" />
+/// <reference path="./BackendAuthNamespaceManager.ts" />
 /// <reference path="../model/User.ts" />
 /// <reference path="../model/SDI.ts" />
 /// <reference path="../model/Source.ts" />
@@ -26,7 +26,7 @@
 /// <reference path="../model/Provider.ts" />
 
 
-class AdminsNamespaceManager extends ShareNamespaceManager {
+class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 	/**
      * Constructor.
@@ -191,7 +191,6 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 		this.addListenerToSocket('RemoveThemeFromRenderer', function(themeDescription) { self.removeThemeFromRenderer(themeDescription); });
 
 		this.addListenerToSocket('RetrieveConnectedClientOfProfil', function (profilIdDescription) { self.sendConnectedClients(profilIdDescription); });
-	    this.addListenerToSocket('RetrieveUserDescriptionFromToken', function(tokenDescription) { self.sendUserDescriptionFromToken(tokenDescription); });
 	    this.addListenerToSocket('RetrieveAllZoneDescriptionFromSDI', function(description) { self.sendAllZoneDescriptionFromSDI(description); });
 
 		this.addListenerToSocket('RetrieveAllTeamDescription', function() { self.sendAllTeamDescription(); });
@@ -254,72 +253,7 @@ class AdminsNamespaceManager extends ShareNamespaceManager {
 	}
 
 
-////////////////////// Begin: Manage SendUserDescriptionFromToken //////////////////////
 
-    /**
-     * Retrieve User instance description from token and send it to client.
-     *
-     * @method sendUserDescriptionFromToken
-     * @param {any} tokenDescription - The Token Description.
-     * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-     */
-    sendUserDescriptionFromToken(tokenDescription : any, self : AdminsNamespaceManager = null) {
-        // tokenDescription : {"token" : string}
-        if(self == null) {
-            self = this;
-        }
-        Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken");
-
-        var token = tokenDescription.token;
-
-        Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken : token " + token);
-
-        Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken : retrieveUser");
-
-        User.findOneByToken(token, function(user) { self.retrieveUserFromTokenSuccess(user); }, function(error) { self.retrieveUserFromTokenFail(error, token); });
-    }
-
-    /**
-     * Retrieve User From Token instance success, so send it to client.
-     *
-     * @method retrieveUserFromTokenSuccess
-     * @param {User} user - The User Description.
-     * @param {AdminsNamespaceManager} self - The AdminsNamespaceManager instance.
-     */
-    retrieveUserFromTokenSuccess(user : User, self : AdminsNamespaceManager = null) {
-        var self = this;
-
-        Logger.debug("SocketId: " + this.socket.id + " - sendUserDescriptionFromToken : success");
-
-		var success : Function = function(completeJSONObject) {
-			self.socket.emit("UserDescriptionFromToken", self.formatResponse(true, completeJSONObject));
-
-			Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken : send done with success status for User with Id : " + user.getId());
-		};
-
-		var fail : Function = function(error) {
-			self.socket.emit("UserDescriptionFromToken", self.formatResponse(false, error));
-			Logger.debug("SocketId: " + self.socket.id + " - sendUserDescriptionFromToken : send done with fail status for User with Id : " + user.getId() + " - Fail during completeJsonObject.");
-		};
-
-		user.toCompleteJSONObject(success, fail);
-    }
-
-    /**
-     * Retrieve User From Token instance fail, so send an error.
-     *
-     * @method retrieveUserFromTokenFail
-     * @param {Error} error - The Error reason of fail.
-     * @param {string} token - The User Token.
-     */
-    retrieveUserFromTokenFail(error : Error, token : string) {
-        var self = this;
-
-        Logger.debug("SocketId: " + this.socket.id + " - sendUserDescriptionFromToken : error");
-        self.socket.emit("UserDescriptionFromToken", self.formatResponse(false, error));
-    }
-
-////////////////////// End: Manage SendUserDescriptionFromToken //////////////////////
 
 ////////////////////// Begin: Manage sendAllZoneDescriptionFromSDI //////////////////////
 
