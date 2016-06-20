@@ -1,6 +1,6 @@
 {
 	"name": "pulsetotem-backend",
-	"version": "3.1.0",
+	"version": "3.2.0",
 	"dependencies": {
 		"body-parser": "1.12.4",
 		"colors": "0.6.2",
