@@ -2,6 +2,11 @@
  * @author Simon Urli <simon@pulsetotem.fr>
  */
 
+/// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
+/// <reference path="./ShareNamespaceManager.ts" />
+/// <reference path="../model/User.ts" />
+/// <reference path="../model/Token.ts" />
+
 class BackendAuthNamespaceManager extends ShareNamespaceManager {
 
     /**
