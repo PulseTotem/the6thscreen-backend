@@ -8,7 +8,7 @@
 /// <reference path="./namespacemanager/ClientsNamespaceManager.ts" />
 /// <reference path="./namespacemanager/SourcesNamespaceManager.ts" />
 /// <reference path="./namespacemanager/AdminsNamespaceManager.ts" />
-/// <reference path="./namespacemanager/BackendAuthNamespaceManager.ts" />
+/// <reference path="./namespacemanager/ManagersNamespaceManager.ts" />
 
 /// <reference path="./routers/ContactFormRouter.ts" />
 
@@ -27,22 +27,6 @@ var moment : any = require("moment");
  * @extends Server
  */
 class The6thScreenBackend extends Server {
-
-    private pushStat(socket : string, ip : string, status: string, username : string, userId: number) : void {
-        var result : StatObject = new StatObject();
-
-        result.setCollection("backend-auth");
-        result.setIp(ip);
-        result.setSocketId(socket);
-
-        var data = {};
-        data["status"] = status;
-        data["username"] = username;
-        data["userid"] = userId;
-        result.setData(data);
-
-        StatsClient.pushStats(result);
-    }
 
     /**
      * Constructor.
@@ -255,14 +239,14 @@ class The6thScreenBackend extends Server {
             // else just call next
         });
 
-        var backendAuthNamespaceManager : any = self.addNamespace("backendAuth", BackendAuthNamespaceManager);
+        var managersNamespaceManager : any = self.addNamespace("managers", ManagersNamespaceManager);
 
-        backendAuthNamespaceManager.use(socketioJwt.authorize({
+		managersNamespaceManager.use(socketioJwt.authorize({
             secret: BackendConfig.getJWTSecret(),
             handshake: true
         }));
 
-        backendAuthNamespaceManager.use(function(socket, next) {
+		managersNamespaceManager.use(function(socket, next) {
             var handshakeData : any = socket.request;
 
             var success = function(token : Token) {
@@ -296,6 +280,31 @@ class The6thScreenBackend extends Server {
 
         self.addAPIEndpoint("contact", ContactFormRouter);
     }
+
+	/**
+	 * Push some infos in Stats service.
+	 *
+	 * @param {string} socket - Socket's id.
+	 * @param {string} ip - Client's ip address.
+	 * @param {string} status - Connection's status.
+	 * @param {string} username - User's username
+	 * @param {number} userId - User's userid.
+	 */
+	private pushStat(socket : string, ip : string, status: string, username : string, userId: number) : void {
+		var result : StatObject = new StatObject();
+
+		result.setCollection("backend-auth");
+		result.setIp(ip);
+		result.setSocketId(socket);
+
+		var data = {};
+		data["status"] = status;
+		data["username"] = username;
+		data["userid"] = userId;
+		result.setData(data);
+
+		StatsClient.pushStats(result);
+	}
 }
 
 /**
