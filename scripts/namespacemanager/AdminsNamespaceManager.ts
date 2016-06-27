@@ -3,7 +3,6 @@
  */
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
-/// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="./BackendAuthNamespaceManager.ts" />
 /// <reference path="../model/User.ts" />
 /// <reference path="../model/SDI.ts" />
