@@ -203,8 +203,6 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
 
-
-
 		this.addListenerToSocket('RetrieveParamTypesFromCallType', function (callTypeDescription) { self.sendParamTypesDescriptionFromCallType(callTypeDescription); });
 		this.addListenerToSocket('CreateParamValueDescription', function (paramValueDescription) { self.createParamValueDescription(paramValueDescription); });
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
@@ -212,6 +210,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 		this.addListenerToSocket('CloneProfil', function(data) { self.cloneProfil(data); });
 		this.addListenerToSocket('CloneSDI', function(data) { self.cloneSDI(data); });
+		this.addListenerToSocket('CloneRelativeEventAndLinkTimeline', function (data) { self.cloneRelativeEventAndLinkTimeline(data); });
 
 		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
@@ -1848,5 +1847,50 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		};
 
 		Team.read(teamId, successRead, fail);
+	}
+
+	/**
+	 * Clone a relativeEvent and its call. Change position of the relativeEvent (+1 from original position). Link the newly created relativeEvent to the relativeTimeline
+	 *
+	 * @param eventAndTlData: id of the relativeEvent to clone and the relativeTimeline to link with. (e.g. : {'relativeEventId': 12, 'timelineId' : 15})
+     */
+	cloneRelativeEventAndLinkTimeline(eventAndTlData : any) {
+		var self = this;
+
+		var relativeEventId = eventAndTlData.relativeEventId;
+		var timelineId = eventAndTlData.timelineId;
+
+		var fail = function (error) {
+			self.socket.emit("AnswerCloneRelativeEventAndLinkTimeline", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - cloneRelativeEventAndLinkTimeline failed");
+			Logger.debug(error);
+		};
+
+		var successReadRelativeEvent = function (relativeEvent : RelativeEvent) {
+			var successCloneRelativeEvent = function (clonedRelativeEvent : RelativeEvent) {
+				var successUpdateRelativeEvent = function () {
+					var successReadRelativeTimeline = function (relativeTimeline : RelativeTimeline) {
+						var successLinkRelativeEvent = function () {
+							self.socket.emit("AnswerCloneRelativeEventAndLinkTimeline", self.formatResponse(true,{"cloneId": clonedRelativeEvent.getId()}));
+						};
+
+						relativeTimeline.addRelativeEvent(clonedRelativeEvent.getId(), successLinkRelativeEvent, fail);
+					};
+
+					RelativeTimeline.read(timelineId, successReadRelativeTimeline, fail);
+				};
+
+				var position = clonedRelativeEvent.position();
+				clonedRelativeEvent.setPosition(position+1);
+
+				var name = clonedRelativeEvent.name();
+				clonedRelativeEvent.setName(name+" clone");
+				clonedRelativeEvent.update(successUpdateRelativeEvent, fail);
+			};
+
+			relativeEvent.clone(successCloneRelativeEvent, fail, null);
+		};
+
+		RelativeEvent.read(relativeEventId, successReadRelativeEvent, fail);
 	}
 }
