@@ -1,5 +1,6 @@
 /**
  * @author Simon Urli <simon@pulsetotem.fr>
+ * @author Christian Brel <christian@pulsetotem.fr, ch.brel@gmail.com>
  */
 
 /// <reference path="./ModelItf.ts" />
@@ -18,6 +19,14 @@ class Team extends ModelItf {
      * @private
      */
     private _name : string;
+
+	/**
+	 * CmsId property.
+	 *
+	 * @property _cmsId
+	 * @type string
+	 */
+	private _cmsId : string;
 
     /**
      * @property _owner : User owner of the team
@@ -70,15 +79,17 @@ class Team extends ModelItf {
     /**
      * Constructor of a team. Only the name is mandatory.
      * @param name
+	 * @param {string} cmsId - The Team's cmsId.
      * @param id
      * @param complete
      * @param createdAt
      * @param updatedAt
      */
-    constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", cmsId : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
         super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
+		this.setCmsId(cmsId);
 
         this._owner = null;
         this._owner_loaded = false;
@@ -108,6 +119,24 @@ class Team extends ModelItf {
     name() : string {
         return this._name;
     }
+
+	/**
+	 * Returns Team's cmsId.
+	 *
+	 * @method cmsId
+	 */
+	cmsId() : string {
+		return this._cmsId;
+	}
+
+	/**
+	 * Set the Team's cmsId.
+	 *
+	 * @method setCmsId
+	 */
+	setCmsId(cmsId : string) {
+		this._cmsId = cmsId;
+	}
 
     /**
      * Get the owner of the team
@@ -310,6 +339,7 @@ class Team extends ModelItf {
         var data = {
             "id": this.getId(),
             "name": this.name(),
+			"cmsId": this.cmsId(),
             "complete": this.isComplete(),
             "createdAt" : this.getCreatedAt(),
             "updatedAt" : this.getUpdatedAt()
@@ -628,7 +658,7 @@ class Team extends ModelItf {
      * @return {SDI} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Team {
-        return new Team(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+        return new Team(jsonObject.name, jsonObject.cmsId, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
     }
 
     /**

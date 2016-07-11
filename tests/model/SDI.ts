@@ -429,7 +429,7 @@ describe('SDI', function() {
 	describe('#linkTeam', function () {
 		it('should call the right request', function (done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var s = new Team("toto",52);
+			var s = new Team("toto", "", 52);
 
 			var response1:any = [];
 
@@ -473,7 +473,7 @@ describe('SDI', function() {
 	describe('#unlinkTeamZone', function () {
 		it('should call the right request', function (done) {
 			var c = new SDI("toto", "blabla", "toto", 52);
-			var s = new Team("toto", 52);
+			var s = new Team("toto", "", 52);
 
 			var response1:any = s.toJSONObject();
 
