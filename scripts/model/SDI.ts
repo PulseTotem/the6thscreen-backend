@@ -732,7 +732,7 @@ class SDI extends ModelItf {
      * @param successCallback
      * @param failCallback
      */
-    clone(successCallback : Function, failCallback : Function) {
+    clone(cloneProfil : boolean, successCallback : Function, failCallback : Function) {
 
         var self = this;
 
@@ -815,7 +815,7 @@ class SDI extends ModelItf {
                                                                 clonedSDI.addProfil(clonedProfil.getId(), successAssoProfil, failCallback);
                                                             };
 
-                                                            if (profilSize > 0) {
+                                                            if (profilSize > 0 && cloneProfil) {
                                                                 Logger.debug("Profil info : "+JSON.stringify(profilInfo));
                                                                 self.profils().forEach(function (profil:Profil) {
                                                                     profil.clone(successCloneProfil, failCallback, profilInfo);

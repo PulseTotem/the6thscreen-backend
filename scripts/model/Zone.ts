@@ -591,7 +591,7 @@ class Zone extends ModelItf {
 	checkCompleteness(successCallback : Function, failCallback : Function) {
 		var self = this;
 
-		var success : Function = function () {
+		var successCheckId : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 
 				var success:Function = function () {
@@ -613,9 +613,9 @@ class Zone extends ModelItf {
 				self._complete = false;
 				successCallback();
 			}
-		}
+		};
 
-		super.checkCompleteness(success, failCallback);
+		super.checkCompleteness(successCheckId, failCallback);
 	}
 
     /**
@@ -915,62 +915,72 @@ class Zone extends ModelItf {
 
 				var successLoadAsso = function () {
 					Logger.debug("Success load asso in zone");
+
 					var successLinkBehaviour = function () {
 						Logger.debug("Success link behaviour in zone");
 						var successLinkTheme = function () {
 							Logger.debug("Success link theme in zone");
 
-							var callTypesSize = self.callTypes().length;
-							var callTypeCounter = 0;
+							var successCheckComplete = function () {
+								Logger.debug("Zone check completeness : "+clonedZone.isComplete());
+								var finalSuccess = function () {
+									successCallback(clonedZone);
+								};
 
-							Logger.debug("CallTypes size : "+callTypesSize);
+								var checkCallTypes = function () {
+									var callTypesSize = self.callTypes().length;
+									var callTypeCounter = 0;
 
-							var successCloneCallType = function (clonedCallType : CallType) {
-								Logger.debug("Success clone call type in zone ("+callTypeCounter+"/"+callTypesSize+")");
+									Logger.debug("CallTypes size : "+callTypesSize);
 
-								var successLinkCallType = function () {
+									var successCloneCallType = function (clonedCallType : CallType) {
+										Logger.debug("Success clone call type in zone ("+callTypeCounter+"/"+callTypesSize+")");
 
-									clonedCallType.desynchronize();
-									var ctComplete = clonedCallType.isComplete();
+										var successLinkCallType = function () {
 
-									var successCTCheckComplete = function () {
-										var successEitherWay = function () {
-											callTypeCounter++;
+											clonedCallType.desynchronize();
+											var ctComplete = clonedCallType.isComplete();
 
-											if (callTypeCounter >= callTypesSize) {
+											var successCTCheckComplete = function () {
+												var successEitherWay = function () {
+													callTypeCounter++;
 
-												var successCheckComplete = function () {
-													var finalSuccess = function () {
-														successCallback(clonedZone);
-													};
-
-													if (clonedZone.isComplete() != isComplete) {
-														clonedZone.update(finalSuccess, failCallback);
-													} else {
+													if (callTypeCounter >= callTypesSize) {
 														finalSuccess();
 													}
 												};
 
-												clonedZone.checkCompleteness(successCheckComplete, failCallback);
-											}
+												if (clonedCallType.isComplete() != ctComplete) {
+													clonedCallType.update(successEitherWay, failCallback);
+												} else {
+													successEitherWay();
+												}
+											};
+
+											clonedCallType.checkCompleteness(successCTCheckComplete, failCallback);
 										};
 
-										if (clonedCallType.isComplete() != ctComplete) {
-											clonedCallType.update(successEitherWay, failCallback);
-										} else {
-											successEitherWay();
-										}
+										clonedZone.addCallType(clonedCallType.getId(), successLinkCallType, failCallback);
 									};
 
-									clonedCallType.checkCompleteness(successCTCheckComplete, failCallback);
+									if (callTypesSize > 0) {
+										self.callTypes().forEach( function (callType : CallType) {
+											callType.clone(successCloneCallType, failCallback);
+										});
+									} else {
+										finalSuccess();
+									}
 								};
 
-								clonedZone.addCallType(clonedCallType.getId(), successLinkCallType, failCallback);
+
+								if (clonedZone.isComplete() != isComplete) {
+									clonedZone.update(checkCallTypes, failCallback);
+								} else {
+									checkCallTypes();
+								}
 							};
 
-							self.callTypes().forEach( function (callType : CallType) {
-								callType.clone(successCloneCallType, failCallback);
-							});
+							clonedZone.checkCompleteness(successCheckComplete, failCallback);
 						};
 
 						if (self.theme() != null) {

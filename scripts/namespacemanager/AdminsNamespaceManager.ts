@@ -1417,8 +1417,9 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 ////////////////////// Begin: Manage cloneSDI //////////////////////
 
 	cloneSDI(SDIDescription : any) {
-		// SDIDescription : { 'SDIId': number }
+		// SDIDescription : { 'SDIId': number, 'cloneProfil': boolean }
 		var sdiId = SDIDescription.SDIId;
+		var cloneProfil = SDIDescription.cloneProfil;
 		var self = this;
 
 		var fail : Function = function (error) {
@@ -1430,10 +1431,15 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		var successReadSDI = function (sdi : SDI) {
 			var successCloneSDI = function (clonedSDI : SDI) {
 				Logger.debug("Answer to admin for cloning sdi");
-				self.socket.emit("AnswerCloneSDI", self.formatResponse(true, clonedSDI.toJSONObject()));
+
+				var successCompleteJSONObject = function (data) {
+					self.socket.emit("AnswerCloneSDI", self.formatResponse(true, data));
+				};
+
+				clonedSDI.toCompleteJSONObject(successCompleteJSONObject, fail);
 			};
 
-			sdi.clone(successCloneSDI, fail);
+			sdi.clone(cloneProfil, successCloneSDI, fail);
 		};
 
 		SDI.read(sdiId, successReadSDI, fail);

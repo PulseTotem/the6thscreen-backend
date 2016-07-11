@@ -925,7 +925,7 @@ class ModelItf {
 
 	    var successCheckCompletenessModelItf = function () {
 		    Logger.debug("Success check completeness model itf ! "+self.getId());
-
+			clone.desynchronize();
 		    if (clone.isComplete()) {
 			    clone.update(successUpdateModelItf, failCallback);
 		    } else {
