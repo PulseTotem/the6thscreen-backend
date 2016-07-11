@@ -46,65 +46,78 @@ class ManagersNamespaceManager extends BackendAuthNamespaceManager {
 
 
 			if(teams.length > 0) {
-				var nbTeams = 0;
-				teams.forEach(function (team:Team) {
+				var teamIndex = 0;
+				var manageTeam = function() {
+					if(teamIndex == teams.length) {
+						successManageTeams();
+					} else {
+						var team = teams[teamIndex];
 
-					var successLoadUsers = function () {
-						if (team.users().length > 0) {
-							var nbUsers = 0;
+						var successLoadUsers = function () {
+							if (team.users().length > 0) {
+								var userIndex = 0;
 
-							team.users().forEach(function (user:User) {
+								var manageUser = function() {
 
-								var successAddUserToTeam = function () {
-									nbUsers++;
+									if(userIndex == team.users().length) {
+										teamIndex++;
 
-									if (nbUsers == team.users().length) {
-										nbTeams++;
+										manageTeam();
+									} else {
+										var user = team.users()[userIndex];
 
-										if(nbTeams == teams.length) {
-											successManageTeams();
+										var successAddUserToTeam = function () {
+											userIndex++;
+
+											manageUser();
+										};
+
+										if (user.cmsId() != "") {
+											var addUserToTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + team.cmsId() + '/' + BackendConfig.getCMSUsersPath() + user.cmsId();
+
+											var data = {};
+
+											RestClient.put(addUserToTeamUrl, data, successAddUserToTeam, fail, self.socket.connectedUser.cmsAuthkey());
+										} else {
+											successAddUserToTeam();
 										}
 									}
 								};
 
-								if (user.cmsId() != "") {
-									var addUserToTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + team.cmsId() + '/' + BackendConfig.getCMSUsersPath + user.cmsId();
+								manageUser();
 
-									var data = {};
+							} else {
+								teamIndex++;
 
-									RestClient.put(addUserToTeamUrl, data, successAddUserToTeam, fail, self.socket.connectedUser.cmsAuthkey());
-								}
-							});
-						} else {
-							nbTeams++;
-
-							if(nbTeams == teams.length) {
-								successManageTeams();
+								manageTeam();
 							}
-						}
-					};
+						};
 
-					var successUpdateTeam = function () {
-						team.loadUsers(successLoadUsers, fail);
-					};
+						var successUpdateTeam = function () {
+							team.loadUsers(successLoadUsers, fail);
+						};
 
-					var successCreateTeam = function (cmsTeam:any) {
-						var teamCMSId = cmsTeam.id;
+						var successCreateTeam = function (cmsTeamResponse:any) {
+							var cmsTeam = cmsTeamResponse.data();
 
-						team.setCmsId(teamCMSId);
+							var teamCMSId = cmsTeam.id;
 
-						team.update(successUpdateTeam, fail);
-					};
+							team.setCmsId(teamCMSId);
 
-					var createTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath();
+							team.update(successUpdateTeam, fail);
+						};
 
-					var data = {
-						"name": team.name()
-					};
+						var createTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath();
 
-					RestClient.post(createTeamUrl, data, successCreateTeam, fail, self.socket.connectedUser.cmsAuthkey());
+						var data = {
+							"name": team.name()
+						};
 
-				});
+						RestClient.post(createTeamUrl, data, successCreateTeam, fail, self.socket.connectedUser.cmsAuthkey());
+					}
+				};
+
+				manageTeam();
 			} else {
 				successManageTeams();
 			}
