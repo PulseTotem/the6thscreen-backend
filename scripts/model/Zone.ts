@@ -991,7 +991,13 @@ class Zone extends ModelItf {
 
 					};
 
-					clonedZone.linkBehaviour(self.behaviour().getId(), successLinkBehaviour, failCallback);
+					if (self.behaviour() != null) {
+						clonedZone.linkBehaviour(self.behaviour().getId(), successLinkBehaviour, failCallback);
+					} else {
+						Logger.warn("The zone "+self.getId()+" does not have any behaviour! Clonage keep going");
+						successLinkBehaviour();
+					}
+
 				};
 
 				self.loadAssociations(successLoadAsso, failCallback);

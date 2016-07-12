@@ -211,6 +211,8 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('CloneSDI', function(data) { self.cloneSDI(data); });
 		this.addListenerToSocket('CloneRelativeEventAndLinkTimeline', function (data) { self.cloneRelativeEventAndLinkTimeline(data); });
 
+		this.addListenerToSocket('CheckAllData', function () { self.checkAllData(); })
+
 		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
 		this.addListenerToSocket('IdentifyCommand', function (clientDescription) { self.sendIdentifyCommandToClient(clientDescription); });
@@ -1898,4 +1900,226 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 		RelativeEvent.read(relativeEventId, successReadRelativeEvent, fail);
 	}
+
+////////////////////// Begin: Check all Data of DB //////////////////////
+
+	private checkModelData(model : any, checkRelations : Function, fail) {
+		var successAllElements = function (elements : Array<any>) {
+			var completeArray = {};
+
+			var nbElements = elements.length;
+
+			var successCheckAllCompleteness = function () {
+
+				var counterElements = elements.length;
+
+				var successUpdate = function () {
+					counterElements--;
+
+					if (counterElements == 0) {
+						checkRelations(elements);
+					}
+				};
+
+				elements.forEach(function (element) {
+					var oldCompleteValue = completeArray[element.getId()];
+
+					if (element.isComplete() != oldCompleteValue) {
+						element.update(successUpdate, fail);
+					} else {
+						successUpdate();
+					}
+				});
+			};
+
+
+			var successCheckCompleteness = function () {
+				nbElements--;
+
+				if (nbElements == 0) {
+					successCheckAllCompleteness();
+				}
+			};
+
+			elements.forEach(function (element) {
+				completeArray[element.getId()] = element.isComplete();
+				element.checkCompleteness(successCheckCompleteness, fail);
+			});
+		};
+
+		model.all(successAllElements, fail);
+	}
+
+	checkAllData = function () {
+		var self = this;
+		var result = {};
+
+		var fail = function (error) {
+			self.socket.emit("AnswerCheckAllData", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - checkAllData failed");
+			Logger.debug(error);
+		};
+
+		var finalSuccess = function () {
+			self.socket.emit("AnswerCheckAllData", self.formatReponse(true, result));
+		};
+
+		var checkSDI = function () {
+			self.checkModelData(SDI, finalSuccess, fail);
+		};
+
+		var checkProfil = function () {
+			self.checkModelData(Profil, checkSDI, fail);
+		};
+
+		var checkRelativeTL = function () {
+			self.checkModelData(RelativeTimeline, checkProfil, fail);
+		};
+
+		var checkAbsoluteTL = function () {
+			self.checkModelData(AbsoluteTimeline, checkRelativeTL, fail);
+		};
+
+		var checkRelativeEvent = function () {
+			self.checkModelData(RelativeEvent, checkAbsoluteTL, fail);
+		};
+
+		var checkAbsoluteEvent = function () {
+			self.checkModelData(AbsoluteEvent, checkRelativeEvent, fail);
+		};
+
+		var checkCall = function () {
+			self.checkModelData(Call, checkAbsoluteEvent, fail);
+		};
+
+		var checkParamValue = function () {
+			self.checkModelData(ParamValue, checkCall, fail);
+		};
+
+		var checkZone = function () {
+			self.checkModelData(Zone, checkParamValue, fail);
+		};
+
+		var checkCallType = function () {
+			var analyseCallTypes = function (callTypes : Array<CallType>) {
+				var nbIncompleteCallTypes = 0;
+
+				for (var i = 0; i < callTypes.length; i++) {
+					var callType = callTypes[i];
+
+					if (!callType.isComplete()) {
+						nbIncompleteCallTypes++;
+					}
+				}
+
+				if (nbIncompleteCallTypes > 0) {
+					result["callType"] = "Several ("+nbIncompleteCallTypes+") are incomplete! It is certainly du to an incomplete migration in database (e.g. rendererTheme not set)";
+				}
+
+				checkZone();
+			};
+
+			self.checkModelData(CallType, analyseCallTypes, fail);
+		};
+
+		var checkTimelineRunner = function () {
+			self.checkModelData(TimelineRunner, checkCallType, fail);
+		};
+
+		var checkSource = function () {
+			self.checkModelData(Source, checkTimelineRunner, fail);
+		};
+
+		var checkService = function () {
+			self.checkModelData(Service, checkSource, fail);
+		};
+
+		var checkParamType = function () {
+			self.checkModelData(ParamType, checkService, fail);
+		};
+
+		var checkConstraintParamType = function () {
+			self.checkModelData(ConstraintParamType, checkParamType, fail);
+		};
+
+		var checkThemeZone = function () {
+			self.checkModelData(ThemeZone, checkConstraintParamType, fail);
+		};
+
+		var checkThemeSDI = function () {
+			self.checkModelData(ThemeSDI, checkThemeZone, fail);
+		};
+
+		var checkSystemTrigger = function () {
+			self.checkModelData(SystemTrigger, checkThemeSDI, fail);
+		};
+
+		var checkUserTrigger = function () {
+			self.checkModelData(UserTrigger, checkSystemTrigger, fail);
+		};
+
+		var checkUser = function () {
+			self.checkModelData(User, checkUserTrigger, fail);
+		};
+
+		var checkTeam = function () {
+			self.checkModelData(Team, checkUser, fail);
+		};
+
+		var checkOAuthKey = function () {
+			self.checkModelData(OAuthKey, checkTeam, fail);
+		};
+
+		var checkToken = function () {
+			var analyzeToken = function (tokens : Array<Token>) {
+				var nbTokenOutdate = 0;
+				var now = moment();
+
+				for (var i = 0; i < tokens.length; i++) {
+					var token : Token = tokens[i];
+
+					if (now.isAfter(token.endDate())) {
+						nbTokenOutdate++;
+					}
+				}
+
+				if (nbTokenOutdate > 0) {
+					result["token"] = nbTokenOutdate+" tokens are out of date. You need to run a clean for tokens.";
+				}
+
+				checkOAuthKey();
+			};
+
+			self.checkModelData(Token, analyzeToken, fail);
+		};
+
+		var checkTypeParamType = function () {
+			self.checkModelData(TypeParamType, checkTeam, fail);
+		};
+
+		var checkBehaviour = function () {
+			self.checkModelData(Behaviour, checkTypeParamType, fail);
+		};
+
+		var checkProvider = function () {
+			self.checkModelData(Provider, checkBehaviour, fail);
+		};
+
+		var checkRenderer = function () {
+			self.checkModelData(Renderer, checkProvider, fail);
+		};
+
+		var checkRendererTheme = function () {
+			self.checkModelData(RendererTheme, checkRenderer, fail);
+		};
+
+		var checkInfoType = function () {
+			self.checkModelData(InfoType, checkRendererTheme, fail);
+		};
+
+		self.checkModelData(Policy, checkInfoType, fail);
+	};
+
+////////////////////// End: Check all Data of DB //////////////////////
+
 }

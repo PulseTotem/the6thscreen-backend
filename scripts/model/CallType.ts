@@ -989,16 +989,39 @@ class CallType extends ModelItf {
 									clonedCallType.checkCompleteness(successCheckComplete, failCallback);
 								};
 
-								clonedCallType.linkSource(self.source().getId(), successLinkSource, failCallback);
+                                if (self.source() != null) {
+                                    clonedCallType.linkSource(self.source().getId(), successLinkSource, failCallback);
+                                } else {
+                                    Logger.warn("The callType "+self.getId()+" does not have any source ! Clonage keep going");
+                                    successLinkSource();
+                                }
+
 							};
 
-							clonedCallType.linkRendererTheme(self.rendererTheme().getId(), successLinkRendererTheme, failCallback);
+                            if (self.rendererTheme() != null) {
+                                clonedCallType.linkRendererTheme(self.rendererTheme().getId(), successLinkRendererTheme, failCallback);
+                            } else {
+                                Logger.warn("The callType "+self.getId()+" does not have any renderer theme ! Clonage keep going");
+                                successLinkRendererTheme();
+                            }
+
                         };
 
-                        clonedCallType.linkRenderer(self.renderer().getId(), successLinkRenderer, failCallback);
+                        if (self.renderer() != null) {
+                            clonedCallType.linkRenderer(self.renderer().getId(), successLinkRenderer, failCallback);
+                        } else {
+                            Logger.warn("The callType "+self.getId()+" does not have any renderer ! Clonage keep going.");
+                            successLinkRenderer();
+                        }
+
                     };
 
-                    clonedCallType.linkPolicy(self.policy().getId(), successLinkPolicy, failCallback);
+                    if (self.policy() != null) {
+                        clonedCallType.linkPolicy(self.policy().getId(), successLinkPolicy, failCallback);
+                    } else {
+                        successLinkPolicy();
+                    }
+
                 };
 
                 self.loadAssociations(successLoadAsso, failCallback);
