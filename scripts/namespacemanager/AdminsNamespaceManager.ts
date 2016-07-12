@@ -211,7 +211,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('CloneSDI', function(data) { self.cloneSDI(data); });
 		this.addListenerToSocket('CloneRelativeEventAndLinkTimeline', function (data) { self.cloneRelativeEventAndLinkTimeline(data); });
 
-		this.addListenerToSocket('CheckAllData', function () { self.checkAllData(); })
+		this.addListenerToSocket('CheckAllData', function () { self.checkAllData(); });
 
 		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
@@ -1904,6 +1904,12 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 ////////////////////// Begin: Check all Data of DB //////////////////////
 
 	private checkModelData(model : any, checkRelations : Function, fail) {
+		var finalSuccess = function (elements) {
+			setTimeout(function() {
+				checkRelations(elements);
+			}, 1000);
+		};
+
 		var successAllElements = function (elements : Array<any>) {
 			var completeArray = {};
 
@@ -1917,7 +1923,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 					counterElements--;
 
 					if (counterElements == 0) {
-						checkRelations(elements);
+						finalSuccess(elements);
 					}
 				};
 
@@ -1941,10 +1947,14 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 				}
 			};
 
-			elements.forEach(function (element) {
-				completeArray[element.getId()] = element.isComplete();
-				element.checkCompleteness(successCheckCompleteness, fail);
-			});
+			if (elements.length > 0) {
+				elements.forEach(function (element) {
+					completeArray[element.getId()] = element.isComplete();
+					element.checkCompleteness(successCheckCompleteness, fail);
+				});
+			} else {
+				finalSuccess(elements);
+			}
 		};
 
 		model.all(successAllElements, fail);
@@ -1952,7 +1962,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 	checkAllData = function () {
 		var self = this;
-		var result = {};
+		var result = [];
 
 		var fail = function (error) {
 			self.socket.emit("AnswerCheckAllData", self.formatResponse(false, error));
@@ -1961,46 +1971,56 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		};
 
 		var finalSuccess = function () {
-			self.socket.emit("AnswerCheckAllData", self.formatReponse(true, result));
+			self.socket.emit("AnswerCheckAllData", self.formatResponse(true, result));
 		};
 
 		var checkSDI = function () {
+			Logger.debug("Check SDI");
 			self.checkModelData(SDI, finalSuccess, fail);
 		};
 
 		var checkProfil = function () {
+			Logger.debug("Check profil");
 			self.checkModelData(Profil, checkSDI, fail);
 		};
 
 		var checkRelativeTL = function () {
+			Logger.debug("Check relativeTL");
 			self.checkModelData(RelativeTimeline, checkProfil, fail);
 		};
 
 		var checkAbsoluteTL = function () {
+			Logger.debug("Check absoluteTL");
 			self.checkModelData(AbsoluteTimeline, checkRelativeTL, fail);
 		};
 
 		var checkRelativeEvent = function () {
+			Logger.debug("Check relativeEvent");
 			self.checkModelData(RelativeEvent, checkAbsoluteTL, fail);
 		};
 
 		var checkAbsoluteEvent = function () {
+			Logger.debug("Check absoluteEvent");
 			self.checkModelData(AbsoluteEvent, checkRelativeEvent, fail);
 		};
 
 		var checkCall = function () {
+			Logger.debug("Check call");
 			self.checkModelData(Call, checkAbsoluteEvent, fail);
 		};
 
 		var checkParamValue = function () {
+			Logger.debug("Check paramValue");
 			self.checkModelData(ParamValue, checkCall, fail);
 		};
 
 		var checkZone = function () {
+			Logger.debug("Check zone");
 			self.checkModelData(Zone, checkParamValue, fail);
 		};
 
 		var checkCallType = function () {
+			Logger.debug("Check callType");
 			var analyseCallTypes = function (callTypes : Array<CallType>) {
 				var nbIncompleteCallTypes = 0;
 
@@ -2013,7 +2033,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 				}
 
 				if (nbIncompleteCallTypes > 0) {
-					result["callType"] = "Several ("+nbIncompleteCallTypes+") are incomplete! It is certainly du to an incomplete migration in database (e.g. rendererTheme not set)";
+					result.push({'model':'callType','msg':"Several ("+nbIncompleteCallTypes+") are incomplete! It is certainly du to an incomplete migration in database (e.g. rendererTheme not set)"});
 				}
 
 				checkZone();
@@ -2023,54 +2043,67 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		};
 
 		var checkTimelineRunner = function () {
+			Logger.debug("Check TLrunner");
 			self.checkModelData(TimelineRunner, checkCallType, fail);
 		};
 
 		var checkSource = function () {
+			Logger.debug("Check source");
 			self.checkModelData(Source, checkTimelineRunner, fail);
 		};
 
 		var checkService = function () {
+			Logger.debug("Check service");
 			self.checkModelData(Service, checkSource, fail);
 		};
 
 		var checkParamType = function () {
+			Logger.debug("Check paramType");
 			self.checkModelData(ParamType, checkService, fail);
 		};
 
 		var checkConstraintParamType = function () {
+			Logger.debug("Check constraintParamType");
 			self.checkModelData(ConstraintParamType, checkParamType, fail);
 		};
 
 		var checkThemeZone = function () {
+			Logger.debug("Check themeZone");
 			self.checkModelData(ThemeZone, checkConstraintParamType, fail);
 		};
 
 		var checkThemeSDI = function () {
+			Logger.debug("Check themeSDI");
 			self.checkModelData(ThemeSDI, checkThemeZone, fail);
 		};
 
 		var checkSystemTrigger = function () {
+			Logger.debug("Check systemtrigger");
 			self.checkModelData(SystemTrigger, checkThemeSDI, fail);
 		};
 
 		var checkUserTrigger = function () {
+			Logger.debug("Check usretrigger");
 			self.checkModelData(UserTrigger, checkSystemTrigger, fail);
 		};
 
 		var checkUser = function () {
+			Logger.debug("Check user");
 			self.checkModelData(User, checkUserTrigger, fail);
 		};
 
 		var checkTeam = function () {
+			Logger.debug("Check team");
 			self.checkModelData(Team, checkUser, fail);
 		};
 
 		var checkOAuthKey = function () {
+			Logger.debug("Check oauthkey");
 			self.checkModelData(OAuthKey, checkTeam, fail);
 		};
 
 		var checkToken = function () {
+			Logger.debug("Check token");
 			var analyzeToken = function (tokens : Array<Token>) {
 				var nbTokenOutdate = 0;
 				var now = moment();
@@ -2084,7 +2117,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 				}
 
 				if (nbTokenOutdate > 0) {
-					result["token"] = nbTokenOutdate+" tokens are out of date. You need to run a clean for tokens.";
+					result.push({'model':'token','msg': nbTokenOutdate+" tokens are out of date. You need to run a clean for tokens."});
 				}
 
 				checkOAuthKey();
@@ -2094,29 +2127,36 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		};
 
 		var checkTypeParamType = function () {
+			Logger.debug("Check typeParamType");
 			self.checkModelData(TypeParamType, checkTeam, fail);
 		};
 
 		var checkBehaviour = function () {
+			Logger.debug("Check behaviour");
 			self.checkModelData(Behaviour, checkTypeParamType, fail);
 		};
 
 		var checkProvider = function () {
+			Logger.debug("Check provider");
 			self.checkModelData(Provider, checkBehaviour, fail);
 		};
 
 		var checkRenderer = function () {
+			Logger.debug("Check renderer");
 			self.checkModelData(Renderer, checkProvider, fail);
 		};
 
 		var checkRendererTheme = function () {
+			Logger.debug("Check rendererTheme");
 			self.checkModelData(RendererTheme, checkRenderer, fail);
 		};
 
 		var checkInfoType = function () {
+			Logger.debug("Check infotype");
 			self.checkModelData(InfoType, checkRendererTheme, fail);
 		};
 
+		Logger.debug("Check policies");
 		self.checkModelData(Policy, checkInfoType, fail);
 	};
 

@@ -548,7 +548,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+result.data()), attemptNumber);
         };
 
         var urlAssociatedObjects;
@@ -599,7 +599,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+result.data()), attemptNumber);
         };
 
         var urlUniqueAssociatedOject;
