@@ -834,35 +834,52 @@ class Zone extends ModelItf {
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 	    var self = this;
 
-	    var successLoadZone : Function = function () {
-		    if (self.zoneContents().length > 0) {
-			    failCallback("You can't delete a zone containing some zone contents.");
-		    } else {
-			    var sizeCT = self.callTypes().length;
-			    var deleted = 0;
+	    var successLoadAsso : Function = function () {
 
-			    var successDeleteCT:Function = function () {
-				    deleted++;
+			var nbZoneContents = self.zoneContents().length;
 
-				    if (deleted == sizeCT) {
-					    ModelItf.deleteObject(Zone, self.getId(), successCallback, failCallback, attemptNumber);
-				    }
-			    };
+			var finalDelete  = function () {
+				var sizeCT = self.callTypes().length;
+				var deleted = 0;
 
-			    if (sizeCT == 0) {
-				    deleted = -1;
-				    successDeleteCT();
-			    }
+				var successDeleteCT:Function = function () {
+					deleted++;
 
-			    for (var ctIndex in self.callTypes()) {
-				    var ct:CallType = self.callTypes()[ctIndex];
+					if (deleted == sizeCT) {
+						ModelItf.deleteObject(Zone, self.getId(), successCallback, failCallback, attemptNumber);
+					}
+				};
 
-				    ct.delete(successDeleteCT, failCallback);
-			    }
-		    }
+				if (sizeCT == 0) {
+					deleted = -1;
+					successDeleteCT();
+				}
+
+				for (var ctIndex in self.callTypes()) {
+					var ct:CallType = self.callTypes()[ctIndex];
+
+					ct.delete(successDeleteCT, failCallback);
+				}
+			};
+
+			var successDeleteZoneContent = function () {
+				nbZoneContents--;
+
+				if (nbZoneContents == 0) {
+					finalDelete();
+				}
+			};
+
+			if (nbZoneContents > 0) {
+				self.zoneContents().forEach(function (zoneContent : ZoneContent) {
+					zoneContent.delete(successDeleteZoneContent, failCallback);
+				});
+			} else {
+				finalDelete();
+			}
 	    };
 
-	    this.loadAssociations(successLoadZone, failCallback);
+	    this.loadAssociations(successLoadAsso, failCallback);
     }
 
     /**
