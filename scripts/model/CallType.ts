@@ -908,10 +908,38 @@ class CallType extends ModelItf {
 
         var self = this;
         var successLoadCalls = function () {
+
+            var nbCalls = self.calls().length;
+
+            var finalSuccess = function () {
+                ModelItf.deleteObject(CallType, self.getId(), successCallback, failCallback, attemptNumber);
+            };
+
+            var successLoadEvent = function() {
+                nbCalls--;
+                if (nbCalls <= 0) {
+                    nbCalls = self.calls().length;
+
+                    var successDeleteRelativeEvent = function () {
+                        nbCalls--;
+
+                        if (nbCalls <= 0) {
+                            finalSuccess();
+                        }
+                    };
+
+                    self.calls().forEach(function (call : Call) {
+                        call.relativeEvent().delete(successDeleteRelativeEvent, failCallback);
+                    });
+                }
+            };
+
             if (self.calls().length > 0) {
-                failCallback("You cannot delete a CallBack which owns some calls. Delete the calls first.");
+                self.calls().forEach(function (call : Call) {
+                    call.loadEvent(successLoadEvent, failCallback);
+                });
             } else {
-                return ModelItf.deleteObject(CallType, self.getId(), successCallback, failCallback, attemptNumber);
+                finalSuccess();
             }
         };
 

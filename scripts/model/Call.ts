@@ -108,6 +108,22 @@ class Call extends ModelItf {
 	 */
 	private _origineCall_loaded : boolean;
 
+	/**
+	 * The relativeEvent the call is associated to
+	 *
+	 * @property _relativeEvent
+	 * @type RelativeEvent
+	 */
+	private _relativeEvent : RelativeEvent;
+
+	/**
+	 * Lazy loading for the relativeEvent
+	 *
+	 * @property _event_loaded
+	 * @type boolean
+	 */
+	private _event_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -363,6 +379,35 @@ class Call extends ModelItf {
 			if (successCallback != null) {
 				successCallback();
 			}
+		}
+	}
+
+	/**
+	 * Get the relativeEvent associated to the call
+	 * @returns {RelativeEvent}
+     */
+	relativeEvent() : RelativeEvent {
+		return this._relativeEvent;
+	}
+
+	loadEvent(successCallback : Function, failCallback : Function) {
+		if (! this._event_loaded) {
+			var self = this;
+
+			var successLoad = function (relativeEvent) {
+				self._relativeEvent = relativeEvent;
+				self._event_loaded = true;
+
+				successCallback();
+			};
+
+			var fail = function (error) {
+				failCallback(error);
+			};
+
+			this.getUniquelyAssociatedObject(Call, RelativeEvent, successLoad, fail);
+		} else {
+			successCallback();
 		}
 	}
 
@@ -675,6 +720,8 @@ class Call extends ModelItf {
 
     /**
      * Delete in database the model with current id.
+	 * WARNING: This method should be **ONLY** called by RelativeEvent model.
+	 * All other models or classes should call delete of RelativeEvent model.
      *
      * @method delete
      * @param {Function} successCallback - The callback function when success.
@@ -709,7 +756,7 @@ class Call extends ModelItf {
 			} else {
 				ModelItf.deleteObject(Call, self.getId(), successCallback, failCallback, attemptNumber);
 			}
-		}
+		};
 
 		this.loadParamValues(successLoadParamValues, fail);
     }

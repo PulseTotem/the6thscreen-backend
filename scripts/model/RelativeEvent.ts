@@ -467,7 +467,7 @@ class RelativeEvent extends ModelItf {
 		var successLoadCall = function() {
 			var successDeleteCall = function() {
 				ModelItf.deleteObject(RelativeEvent, self.getId(), successCallback, failCallback, attemptNumber);
-			}
+			};
 
 			self.call().delete(successDeleteCall, fail);
 		};
