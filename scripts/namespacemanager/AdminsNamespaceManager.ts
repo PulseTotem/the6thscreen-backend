@@ -1903,7 +1903,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 ////////////////////// Begin: Check all Data of DB //////////////////////
 
-	private checkModelData(model : any, checkRelations : Function, fail) {
+	private checkModelData(model : any, checkRelations : Function, fail, result : Array<any>) {
 		var finalSuccess = function (elements) {
 			setTimeout(function() {
 				checkRelations(elements);
@@ -1919,10 +1919,18 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 				var counterElements = elements.length;
 
+				var nbElementsToUpdate = 0;
+
 				var successUpdate = function () {
 					counterElements--;
 
 					if (counterElements == 0) {
+						if (nbElementsToUpdate > 0) {
+							result.push({
+								'model':model.getTableName(),
+								'msg': 'Several instances of '+model.getTableName()+' ('+nbElementsToUpdate+') change their value of complete. Maybe you should change the way this value is updated.'
+							});
+						}
 						finalSuccess(elements);
 					}
 				};
@@ -1931,6 +1939,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 					var oldCompleteValue = completeArray[element.getId()];
 
 					if (element.isComplete() != oldCompleteValue) {
+						nbElementsToUpdate++;
 						element.update(successUpdate, fail);
 					} else {
 						successUpdate();
@@ -2000,42 +2009,42 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 				finalSuccess();
 			};
 
-			self.checkModelData(SDI, analyzeSDI, fail);
+			self.checkModelData(SDI, analyzeSDI, fail, result);
 		};
 
 		var checkProfil = function () {
 			Logger.debug("Check profil");
-			self.checkModelData(Profil, checkSDI, fail);
+			self.checkModelData(Profil, checkSDI, fail, result);
 		};
 
 		var checkRelativeTL = function () {
 			Logger.debug("Check relativeTL");
-			self.checkModelData(RelativeTimeline, checkProfil, fail);
+			self.checkModelData(RelativeTimeline, checkProfil, fail, result);
 		};
 
 		var checkAbsoluteTL = function () {
 			Logger.debug("Check absoluteTL");
-			self.checkModelData(AbsoluteTimeline, checkRelativeTL, fail);
+			self.checkModelData(AbsoluteTimeline, checkRelativeTL, fail, result);
 		};
 
 		var checkRelativeEvent = function () {
 			Logger.debug("Check relativeEvent");
-			self.checkModelData(RelativeEvent, checkAbsoluteTL, fail);
+			self.checkModelData(RelativeEvent, checkAbsoluteTL, fail, result);
 		};
 
 		var checkAbsoluteEvent = function () {
 			Logger.debug("Check absoluteEvent");
-			self.checkModelData(AbsoluteEvent, checkRelativeEvent, fail);
+			self.checkModelData(AbsoluteEvent, checkRelativeEvent, fail, result);
 		};
 
 		var checkCall = function () {
 			Logger.debug("Check call");
-			self.checkModelData(Call, checkAbsoluteEvent, fail);
+			self.checkModelData(Call, checkAbsoluteEvent, fail, result);
 		};
 
 		var checkParamValue = function () {
 			Logger.debug("Check paramValue");
-			self.checkModelData(ParamValue, checkCall, fail);
+			self.checkModelData(ParamValue, checkCall, fail, result);
 		};
 
 		var checkZone = function () {
@@ -2064,7 +2073,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 				checkParamValue();
 			};
 
-			self.checkModelData(Zone, analyzeZone, fail);
+			self.checkModelData(Zone, analyzeZone, fail, result);
 		};
 
 		var checkCallType = function () {
@@ -2087,67 +2096,67 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 				checkZone();
 			};
 
-			self.checkModelData(CallType, analyseCallTypes, fail);
+			self.checkModelData(CallType, analyseCallTypes, fail, result);
 		};
 
 		var checkTimelineRunner = function () {
 			Logger.debug("Check TLrunner");
-			self.checkModelData(TimelineRunner, checkCallType, fail);
+			self.checkModelData(TimelineRunner, checkCallType, fail, result);
 		};
 
 		var checkSource = function () {
 			Logger.debug("Check source");
-			self.checkModelData(Source, checkTimelineRunner, fail);
+			self.checkModelData(Source, checkTimelineRunner, fail, result);
 		};
 
 		var checkService = function () {
 			Logger.debug("Check service");
-			self.checkModelData(Service, checkSource, fail);
+			self.checkModelData(Service, checkSource, fail, result);
 		};
 
 		var checkParamType = function () {
 			Logger.debug("Check paramType");
-			self.checkModelData(ParamType, checkService, fail);
+			self.checkModelData(ParamType, checkService, fail, result);
 		};
 
 		var checkConstraintParamType = function () {
 			Logger.debug("Check constraintParamType");
-			self.checkModelData(ConstraintParamType, checkParamType, fail);
+			self.checkModelData(ConstraintParamType, checkParamType, fail, result);
 		};
 
 		var checkThemeZone = function () {
 			Logger.debug("Check themeZone");
-			self.checkModelData(ThemeZone, checkConstraintParamType, fail);
+			self.checkModelData(ThemeZone, checkConstraintParamType, fail, result);
 		};
 
 		var checkThemeSDI = function () {
 			Logger.debug("Check themeSDI");
-			self.checkModelData(ThemeSDI, checkThemeZone, fail);
+			self.checkModelData(ThemeSDI, checkThemeZone, fail, result);
 		};
 
 		var checkSystemTrigger = function () {
 			Logger.debug("Check systemtrigger");
-			self.checkModelData(SystemTrigger, checkThemeSDI, fail);
+			self.checkModelData(SystemTrigger, checkThemeSDI, fail, result);
 		};
 
 		var checkUserTrigger = function () {
 			Logger.debug("Check usretrigger");
-			self.checkModelData(UserTrigger, checkSystemTrigger, fail);
+			self.checkModelData(UserTrigger, checkSystemTrigger, fail, result);
 		};
 
 		var checkUser = function () {
 			Logger.debug("Check user");
-			self.checkModelData(User, checkUserTrigger, fail);
+			self.checkModelData(User, checkUserTrigger, fail, result);
 		};
 
 		var checkTeam = function () {
 			Logger.debug("Check team");
-			self.checkModelData(Team, checkUser, fail);
+			self.checkModelData(Team, checkUser, fail, result);
 		};
 
 		var checkOAuthKey = function () {
 			Logger.debug("Check oauthkey");
-			self.checkModelData(OAuthKey, checkTeam, fail);
+			self.checkModelData(OAuthKey, checkTeam, fail, result);
 		};
 
 		var checkToken = function () {
@@ -2171,41 +2180,41 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 				checkOAuthKey();
 			};
 
-			self.checkModelData(Token, analyzeToken, fail);
+			self.checkModelData(Token, analyzeToken, fail, result);
 		};
 
 		var checkTypeParamType = function () {
 			Logger.debug("Check typeParamType");
-			self.checkModelData(TypeParamType, checkTeam, fail);
+			self.checkModelData(TypeParamType, checkTeam, fail, result);
 		};
 
 		var checkBehaviour = function () {
 			Logger.debug("Check behaviour");
-			self.checkModelData(Behaviour, checkTypeParamType, fail);
+			self.checkModelData(Behaviour, checkTypeParamType, fail, result);
 		};
 
 		var checkProvider = function () {
 			Logger.debug("Check provider");
-			self.checkModelData(Provider, checkBehaviour, fail);
+			self.checkModelData(Provider, checkBehaviour, fail, result);
 		};
 
 		var checkRenderer = function () {
 			Logger.debug("Check renderer");
-			self.checkModelData(Renderer, checkProvider, fail);
+			self.checkModelData(Renderer, checkProvider, fail, result);
 		};
 
 		var checkRendererTheme = function () {
 			Logger.debug("Check rendererTheme");
-			self.checkModelData(RendererTheme, checkRenderer, fail);
+			self.checkModelData(RendererTheme, checkRenderer, fail, result);
 		};
 
 		var checkInfoType = function () {
 			Logger.debug("Check infotype");
-			self.checkModelData(InfoType, checkRendererTheme, fail);
+			self.checkModelData(InfoType, checkRendererTheme, fail, result);
 		};
 
 		Logger.debug("Check policies");
-		self.checkModelData(Policy, checkInfoType, fail);
+		self.checkModelData(Policy, checkInfoType, fail, result);
 	};
 
 ////////////////////// End: Check all Data of DB //////////////////////

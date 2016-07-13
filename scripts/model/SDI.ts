@@ -722,7 +722,7 @@ class SDI extends ModelItf {
             } else {
 
                 var finalSuccess = function () {
-                    ModelItf.deleteObject(SDI, this.getId(), successCallback, failCallback, attemptNumber);
+                    ModelItf.deleteObject(SDI, self.getId(), successCallback, failCallback, attemptNumber);
                 };
 
                 var nbZone = self.zones().length;
