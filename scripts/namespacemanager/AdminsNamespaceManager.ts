@@ -141,7 +141,6 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('UpdateUserTrigger', function(data) { self.updateObjectAttribute(UserTrigger, data, "AnswerUpdateUserTrigger"); });
 		this.addListenerToSocket('UpdateTimelineRunner', function(data) { self.updateObjectAttribute(TimelineRunner, data, "AnswerUpdateTimelineRunner"); });
 		this.addListenerToSocket('UpdateOAuthKey', function(data) { self.updateObjectAttribute(OAuthKey, data, "AnswerUpdateOAuthKey"); });
-		this.addListenerToSocket('UpdateTeam', function(data) { self.updateObjectAttribute(Team, data, "AnswerUpdateTeam"); });
 		this.addListenerToSocket('UpdateProvider', function(data) { self.updateObjectAttribute(Provider, data, "AnswerUpdateProvider"); });
 
 
@@ -168,7 +167,6 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('DeleteUserTrigger', function(idUserTrigger) { self.deleteObjectFromDescription(UserTrigger, "userTriggerId", idUserTrigger, "AnswerDeleteUserTrigger"); });
 		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "AnswerDeleteSDI"); });
 		this.addListenerToSocket('DeleteTimelineRunner', function(idTimelineRunner) { self.deleteObjectFromDescription(TimelineRunner, "timelineRunnerId", idTimelineRunner, "AnswerDeleteTimelineRunner"); });
-		this.addListenerToSocket('DeleteTeam', function(idTeam) { self.deleteObjectFromDescription(Team, "teamId", idTeam, "AnswerDeleteTeam"); });
 		this.addListenerToSocket('DeleteProvider', function(idProvider) { self.deleteObjectFromDescription(Provider, "providerId", idProvider, "AnswerDeleteProvider"); });
 
 		// Custom requests
@@ -197,6 +195,8 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('CreateUser', function(data) { self.createUser(data); });
 		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteUser(idUser["userId"]); });
 		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
+		this.addListenerToSocket('DeleteTeam', function(idTeam) { self.deleteTeam(idTeam["teamId"]); });
+		this.addListenerToSocket('UpdateTeam', function(data) { self.updateTeam(data); });
 
 
 
@@ -1619,6 +1619,165 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 	}
 
 ////////////////////// End: Manage deleteUser //////////////////////
+
+////////////////////// Begin: Manage updateTeam //////////////////////
+
+	/**
+	 * Update Team from given data.
+	 * Save new Team in CMS.
+	 * Send the result on the channel "AnswerUpdateTeam"
+	 *
+	 * @method updateTeam
+	 * @param {JSONObject} teamDescription - Team description to update
+	 */
+	updateTeam(teamDescription : any) {
+		var self = this;
+
+		var fail = function(error) {
+			self.socket.emit("AnswerUpdateTeam", self.formatResponse(false, error));
+			Logger.debug("SocketId: " + self.socket.id + " - updateTeam : send done with fail status.");
+		};
+
+		var successTeamCompleteDesc = function(teamCompleteDesc) {
+			self.socket.emit("AnswerUpdateTeam", self.formatResponse(true, teamCompleteDesc));
+			Logger.debug("SocketId: " + self.socket.id + " - updateTeam : send done with success status.");
+		};
+
+		var insertDataToCms = function (url, team, successCallback) {
+			var args = {
+				"data": {
+					"name": team.name()
+				},
+				"headers": {
+					"Content-Type": "application/json",
+					"Authorization": self.socket.connectedUser.cmsAuthkey()
+				}
+			};
+
+			var req = RestClient.getClient().put(url, args, function (data, response) {
+				if (response.statusCode >= 200 && response.statusCode < 300) {
+					successCallback(data);
+				} else {
+					fail(new RestClientResponse(false, data));
+				}
+			});
+			req.on('error', function (msg) {
+				Logger.error("Error while connecting to CMS");
+				Logger.debug(msg.toString());
+
+				fail(new RestClientResponse(false, msg.toString()));
+			});
+		};
+
+		var updateTeam = function (url, team, successCallback) {
+			if(team.name() != "") {
+				var successCompleteTeam = function (teamCompleteDesc) {
+
+					var success = function (data) {
+						successCallback(teamCompleteDesc, data);
+					};
+
+					insertDataToCms(url, team, success);
+				};
+
+				team.toCompleteJSONObject(successCompleteTeam, fail);
+			} else {
+				team.toCompleteJSONObject(successTeamCompleteDesc, fail);
+			}
+		};
+
+		var successTeamRead = function(team : Team) {
+			if(team.cmsId() != "") {
+				var updateTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + team.cmsId();
+				var successUpdateCMSInfo = function (teamCompleteDesc, data) {
+					successTeamCompleteDesc(teamCompleteDesc);
+				};
+
+				updateTeam(updateTeamUrl, team, successUpdateCMSInfo);
+			} else {
+				var createTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath();
+				var successCreateCMSInfo = function (teamCompleteDesc, data) {
+					team.setCmsId(data.id);
+
+					var successUpdate = function() {
+						successTeamCompleteDesc(teamCompleteDesc);
+					};
+
+					team.update(successUpdate, fail);
+				};
+				updateTeam(createTeamUrl, team, successCreateCMSInfo);
+			}
+		};
+
+		var successUpdateTeam = function() {
+			Team.read(teamDescription.id, successTeamRead, fail);
+		};
+
+		ModelItf.updateAttribute(Team, teamDescription, successUpdateTeam, fail);
+	}
+
+////////////////////// End: Manage updateTeam //////////////////////
+
+////////////////////// Begin: Manage deleteTeam //////////////////////
+
+	/**
+	 * Delete Team from given id.
+	 * Delete Team in CMS.
+	 * Send the result on the channel "AnswerDeleteTeam"
+	 *
+	 * @method deleteTeam
+	 * @param {number} teamId - Team's Id to delete
+	 */
+	deleteTeam(teamId : number) {
+		var self = this;
+
+		var fail = function (error) {
+			self.socket.emit("AnswerDeleteTeam", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - DeleteTeam failed");
+			Logger.debug(error);
+		};
+
+		var successReadTeam = function (team : Team) {
+
+			var successDeleteTeam = function () {
+				self.socket.emit("AnswerDeleteTeam", self.formatResponse(true, teamId));
+			};
+
+			if(!!team.cmsId()) {
+				var deleteTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + team.cmsId();
+
+				var args = {
+					"data" : {
+
+					},
+					"headers": {
+						"Content-Type": "application/json",
+						"Authorization": self.socket.connectedUser.cmsAuthkey()
+					}
+				};
+
+				var req = RestClient.getClient().delete(deleteTeamUrl, args, function (data, response) {
+					if (response.statusCode >= 200 && response.statusCode < 300) {
+						team.delete(successDeleteTeam, fail);
+					} else {
+						fail(new RestClientResponse(false, data));
+					}
+				});
+				req.on('error', function (msg) {
+					Logger.error("Error while connecting to CMS");
+					Logger.debug(msg.toString());
+
+					fail(new RestClientResponse(false, msg.toString()));
+				});
+			} else {
+				team.delete(successDeleteTeam, fail);
+			}
+		};
+
+		Team.read(teamId, successReadTeam, fail);
+	}
+
+////////////////////// End: Manage deleteTeam //////////////////////
 
 ////////////////////// Begin: Manage RendererThemes of Renderer //////////////////////
 
