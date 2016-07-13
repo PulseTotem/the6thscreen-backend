@@ -704,7 +704,8 @@ class SDI extends ModelItf {
     }
 
     /**
-     * Delete in database the model with current id.
+     * Delete the SDI and all associated zone.
+     * You cannot delete a SDI containing at least one profil.
      *
      * @method delete
      * @param {Function} successCallback - The callback function when success.
@@ -712,7 +713,39 @@ class SDI extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(SDI, this.getId(), successCallback, failCallback, attemptNumber);
+
+        var self = this;
+
+        var successLoadAsso = function () {
+            if (self.profils().length > 0) {
+                failCallback("You cannot a SDI containing some profiles.");
+            } else {
+
+                var finalSuccess = function () {
+                    ModelItf.deleteObject(SDI, this.getId(), successCallback, failCallback, attemptNumber);
+                };
+
+                var nbZone = self.zones().length;
+
+                var successDeleteZone = function () {
+                    nbZone--;
+
+                    if (nbZone == 0) {
+                        finalSuccess();
+                    }
+                };
+
+                if (nbZone > 0) {
+                    self.zones().forEach(function (zone : Zone) {
+                        zone.delete(successDeleteZone, failCallback);
+                    });
+                } else {
+                    finalSuccess();
+                }
+            }
+        };
+
+        self.loadAssociations(successLoadAsso, failCallback);
     }
 
     /**

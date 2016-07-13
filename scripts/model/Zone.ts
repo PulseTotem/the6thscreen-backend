@@ -824,7 +824,6 @@ class Zone extends ModelItf {
     /**
      * Delete in database the Zone with current id.
      * This method also deletes all the containing CallTypes of the Zone.
-     * If the Zone contains some ZoneContents it fails with a message.
      *
      * @method delete
      * @param {Function} successCallback - The callback function when success.
