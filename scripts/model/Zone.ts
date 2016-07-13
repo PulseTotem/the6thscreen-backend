@@ -594,19 +594,28 @@ class Zone extends ModelItf {
 		var successCheckId : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 
-				var success:Function = function () {
-					self._complete = (!!self.behaviour() && self.behaviour().isComplete());
-					successCallback();
+				var successLoad:Function = function () {
+					if (self._behaviour_loaded && self._callTypes_loaded) {
+
+						for (var i = 0; i < self._callTypes.length; i++) {
+							var callType = self._callTypes[i];
+
+							self._complete = self._complete && (!!callType && callType.isComplete());
+						}
+
+						self._complete = self._complete && (!!self.behaviour() && self.behaviour().isComplete());
+						successCallback();
+					}
 				};
 
 				var fail:Function = function (error) {
 					failCallback(error);
 				};
 
-				if (!self._behaviour_loaded) {
-					self.loadBehaviour(success, fail);
+				if (!self._behaviour_loaded || !self._callTypes_loaded) {
+					self.loadAssociations(successLoad, fail);
 				} else {
-					success();
+					successLoad();
 				}
 
 			} else {

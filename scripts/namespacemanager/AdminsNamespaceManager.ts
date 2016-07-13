@@ -1976,7 +1976,31 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 		var checkSDI = function () {
 			Logger.debug("Check SDI");
-			self.checkModelData(SDI, finalSuccess, fail);
+			var analyzeSDI = function (sdis : Array<SDI>) {
+				var nbIncompleteSDI = 0;
+
+				for (var i = 0; i < sdis.length; i++) {
+					var sdi = sdis[i];
+
+					if (!sdi.isComplete()) {
+						nbIncompleteSDI++;
+					}
+				}
+
+				if (nbIncompleteSDI > 0) {
+					var msgToPush = {
+						'model': 'SDI',
+						'msg': "Several SDI ("+nbIncompleteSDI+") are incomplete! " +
+							   "It is certainly du to the propagation of incomplete element (e.g. zone)" +
+						       " SDI completeness is determined by assigned name, assigned team, and completeness of all contained zones and profils."
+					};
+					result.push(msgToPush);
+				}
+
+				finalSuccess();
+			};
+
+			self.checkModelData(SDI, analyzeSDI, fail);
 		};
 
 		var checkProfil = function () {
@@ -2016,7 +2040,31 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 		var checkZone = function () {
 			Logger.debug("Check zone");
-			self.checkModelData(Zone, checkParamValue, fail);
+			var analyzeZone = function (zones : Array<Zone>) {
+				var nbIncompleteZone = 0;
+
+				for (var i = 0; i < zones.length; i++) {
+					var zone = zones[i];
+
+					if (!zone.isComplete()) {
+						nbIncompleteZone++;
+					}
+				}
+
+				if (nbIncompleteZone > 0) {
+					var msgToPush = {
+						'model': 'zone',
+						'msg': "Several zones ("+nbIncompleteZone+") are incomplete! " +
+						       "It is certainly du to the propagation of incomplete element (e.g. callTypes)" +
+							   " Zone completeness is determined by completeness of behaviour and of all callTypes contained in the zone."
+					};
+					result.push(msgToPush);
+				}
+
+				checkParamValue();
+			};
+
+			self.checkModelData(Zone, analyzeZone, fail);
 		};
 
 		var checkCallType = function () {
@@ -2033,7 +2081,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 				}
 
 				if (nbIncompleteCallTypes > 0) {
-					result.push({'model':'callType','msg':"Several ("+nbIncompleteCallTypes+") are incomplete! It is certainly du to an incomplete migration in database (e.g. rendererTheme not set)"});
+					result.push({'model':'callType','msg':"Several calltypes ("+nbIncompleteCallTypes+") are incomplete! It is certainly du to an incomplete migration in database (e.g. rendererTheme not set)"});
 				}
 
 				checkZone();

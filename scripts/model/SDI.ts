@@ -478,11 +478,36 @@ class SDI extends ModelItf {
 	checkCompleteness(successCallback : Function, failCallback : Function) : void {
 		var self = this;
 
-		var success : Function = function () {
-			self._complete = (self._complete && !!self.name());
-			successCallback();
-		}
-		super.checkCompleteness(success, failCallback);
+		var successCheckSuper : Function = function () {
+            if (self.isComplete() && !!self.name()) {
+                var successLoadAsso = function () {
+                    if (self._profils_loaded && self._team_loaded && self._theme_loaded && self._zones_loaded) {
+                        for (var i = 0; i < self.profils().length; i++) {
+                            var profil : Profil = self.profils()[i];
+                            self._complete = self._complete && (!!profil && profil.isComplete());
+                        }
+
+                        for (var i = 0; i < self.zones().length; i++) {
+                            var zone : Zone = self.zones()[i];
+                            self._complete = self._complete && (!!zone && zone.isComplete());
+                        }
+
+                        self._complete = self._complete && (!!self.team() && self.team().isComplete()) && (!!self.theme() && self.theme().isComplete());
+                        successCallback();
+                    }
+                };
+
+                if (!self._profils_loaded || !self._team_loaded || !self._zones_loaded || !self._theme_loaded) {
+                    self.loadAssociations(successLoadAsso, failCallback);
+                } else {
+                    successLoadAsso();
+                }
+            } else {
+                self._complete = false;
+                successCallback();
+            }
+		};
+		super.checkCompleteness(successCheckSuper, failCallback);
 	}
 
     /**
