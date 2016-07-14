@@ -1464,48 +1464,51 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with success status.");
 		};
 
-		var insertDataToCms = function (url, user, successCallback) {
-			var args = {
-				"data": {
-					"username": user.username(),
-					"email": user.email()
-				},
-				"headers": {
-					"Content-Type": "application/json",
-					"Authorization": self.socket.connectedUser.cmsAuthkey()
-				}
-			};
+		var successUserRead = function(user : User) {
 
-			var req = RestClient.getClient().put(url, args, function (data, response) {
-				if (response.statusCode >= 200 && response.statusCode < 300) {
-					successCallback(data);
-				} else {
-					fail(new RestClientResponse(false, data));
-				}
-			});
-			req.on('error', function (msg) {
-				Logger.error("Error while connecting to CMS");
-				Logger.debug(msg.toString());
-
-				fail(new RestClientResponse(false, msg.toString()));
-			});
-		};
-
-		var updateUser = function (url, user, successCallback) {
 			if(user.username() != "" && user.email() != "") {
 				var successCompleteUser = function (userCompleteDesc) {
 
-					var success = function (data) {
-						successCallback(userCompleteDesc, data);
-					};
-
 					var successUpdateTeamName = function () {
-						insertDataToCms(url, user, success);
+
+						var data = {
+							"username": user.username(),
+							"email": user.email()
+						};
+
+						if(user.cmsId() != "" && user.cmsAuthkey() != "") {
+
+							var successUpdateCMS = function() {
+								successUserCompleteDesc(userCompleteDesc);
+							};
+
+							var updateUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + userCompleteDesc.cmsId;
+							RestClient.put(updateUserUrl, data, successUpdateCMS, fail, self.socket.connectedUser.cmsAuthkey());
+						} else {
+							var successCreateCMS = function(createResponse : RestClientResponse) {
+								var data = createResponse.data();
+								user.setCmsId(data.id);
+								user.setCmsAuthkey(data.authkey);
+
+								var successUpdate = function() {
+									userCompleteDesc.cmsId = data.id;
+									userCompleteDesc.cmsAuthkey = data.authkey;
+
+									successUserCompleteDesc(userCompleteDesc);
+								};
+
+								user.update(successUpdate, fail);
+							};
+
+							var createUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath();
+							RestClient.post(createUserUrl, data, successCreateCMS, fail, self.socket.connectedUser.cmsAuthkey());
+						}
 					};
 
 					var team = user.defaultTeam();
 					if (team == null) {
 						Logger.error("The following error has no default team: "+user.username()+" ("+user.getId()+")");
+						fail("The following error has no default team: "+user.username()+" ("+user.getId()+")");
 					} else {
 						var newTeamName = user.username()+"Team";
 						team.setName(newTeamName);
@@ -1516,36 +1519,6 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 				user.toCompleteJSONObject(successCompleteUser, fail);
 			} else {
 				user.toCompleteJSONObject(successUserCompleteDesc, fail);
-			}
-		};
-
-		var successUserRead = function(user : User) {
-
-			if(user.cmsId() != "" && user.cmsAuthkey() != "") {
-				var updateUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
-				var successUpdateCMSInfo = function (userCompleteDesc, data) {
-					successUserCompleteDesc(userCompleteDesc);
-				};
-
-				updateUser(updateUserUrl, user, successUpdateCMSInfo);
-			} else {
-				var createUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath();
-				var successCreateCMSInfo = function (userCompleteDesc, data) {
-					Logger.debug(data.id);
-					Logger.debug(data.authkey);
-
-					user.setCmsId(data.id);
-					user.setCmsAuthkey(data.authkey);
-
-					var successUpdate = function() {
-						successUserCompleteDesc(userCompleteDesc);
-					};
-
-					Logger.debug(user.toJSONObject());
-
-					user.update(successUpdate, fail);
-				};
-				updateUser(createUserUrl, user, successCreateCMSInfo);
 			}
 		};
 
@@ -1575,11 +1548,10 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		var fail = function (error) {
 			self.socket.emit("AnswerDeleteUser", self.formatResponse(false, error));
 			Logger.error("SocketId: "+self.socket.id+" - DeleteUser failed");
-			Logger.debug(error);
 		};
 
 		var successReadUser = function (user : User) {
-
+			
 			var successDeleteUser = function () {
 				self.socket.emit("AnswerDeleteUser", self.formatResponse(true, userId));
 			};
@@ -1587,29 +1559,11 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 			if(!!user.cmsId()) {
 				var deleteUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
 
-				var args = {
-					"data" : {
-
-					},
-					"headers": {
-						"Content-Type": "application/json",
-						"Authorization": self.socket.connectedUser.cmsAuthkey()
-					}
+				var successDeleteCMSUser = function() {
+					user.delete(successDeleteUser, fail);
 				};
 
-				var req = RestClient.getClient().delete(deleteUserUrl, args, function (data, response) {
-					if (response.statusCode >= 200 && response.statusCode < 300) {
-						user.delete(successDeleteUser, fail);
-					} else {
-						fail(new RestClientResponse(false, data));
-					}
-				});
-				req.on('error', function (msg) {
-					Logger.error("Error while connecting to CMS");
-					Logger.debug(msg.toString());
-
-					fail(new RestClientResponse(false, msg.toString()));
-				});
+				RestClient.delete(deleteUserUrl, successDeleteCMSUser, fail, self.socket.connectedUser.cmsAuthkey());
 			} else {
 				user.delete(successDeleteUser, fail);
 			}
@@ -1635,7 +1589,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 		var fail = function(error) {
 			self.socket.emit("AnswerUpdateTeam", self.formatResponse(false, error));
-			Logger.debug("SocketId: " + self.socket.id + " - updateTeam : send done with fail status.");
+			Logger.error("SocketId: " + self.socket.id + " - updateTeam : send done with fail status.");
 		};
 
 		var successTeamCompleteDesc = function(teamCompleteDesc) {
@@ -1654,6 +1608,8 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 				}
 			};
 
+			Logger.debug("On fait l'appel au CMS");
+
 			var req = RestClient.getClient().put(url, args, function (data, response) {
 				if (response.statusCode >= 200 && response.statusCode < 300) {
 					successCallback(data);
@@ -1670,7 +1626,9 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		};
 
 		var updateTeam = function (url, team, successCallback) {
+			Logger.debug("Par ici :" + url);
 			if(team.name() != "") {
+				Logger.debug("c'est bon on passe");
 				var successCompleteTeam = function (teamCompleteDesc) {
 
 					var success = function (data) {
@@ -1734,7 +1692,6 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		var fail = function (error) {
 			self.socket.emit("AnswerDeleteTeam", self.formatResponse(false, error));
 			Logger.error("SocketId: "+self.socket.id+" - DeleteTeam failed");
-			Logger.debug(error);
 		};
 
 		var successReadTeam = function (team : Team) {
@@ -1906,37 +1863,41 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 			Logger.debug(error);
 		};
 
+		var user = User.fromJSONObject(dataUser);
+
 		var successCreateUser = function (userData) {
 
-			var user : User = User.fromJSONObject(userData);
+			var successUpdateUser = function() {
+				var successCreateTeam = function (teamData) {
+					var team : Team = Team.fromJSONObject(teamData);
+					var successLinkDefaultTeam = function () {
+						var successLinkOwner = function () {
+							var successAddUser = function () {
+								var successCompleteJSONObject = function (data) {
+									self.socket.emit("AnswerCreateUser", self.formatResponse(true, data));
+								};
 
-			var successCreateTeam = function (teamData) {
-
-				var team : Team = Team.fromJSONObject(teamData);
-				var successLinkDefaultTeam = function () {
-					var successLinkOwner = function () {
-						var successAddUser = function () {
-							var successCompleteJSONObject = function (data) {
-								self.socket.emit("AnswerCreateUser", self.formatResponse(true, data));
+								user.toCompleteJSONObject(successCompleteJSONObject, fail);
 							};
 
-							user.toCompleteJSONObject(successCompleteJSONObject, fail);
+							team.addUser(user.getId(), successAddUser, fail);
 						};
 
-						team.addUser(user.getId(), successAddUser, fail);
+						team.linkOwner(user.getId(), successLinkOwner, fail);
 					};
 
-					team.linkOwner(user.getId(), successLinkOwner, fail);
+					user.linkDefaultTeam(team.getId(), successLinkDefaultTeam, fail);
 				};
 
-				user.linkDefaultTeam(team.getId(), successLinkDefaultTeam, fail);
+				var team = new Team(user.username()+" team");
+				team.create(successCreateTeam, fail);
 			};
 
-			var team = new Team(user.username()+" team");
-			team.create(successCreateTeam, fail);
+			user.setUsername("User" + user.getId());
+			user.setEmail("User" + user.getId() + "@pulsetotem.fr");
+			user.update(successUpdateUser, fail);
 		};
 
-		var user = User.fromJSONObject(dataUser);
 		user.create(successCreateUser, fail);
 	}
 ////////////////////// END: Manage creating user and her default team //////////////////////
