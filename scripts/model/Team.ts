@@ -466,9 +466,36 @@ class Team extends ModelItf {
      * @param {number} userID The id of the User to add inside the Team. It cannot be a null value.
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
+	 * @param {string} cmsAuthKey - The callback function when fail.
      */
-    addUser(userID : number, successCallback : Function, failCallback : Function) {
-        this.associateObject(Team, User, userID, successCallback, failCallback);
+    addUser(userID : number, successCallback : Function, failCallback : Function, cmsAuthKey : string = "") {
+		var self = this;
+
+		var successAssociate = function(resultAssociation) {
+
+			var successReadUser = function(user : User) {
+
+				var successAddUser = function() {
+					successCallback(resultAssociation);
+				};
+
+				if(user.cmsId() != "" && self.cmsId() != "" && cmsAuthKey != "") {
+					var addUserToTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + self.cmsId() + '/' + BackendConfig.getCMSUsersPath() + user.cmsId();
+
+					Logger.debug(addUserToTeamUrl);
+					
+
+					var data = {};
+
+					RestClient.put(addUserToTeamUrl, data, successAddUser, failCallback, cmsAuthKey);
+				} else {
+					successAddUser();
+				}
+			};
+
+			User.read(userID, successReadUser, failCallback);
+		};
+        this.associateObject(Team, User, userID, successAssociate, failCallback);
     }
 
     /**
@@ -479,9 +506,32 @@ class Team extends ModelItf {
      * @param {number} userID The id of the User to remove from that Team
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
+	 * @param {string} cmsAuthKey - The callback function when fail.
      */
-    removeUser(userID : number, successCallback : Function, failCallback : Function) {
-        this.deleteObjectAssociation(Team, User, userID, successCallback, failCallback);
+    removeUser(userID : number, successCallback : Function, failCallback : Function, cmsAuthKey : string = "") {
+		var self = this;
+
+		var successDeleteAssociate = function(resultAssociation) {
+
+			var successReadUser = function(user : User) {
+
+				var successRemoveUser = function() {
+					successCallback(resultAssociation);
+				};
+
+				if(user.cmsId() != "" && self.cmsId() != "" && cmsAuthKey != "") {
+					var deleteUserToTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + self.cmsId() + '/' + BackendConfig.getCMSUsersPath() + user.cmsId();
+
+					RestClient.delete(deleteUserToTeamUrl, successRemoveUser, failCallback, cmsAuthKey);
+				} else {
+					successRemoveUser();
+				}
+			};
+
+			User.read(userID, successReadUser, failCallback);
+		};
+
+        this.deleteObjectAssociation(Team, User, userID, successDeleteAssociate, failCallback);
     }
 
     /**
