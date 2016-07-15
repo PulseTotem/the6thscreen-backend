@@ -308,7 +308,7 @@ describe('User', function() {
 	describe('#addTeam', function() {
 		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", "", "","", false, null, 52);
-			var pv = new Team("mavaleur", 12);
+			var pv = new Team("mavaleur", "", 12);
 
 			var response1 : any = [];
 
@@ -352,7 +352,7 @@ describe('User', function() {
 	describe('#removeTeam', function() {
 		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", "", "","", false, null, 52);
-			var pv = new Team("mavaleur", 12);
+			var pv = new Team("mavaleur", "", 12);
 
 			var response1 : any = [
 				{
@@ -402,7 +402,7 @@ describe('User', function() {
 	describe('#linkDefaultTeam', function() {
 		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", "", "","", false, null, 52);
-			var pv = new Team("mavaleur", 12);
+			var pv = new Team("mavaleur", "", 12);
 			var linkName = "DefaultTeams";
 
 			var response1 : any = [];
@@ -447,7 +447,7 @@ describe('User', function() {
 	describe('#unlinkDefaultTeam', function() {
 		it('should call the right request', function(done) {
 			var c = new User("toto", "bla", "", "","", false, null, 52);
-			var pv = new Team("mavaleur", 12);
+			var pv = new Team("mavaleur", "", 12);
 			var linkName = "DefaultTeams";
 
 			var response1 : any =

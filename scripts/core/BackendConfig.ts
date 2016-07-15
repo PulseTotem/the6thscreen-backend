@@ -208,6 +208,10 @@ class BackendConfig {
         return "users/"
     }
 
+	static getCMSTeamsPath() : string {
+		return "teams/"
+	}
+
     static getStatsHost() : string {
         BackendConfig.retrieveConfigurationInformation();
         return BackendConfig.backendConfig.stats.host;
