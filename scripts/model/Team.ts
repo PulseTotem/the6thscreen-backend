@@ -482,8 +482,6 @@ class Team extends ModelItf {
 				if(user.cmsId() != "" && self.cmsId() != "" && cmsAuthKey != "") {
 					var addUserToTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + self.cmsId() + '/' + BackendConfig.getCMSUsersPath() + user.cmsId();
 
-					Logger.debug(addUserToTeamUrl);
-					
 
 					var data = {};
 

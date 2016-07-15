@@ -1699,8 +1699,8 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		var self = this;
 
 		var fail = function(error) {
-			failCB(error);
 			Logger.error("SocketId: " + self.socket.id + " - updateTeamObject : fail.");
+			failCB(error);
 		};
 
 		var successTeamRead = function(team : Team) {
