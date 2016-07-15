@@ -1,15 +1,16 @@
 {
-	"name": "pulsetotem-backend",
-	"version": "3.2.1",
-	"dependencies": {
-		"jsonwebtoken": "3.2.2",
-		"nodemailer": "<=1.8.0",
-		"socketio-jwt": "2.3.5"
-	},
-	"devDependencies": {
-		"grunt-contrib-watch": "0.6.1",
-		"grunt-express-server": "0.4.19",
-		"nock": "2.9.1",
-		"grunt-env": "0.4.4"
-	}
+  "name": "pulsetotem-backend",
+  "version": "3.2.2",
+  "dependencies": {
+    "jsonwebtoken": "3.2.2",
+    "nodemailer": "<=1.8.0",
+    "socketio-jwt": "2.3.5"
+  },
+  "devDependencies": {
+    "grunt-contrib-watch": "0.6.1",
+    "grunt-express-server": "0.4.19",
+    "nock": "2.9.1",
+    "grunt-env": "0.4.4",
+    "grunt-bumpup": "~0.6.3"
+  }
 }
