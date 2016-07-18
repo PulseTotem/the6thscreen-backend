@@ -449,6 +449,7 @@ class SDI extends ModelItf {
 		this._profils_loaded = false;
 		this._zones_loaded = false;
         this._theme_loaded = false;
+        this._team_loaded = false;
         this._origineSDI_loaded = false;
 	}
 
@@ -903,17 +904,22 @@ class SDI extends ModelItf {
                                                     counterCTs++;
                                                     var counterCTCall = 0;
 
-                                                    if (counterCTs >= nbCTs) {
-                                                        for (var i = 0; i < nbCTs; i++) {
-                                                            var callType = clonedZone.callTypes()[i];
-                                                            var callTypeOrigine = callType.origineCallType();
+                                                    if (nbCTs == 0) {
+                                                        successLoadCall();
+                                                    } else {
+                                                        if (counterCTs >= nbCTs) {
+                                                            for (var i = 0; i < nbCTs; i++) {
+                                                                var callType = clonedZone.callTypes()[i];
+                                                                var callTypeOrigine = callType.origineCallType();
 
-                                                            Logger.debug("Obtained callType : " + callType.getId());
-                                                            Logger.debug("Obtained origine : " + JSON.stringify(callTypeOrigine));
+                                                                Logger.debug("Obtained callType : " + callType.getId());
+                                                                Logger.debug("Obtained origine : " + JSON.stringify(callTypeOrigine));
 
-                                                            callTypeOrigine.loadCalls(successLoadCall, failCallback);
+                                                                callTypeOrigine.loadCalls(successLoadCall, failCallback);
+                                                            }
                                                         }
                                                     }
+
 
                                                 };
 
@@ -928,14 +934,19 @@ class SDI extends ModelItf {
 
                                                 Logger.debug("NBCTS : " + nbCTs);
 
-                                                for (var i = 0; i < nbCTs; i++) {
-                                                    Logger.debug("Loop loadOrigine :" + i);
-                                                    var ct = clonedZone.callTypes()[i];
-                                                    Logger.debug("Clone : load origine for callType : " + ct.getId());
-                                                    ct.loadOrigineCallType(successLoadOrigineCT, failCallback);
+                                                if (nbCTs == 0) {
+                                                    successLoadOrigineCT();
+                                                } else {
+                                                    for (var i = 0; i < nbCTs; i++) {
+                                                        Logger.debug("Loop loadOrigine :" + i);
+                                                        var ct = clonedZone.callTypes()[i];
+                                                        Logger.debug("Clone : load origine for callType : " + ct.getId());
+                                                        ct.loadOrigineCallType(successLoadOrigineCT, failCallback);
+                                                    }
                                                 }
                                             };
 
+                                            clonedZone.desynchronize();
                                             clonedZone.loadCallTypes(successLoadCT, failCallback);
                                         };
 

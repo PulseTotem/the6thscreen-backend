@@ -1437,6 +1437,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 					self.socket.emit("AnswerCloneSDI", self.formatResponse(true, data));
 				};
 
+				clonedSDI.desynchronize();
 				clonedSDI.toCompleteJSONObject(successCompleteJSONObject, fail);
 			};
 
