@@ -253,7 +253,6 @@ class ParamValue extends ModelItf {
 		var self = this;
 
 		var success : Function = function () {
-            Logger.debug("Success super check complete ParamValue");
 			if (self.isComplete() && self.value() != null) {
 				var successLoad:Function = function () {
 					self._complete = (self.paramType() !== null && self.paramType().isComplete());

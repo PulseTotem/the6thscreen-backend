@@ -24,7 +24,6 @@
 /// <reference path="../model/Team.ts" />
 /// <reference path="../model/Provider.ts" />
 
-
 class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 	/**
@@ -1904,63 +1903,48 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 ////////////////////// Begin: Check all Data of DB //////////////////////
 
 	private checkModelData(model : any, checkRelations : Function, fail, result : Array<any>) {
+		var nbElementsToUpdate = 0;
+
 		var finalSuccess = function (elements) {
-			setTimeout(function() {
-				checkRelations(elements);
-			}, 1000);
+			if (nbElementsToUpdate > 0) {
+				result.push({
+					'model':model.getTableName(),
+					'msg': 'Several instances of '+model.getTableName()+' ('+nbElementsToUpdate+') change their value of complete. Maybe you should change the way this value is updated.'
+				});
+			}
+			checkRelations(elements);
 		};
 
 		var successAllElements = function (elements : Array<any>) {
-			var completeArray = {};
+			if (elements.length > 0) {
+				var testElement = function (index) {
+					if (index < elements.length) {
+						var element = elements[index];
 
-			var nbElements = elements.length;
+						var elementComplete = element.isComplete();
 
-			var successCheckAllCompleteness = function () {
+						var finalCheckElement = function () {
+							testElement(index+1);
+						};
 
-				var counterElements = elements.length;
+						var successCheckCompleteness = function () {
+							var newCompleteValue = element.isComplete();
+							if (elementComplete != newCompleteValue) {
+								nbElementsToUpdate++;
+								element.update(finalCheckElement, fail);
+							} else {
+								finalCheckElement();
+							}
+						};
 
-				var nbElementsToUpdate = 0;
-
-				var successUpdate = function () {
-					counterElements--;
-
-					if (counterElements == 0) {
-						if (nbElementsToUpdate > 0) {
-							result.push({
-								'model':model.getTableName(),
-								'msg': 'Several instances of '+model.getTableName()+' ('+nbElementsToUpdate+') change their value of complete. Maybe you should change the way this value is updated.'
-							});
-						}
+						element.checkCompleteness(successCheckCompleteness, fail);
+					} else {
 						finalSuccess(elements);
 					}
+
 				};
 
-				elements.forEach(function (element) {
-					var oldCompleteValue = completeArray[element.getId()];
-
-					if (element.isComplete() != oldCompleteValue) {
-						nbElementsToUpdate++;
-						element.update(successUpdate, fail);
-					} else {
-						successUpdate();
-					}
-				});
-			};
-
-
-			var successCheckCompleteness = function () {
-				nbElements--;
-
-				if (nbElements == 0) {
-					successCheckAllCompleteness();
-				}
-			};
-
-			if (elements.length > 0) {
-				elements.forEach(function (element) {
-					completeArray[element.getId()] = element.isComplete();
-					element.checkCompleteness(successCheckCompleteness, fail);
-				});
+				testElement(0);
 			} else {
 				finalSuccess(elements);
 			}

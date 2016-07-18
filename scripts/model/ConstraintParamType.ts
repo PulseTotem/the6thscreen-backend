@@ -149,7 +149,6 @@ class ConstraintParamType extends ModelItf {
         if(! this._type_loaded) {
             var self = this;
             var success : Function = function(type) {
-	            Logger.debug("Obtained type : "+JSON.stringify(type));
                 if(!!type) {
                     self._type = type;
                 }
@@ -241,7 +240,6 @@ class ConstraintParamType extends ModelItf {
 	checkCompleteness(successCallback : Function, failCallback : Function) : void {
 
 		var self = this;
-		Logger.debug("Appel checkCompleteness");
 		var success : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 
