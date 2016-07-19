@@ -451,9 +451,10 @@ class RelativeTimeline extends ModelItf {
 					if (self._relativeEvents_loaded && self._systemTrigger_loaded && self._timelineRunner_loaded) {
 						self._complete = (self._relativeEvents.length > 0) && self._systemTrigger != null && self._timelineRunner != null && self._systemTrigger.isComplete() && self._timelineRunner.isComplete();
 
-						self._relativeEvents.forEach(function (relativeEvent : RelativeEvent) {
+						for (var i = 0; i < self.relativeEvents().length; i++) {
+							var relativeEvent : RelativeEvent = self.relativeEvents()[i];
 							self._complete = self._complete && relativeEvent.isComplete();
-						});
+						}
 						successCallback();
 					}
 				};

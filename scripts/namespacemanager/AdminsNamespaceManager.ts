@@ -206,7 +206,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
 		this.addListenerToSocket('ResetUserPassword', function (passwordDescription) { self.resetUserPassword(passwordDescription); });
 
-		this.addListenerToSocket('CloneProfil', function(data) { self.cloneProfil(data); });
+		this.addListenerToSocket('CloneZoneContent', function(data) { self.cloneZoneContent(data); });
 		this.addListenerToSocket('CloneSDI', function(data) { self.cloneSDI(data); });
 		this.addListenerToSocket('CloneRelativeEventAndLinkTimeline', function (data) { self.cloneRelativeEventAndLinkTimeline(data); });
 
@@ -1388,32 +1388,52 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 ////////////////////// END: Manage resetUserPassword //////////////////////
 
-////////////////////// Begin: Manage cloneProfil //////////////////////
+////////////////////// Begin: Manage cloneZoneContent //////////////////////
 
-	cloneProfil(profilDescription : any) {
-		// profilDescription : { 'profilId': number }
-		var profilId = profilDescription.profilId;
+	cloneZoneContent(zoneContentDescription : any) {
+		// zoneContentDescription : { 'zoneContentId': number }
+		var zoneContentId = zoneContentDescription.zoneContentId;
 		var self = this;
 
 		var fail : Function = function (error) {
-			Logger.error("Error when reading the profil "+profilId);
+			Logger.error("Error when reading the zoneContent "+zoneContentId);
 			Logger.error(error);
-			self.socket.emit("AnswerCloneProfil", self.formatResponse(false, error));
+			self.socket.emit("AnswerCloneZoneContent", self.formatResponse(false, error));
 		};
 
-		var successReadProfil = function (profil : Profil) {
-			var successCloneProfil = function (clonedProfil : Profil) {
-				Logger.debug("Answer to admin for cloning profil");
-				self.socket.emit("AnswerCloneProfil", self.formatResponse(true, clonedProfil.toJSONObject()));
+		var successReadZoneContent = function (zoneContent : ZoneContent) {
+			var successCloneZoneContent = function (clonedZoneContent : ZoneContent) {
+				var successLoadZone = function () {
+					var successLinkZone = function () {
+						var successCheckComplete = function () {
+							var successUpdateClone = function () {
+								var successCompleteJSONObject = function (completeData) {
+									self.socket.emit("AnswerCloneZoneContent", self.formatResponse(true, completeData));
+								};
+
+								clonedZoneContent.toCompleteJSONObject(successCompleteJSONObject, fail);
+							};
+
+							clonedZoneContent.update(successUpdateClone, fail);
+						};
+
+						clonedZoneContent.setName(clonedZoneContent.name()+"clone");
+						clonedZoneContent.checkCompleteness(successCheckComplete, fail);
+					};
+
+					clonedZoneContent.linkZone(zoneContent.zone().getId(), successLinkZone, fail);
+				};
+
+				zoneContent.loadZone(successLoadZone, fail);
 			};
 
-			profil.clone(successCloneProfil, fail, null);
+			zoneContent.clone(successCloneZoneContent, fail, null);
 		};
 
-		Profil.read(profilId, successReadProfil, fail);
+		ZoneContent.read(zoneContentId, successReadZoneContent, fail);
 	}
 
-////////////////////// END: Manage cloneProfil //////////////////////
+////////////////////// END: Manage cloneZoneContent //////////////////////
 
 ////////////////////// Begin: Manage cloneSDI //////////////////////
 
