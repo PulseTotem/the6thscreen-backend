@@ -685,6 +685,18 @@ class Team extends ModelItf {
         return this.allObjects(Team, successCallback, failCallback, attemptNumber);
     }
 
+	/**
+	 * Find One Team by name.
+	 *
+	 * @method findOneByName
+	 * @param {string} teamname - The Team's name
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	static findOneByName(teamname : string, successCallback : Function, failCallback : Function) {
+		return this.findOneBy(Team, "name", teamname, successCallback, failCallback);
+	}
+
     /**
      * Return a Team instance from a JSON string.
      *

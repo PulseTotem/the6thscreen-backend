@@ -22,6 +22,7 @@ class ManagersNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('ManageTeams', function() { self.manageExistingTeams(); });
 
 		this.addListenerToSocket('RetrieveUserByUsername', function(data) { self.retrieveUserByUsername(data); });
+		this.addListenerToSocket('RetrieveTeamByName', function(data) { self.retrieveTeamByName(data); });
 	}
 
 ////////////////////// Begin: Manage retrieveUserByUsername //////////////////////
@@ -43,7 +44,7 @@ class ManagersNamespaceManager extends BackendAuthNamespaceManager {
 
 		var successUserCompleteDesc = function(userCompleteDesc) {
 			self.socket.emit("AnswerRetrieveUserByUsername", self.formatResponse(true, userCompleteDesc));
-			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with success status.");
+			Logger.debug("SocketId: " + self.socket.id + " - retrieveUserByUsername : send done with success status.");
 		};
 
 		var successFind = function(user : User) {
@@ -56,6 +57,39 @@ class ManagersNamespaceManager extends BackendAuthNamespaceManager {
 	}
 
 ////////////////////// End: Manage retrieveUserByUsername //////////////////////
+
+////////////////////// Begin: Manage retrieveTeamByName //////////////////////
+
+	/**
+	 * Retrieve a Team from given data.
+	 * Send the result on the channel "AnswerRetrieveTeamByName"
+	 *
+	 * @method retrieveTeamByName
+	 * @param {JSONObject} teamDescription - Team description to retrieve
+	 */
+	retrieveTeamByName(teamDescription : any) {
+		var self = this;
+
+		var fail = function(error) {
+			self.socket.emit("AnswerRetrieveTeamByName", self.formatResponse(false, error));
+			Logger.error("SocketId: " + self.socket.id + " - retrieveTeamByName : send done with fail status.");
+		};
+
+		var successTeamCompleteDesc = function(teamCompleteDesc) {
+			self.socket.emit("AnswerRetrieveTeamByName", self.formatResponse(true, teamCompleteDesc));
+			Logger.debug("SocketId: " + self.socket.id + " - retrieveTeamByName : send done with success status.");
+		};
+
+		var successFind = function(team : Team) {
+			team.toCompleteJSONObject(successTeamCompleteDesc, fail);
+		};
+
+		var teamname : string = teamDescription.name;
+
+		Team.findOneByName(teamname, successFind, fail);
+	}
+
+////////////////////// End: Manage retrieveTeamByName //////////////////////
 
 
 
