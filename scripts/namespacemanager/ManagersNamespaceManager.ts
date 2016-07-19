@@ -20,7 +20,45 @@ class ManagersNamespaceManager extends BackendAuthNamespaceManager {
 		var self = this;
 
 		this.addListenerToSocket('ManageTeams', function() { self.manageExistingTeams(); });
+
+		this.addListenerToSocket('RetrieveUserByUsername', function(data) { self.retrieveUserByUsername(data); });
 	}
+
+////////////////////// Begin: Manage retrieveUserByUsername //////////////////////
+
+	/**
+	 * Retrieve a User from given data.
+	 * Send the result on the channel "AnswerRetrieveUserByUsername"
+	 *
+	 * @method retrieveUserByUsername
+	 * @param {JSONObject} userDescription - User description to retrieve
+	 */
+	retrieveUserByUsername(userDescription : any) {
+		var self = this;
+
+		var fail = function(error) {
+			self.socket.emit("AnswerRetrieveUserByUsername", self.formatResponse(false, error));
+			Logger.error("SocketId: " + self.socket.id + " - retrieveUserByUsername : send done with fail status.");
+		};
+
+		var successUserCompleteDesc = function(userCompleteDesc) {
+			self.socket.emit("AnswerRetrieveUserByUsername", self.formatResponse(true, userCompleteDesc));
+			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with success status.");
+		};
+
+		var successFind = function(user : User) {
+			user.toCompleteJSONObject(successUserCompleteDesc, fail);
+		};
+
+		var username : string = userDescription.username;
+
+		User.findOneByUsername(username, successFind, fail);
+	}
+
+////////////////////// End: Manage retrieveUserByUsername //////////////////////
+
+
+
 
 
 	/**
