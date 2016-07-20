@@ -866,6 +866,7 @@ class SDI extends ModelItf {
                                                                         counterProfil++;
 
                                                                         if (counterProfil >= profilSize) {
+                                                                            clonedSDI.desynchronize();
                                                                             clonedSDI.checkCompleteness(successCheckComplete, failCallback);
                                                                         }
                                                                     };

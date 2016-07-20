@@ -471,21 +471,23 @@ class Call extends ModelItf {
 		var self = this;
 		var success = function () {
 			if (self.isComplete() && !!self.name()) {
-				var successLoad : Function = function () {
-					if (self._call_type_loaded) {
-						self._complete = (!!self.callType() && self.callType().isComplete());
-						successCallback();
+				var successLoadAsso : Function = function () {
+					self._complete = (!!self.callType() && self.callType().isComplete());
+
+					if (self.paramValues().length > 0) {
+						for (var i = 0; i < self.paramValues().length; i++) {
+							var paramValue : ParamValue = self.paramValues()[i];
+							self._complete = self._complete && paramValue.isComplete();
+						}
 					}
+					successCallback();
 				};
 
 				var fail : Function = function (error) {
 					failCallback(error);
 				};
-				if (self._call_type_loaded) {
-					successLoad();
-				} else {
-					self.loadCallType(successLoad,fail);
-				}
+
+				self.loadAssociations(successLoadAsso,fail);
 
 			} else {
 				self._complete = false;
