@@ -211,6 +211,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('CloneRelativeEventAndLinkTimeline', function (data) { self.cloneRelativeEventAndLinkTimeline(data); });
 
 		this.addListenerToSocket('CheckAllData', function () { self.checkAllData(); });
+		this.addListenerToSocket('CheckAndRemoveOrphans', function () { self.checkAndRemoveOrphans(); });
 
 		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
@@ -2223,5 +2224,144 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 	};
 
 ////////////////////// End: Check all Data of DB //////////////////////
+
+////////////////////// Begin: Check and remove orphans of DB //////////////////////
+
+	private checkModelOrphans(model : any, successCallback : Function, failCallback : Function, result : Array<any>) {
+		var nbElementsToDelete = 0;
+
+		var finalSuccess = function () {
+			if (nbElementsToDelete > 0) {
+				result.push({
+					'model':model.getTableName(),
+					'msg': 'Several instances of '+model.getTableName()+' ('+nbElementsToDelete+') were orphans and have been deleted. Maybe you should change the way this value is updated.'
+				});
+			}
+			successCallback();
+		};
+
+		var successAllElements = function (elements : Array<any>) {
+			if (elements.length > 0) {
+				var testElement = function (index) {
+					if (index < elements.length) {
+						var element = elements[index];
+
+						var finalTestOrphan = function () {
+							testElement(index+1);
+						};
+
+						var successTestOrphan = function (isOrphan) {
+							if (isOrphan) {
+								nbElementsToDelete++;
+								element.delete(finalTestOrphan, failCallback);
+							} else {
+								finalTestOrphan();
+							}
+						};
+
+						element.isOrphan(successTestOrphan, failCallback);
+					} else {
+						finalSuccess();
+					}
+				};
+
+				testElement(0);
+			} else {
+				finalSuccess();
+			}
+		};
+
+		model.all(successAllElements, failCallback);
+	}
+
+	checkAndRemoveOrphans = function () {
+		var self = this;
+		var result = [];
+
+		var fail = function (error) {
+			self.socket.emit("AnswerCheckAndRemoveOrphans", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - checkAllData failed");
+			Logger.debug(error);
+		};
+
+		var finalSuccess = function () {
+			self.socket.emit("AnswerCheckAndRemoveOrphans", self.formatResponse(true, result));
+		};
+
+		var checkParamValue = function () {
+			Logger.debug("Check paramValue");
+			self.checkModelOrphans(ParamValue, finalSuccess, fail, result);
+		};
+
+		var checkCall = function () {
+			Logger.debug("Check call");
+			self.checkModelOrphans(Call, checkParamValue, fail, result);
+		};
+
+		var checkAbsoluteEvent = function () {
+			Logger.debug("Check absoluteEvent");
+			self.checkModelOrphans(AbsoluteEvent, checkCall, fail, result);
+		};
+
+		var checkAbsoluteTL = function () {
+			Logger.debug("Check absoluteTL");
+			self.checkModelOrphans(AbsoluteTimeline, checkAbsoluteEvent, fail, result);
+		};
+
+		var checkRelativeEvent = function () {
+			Logger.debug("Check relativeEvent");
+			self.checkModelOrphans(RelativeEvent, checkAbsoluteTL, fail, result);
+		};
+
+		var checkRelativeTL = function () {
+			Logger.debug("Check relativeTL");
+			self.checkModelOrphans(RelativeTimeline, checkRelativeEvent, fail, result);
+		};
+
+		var checkZoneContent = function () {
+			Logger.debug("Check zoneContent");
+			self.checkModelOrphans(ZoneContent, checkRelativeTL, fail, result);
+		};
+
+		var checkRendererTheme = function () {
+			Logger.debug("Check rendererTheme");
+			self.checkModelOrphans(RendererTheme, checkZoneContent, fail, result);
+		};
+
+		var checkOAuth = function () {
+			Logger.debug("Check oAuth");
+			self.checkModelOrphans(OAuthKey, checkRendererTheme, fail, result);
+		};
+
+		var checkToken = function () {
+			Logger.debug("Check token");
+			self.checkModelOrphans(Token, checkOAuth, fail, result);
+		};
+
+		var checkCallType = function () {
+			Logger.debug("Check callType");
+			self.checkModelOrphans(CallType, checkToken, fail, result);
+		};
+
+		var checkProfil = function () {
+			Logger.debug("Check profil");
+			self.checkModelOrphans(Profil, checkCallType, fail, result);
+		};
+
+		var checkZone = function () {
+			Logger.debug("Check zone");
+			self.checkModelOrphans(Zone, checkProfil, fail, result);
+		};
+
+		var checkTeam = function () {
+			Logger.debug("Check team");
+			self.checkModelOrphans(Team, checkZone, fail, result);
+		};
+
+		Logger.debug("Check user");
+		self.checkModelOrphans(User, checkTeam, fail, result);
+	};
+
+////////////////////// End: Check and remove orphans of DB //////////////////////
 
 }
