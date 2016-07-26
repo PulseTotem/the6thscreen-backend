@@ -152,6 +152,9 @@ class Call extends ModelItf {
 
 	    this._origineCall = null;
 	    this._origineCall_loaded = false;
+
+		this._relativeEvent = null;
+		this._event_loaded = false;
     }
 
     /**
@@ -891,6 +894,31 @@ class Call extends ModelItf {
 		};
 
 		super.cloneObject(Call, successCloneCall, failCallback);
+	}
+
+	/**
+	 * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	isOrphan(successCallback, failCallback) {
+		var self = this;
+
+		var successLoadEvent = function () {
+			var success = (self.relativeEvent() == null);
+
+			successCallback(success);
+		};
+
+		var successLoadCallType = function () {
+			if (self.callType() != null) {
+				successCallback(false);
+			} else {
+				self.loadEvent(successLoadEvent, failCallback);
+			}
+		};
+
+		this.loadCallType(successLoadCallType, failCallback);
 	}
 
     /**

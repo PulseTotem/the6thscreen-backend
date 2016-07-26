@@ -57,6 +57,22 @@ class ParamValue extends ModelItf {
     private _origineParamValue_loaded : boolean;
 
     /**
+     * Call property
+     *
+     * @property _call
+     * @type Call
+     */
+    private _call : Call;
+
+    /**
+     * Lazy loading for call attribute
+     *
+     * @property _call_loaded
+     * @type boolean
+     */
+    private _call_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -75,6 +91,9 @@ class ParamValue extends ModelItf {
 
         this._origineParamValue = null;
         this._origineParamValue_loaded = false;
+
+        this._call = null;
+        this._call_loaded = false;
     }
 
 	// TODO : Check the value type here?
@@ -180,6 +199,44 @@ class ParamValue extends ModelItf {
             if (successCallback != null) {
                 successCallback();
             }
+        }
+    }
+
+    /**
+     * Return the call in which the ParamValue is stored
+     *
+     * @method call
+     * @returns {Call}
+     */
+    call() {
+        return this._call;
+    }
+
+    /**
+     * Load the call attribute
+     *
+     * @method loadCall
+     * @param successCallback
+     * @param failCallback
+     */
+    loadCall(successCallback : Function, failCallback : Function) {
+        if (! this._call_loaded) {
+            var self = this;
+
+            var successLoad = function (call) {
+                self._call = call;
+                self._call_loaded = true;
+
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getUniquelyAssociatedObject(ParamValue, Call, successLoad, fail);
+        } else {
+            successCallback();
         }
     }
 
@@ -494,6 +551,22 @@ class ParamValue extends ModelItf {
             clonedParamValue.linkOrigineParamValue(self.getId(), successLinkOrigine, failCallback);
         };
         super.cloneObject(ParamValue, successCloneParamValue, failCallback);
+    }
+
+    /**
+     * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+     * @param successCallback
+     * @param failCallback
+     */
+    isOrphan(successCallback, failCallback) {
+        var self = this;
+
+        var successLoadCall = function () {
+            var result = (self.call() == null);
+            successCallback(result);
+        };
+
+        this.loadCall(successLoadCall, failCallback);
     }
 
     /**

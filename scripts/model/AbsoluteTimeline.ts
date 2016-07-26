@@ -39,6 +39,22 @@ class AbsoluteTimeline extends ModelItf {
      */
     private _absoluteEvents_loaded : boolean;
 
+    /**
+     * ZoneContent property
+     *
+     * @property _zoneContent
+     * @type ZoneContent
+     */
+    private _zoneContent : ZoneContent;
+
+    /**
+     * Lazy loading for ZoneContent property
+     *
+     * @property _zoneContent_loaded
+     * @type boolean
+     */
+    private _zoneContent_loaded : boolean;
+
 
     /**
      * Constructor.
@@ -56,6 +72,9 @@ class AbsoluteTimeline extends ModelItf {
 
         this._absoluteEvents = new Array();
         this._absoluteEvents_loaded = false;
+
+        this._zoneContent = null;
+        this._zoneContent_loaded = false;
     }
 
 	/**
@@ -115,6 +134,43 @@ class AbsoluteTimeline extends ModelItf {
             if(successCallback != null) {
                 successCallback();
             }
+        }
+    }
+
+    /**
+     * Return the zoneContent of the timeline
+     *
+     * @method zoneContent
+     * @returns {ZoneContent}
+     */
+    zoneContent() {
+        return this._zoneContent;
+    }
+
+    /**
+     * Lazy loading for the zoneContent attribute
+     *
+     * @param successCallback
+     * @param failCallback
+     */
+    loadZoneContent(successCallback : Function, failCallback : Function) {
+        if (!this._zoneContent) {
+            var self = this;
+
+            var successLoad = function (zoneContent) {
+                self._zoneContent = zoneContent;
+                self._zoneContent_loaded = true;
+
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getUniquelyAssociatedObject(AbsoluteTimeline, ZoneContent, successLoad, fail);
+        } else {
+            successCallback();
         }
     }
 
@@ -349,6 +405,22 @@ class AbsoluteTimeline extends ModelItf {
 	static fromJSONObject(jsonObject : any) : AbsoluteTimeline {
 		return new AbsoluteTimeline(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
+
+    /**
+     * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+     * @param successCallback
+     * @param failCallback
+     */
+    isOrphan(successCallback, failCallback) {
+        var self = this;
+
+        var successLoadZoneContent = function () {
+            var result = (self.zoneContent() == null);
+            successCallback(result);
+        };
+
+        this.loadZoneContent(successLoadZoneContent, failCallback);
+    }
 
     /**
      * Retrieve DataBase Table Name.

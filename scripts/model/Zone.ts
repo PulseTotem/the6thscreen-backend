@@ -146,6 +146,21 @@ class Zone extends ModelItf {
 	 */
 	private _origineZone_loaded : boolean;
 
+	/**
+	 * The SDI which contain this zone
+	 * @property _sdi
+	 * @type SDI
+	 */
+	private _sdi : SDI;
+
+	/**
+	 * Lazy loading for _sdi property
+	 *
+	 * @property _sdi_loaded
+	 * @type boolean
+	 */
+	private _sdi_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -181,6 +196,9 @@ class Zone extends ModelItf {
 
 	    this._origineZone = null;
 	    this._origineZone_loaded = false;
+
+		this._sdi = null;
+		this._sdi_loaded = false;
     }
 
 	/**
@@ -504,6 +522,31 @@ class Zone extends ModelItf {
 			if (successCallback != null) {
 				successCallback();
 			}
+		}
+	}
+
+	sdi() : SDI {
+		return this._sdi;
+	}
+
+	loadSDI(successCallback : Function, failCallback : Function) {
+		if (!this._sdi_loaded) {
+			var self = this;
+
+			var successLoad = function (sdi) {
+				self._sdi = sdi;
+				self._sdi_loaded = true;
+
+				successCallback();
+			};
+
+			var fail = function (error) {
+				failCallback(error);
+			};
+
+			this.getUniquelyAssociatedObject(Zone, SDI, successLoad, fail);
+		} else {
+			successCallback();
 		}
 	}
 
@@ -1033,6 +1076,22 @@ class Zone extends ModelItf {
 		};
 
 		super.cloneObject(Zone, successCloneZone, failCallback);
+	}
+
+	/**
+	 * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+	 * @param successCallback
+	 * @param failCallback
+     */
+	isOrphan(successCallback, failCallback) {
+		var self = this;
+
+		var successLoadSDI = function () {
+			var result = (self.sdi() == null);
+			successCallback(result);
+		};
+
+		this.loadSDI(successLoadSDI, failCallback);
 	}
 
     /**

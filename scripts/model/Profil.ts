@@ -791,6 +791,22 @@ class Profil extends ModelItf {
 		clone.create(successCreateModelItf, failCallback);
 	}
 
+	/**
+	 * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	isOrphan(successCallback, failCallback) {
+		var self = this;
+
+		var successLoadSDI = function () {
+			var result = (self.sdi() == null);
+			successCallback(result);
+		};
+
+		this.loadSDI(successLoadSDI, failCallback);
+	}
+
     /**
      * Retrieve DataBase Table Name.
      *

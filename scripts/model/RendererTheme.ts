@@ -24,6 +24,22 @@ class RendererTheme extends ModelItf {
      */
     private _name : string;
 
+	/**
+	 * Renderer property
+	 *
+	 * @property _renderer
+	 * @type Renderer
+	 */
+	private _renderer : Renderer;
+
+	/**
+	 * Lazy loading for Renderer property
+	 *
+	 * @property _renderer_loaded
+	 * @type boolean
+	 */
+	private _renderer_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -37,6 +53,9 @@ class RendererTheme extends ModelItf {
 		super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
+
+		this._renderer = null;
+		this._renderer_loaded = false;
     }
 
 	/**
@@ -56,6 +75,44 @@ class RendererTheme extends ModelItf {
     name() {
         return this._name;
     }
+
+	/**
+	 * Return the Renderer in which the theme is stored
+	 *
+	 * @method renderer
+	 * @returns {Renderer}
+     */
+	renderer() {
+		return this._renderer;
+	}
+
+	/**
+	 * Load the renderer
+	 *
+	 * @method loadRenderer
+	 * @param successCallback
+	 * @param failCallback
+     */
+	loadRenderer(successCallback : Function, failCallback : Function) {
+		if (! this._renderer_loaded) {
+			var self = this;
+
+			var successLoad = function (renderer) {
+				self._renderer = renderer;
+				self._renderer_loaded = true;
+
+				successCallback();
+			};
+
+			var fail = function (error) {
+				failCallback(error);
+			};
+
+			this.getUniquelyAssociatedObject(RendererTheme, Renderer, successLoad, fail);
+		} else {
+			successCallback();
+		}
+	}
 
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -179,6 +236,22 @@ class RendererTheme extends ModelItf {
 	 */
 	static fromJSONObject(jsonObject : any) : RendererTheme {
 		return new RendererTheme(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+	}
+
+	/**
+	 * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	isOrphan(successCallback, failCallback) {
+		var self = this;
+
+		var successLoadRenderer = function () {
+			var result = (self.renderer() == null);
+			successCallback(result);
+		};
+
+		this.loadRenderer(successLoadRenderer, failCallback);
 	}
 
     /**

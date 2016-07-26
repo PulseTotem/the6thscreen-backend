@@ -1062,6 +1062,30 @@ class CallType extends ModelItf {
     }
 
     /**
+     * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+     * @param successCallback
+     * @param failCallback
+     */
+    isOrphan(successCallback, failCallback) {
+        var self = this;
+
+        var successLoadSource = function () {
+            var result = (self.source() == null);
+            successCallback(result);
+        };
+
+        var successLoadZone = function () {
+            if (self.zone() == null) {
+                successCallback(true);
+            } else {
+                self.loadSource(successLoadSource, failCallback);
+            }
+        };
+
+        this.loadZone(successLoadZone, failCallback);
+    }
+
+    /**
      * Retrieve DataBase Table Name.
      *
      * @method getTableName

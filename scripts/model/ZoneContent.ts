@@ -890,6 +890,39 @@ class ZoneContent extends ModelItf {
 		super.cloneObject(ZoneContent, successCloneZC, failCallback);
 	}
 
+	/**
+	 * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	isOrphan(successCallback, failCallback) {
+		var self = this;
+
+		var successLoadAbsoluteTL = function () {
+			var success = (self.absoluteTimeline() == null);
+
+			successCallback(success);
+		};
+
+		var successLoadRelativeTimeline = function () {
+			if (self.zone() != null) {
+				successCallback(false);
+			} else {
+				self.loadAbsoluteTimeline(successLoadAbsoluteTL, failCallback);
+			}
+		};
+
+		var successLoadZone = function () {
+			if (self.zone() != null) {
+				successCallback(false);
+			} else {
+				self.loadRelativeTimeline(successLoadRelativeTimeline, failCallback);
+			}
+		};
+
+		this.loadZone(successLoadZone, failCallback);
+	}
+
     /**
      * Retrieve DataBase Table Name.
      *

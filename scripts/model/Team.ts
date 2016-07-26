@@ -632,6 +632,22 @@ class Team extends ModelItf {
     }
 
     /**
+     * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+     * @param successCallback
+     * @param failCallback
+     */
+    isOrphan(successCallback, failCallback) {
+        var self = this;
+
+        var successLoadOwner = function () {
+            var result = (self.owner() == null);
+            successCallback(result);
+        };
+
+        this.loadOwner(successLoadOwner, failCallback);
+    }
+
+    /**
      * Retrieve DataBase Table Name.
      *
      * @method getTableName

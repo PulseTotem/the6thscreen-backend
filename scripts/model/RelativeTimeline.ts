@@ -92,6 +92,22 @@ class RelativeTimeline extends ModelItf {
 	private _userTrigger_loaded : boolean;
 
 	/**
+	 * ZoneContent property
+	 *
+	 * @property _zoneContent
+	 * @type ZoneContent
+	 */
+	private _zoneContent : ZoneContent;
+
+	/**
+	 * Lazy loading for ZoneContent property
+	 *
+	 * @property _zoneContent_loaded
+	 * @type boolean
+	 */
+	private _zoneContent_loaded : boolean;
+
+	/**
 	 * The origine relativeTimeline if the current object is a clone
 	 *
 	 * @property _origineRelativeTimeline
@@ -135,6 +151,9 @@ class RelativeTimeline extends ModelItf {
 
 	    this._origineRelativeTimeline = null;
 	    this._origineRelativeTimeline_loaded = false;
+
+		this._zoneContent = null;
+		this._zoneContent_loaded = false;
     }
 
 	/**
@@ -370,6 +389,43 @@ class RelativeTimeline extends ModelItf {
 			if (successCallback != null) {
 				successCallback();
 			}
+		}
+	}
+
+	/**
+	 * Return the zoneContent of the timeline
+	 *
+	 * @method zoneContent
+	 * @returns {ZoneContent}
+     */
+	zoneContent() {
+		return this._zoneContent;
+	}
+
+	/**
+	 * Lazy loading for the zoneContent attribute
+	 *
+	 * @param successCallback
+	 * @param failCallback
+     */
+	loadZoneContent(successCallback : Function, failCallback : Function) {
+		if (!this._zoneContent) {
+			var self = this;
+
+			var successLoad = function (zoneContent) {
+				self._zoneContent = zoneContent;
+				self._zoneContent_loaded = true;
+
+				successCallback();
+			};
+
+			var fail = function (error) {
+				failCallback(error);
+			};
+
+			this.getUniquelyAssociatedObject(RelativeTimeline, ZoneContent, successLoad, fail);
+		} else {
+			successCallback();
 		}
 	}
 
@@ -835,6 +891,22 @@ class RelativeTimeline extends ModelItf {
 		};
 
 		super.cloneObject(RelativeTimeline, successCloneRelativeTL, failCallback);
+	}
+
+	/**
+	 * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	isOrphan(successCallback, failCallback) {
+		var self = this;
+
+		var successLoadZoneContent = function () {
+			var result = (self.zoneContent() == null);
+			successCallback(result);
+		};
+
+		this.loadZoneContent(successLoadZoneContent, failCallback);
 	}
 
     /**
