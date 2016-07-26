@@ -880,6 +880,7 @@ class SDI extends ModelItf {
                                                                         profil.clone(successCloneProfil, failCallback, profilInfo);
                                                                     });
                                                                 } else {
+                                                                    clonedSDI.desynchronize();
                                                                     clonedSDI.checkCompleteness(successCheckComplete, failCallback);
                                                                 }
                                                             }

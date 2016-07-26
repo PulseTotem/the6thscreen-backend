@@ -2253,7 +2253,11 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 						var successTestOrphan = function (isOrphan) {
 							if (isOrphan) {
 								nbElementsToDelete++;
-								element.delete(finalTestOrphan, failCallback);
+								result.push({
+									'model': model.getTableName(),
+									'msg': 'Delete element with id: '+element.getId()
+								});
+								element.delete(finalTestOrphan, failCallback, 1, true); // try to force the delete
 							} else {
 								finalTestOrphan();
 							}
@@ -2282,6 +2286,8 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 			self.socket.emit("AnswerCheckAndRemoveOrphans", self.formatResponse(false, error));
 			Logger.error("SocketId: "+self.socket.id+" - checkAllData failed");
 			Logger.debug(error);
+			Logger.info("Results before error: ");
+			Logger.info(result);
 		};
 
 		var finalSuccess = function () {
