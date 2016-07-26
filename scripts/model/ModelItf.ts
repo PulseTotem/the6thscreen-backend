@@ -623,8 +623,9 @@ class ModelItf {
 	 * @param informations The informations for the update with the following format : {'id': 12, 'method':'setName', 'value':'toto'}. Only method starting by the name 'set', 'add', 'link', 'unlink' or 'remove' are allowed.
 	 * @param successCallback The function to call if the object is successfully updated.
 	 * @param failCallback The function to call in case of failure.
+	 * @param {string} cmsAuthKey - The callback function when fail.
 	 */
-	static updateAttribute(modelClass : any, informations : any, successCallback : Function, failCallback : Function) {
+	static updateAttribute(modelClass : any, informations : any, successCallback : Function, failCallback : Function, cmsAuthKey : string = "") {
 		if (!modelClass) {
 			failCallback(new ModelException("You must specify the modelClass in order to update one of its attribute."));
 			return;
@@ -671,7 +672,7 @@ class ModelItf {
 					self[informations.method](informations.value);
 					self.checkCompleteness(doUpdate, failCallback);
 				} else {
-					self[informations.method](informations.value, successCheck, failCallback);
+					self[informations.method](informations.value, successCheck, failCallback, cmsAuthKey);
 				}
 			} catch (error) {
 				if (error instanceof TypeError) {

@@ -348,7 +348,7 @@ describe('OAuthKey', function() {
     describe('#addTeam', function () {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
-            var s = new Team("team", 42);
+            var s = new Team("team", "", 42);
 
             var response1:any = [];
 
@@ -391,7 +391,7 @@ describe('OAuthKey', function() {
     describe('#removeTeam', function () {
         it('should call the right request', function (done) {
             var c = new OAuthKey("toto", "machin", "heyhey", 52);
-            var s = new Team("provider", 42);
+            var s = new Team("provider", "", 42);
 
             var response1:any = [s.toJSONObject()];
 

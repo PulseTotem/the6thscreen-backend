@@ -1,5 +1,6 @@
 /**
  * @author Simon Urli <simon@the6thscreen.fr>
+ * @author Christian Brel <christian@pulsetotem.fr, ch.brel@gmail.com>
  */
 
 /// <reference path="../../libsdef/mocha.d.ts" />
@@ -22,14 +23,20 @@ describe('Team', function() {
 			assert.equal(c.name(), name, "The name is not stored correctly.");
 		});
 
+		it('should store the cmsId', function () {
+			var cmsId = "cmsId42";
+			var c = new Team("", cmsId);
+			assert.equal(c.cmsId(), cmsId, "The cmsId is not stored correctly.");
+		});
+
 		it('should store the ID', function () {
 			var id = 52;
-			var c = new Team("afd", id);
+			var c = new Team("afd", "", id);
 			assert.equal(c.getId(), id, "The ID is not stored.");
 		});
 
 		it('should store the complete value', function () {
-			var c = new Team("afd", 34, true);
+			var c = new Team("afd", "", 34, true);
 			assert.equal(c.isComplete(), true, "The complete value is not stored.");
 		});
 
@@ -54,7 +61,7 @@ describe('Team', function() {
 		});
 
 		it('should return true if the object has a name and an ID', function(done) {
-			var b = new Team("tret", 34);
+			var b = new Team("tret", "", 34);
 			var success = function () {
 				assert.equal(b.isComplete(), true, "The Team should be complete.");
 				done();
@@ -67,7 +74,7 @@ describe('Team', function() {
 		});
 
 		it('should return false if the object has an empty name and an ID', function(done) {
-			var b = new Team("",34);
+			var b = new Team("", "", 34);
 			var success = function () {
 				assert.equal(b.isComplete(), false, "The Team should not be complete.");
 				done();
@@ -85,11 +92,12 @@ describe('Team', function() {
 			var json = {
 				"id": 42,
 				"name": "toto",
+				"cmsId": "cmsId42",
 				"complete": true
 			};
 
 			var teamRetrieve = Team.fromJSONObject(json);
-			var teamExpected = new Team("toto", 42, true);
+			var teamExpected = new Team("toto", "cmsId42", 42, true);
 
 			assert.deepEqual(teamRetrieve, teamExpected, "The retrieve Team (" + teamRetrieve + ") does not match with the expected one (" + teamExpected + ")");
 		});
@@ -98,11 +106,12 @@ describe('Team', function() {
 			var json = {
 				"id": 42,
 				"name": null,
+				"cmsId": "cmsId42",
 				"complete": false
 			};
 
 			var teamRetrieve = Team.fromJSONObject(json);
-			var teamExpected = new Team(null, 42);
+			var teamExpected = new Team(null, "cmsId42", 42);
 
 			assert.deepEqual(teamRetrieve, teamExpected, "The retrieve Team (" + teamRetrieve + ") does not match with the expected one (" + teamExpected + ")");
 		});
@@ -110,9 +119,10 @@ describe('Team', function() {
 
 	describe('#toJsonObject', function () {
 		it('should create the expected JSON Object', function () {
-			var c = new Team("toto", 52, true);
+			var c = new Team("toto", "cmsId52", 52, true);
 			var expected = {
 				"name": "toto",
+				"cmsId": "cmsId52",
 				"id": 52,
 				"complete": true,
 				"createdAt":null,
@@ -126,7 +136,7 @@ describe('Team', function() {
 
 	describe('#addUser', function() {
 		it('should call the right request', function(done) {
-			var c = new Team("toto", 52);
+			var c = new Team("toto", "cmsId52", 52);
 			var pv = new User("mavaleur", "", "", "","", false, null, 12);
 
 			var response1 : any = [];
@@ -171,7 +181,7 @@ describe('Team', function() {
 
 	describe('#removeUser', function() {
 		it('should call the right request', function(done) {
-			var c = new Team("toto", 52);
+			var c = new Team("toto", "cmsId52", 52);
 			var pv = new User("mavaleur", "", "", "","", false, null, 12);
 
 			var response1 : any = [
@@ -223,7 +233,7 @@ describe('Team', function() {
 
 	describe('#addSDI', function() {
 		it('should call the right request', function(done) {
-			var t = new Team("blurp", 123);
+			var t = new Team("blurp", "cmsId123", 123);
 			var c = new SDI("toto", "blabla", "toto", 52);
 
 			var response1 : any = [];
@@ -267,7 +277,7 @@ describe('Team', function() {
 
 	describe('#removeSDI', function() {
 		it('should call the right request', function(done) {
-			var t = new Team("blurp", 123);
+			var t = new Team("blurp", "cmsId123", 123);
 			var c = new SDI("toto", "blabla", "toto", 52);
 
 			var response1 : any = [
@@ -320,7 +330,7 @@ describe('Team', function() {
 
 	describe('#linkOwner', function () {
 		it('should call the right request', function (done) {
-			var c = new Team("toto", 52);
+			var c = new Team("toto", "cmsId52", 52);
 			var pv = new User("mavaleur", "", "", "","", false, null, 12);
 			var linkName = "Owners";
 
@@ -365,7 +375,7 @@ describe('Team', function() {
 
 	describe('#unlinkOwner', function () {
 		it('should call the right request', function (done) {
-			var c = new Team("toto", 52);
+			var c = new Team("toto", "cmsId52", 52);
 			var pv = new User("mavaleur", "", "", "","", false, null, 12);
 			var linkName = "Owners";
 
@@ -410,7 +420,7 @@ describe('Team', function() {
 
 	describe('#addOAuthKey', function() {
 		it('should call the right request', function(done) {
-			var t = new Team("blurp", 123);
+			var t = new Team("blurp", "cmsId123", 123);
 			var c = new OAuthKey("toto", "blabla", "toto", 52);
 
 			var response1 : any = [];
@@ -454,7 +464,7 @@ describe('Team', function() {
 
 	describe('#removeOAuthKey', function() {
 		it('should call the right request', function(done) {
-			var t = new Team("blurp", 123);
+			var t = new Team("blurp", "cmsId123", 123);
 			var c = new OAuthKey("toto", "blabla", "toto", 52);
 
 			var response1 : any = [
