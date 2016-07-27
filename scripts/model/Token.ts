@@ -345,6 +345,22 @@ class Token extends ModelItf {
     }
 
     /**
+     * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+     * @param successCallback
+     * @param failCallback
+     */
+    isOrphan(successCallback, failCallback) {
+        var self = this;
+
+        var successLoadUser = function () {
+            var result = (self.user() == null);
+            successCallback(result);
+        };
+
+        this.loadUser(successLoadUser, failCallback);
+    }
+
+    /**
      * Retrieve DataBase Table Name.
      *
      * @method getTableName

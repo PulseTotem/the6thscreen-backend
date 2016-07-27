@@ -108,6 +108,22 @@ class Call extends ModelItf {
 	 */
 	private _origineCall_loaded : boolean;
 
+	/**
+	 * The relativeEvent the call is associated to
+	 *
+	 * @property _relativeEvent
+	 * @type RelativeEvent
+	 */
+	private _relativeEvent : RelativeEvent;
+
+	/**
+	 * Lazy loading for the relativeEvent
+	 *
+	 * @property _event_loaded
+	 * @type boolean
+	 */
+	private _event_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -136,6 +152,9 @@ class Call extends ModelItf {
 
 	    this._origineCall = null;
 	    this._origineCall_loaded = false;
+
+		this._relativeEvent = null;
+		this._event_loaded = false;
     }
 
     /**
@@ -366,6 +385,35 @@ class Call extends ModelItf {
 		}
 	}
 
+	/**
+	 * Get the relativeEvent associated to the call
+	 * @returns {RelativeEvent}
+     */
+	relativeEvent() : RelativeEvent {
+		return this._relativeEvent;
+	}
+
+	loadEvent(successCallback : Function, failCallback : Function) {
+		if (! this._event_loaded) {
+			var self = this;
+
+			var successLoad = function (relativeEvent) {
+				self._relativeEvent = relativeEvent;
+				self._event_loaded = true;
+
+				successCallback();
+			};
+
+			var fail = function (error) {
+				failCallback(error);
+			};
+
+			this.getUniquelyAssociatedObject(Call, RelativeEvent, successLoad, fail);
+		} else {
+			successCallback();
+		}
+	}
+
     //////////////////// Methods managing model. Connections to database. ///////////////////////////
 
     /**
@@ -426,21 +474,23 @@ class Call extends ModelItf {
 		var self = this;
 		var success = function () {
 			if (self.isComplete() && !!self.name()) {
-				var successLoad : Function = function () {
-					if (self._call_type_loaded) {
-						self._complete = (!!self.callType() && self.callType().isComplete());
-						successCallback();
+				var successLoadAsso : Function = function () {
+					self._complete = (!!self.callType() && self.callType().isComplete());
+
+					if (self.paramValues().length > 0) {
+						for (var i = 0; i < self.paramValues().length; i++) {
+							var paramValue : ParamValue = self.paramValues()[i];
+							self._complete = self._complete && paramValue.isComplete();
+						}
 					}
+					successCallback();
 				};
 
 				var fail : Function = function (error) {
 					failCallback(error);
 				};
-				if (self._call_type_loaded) {
-					successLoad();
-				} else {
-					self.loadCallType(successLoad,fail);
-				}
+
+				self.loadAssociations(successLoadAsso,fail);
 
 			} else {
 				self._complete = false;
@@ -675,6 +725,8 @@ class Call extends ModelItf {
 
     /**
      * Delete in database the model with current id.
+	 * WARNING: This method should be **ONLY** called by RelativeEvent model.
+	 * All other models or classes should call delete of RelativeEvent model.
      *
      * @method delete
      * @param {Function} successCallback - The callback function when success.
@@ -709,7 +761,7 @@ class Call extends ModelItf {
 			} else {
 				ModelItf.deleteObject(Call, self.getId(), successCallback, failCallback, attemptNumber);
 			}
-		}
+		};
 
 		this.loadParamValues(successLoadParamValues, fail);
     }
@@ -842,6 +894,31 @@ class Call extends ModelItf {
 		};
 
 		super.cloneObject(Call, successCloneCall, failCallback);
+	}
+
+	/**
+	 * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	isOrphan(successCallback, failCallback) {
+		var self = this;
+
+		var successLoadEvent = function () {
+			var success = (self.relativeEvent() == null);
+
+			successCallback(success);
+		};
+
+		var successLoadCallType = function () {
+			if (self.callType() != null) {
+				successCallback(false);
+			} else {
+				self.loadEvent(successLoadEvent, failCallback);
+			}
+		};
+
+		this.loadCallType(successLoadCallType, failCallback);
 	}
 
     /**

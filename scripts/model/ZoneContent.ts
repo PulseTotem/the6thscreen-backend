@@ -726,7 +726,7 @@ class ZoneContent extends ModelItf {
      * @param {Function} failCallback - The callback function when fail.
      * @param {number} attemptNumber - The attempt number.
      */
-    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
+    delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0, force = false) {
 		var self = this;
 
 		var fail : Function = function(error) {
@@ -734,7 +734,7 @@ class ZoneContent extends ModelItf {
 		};
 
 		var successLoadAssociations = function() {
-			if(self.profils().length > 0) {
+			if(self.profils().length > 0 && !force) {
 				fail("You can't delete a ZoneContent that belongs to some Profils.");
 			} else {
 				if(self.relativeTimeline() != null) {
@@ -888,6 +888,39 @@ class ZoneContent extends ModelItf {
 		};
 
 		super.cloneObject(ZoneContent, successCloneZC, failCallback);
+	}
+
+	/**
+	 * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	isOrphan(successCallback, failCallback) {
+		var self = this;
+
+		var successLoadAbsoluteTL = function () {
+			var success = (self.absoluteTimeline() == null);
+
+			successCallback(success);
+		};
+
+		var successLoadRelativeTimeline = function () {
+			if (self.relativeTimeline() != null) {
+				successCallback(false);
+			} else {
+				self.loadAbsoluteTimeline(successLoadAbsoluteTL, failCallback);
+			}
+		};
+
+		var successLoadZone = function () {
+			if (self.zone() == null) {
+				successCallback(true);
+			} else {
+				self.loadRelativeTimeline(successLoadRelativeTimeline, failCallback);
+			}
+		};
+
+		this.loadZone(successLoadZone, failCallback);
 	}
 
     /**

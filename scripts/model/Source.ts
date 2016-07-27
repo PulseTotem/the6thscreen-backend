@@ -922,7 +922,17 @@ class Source extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Source, this.getId(), successCallback, failCallback, attemptNumber);
+        var self = this;
+
+        var successLoadCallTypes = function () {
+            if (self.callTypes().length == 0) {
+                ModelItf.deleteObject(Source, self.getId(), successCallback, failCallback, attemptNumber);
+            } else {
+                failCallback("You cannot delete a source which is used in some calltypes.");
+            }
+        };
+
+        this.loadCallTypes(successLoadCallTypes, failCallback);
     }
 
     /**

@@ -70,6 +70,22 @@ class OAuthKey extends ModelItf {
     private _teams_loaded : boolean;
 
     /**
+     * User property
+     *
+     * @property _user
+     * @type User
+     */
+    private _user : User;
+
+    /**
+     * Lazy loading for User property
+     *
+     * @property _user_Loaded
+     * @type boolean
+     */
+    private _user_loaded : boolean;
+
+    /**
      * Constructor.
      *
      * @constructor
@@ -92,6 +108,9 @@ class OAuthKey extends ModelItf {
 
         this._teams = new Array<Team>();
         this._teams_loaded = false;
+
+        this._user = null;
+        this._user_loaded = false;
     }
 
     /**
@@ -223,6 +242,44 @@ class OAuthKey extends ModelItf {
             };
 
             this.getAssociatedObjects(OAuthKey, Team, success, fail);
+        } else {
+            successCallback();
+        }
+    }
+
+    /**
+     * Return the owner of the OAuthKey
+     *
+     * @method user
+     * @returns {User}
+     */
+    user() {
+        return this._user;
+    }
+
+    /**
+     * Load the owner of the oAuthKey
+     *
+     * @method loadUser
+     * @param successCallback
+     * @param failCallback
+     */
+    loadUser(successCallback : Function, failCallback : Function) {
+        if (! this._user_loaded) {
+            var self = this;
+
+            var success = function (user) {
+                self._user = user;
+                self._user_loaded = true;
+
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getUniquelyAssociatedObject(OAuthKey, User, success, fail);
         } else {
             successCallback();
         }
@@ -509,6 +566,30 @@ class OAuthKey extends ModelItf {
      */
     static fromJSONObject(jsonObject : any) : OAuthKey {
         return new OAuthKey(jsonObject.name, jsonObject.description, jsonObject.value, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+    }
+
+    /**
+     * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+     * @param successCallback
+     * @param failCallback
+     */
+    isOrphan(successCallback, failCallback) {
+        var self = this;
+
+        var successLoadProvider = function () {
+            var result = (self.provider() == null);
+            successCallback(result);
+        };
+
+        var successLoadUser = function () {
+            if (self.user() == null) {
+                successCallback(true);
+            } else {
+                self.loadProvider(successLoadProvider, failCallback);
+            }
+        };
+
+        this.loadUser(successLoadUser, failCallback);
     }
 
     /**

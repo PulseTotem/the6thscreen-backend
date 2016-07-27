@@ -42,6 +42,8 @@ class The6thScreenBackend extends Server {
             var clientIp = req.header("x-forwarded-for");
             Logger.info("Login with following IP: "+clientIp);
 
+            var rememberme = req.body.rememberme;
+
             var fail = function(error) {
                 res.status(500).send({ 'error': JSON.stringify(error) });
             };
@@ -65,6 +67,10 @@ class The6thScreenBackend extends Server {
 
                     var now = moment();
                     var tomorrow = moment().add(7, 'days');
+
+                    if (rememberme) {
+                        tomorrow = moment().add(31, 'days');
+                    }
 
                     var token : Token = new Token(tokenString, tomorrow.toDate());
 
@@ -110,6 +116,31 @@ class The6thScreenBackend extends Server {
         });
 
 		this.app.post('/loginFromToken', function(req, res) {
+
+            var cleanOldTokens = function () {
+
+                var fail = function (error) {
+                    Logger.error("Error while cleaning old tokens");
+                    Logger.debug(error);
+                };
+
+                var successLoadAllTokens = function (tokens : Array<Token>) {
+                    var successDelete = function () {
+                        Logger.debug("Succeed to delete one old token.");
+                    };
+
+                    for (var i = 0; i < tokens.length; i++) {
+                        var token = tokens[i];
+
+                        if (moment().isAfter(token.endDate())) {
+                            token.delete(successDelete, fail);
+                        }
+                    }
+                };
+
+                Token.all(successLoadAllTokens, fail);
+            };
+
             var clientIp = req.header("x-forwarded-for");
             Logger.info("Login by token with IP: " + clientIp);
 
@@ -151,6 +182,7 @@ class The6thScreenBackend extends Server {
                         // we are sending the profile in the token
                         var tokenStr = jwt.sign(profile, BackendConfig.getJWTSecret());
                         var finalSuccess = function () {
+                            cleanOldTokens();
                             res.json({token: tokenStr});
                         };
 

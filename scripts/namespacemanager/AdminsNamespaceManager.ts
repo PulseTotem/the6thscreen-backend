@@ -24,7 +24,6 @@
 /// <reference path="../model/Team.ts" />
 /// <reference path="../model/Provider.ts" />
 
-
 class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 	/**
@@ -206,9 +205,12 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
 		this.addListenerToSocket('ResetUserPassword', function (passwordDescription) { self.resetUserPassword(passwordDescription); });
 
-		this.addListenerToSocket('CloneProfil', function(data) { self.cloneProfil(data); });
+		this.addListenerToSocket('CloneZoneContent', function(data) { self.cloneZoneContent(data); });
 		this.addListenerToSocket('CloneSDI', function(data) { self.cloneSDI(data); });
 		this.addListenerToSocket('CloneRelativeEventAndLinkTimeline', function (data) { self.cloneRelativeEventAndLinkTimeline(data); });
+
+		this.addListenerToSocket('CheckAllData', function () { self.checkAllData(); });
+		this.addListenerToSocket('CheckAndRemoveOrphans', function () { self.checkAndRemoveOrphans(); });
 
 		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
@@ -1386,38 +1388,59 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 ////////////////////// END: Manage resetUserPassword //////////////////////
 
-////////////////////// Begin: Manage cloneProfil //////////////////////
+////////////////////// Begin: Manage cloneZoneContent //////////////////////
 
-	cloneProfil(profilDescription : any) {
-		// profilDescription : { 'profilId': number }
-		var profilId = profilDescription.profilId;
+	cloneZoneContent(zoneContentDescription : any) {
+		// zoneContentDescription : { 'zoneContentId': number }
+		var zoneContentId = zoneContentDescription.zoneContentId;
 		var self = this;
 
 		var fail : Function = function (error) {
-			Logger.error("Error when reading the profil "+profilId);
+			Logger.error("Error when reading the zoneContent "+zoneContentId);
 			Logger.error(error);
-			self.socket.emit("AnswerCloneProfil", self.formatResponse(false, error));
+			self.socket.emit("AnswerCloneZoneContent", self.formatResponse(false, error));
 		};
 
-		var successReadProfil = function (profil : Profil) {
-			var successCloneProfil = function (clonedProfil : Profil) {
-				Logger.debug("Answer to admin for cloning profil");
-				self.socket.emit("AnswerCloneProfil", self.formatResponse(true, clonedProfil.toJSONObject()));
+		var successReadZoneContent = function (zoneContent : ZoneContent) {
+			var successCloneZoneContent = function (clonedZoneContent : ZoneContent) {
+				var successLoadZone = function () {
+					var successLinkZone = function () {
+						var successCheckComplete = function () {
+							var successUpdateClone = function () {
+								var successCompleteJSONObject = function (completeData) {
+									self.socket.emit("AnswerCloneZoneContent", self.formatResponse(true, completeData));
+								};
+
+								clonedZoneContent.toCompleteJSONObject(successCompleteJSONObject, fail);
+							};
+
+							clonedZoneContent.update(successUpdateClone, fail);
+						};
+
+						clonedZoneContent.setName(clonedZoneContent.name()+"clone");
+						clonedZoneContent.checkCompleteness(successCheckComplete, fail);
+					};
+
+					clonedZoneContent.linkZone(zoneContent.zone().getId(), successLinkZone, fail);
+				};
+
+				zoneContent.loadZone(successLoadZone, fail);
 			};
 
-			profil.clone(successCloneProfil, fail, null);
+			zoneContent.clone(successCloneZoneContent, fail, null);
 		};
 
-		Profil.read(profilId, successReadProfil, fail);
+		ZoneContent.read(zoneContentId, successReadZoneContent, fail);
 	}
 
-////////////////////// END: Manage cloneProfil //////////////////////
+////////////////////// END: Manage cloneZoneContent //////////////////////
 
 ////////////////////// Begin: Manage cloneSDI //////////////////////
 
 	cloneSDI(SDIDescription : any) {
-		// SDIDescription : { 'SDIId': number }
+		// SDIDescription : { 'SDIId': number, 'cloneProfil': boolean }
 		var sdiId = SDIDescription.SDIId;
+		var cloneProfil = SDIDescription.cloneProfil;
 		var self = this;
 
 		var fail : Function = function (error) {
@@ -1429,10 +1452,16 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		var successReadSDI = function (sdi : SDI) {
 			var successCloneSDI = function (clonedSDI : SDI) {
 				Logger.debug("Answer to admin for cloning sdi");
-				self.socket.emit("AnswerCloneSDI", self.formatResponse(true, clonedSDI.toJSONObject()));
+
+				var successCompleteJSONObject = function (data) {
+					self.socket.emit("AnswerCloneSDI", self.formatResponse(true, data));
+				};
+
+				clonedSDI.desynchronize();
+				clonedSDI.toCompleteJSONObject(successCompleteJSONObject, fail);
 			};
 
-			sdi.clone(successCloneSDI, fail);
+			sdi.clone(cloneProfil, successCloneSDI, fail);
 		};
 
 		SDI.read(sdiId, successReadSDI, fail);
@@ -2069,4 +2098,453 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 		RelativeEvent.read(relativeEventId, successReadRelativeEvent, fail);
 	}
+
+////////////////////// Begin: Check all Data of DB //////////////////////
+
+	private checkModelData(model : any, checkRelations : Function, fail, result : Array<any>) {
+		var nbElementsToUpdate = 0;
+
+		var finalSuccess = function (elements) {
+			if (nbElementsToUpdate > 0) {
+				result.push({
+					'model':model.getTableName(),
+					'msg': 'Several instances of '+model.getTableName()+' ('+nbElementsToUpdate+') change their value of complete. Maybe you should change the way this value is updated.'
+				});
+			}
+			checkRelations(elements);
+		};
+
+		var successAllElements = function (elements : Array<any>) {
+			if (elements.length > 0) {
+				var testElement = function (index) {
+					if (index < elements.length) {
+						var element = elements[index];
+
+						var elementComplete = element.isComplete();
+
+						var finalCheckElement = function () {
+							testElement(index+1);
+						};
+
+						var successCheckCompleteness = function () {
+							var newCompleteValue = element.isComplete();
+							if (elementComplete != newCompleteValue) {
+								nbElementsToUpdate++;
+								element.update(finalCheckElement, fail);
+							} else {
+								finalCheckElement();
+							}
+						};
+
+						element.checkCompleteness(successCheckCompleteness, fail);
+					} else {
+						finalSuccess(elements);
+					}
+
+				};
+
+				testElement(0);
+			} else {
+				finalSuccess(elements);
+			}
+		};
+
+		model.all(successAllElements, fail);
+	}
+
+	checkAllData = function () {
+		var self = this;
+		var result = [];
+
+		var fail = function (error) {
+			self.socket.emit("AnswerCheckAllData", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - checkAllData failed");
+			Logger.debug(error);
+		};
+
+		var finalSuccess = function () {
+			self.socket.emit("AnswerCheckAllData", self.formatResponse(true, result));
+		};
+
+		var checkSDI = function () {
+			Logger.debug("Check SDI");
+			var analyzeSDI = function (sdis : Array<SDI>) {
+				var nbIncompleteSDI = 0;
+
+				for (var i = 0; i < sdis.length; i++) {
+					var sdi = sdis[i];
+
+					if (!sdi.isComplete()) {
+						nbIncompleteSDI++;
+					}
+				}
+
+				if (nbIncompleteSDI > 0) {
+					var msgToPush = {
+						'model': 'SDI',
+						'msg': "Several SDI ("+nbIncompleteSDI+") are incomplete! " +
+							   "It is certainly du to the propagation of incomplete element (e.g. zone)" +
+						       " SDI completeness is determined by assigned name, assigned team, and completeness of all contained zones and profils."
+					};
+					result.push(msgToPush);
+				}
+
+				finalSuccess();
+			};
+
+			self.checkModelData(SDI, analyzeSDI, fail, result);
+		};
+
+		var checkProfil = function () {
+			Logger.debug("Check profil");
+			self.checkModelData(Profil, checkSDI, fail, result);
+		};
+
+		var checkRelativeTL = function () {
+			Logger.debug("Check relativeTL");
+			self.checkModelData(RelativeTimeline, checkProfil, fail, result);
+		};
+
+		var checkAbsoluteTL = function () {
+			Logger.debug("Check absoluteTL");
+			self.checkModelData(AbsoluteTimeline, checkRelativeTL, fail, result);
+		};
+
+		var checkRelativeEvent = function () {
+			Logger.debug("Check relativeEvent");
+			self.checkModelData(RelativeEvent, checkAbsoluteTL, fail, result);
+		};
+
+		var checkAbsoluteEvent = function () {
+			Logger.debug("Check absoluteEvent");
+			self.checkModelData(AbsoluteEvent, checkRelativeEvent, fail, result);
+		};
+
+		var checkCall = function () {
+			Logger.debug("Check call");
+			self.checkModelData(Call, checkAbsoluteEvent, fail, result);
+		};
+
+		var checkParamValue = function () {
+			Logger.debug("Check paramValue");
+			self.checkModelData(ParamValue, checkCall, fail, result);
+		};
+
+		var checkZone = function () {
+			Logger.debug("Check zone");
+			var analyzeZone = function (zones : Array<Zone>) {
+				var nbIncompleteZone = 0;
+
+				for (var i = 0; i < zones.length; i++) {
+					var zone = zones[i];
+
+					if (!zone.isComplete()) {
+						nbIncompleteZone++;
+					}
+				}
+
+				if (nbIncompleteZone > 0) {
+					var msgToPush = {
+						'model': 'zone',
+						'msg': "Several zones ("+nbIncompleteZone+") are incomplete! " +
+						       "It is certainly du to the propagation of incomplete element (e.g. callTypes)" +
+							   " Zone completeness is determined by completeness of behaviour and of all callTypes contained in the zone."
+					};
+					result.push(msgToPush);
+				}
+
+				checkParamValue();
+			};
+
+			self.checkModelData(Zone, analyzeZone, fail, result);
+		};
+
+		var checkCallType = function () {
+			Logger.debug("Check callType");
+			var analyseCallTypes = function (callTypes : Array<CallType>) {
+				var nbIncompleteCallTypes = 0;
+
+				for (var i = 0; i < callTypes.length; i++) {
+					var callType = callTypes[i];
+
+					if (!callType.isComplete()) {
+						nbIncompleteCallTypes++;
+					}
+				}
+
+				if (nbIncompleteCallTypes > 0) {
+					result.push({'model':'callType','msg':"Several calltypes ("+nbIncompleteCallTypes+") are incomplete! It is certainly du to an incomplete migration in database (e.g. rendererTheme not set)"});
+				}
+
+				checkZone();
+			};
+
+			self.checkModelData(CallType, analyseCallTypes, fail, result);
+		};
+
+		var checkTimelineRunner = function () {
+			Logger.debug("Check TLrunner");
+			self.checkModelData(TimelineRunner, checkCallType, fail, result);
+		};
+
+		var checkSource = function () {
+			Logger.debug("Check source");
+			self.checkModelData(Source, checkTimelineRunner, fail, result);
+		};
+
+		var checkService = function () {
+			Logger.debug("Check service");
+			self.checkModelData(Service, checkSource, fail, result);
+		};
+
+		var checkParamType = function () {
+			Logger.debug("Check paramType");
+			self.checkModelData(ParamType, checkService, fail, result);
+		};
+
+		var checkConstraintParamType = function () {
+			Logger.debug("Check constraintParamType");
+			self.checkModelData(ConstraintParamType, checkParamType, fail, result);
+		};
+
+		var checkThemeZone = function () {
+			Logger.debug("Check themeZone");
+			self.checkModelData(ThemeZone, checkConstraintParamType, fail, result);
+		};
+
+		var checkThemeSDI = function () {
+			Logger.debug("Check themeSDI");
+			self.checkModelData(ThemeSDI, checkThemeZone, fail, result);
+		};
+
+		var checkSystemTrigger = function () {
+			Logger.debug("Check systemtrigger");
+			self.checkModelData(SystemTrigger, checkThemeSDI, fail, result);
+		};
+
+		var checkUserTrigger = function () {
+			Logger.debug("Check usretrigger");
+			self.checkModelData(UserTrigger, checkSystemTrigger, fail, result);
+		};
+
+		var checkUser = function () {
+			Logger.debug("Check user");
+			self.checkModelData(User, checkUserTrigger, fail, result);
+		};
+
+		var checkTeam = function () {
+			Logger.debug("Check team");
+			self.checkModelData(Team, checkUser, fail, result);
+		};
+
+		var checkOAuthKey = function () {
+			Logger.debug("Check oauthkey");
+			self.checkModelData(OAuthKey, checkTeam, fail, result);
+		};
+
+		var checkToken = function () {
+			Logger.debug("Check token");
+			var analyzeToken = function (tokens : Array<Token>) {
+				var nbTokenOutdate = 0;
+				var now = moment();
+
+				for (var i = 0; i < tokens.length; i++) {
+					var token : Token = tokens[i];
+
+					if (now.isAfter(token.endDate())) {
+						nbTokenOutdate++;
+					}
+				}
+
+				if (nbTokenOutdate > 0) {
+					result.push({'model':'token','msg': nbTokenOutdate+" tokens are out of date. You need to run a clean for tokens."});
+				}
+
+				checkOAuthKey();
+			};
+
+			self.checkModelData(Token, analyzeToken, fail, result);
+		};
+
+		var checkTypeParamType = function () {
+			Logger.debug("Check typeParamType");
+			self.checkModelData(TypeParamType, checkTeam, fail, result);
+		};
+
+		var checkBehaviour = function () {
+			Logger.debug("Check behaviour");
+			self.checkModelData(Behaviour, checkTypeParamType, fail, result);
+		};
+
+		var checkProvider = function () {
+			Logger.debug("Check provider");
+			self.checkModelData(Provider, checkBehaviour, fail, result);
+		};
+
+		var checkRendererTheme = function () {
+			Logger.debug("Check rendererTheme");
+			self.checkModelData(RendererTheme, checkProvider, fail, result);
+		};
+
+		var checkRenderer = function () {
+			Logger.debug("Check renderer");
+			self.checkModelData(Renderer, checkRendererTheme, fail, result);
+		};
+
+		var checkInfoType = function () {
+			Logger.debug("Check infotype");
+			self.checkModelData(InfoType, checkRenderer, fail, result);
+		};
+
+		Logger.debug("Check policies");
+		self.checkModelData(Policy, checkInfoType, fail, result);
+	};
+
+////////////////////// End: Check all Data of DB //////////////////////
+
+////////////////////// Begin: Check and remove orphans of DB //////////////////////
+
+	private checkModelOrphans(model : any, successCallback : Function, failCallback : Function, result : Array<any>) {
+		var nbElementsToDelete = 0;
+
+		var finalSuccess = function () {
+			if (nbElementsToDelete > 0) {
+				result.push({
+					'model':model.getTableName(),
+					'msg': 'Several instances of '+model.getTableName()+' ('+nbElementsToDelete+') were orphans and have been deleted. Maybe you should change the way this value is updated.'
+				});
+			}
+			successCallback();
+		};
+
+		var successAllElements = function (elements : Array<any>) {
+			if (elements.length > 0) {
+				var testElement = function (index) {
+					if (index < elements.length) {
+						var element = elements[index];
+
+						var finalTestOrphan = function () {
+							testElement(index+1);
+						};
+
+						var successTestOrphan = function (isOrphan) {
+							if (isOrphan) {
+								nbElementsToDelete++;
+								result.push({
+									'model': model.getTableName(),
+									'msg': 'Delete element with id: '+element.getId()
+								});
+								element.delete(finalTestOrphan, failCallback, 1, true); // try to force the delete
+							} else {
+								finalTestOrphan();
+							}
+						};
+
+						element.isOrphan(successTestOrphan, failCallback);
+					} else {
+						finalSuccess();
+					}
+				};
+
+				testElement(0);
+			} else {
+				finalSuccess();
+			}
+		};
+
+		model.all(successAllElements, failCallback);
+	}
+
+	checkAndRemoveOrphans = function () {
+		var self = this;
+		var result = [];
+
+		var fail = function (error) {
+			self.socket.emit("AnswerCheckAndRemoveOrphans", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - checkAllData failed");
+			Logger.debug(error);
+			Logger.info("Results before error: ");
+			Logger.info(result);
+		};
+
+		var finalSuccess = function () {
+			self.socket.emit("AnswerCheckAndRemoveOrphans", self.formatResponse(true, result));
+		};
+
+		var checkParamValue = function () {
+			Logger.debug("Check orphans paramValue");
+			self.checkModelOrphans(ParamValue, finalSuccess, fail, result);
+		};
+
+		var checkCall = function () {
+			Logger.debug("Check orphans call");
+			self.checkModelOrphans(Call, checkParamValue, fail, result);
+		};
+
+		var checkAbsoluteEvent = function () {
+			Logger.debug("Check orphans absoluteEvent");
+			self.checkModelOrphans(AbsoluteEvent, checkCall, fail, result);
+		};
+
+		var checkAbsoluteTL = function () {
+			Logger.debug("Check orphans absoluteTL");
+			self.checkModelOrphans(AbsoluteTimeline, checkAbsoluteEvent, fail, result);
+		};
+
+		var checkRelativeEvent = function () {
+			Logger.debug("Check orphans relativeEvent");
+			self.checkModelOrphans(RelativeEvent, checkAbsoluteTL, fail, result);
+		};
+
+		var checkRelativeTL = function () {
+			Logger.debug("Check orphans relativeTL");
+			self.checkModelOrphans(RelativeTimeline, checkRelativeEvent, fail, result);
+		};
+
+		var checkZoneContent = function () {
+			Logger.debug("Check orphans zoneContent");
+			self.checkModelOrphans(ZoneContent, checkRelativeTL, fail, result);
+		};
+
+		var checkRendererTheme = function () {
+			Logger.debug("Check orphans rendererTheme");
+			self.checkModelOrphans(RendererTheme, checkZoneContent, fail, result);
+		};
+
+		var checkOAuth = function () {
+			Logger.debug("Check orphans oAuth");
+			self.checkModelOrphans(OAuthKey, checkRendererTheme, fail, result);
+		};
+
+		var checkToken = function () {
+			Logger.debug("Check orphans token");
+			self.checkModelOrphans(Token, checkOAuth, fail, result);
+		};
+
+		var checkCallType = function () {
+			Logger.debug("Check orphans callType");
+			self.checkModelOrphans(CallType, checkToken, fail, result);
+		};
+
+		var checkProfil = function () {
+			Logger.debug("Check orphans profil");
+			self.checkModelOrphans(Profil, checkCallType, fail, result);
+		};
+
+		var checkZone = function () {
+			Logger.debug("Check orphans zone");
+			self.checkModelOrphans(Zone, checkProfil, fail, result);
+		};
+
+		var checkTeam = function () {
+			Logger.debug("Check orphans team");
+			self.checkModelOrphans(Team, checkZone, fail, result);
+		};
+
+		Logger.debug("Check orphans user");
+		self.checkModelOrphans(User, checkTeam, fail, result);
+	};
+
+////////////////////// End: Check and remove orphans of DB //////////////////////
+
 }

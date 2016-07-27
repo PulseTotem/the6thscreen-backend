@@ -55,6 +55,22 @@ class AbsoluteEvent extends ModelItf {
      */
     private _relativeTimeline_loaded : boolean;
 
+	/**
+	 * AbsoluteTimeline property
+	 *
+	 * @property _absoluteTimeline
+	 * @type AbsoluteTimeline
+	 */
+	private _absoluteTimeline : AbsoluteTimeline;
+
+	/**
+	 * Lazy loading for the absoluteTimeline property
+	 *
+	 * @property _absoluteTimeline_loaded
+	 * @type boolean
+	 */
+	private _absoluteTimeline_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -73,6 +89,9 @@ class AbsoluteEvent extends ModelItf {
 
 	    this._relativeTimeline = null;
 	    this._relativeTimeline_loaded = false;
+
+		this._absoluteTimeline = null;
+		this._absoluteTimeline_loaded = false;
     }
 
 	/**
@@ -169,6 +188,44 @@ class AbsoluteEvent extends ModelItf {
 			if(successCallback != null) {
 				successCallback();
 			}
+		}
+	}
+
+	/**
+	 * Return the AbsoluteTimeline in which the event is stored
+	 *
+	 * @method absoluteTimeline
+	 * @returns {AbsoluteTimeline}
+     */
+	absoluteTimeline() {
+		return this._absoluteTimeline;
+	}
+
+	/**
+	 * Load the AbsoluteEvent's absoluteTimeline
+	 *
+	 * @method loadAbsoluteTimeline
+	 * @param successCallback
+	 * @param failCallback
+     */
+	loadAbsoluteTimeline(successCallback : Function, failCallback : Function) {
+		if (! this._absoluteTimeline_loaded) {
+			var self = this;
+
+			var success = function (absoluteTimeline) {
+				self._absoluteTimeline = absoluteTimeline;
+				self._absoluteTimeline_loaded = true;
+
+				successCallback();
+			};
+
+			var fail = function (error) {
+				failCallback(error);
+			};
+
+			this.getUniquelyAssociatedObject(AbsoluteEvent, AbsoluteTimeline, success, fail);
+		} else {
+			successCallback();
 		}
 	}
 
@@ -406,6 +463,22 @@ class AbsoluteEvent extends ModelItf {
 	 */
 	static fromJSONObject(jsonObject : any) : AbsoluteEvent {
 		return new AbsoluteEvent(jsonObject.name, jsonObject.begin, jsonObject.duration, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+	}
+
+	/**
+	 * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+	 * @param successCallback
+	 * @param failCallback
+	 */
+	isOrphan(successCallback, failCallback) {
+		var self = this;
+
+		var successLoadAbsoluteTL = function () {
+			var result = (self.absoluteTimeline() == null);
+			successCallback(result);
+		};
+
+		this.loadAbsoluteTimeline(successLoadAbsoluteTL, failCallback);
 	}
 
     /**

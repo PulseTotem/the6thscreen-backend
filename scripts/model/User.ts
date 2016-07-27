@@ -996,6 +996,22 @@ class User extends ModelItf {
 	}
 
     /**
+     * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+     * @param successCallback
+     * @param failCallback
+     */
+    isOrphan(successCallback, failCallback) {
+        var self = this;
+
+        var successLoadDefaultTeam = function () {
+            var result = (self.defaultTeam() == null);
+            successCallback(result);
+        };
+
+        this.loadDefaultTeam(successLoadDefaultTeam, failCallback);
+    }
+
+    /**
      * Retrieve DataBase Table Name.
      *
      * @method getTableName
