@@ -2381,19 +2381,19 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 			self.checkModelData(Provider, checkBehaviour, fail, result);
 		};
 
-		var checkRenderer = function () {
-			Logger.debug("Check renderer");
-			self.checkModelData(Renderer, checkProvider, fail, result);
-		};
-
 		var checkRendererTheme = function () {
 			Logger.debug("Check rendererTheme");
-			self.checkModelData(RendererTheme, checkRenderer, fail, result);
+			self.checkModelData(RendererTheme, checkProvider, fail, result);
+		};
+
+		var checkRenderer = function () {
+			Logger.debug("Check renderer");
+			self.checkModelData(Renderer, checkRendererTheme, fail, result);
 		};
 
 		var checkInfoType = function () {
 			Logger.debug("Check infotype");
-			self.checkModelData(InfoType, checkRendererTheme, fail, result);
+			self.checkModelData(InfoType, checkRenderer, fail, result);
 		};
 
 		Logger.debug("Check policies");
@@ -2472,76 +2472,76 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		};
 
 		var checkParamValue = function () {
-			Logger.debug("Check paramValue");
+			Logger.debug("Check orphans paramValue");
 			self.checkModelOrphans(ParamValue, finalSuccess, fail, result);
 		};
 
 		var checkCall = function () {
-			Logger.debug("Check call");
+			Logger.debug("Check orphans call");
 			self.checkModelOrphans(Call, checkParamValue, fail, result);
 		};
 
 		var checkAbsoluteEvent = function () {
-			Logger.debug("Check absoluteEvent");
+			Logger.debug("Check orphans absoluteEvent");
 			self.checkModelOrphans(AbsoluteEvent, checkCall, fail, result);
 		};
 
 		var checkAbsoluteTL = function () {
-			Logger.debug("Check absoluteTL");
+			Logger.debug("Check orphans absoluteTL");
 			self.checkModelOrphans(AbsoluteTimeline, checkAbsoluteEvent, fail, result);
 		};
 
 		var checkRelativeEvent = function () {
-			Logger.debug("Check relativeEvent");
+			Logger.debug("Check orphans relativeEvent");
 			self.checkModelOrphans(RelativeEvent, checkAbsoluteTL, fail, result);
 		};
 
 		var checkRelativeTL = function () {
-			Logger.debug("Check relativeTL");
+			Logger.debug("Check orphans relativeTL");
 			self.checkModelOrphans(RelativeTimeline, checkRelativeEvent, fail, result);
 		};
 
 		var checkZoneContent = function () {
-			Logger.debug("Check zoneContent");
+			Logger.debug("Check orphans zoneContent");
 			self.checkModelOrphans(ZoneContent, checkRelativeTL, fail, result);
 		};
 
 		var checkRendererTheme = function () {
-			Logger.debug("Check rendererTheme");
+			Logger.debug("Check orphans rendererTheme");
 			self.checkModelOrphans(RendererTheme, checkZoneContent, fail, result);
 		};
 
 		var checkOAuth = function () {
-			Logger.debug("Check oAuth");
+			Logger.debug("Check orphans oAuth");
 			self.checkModelOrphans(OAuthKey, checkRendererTheme, fail, result);
 		};
 
 		var checkToken = function () {
-			Logger.debug("Check token");
+			Logger.debug("Check orphans token");
 			self.checkModelOrphans(Token, checkOAuth, fail, result);
 		};
 
 		var checkCallType = function () {
-			Logger.debug("Check callType");
+			Logger.debug("Check orphans callType");
 			self.checkModelOrphans(CallType, checkToken, fail, result);
 		};
 
 		var checkProfil = function () {
-			Logger.debug("Check profil");
+			Logger.debug("Check orphans profil");
 			self.checkModelOrphans(Profil, checkCallType, fail, result);
 		};
 
 		var checkZone = function () {
-			Logger.debug("Check zone");
+			Logger.debug("Check orphans zone");
 			self.checkModelOrphans(Zone, checkProfil, fail, result);
 		};
 
 		var checkTeam = function () {
-			Logger.debug("Check team");
+			Logger.debug("Check orphans team");
 			self.checkModelOrphans(Team, checkZone, fail, result);
 		};
 
-		Logger.debug("Check user");
+		Logger.debug("Check orphans user");
 		self.checkModelOrphans(User, checkTeam, fail, result);
 	};
 

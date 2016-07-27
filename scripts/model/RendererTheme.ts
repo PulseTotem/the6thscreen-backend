@@ -146,8 +146,9 @@ class RendererTheme extends ModelItf {
 
 		var success : Function = function () {
 			self._complete = (self._complete && !!self.name());
+
 			successCallback();
-		}
+		};
 
 		super.checkCompleteness(success, failCallback);
 	}
