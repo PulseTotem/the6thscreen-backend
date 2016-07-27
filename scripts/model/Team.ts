@@ -1,5 +1,6 @@
 /**
  * @author Simon Urli <simon@pulsetotem.fr>
+ * @author Christian Brel <christian@pulsetotem.fr, ch.brel@gmail.com>
  */
 
 /// <reference path="./ModelItf.ts" />
@@ -18,6 +19,14 @@ class Team extends ModelItf {
      * @private
      */
     private _name : string;
+
+	/**
+	 * CmsId property.
+	 *
+	 * @property _cmsId
+	 * @type string
+	 */
+	private _cmsId : string;
 
     /**
      * @property _owner : User owner of the team
@@ -70,15 +79,17 @@ class Team extends ModelItf {
     /**
      * Constructor of a team. Only the name is mandatory.
      * @param name
+	 * @param {string} cmsId - The Team's cmsId.
      * @param id
      * @param complete
      * @param createdAt
      * @param updatedAt
      */
-    constructor(name : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+    constructor(name : string = "", cmsId : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
         super(id, complete, createdAt, updatedAt);
 
         this.setName(name);
+		this.setCmsId(cmsId);
 
         this._owner = null;
         this._owner_loaded = false;
@@ -108,6 +119,24 @@ class Team extends ModelItf {
     name() : string {
         return this._name;
     }
+
+	/**
+	 * Returns Team's cmsId.
+	 *
+	 * @method cmsId
+	 */
+	cmsId() : string {
+		return this._cmsId;
+	}
+
+	/**
+	 * Set the Team's cmsId.
+	 *
+	 * @method setCmsId
+	 */
+	setCmsId(cmsId : string) {
+		this._cmsId = cmsId;
+	}
 
     /**
      * Get the owner of the team
@@ -310,6 +339,7 @@ class Team extends ModelItf {
         var data = {
             "id": this.getId(),
             "name": this.name(),
+			"cmsId": this.cmsId(),
             "complete": this.isComplete(),
             "createdAt" : this.getCreatedAt(),
             "updatedAt" : this.getUpdatedAt()
@@ -436,9 +466,34 @@ class Team extends ModelItf {
      * @param {number} userID The id of the User to add inside the Team. It cannot be a null value.
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
+	 * @param {string} cmsAuthKey - The callback function when fail.
      */
-    addUser(userID : number, successCallback : Function, failCallback : Function) {
-        this.associateObject(Team, User, userID, successCallback, failCallback);
+    addUser(userID : number, successCallback : Function, failCallback : Function, cmsAuthKey : string = "") {
+		var self = this;
+
+		var successAssociate = function(resultAssociation) {
+
+			var successReadUser = function(user : User) {
+
+				var successAddUser = function() {
+					successCallback(resultAssociation);
+				};
+
+				if(user.cmsId() != "" && self.cmsId() != "" && cmsAuthKey != "") {
+					var addUserToTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + self.cmsId() + '/' + BackendConfig.getCMSUsersPath() + user.cmsId();
+
+
+					var data = {};
+
+					RestClient.put(addUserToTeamUrl, data, successAddUser, failCallback, cmsAuthKey);
+				} else {
+					successAddUser();
+				}
+			};
+
+			User.read(userID, successReadUser, failCallback);
+		};
+        this.associateObject(Team, User, userID, successAssociate, failCallback);
     }
 
     /**
@@ -449,9 +504,32 @@ class Team extends ModelItf {
      * @param {number} userID The id of the User to remove from that Team
      * @param {Function} successCallback - The callback function when success.
      * @param {Function} failCallback - The callback function when fail.
+	 * @param {string} cmsAuthKey - The callback function when fail.
      */
-    removeUser(userID : number, successCallback : Function, failCallback : Function) {
-        this.deleteObjectAssociation(Team, User, userID, successCallback, failCallback);
+    removeUser(userID : number, successCallback : Function, failCallback : Function, cmsAuthKey : string = "") {
+		var self = this;
+
+		var successDeleteAssociate = function(resultAssociation) {
+
+			var successReadUser = function(user : User) {
+
+				var successRemoveUser = function() {
+					successCallback(resultAssociation);
+				};
+
+				if(user.cmsId() != "" && self.cmsId() != "" && cmsAuthKey != "") {
+					var deleteUserToTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + self.cmsId() + '/' + BackendConfig.getCMSUsersPath() + user.cmsId();
+
+					RestClient.delete(deleteUserToTeamUrl, successRemoveUser, failCallback, cmsAuthKey);
+				} else {
+					successRemoveUser();
+				}
+			};
+
+			User.read(userID, successReadUser, failCallback);
+		};
+
+        this.deleteObjectAssociation(Team, User, userID, successDeleteAssociate, failCallback);
     }
 
     /**
@@ -607,6 +685,18 @@ class Team extends ModelItf {
         return this.allObjects(Team, successCallback, failCallback, attemptNumber);
     }
 
+	/**
+	 * Find One Team by name.
+	 *
+	 * @method findOneByName
+	 * @param {string} teamname - The Team's name
+	 * @param {Function} successCallback - The callback function when success.
+	 * @param {Function} failCallback - The callback function when fail.
+	 */
+	static findOneByName(teamname : string, successCallback : Function, failCallback : Function) {
+		return this.findOneBy(Team, "name", teamname, successCallback, failCallback);
+	}
+
     /**
      * Return a Team instance from a JSON string.
      *
@@ -628,7 +718,23 @@ class Team extends ModelItf {
      * @return {SDI} The model instance.
      */
     static fromJSONObject(jsonObject : any) : Team {
-        return new Team(jsonObject.name, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+        return new Team(jsonObject.name, jsonObject.cmsId, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+    }
+
+    /**
+     * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+     * @param successCallback
+     * @param failCallback
+     */
+    isOrphan(successCallback, failCallback) {
+        var self = this;
+
+        var successLoadOwner = function () {
+            var result = (self.owner() == null);
+            successCallback(result);
+        };
+
+        this.loadOwner(successLoadOwner, failCallback);
     }
 
     /**

@@ -3,7 +3,6 @@
  */
 
 /// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
-/// <reference path="../../t6s-core/core-backend/scripts/Logger.ts" />
 /// <reference path="./BackendAuthNamespaceManager.ts" />
 /// <reference path="../model/User.ts" />
 /// <reference path="../model/SDI.ts" />
@@ -24,7 +23,6 @@
 /// <reference path="../model/TimelineRunner.ts" />
 /// <reference path="../model/Team.ts" />
 /// <reference path="../model/Provider.ts" />
-
 
 class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
@@ -113,7 +111,6 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('CreateSystemTrigger', function(data) { self.createObject(SystemTrigger, data, "AnswerCreateSystemTrigger"); });
 		this.addListenerToSocket('CreateUserTrigger', function(data) { self.createObject(UserTrigger, data, "AnswerCreateUserTrigger"); });
 		this.addListenerToSocket('CreateTimelineRunner', function(data) { self.createObject(TimelineRunner, data, "AnswerCreateTimelineRunner"); });
-		this.addListenerToSocket('CreateTeam', function(data) { self.createObject(Team, data, "AnswerCreateTeam"); });
 		this.addListenerToSocket('CreateProvider', function(data) { self.createObject(Provider, data, "AnswerCreateProvider"); });
 
 
@@ -142,7 +139,6 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('UpdateUserTrigger', function(data) { self.updateObjectAttribute(UserTrigger, data, "AnswerUpdateUserTrigger"); });
 		this.addListenerToSocket('UpdateTimelineRunner', function(data) { self.updateObjectAttribute(TimelineRunner, data, "AnswerUpdateTimelineRunner"); });
 		this.addListenerToSocket('UpdateOAuthKey', function(data) { self.updateObjectAttribute(OAuthKey, data, "AnswerUpdateOAuthKey"); });
-		this.addListenerToSocket('UpdateTeam', function(data) { self.updateObjectAttribute(Team, data, "AnswerUpdateTeam"); });
 		this.addListenerToSocket('UpdateProvider', function(data) { self.updateObjectAttribute(Provider, data, "AnswerUpdateProvider"); });
 
 
@@ -169,7 +165,6 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('DeleteUserTrigger', function(idUserTrigger) { self.deleteObjectFromDescription(UserTrigger, "userTriggerId", idUserTrigger, "AnswerDeleteUserTrigger"); });
 		this.addListenerToSocket('DeleteSDI', function(idSDI) { self.deleteObjectFromDescription(SDI, "sdiId", idSDI, "AnswerDeleteSDI"); });
 		this.addListenerToSocket('DeleteTimelineRunner', function(idTimelineRunner) { self.deleteObjectFromDescription(TimelineRunner, "timelineRunnerId", idTimelineRunner, "AnswerDeleteTimelineRunner"); });
-		this.addListenerToSocket('DeleteTeam', function(idTeam) { self.deleteObjectFromDescription(Team, "teamId", idTeam, "AnswerDeleteTeam"); });
 		this.addListenerToSocket('DeleteProvider', function(idProvider) { self.deleteObjectFromDescription(Provider, "providerId", idProvider, "AnswerDeleteProvider"); });
 
 		// Custom requests
@@ -198,20 +193,24 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('CreateUser', function(data) { self.createUser(data); });
 		this.addListenerToSocket('DeleteUser', function(idUser) { self.deleteUser(idUser["userId"]); });
 		this.addListenerToSocket('UpdateUser', function(data) { self.updateUser(data); });
-
+		this.addListenerToSocket('CreateTeam', function(data) { self.createTeam(data); });
+		this.addListenerToSocket('DeleteTeam', function(idTeam) { self.deleteTeam(idTeam["teamId"]); });
+		this.addListenerToSocket('UpdateTeam', function(data) { self.updateTeam(data); });
 
 
 		this.addListenerToSocket('CreateOAuthKeyDescription', function(data) { self.createOAuthKey(data); });
-
-
 
 		this.addListenerToSocket('RetrieveParamTypesFromCallType', function (callTypeDescription) { self.sendParamTypesDescriptionFromCallType(callTypeDescription); });
 		this.addListenerToSocket('CreateParamValueDescription', function (paramValueDescription) { self.createParamValueDescription(paramValueDescription); });
 		this.addListenerToSocket('RetrieveParamValuesFromCall', function (callDescription) { self.sendParamValuesDescriptionFromCall(callDescription); });
 		this.addListenerToSocket('ResetUserPassword', function (passwordDescription) { self.resetUserPassword(passwordDescription); });
 
-		this.addListenerToSocket('CloneProfil', function(data) { self.cloneProfil(data); });
+		this.addListenerToSocket('CloneZoneContent', function(data) { self.cloneZoneContent(data); });
 		this.addListenerToSocket('CloneSDI', function(data) { self.cloneSDI(data); });
+		this.addListenerToSocket('CloneRelativeEventAndLinkTimeline', function (data) { self.cloneRelativeEventAndLinkTimeline(data); });
+
+		this.addListenerToSocket('CheckAllData', function () { self.checkAllData(); });
+		this.addListenerToSocket('CheckAndRemoveOrphans', function () { self.checkAndRemoveOrphans(); });
 
 		// Remote control to the client
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
@@ -1389,38 +1388,59 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 ////////////////////// END: Manage resetUserPassword //////////////////////
 
-////////////////////// Begin: Manage cloneProfil //////////////////////
+////////////////////// Begin: Manage cloneZoneContent //////////////////////
 
-	cloneProfil(profilDescription : any) {
-		// profilDescription : { 'profilId': number }
-		var profilId = profilDescription.profilId;
+	cloneZoneContent(zoneContentDescription : any) {
+		// zoneContentDescription : { 'zoneContentId': number }
+		var zoneContentId = zoneContentDescription.zoneContentId;
 		var self = this;
 
 		var fail : Function = function (error) {
-			Logger.error("Error when reading the profil "+profilId);
+			Logger.error("Error when reading the zoneContent "+zoneContentId);
 			Logger.error(error);
-			self.socket.emit("AnswerCloneProfil", self.formatResponse(false, error));
+			self.socket.emit("AnswerCloneZoneContent", self.formatResponse(false, error));
 		};
 
-		var successReadProfil = function (profil : Profil) {
-			var successCloneProfil = function (clonedProfil : Profil) {
-				Logger.debug("Answer to admin for cloning profil");
-				self.socket.emit("AnswerCloneProfil", self.formatResponse(true, clonedProfil.toJSONObject()));
+		var successReadZoneContent = function (zoneContent : ZoneContent) {
+			var successCloneZoneContent = function (clonedZoneContent : ZoneContent) {
+				var successLoadZone = function () {
+					var successLinkZone = function () {
+						var successCheckComplete = function () {
+							var successUpdateClone = function () {
+								var successCompleteJSONObject = function (completeData) {
+									self.socket.emit("AnswerCloneZoneContent", self.formatResponse(true, completeData));
+								};
+
+								clonedZoneContent.toCompleteJSONObject(successCompleteJSONObject, fail);
+							};
+
+							clonedZoneContent.update(successUpdateClone, fail);
+						};
+
+						clonedZoneContent.setName(clonedZoneContent.name()+"clone");
+						clonedZoneContent.checkCompleteness(successCheckComplete, fail);
+					};
+
+					clonedZoneContent.linkZone(zoneContent.zone().getId(), successLinkZone, fail);
+				};
+
+				zoneContent.loadZone(successLoadZone, fail);
 			};
 
-			profil.clone(successCloneProfil, fail, null);
+			zoneContent.clone(successCloneZoneContent, fail, null);
 		};
 
-		Profil.read(profilId, successReadProfil, fail);
+		ZoneContent.read(zoneContentId, successReadZoneContent, fail);
 	}
 
-////////////////////// END: Manage cloneProfil //////////////////////
+////////////////////// END: Manage cloneZoneContent //////////////////////
 
 ////////////////////// Begin: Manage cloneSDI //////////////////////
 
 	cloneSDI(SDIDescription : any) {
-		// SDIDescription : { 'SDIId': number }
+		// SDIDescription : { 'SDIId': number, 'cloneProfil': boolean }
 		var sdiId = SDIDescription.SDIId;
+		var cloneProfil = SDIDescription.cloneProfil;
 		var self = this;
 
 		var fail : Function = function (error) {
@@ -1432,10 +1452,16 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		var successReadSDI = function (sdi : SDI) {
 			var successCloneSDI = function (clonedSDI : SDI) {
 				Logger.debug("Answer to admin for cloning sdi");
-				self.socket.emit("AnswerCloneSDI", self.formatResponse(true, clonedSDI.toJSONObject()));
+
+				var successCompleteJSONObject = function (data) {
+					self.socket.emit("AnswerCloneSDI", self.formatResponse(true, data));
+				};
+
+				clonedSDI.desynchronize();
+				clonedSDI.toCompleteJSONObject(successCompleteJSONObject, fail);
 			};
 
-			sdi.clone(successCloneSDI, fail);
+			sdi.clone(cloneProfil, successCloneSDI, fail);
 		};
 
 		SDI.read(sdiId, successReadSDI, fail);
@@ -1458,7 +1484,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 		var fail = function(error) {
 			self.socket.emit("AnswerUpdateUser", self.formatResponse(false, error));
-			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with fail status.");
+			Logger.error("SocketId: " + self.socket.id + " - updateUser : send done with fail status.");
 		};
 
 		var successUserCompleteDesc = function(userCompleteDesc) {
@@ -1466,52 +1492,75 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 			Logger.debug("SocketId: " + self.socket.id + " - updateUser : send done with success status.");
 		};
 
-		var insertDataToCms = function (url, user, successCallback) {
-			var args = {
-				"data": {
-					"username": user.username(),
-					"email": user.email()
-				},
-				"headers": {
-					"Content-Type": "application/json",
-					"Authorization": self.socket.connectedUser.cmsAuthkey()
-				}
-			};
+		var successUserRead = function(user : User) {
 
-			var req = RestClient.getClient().put(url, args, function (data, response) {
-				if (response.statusCode >= 200 && response.statusCode < 300) {
-					successCallback(data);
-				} else {
-					fail(new RestClientResponse(false, data));
-				}
-			});
-			req.on('error', function (msg) {
-				Logger.error("Error while connecting to CMS");
-				Logger.debug(msg.toString());
-
-				fail(new RestClientResponse(false, msg.toString()));
-			});
-		};
-
-		var updateUser = function (url, user, successCallback) {
 			if(user.username() != "" && user.email() != "") {
 				var successCompleteUser = function (userCompleteDesc) {
 
-					var success = function (data) {
-						successCallback(userCompleteDesc, data);
-					};
+					var successUpdateTeamName = function(newTeam : Team) {
 
-					var successUpdateTeamName = function () {
-						insertDataToCms(url, user, success);
+						var failCMS = function(failResponse : RestClientResponse) {
+							fail(failResponse.data());
+						};
+
+						var data = {
+							"username": user.username(),
+							"email": user.email()
+						};
+
+						if(user.cmsId() != "" && user.cmsAuthkey() != "") {
+
+							var successUpdateCMS = function() {
+								successUserCompleteDesc(userCompleteDesc);
+							};
+
+							var updateUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
+							RestClient.put(updateUserUrl, data, successUpdateCMS, failCMS, self.socket.connectedUser.cmsAuthkey());
+						} else {
+							var successCreateCMS = function(createResponse : RestClientResponse) {
+								var data : any = createResponse.data();
+
+								user.setCmsId(data.id);
+								user.setCmsAuthkey(data.authkey);
+
+								var successAddCMSUserToCMSTeam = function() {
+									successUserCompleteDesc(userCompleteDesc);
+								};
+
+								var successUpdate = function() {
+									userCompleteDesc.cmsId = user.cmsId();
+									userCompleteDesc.cmsAuthkey = user.cmsAuthkey();
+
+									var addUserToTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + newTeam.cmsId() + '/' + BackendConfig.getCMSUsersPath() + user.cmsId();
+
+									Logger.debug(addUserToTeamUrl);
+
+									var data = {};
+
+									RestClient.put(addUserToTeamUrl, data, successAddCMSUserToCMSTeam, failCMS, self.socket.connectedUser.cmsAuthkey());
+								};
+
+								user.update(successUpdate, fail);
+							};
+
+							var createUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath();
+							RestClient.post(createUserUrl, data, successCreateCMS, fail, self.socket.connectedUser.cmsAuthkey());
+						}
 					};
 
 					var team = user.defaultTeam();
 					if (team == null) {
 						Logger.error("The following error has no default team: "+user.username()+" ("+user.getId()+")");
+						fail("The following error has no default team: "+user.username()+" ("+user.getId()+")");
 					} else {
 						var newTeamName = user.username()+"Team";
 						team.setName(newTeamName);
-						team.update(successUpdateTeamName, fail);
+						var teamDescription = {
+							"id" : team.getId(),
+							"method" : "setName",
+							"value" : newTeamName
+						};
+						self.updateTeamObject(teamDescription, successUpdateTeamName, fail);
 					}
 				};
 
@@ -1521,41 +1570,11 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 			}
 		};
 
-		var successUserRead = function(user : User) {
-
-			if(user.cmsId() != "" && user.cmsAuthkey() != "") {
-				var updateUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
-				var successUpdateCMSInfo = function (userCompleteDesc, data) {
-					successUserCompleteDesc(userCompleteDesc);
-				};
-
-				updateUser(updateUserUrl, user, successUpdateCMSInfo);
-			} else {
-				var createUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath();
-				var successCreateCMSInfo = function (userCompleteDesc, data) {
-					Logger.debug(data.id);
-					Logger.debug(data.authkey);
-
-					user.setCmsId(data.id);
-					user.setCmsAuthkey(data.authkey);
-
-					var successUpdate = function() {
-						successUserCompleteDesc(userCompleteDesc);
-					};
-
-					Logger.debug(user.toJSONObject());
-
-					user.update(successUpdate, fail);
-				};
-				updateUser(createUserUrl, user, successCreateCMSInfo);
-			}
-		};
-
 		var successUpdateUser = function() {
 			User.read(userDescription.id, successUserRead, fail);
 		};
 
-		ModelItf.updateAttribute(User, userDescription, successUpdateUser, fail);
+		ModelItf.updateAttribute(User, userDescription, successUpdateUser, fail, self.socket.connectedUser.cmsAuthkey());
 	}
 
 ////////////////////// End: Manage updateUser //////////////////////
@@ -1577,7 +1596,6 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		var fail = function (error) {
 			self.socket.emit("AnswerDeleteUser", self.formatResponse(false, error));
 			Logger.error("SocketId: "+self.socket.id+" - DeleteUser failed");
-			Logger.debug(error);
 		};
 
 		var successReadUser = function (user : User) {
@@ -1589,29 +1607,11 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 			if(!!user.cmsId()) {
 				var deleteUserUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSUsersPath() + user.cmsId();
 
-				var args = {
-					"data" : {
-
-					},
-					"headers": {
-						"Content-Type": "application/json",
-						"Authorization": self.socket.connectedUser.cmsAuthkey()
-					}
+				var successDeleteCMSUser = function() {
+					user.delete(successDeleteUser, fail);
 				};
 
-				var req = RestClient.getClient().delete(deleteUserUrl, args, function (data, response) {
-					if (response.statusCode >= 200 && response.statusCode < 300) {
-						user.delete(successDeleteUser, fail);
-					} else {
-						fail(new RestClientResponse(false, data));
-					}
-				});
-				req.on('error', function (msg) {
-					Logger.error("Error while connecting to CMS");
-					Logger.debug(msg.toString());
-
-					fail(new RestClientResponse(false, msg.toString()));
-				});
+				RestClient.delete(deleteUserUrl, successDeleteCMSUser, fail, self.socket.connectedUser.cmsAuthkey());
 			} else {
 				user.delete(successDeleteUser, fail);
 			}
@@ -1621,6 +1621,196 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 	}
 
 ////////////////////// End: Manage deleteUser //////////////////////
+
+////////////////////// Begin: Manage createTeam //////////////////////
+
+	/**
+	 * Create Team from given data.
+	 * Save new Team in CMS.
+	 * Send the result on the channel "AnswerCreateTeam"
+	 *
+	 * @method createTeam
+	 * @param {JSONObject} teamDescription - Team description to update
+	 */
+	createTeam(teamDescription : any) {
+		var self = this;
+
+		var fail = function(error) {
+			self.socket.emit("AnswerCreateTeam", self.formatResponse(false, error));
+			Logger.error("SocketId: " + self.socket.id + " - createTeam : send done with fail status.");
+		};
+
+		var successCompleteTeamDescription = function(teamCompleteDescription) {
+			self.socket.emit("AnswerCreateTeam", self.formatResponse(true, teamCompleteDescription));
+		};
+
+		var successCreateTeam = function(team : Team) {
+			team.toCompleteJSONObject(successCompleteTeamDescription, fail);
+		};
+
+		self.createTeamObject(teamDescription, successCreateTeam, fail);
+	}
+
+	/**
+	 * Create Team Object from given data and return it.
+	 *
+	 * @method createTeamObject
+	 * @param {JSONObject} teamDescription - Team description to update
+	 * @param {Function} successCB - Success callback.
+	 * @param {Function} failCB - Fail callback.
+	 */
+	createTeamObject(teamDescription : any, successCB : Function, failCB : Function) {
+		var self = this;
+
+		var fail = function(error) {
+			Logger.error("SocketId: " + self.socket.id + " - createTeamObject : fail.");
+			failCB(error);
+		};
+
+		var team : Team = Team.fromJSONObject(teamDescription);
+
+		var successUpdateTeam = function() {
+			successCB(team);
+		};
+
+		var successCreateTeam = function() {
+			if(team.name() == "") {
+				team.setName("Team" + team.getId());
+			}
+
+			team.update(successUpdateTeam, fail);
+		};
+
+		team.create(successCreateTeam, fail);
+	}
+
+////////////////////// End: Manage createTeam //////////////////////
+
+////////////////////// Begin: Manage updateTeam //////////////////////
+
+	/**
+	 * Update Team from given data.
+	 * Save new Team in CMS.
+	 * Send the result on the channel "AnswerUpdateTeam"
+	 *
+	 * @method updateTeam
+	 * @param {JSONObject} teamDescription - Team description to update
+	 */
+	updateTeam(teamDescription : any) {
+		var self = this;
+
+		var fail = function(error) {
+			self.socket.emit("AnswerUpdateTeam", self.formatResponse(false, error));
+			Logger.error("SocketId: " + self.socket.id + " - updateTeam : send done with fail status.");
+		};
+
+		var successTeamCompleteDesc = function(teamCompleteDesc) {
+			self.socket.emit("AnswerUpdateTeam", self.formatResponse(true, teamCompleteDesc));
+			Logger.debug("SocketId: " + self.socket.id + " - updateTeam : send done with success status.");
+		};
+
+		var successUpdateTeam = function(team : Team) {
+			team.toCompleteJSONObject(successTeamCompleteDesc, fail);
+		};
+
+		self.updateTeamObject(teamDescription, successUpdateTeam, fail);
+	}
+
+	/**
+	 * Update Team Object from given data and return it.
+	 *
+	 * @method updateTeamObject
+	 * @param {JSONObject} teamDescription - Team description to update
+	 * @param {Function} successCB - Success callback.
+	 * @param {Function} failCB - Fail callback.
+	 */
+	updateTeamObject(teamDescription : any, successCB : Function, failCB : Function) {
+		var self = this;
+
+		var fail = function(error) {
+			Logger.error("SocketId: " + self.socket.id + " - updateTeamObject : fail.");
+			failCB(error);
+		};
+
+		var successTeamRead = function(team : Team) {
+			var data = {
+				"name": team.name()
+			};
+
+			if(team.cmsId() != "") {
+				var successUpdateCMS = function() {
+					successCB(team);
+				};
+
+				var updateTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + team.cmsId();
+				RestClient.put(updateTeamUrl, data, successUpdateCMS, fail, self.socket.connectedUser.cmsAuthkey());
+			} else {
+				var successCreateCMS = function(createResponse : RestClientResponse) {
+					var cmsdata = createResponse.data();
+					team.setCmsId(cmsdata.id);
+
+					var successUpdate = function() {
+						successCB(team);
+					};
+
+					team.update(successUpdate, fail);
+				};
+
+				var createTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath();
+				RestClient.post(createTeamUrl, data, successCreateCMS, fail, self.socket.connectedUser.cmsAuthkey());
+			}
+		};
+
+		var successUpdateTeam = function() {
+			Team.read(teamDescription.id, successTeamRead, fail);
+		};
+
+		ModelItf.updateAttribute(Team, teamDescription, successUpdateTeam, fail, self.socket.connectedUser.cmsAuthkey());
+	}
+
+////////////////////// End: Manage updateTeam //////////////////////
+
+////////////////////// Begin: Manage deleteTeam //////////////////////
+
+	/**
+	 * Delete Team from given id.
+	 * Delete Team in CMS.
+	 * Send the result on the channel "AnswerDeleteTeam"
+	 *
+	 * @method deleteTeam
+	 * @param {number} teamId - Team's Id to delete
+	 */
+	deleteTeam(teamId : number) {
+		var self = this;
+
+		var fail = function (error) {
+			self.socket.emit("AnswerDeleteTeam", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - DeleteTeam failed");
+		};
+
+		var successReadTeam = function (team : Team) {
+
+			var successDeleteTeam = function () {
+				self.socket.emit("AnswerDeleteTeam", self.formatResponse(true, teamId));
+			};
+
+			if(!!team.cmsId()) {
+				var deleteTeamUrl = BackendConfig.getCMSHost() + BackendConfig.getCMSTeamsPath() + team.cmsId();
+
+				var successDeleteCMSTeam = function() {
+					team.delete(successDeleteTeam, fail);
+				};
+
+				RestClient.delete(deleteTeamUrl, successDeleteCMSTeam, fail, self.socket.connectedUser.cmsAuthkey());
+			} else {
+				team.delete(successDeleteTeam, fail);
+			}
+		};
+
+		Team.read(teamId, successReadTeam, fail);
+	}
+
+////////////////////// End: Manage deleteTeam //////////////////////
 
 ////////////////////// Begin: Manage RendererThemes of Renderer //////////////////////
 
@@ -1749,37 +1939,51 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 			Logger.debug(error);
 		};
 
+		var user = User.fromJSONObject(dataUser);
+
 		var successCreateUser = function (userData) {
 
-			var user : User = User.fromJSONObject(userData);
+			var successUpdateUser = function() {
 
-			var successCreateTeam = function (teamData) {
+				var successCreateTeam = function (team : Team) {
 
-				var team : Team = Team.fromJSONObject(teamData);
-				var successLinkDefaultTeam = function () {
-					var successLinkOwner = function () {
-						var successAddUser = function () {
-							var successCompleteJSONObject = function (data) {
-								self.socket.emit("AnswerCreateUser", self.formatResponse(true, data));
+					var successLinkDefaultTeam = function () {
+						var successLinkOwner = function () {
+							var successAddUser = function () {
+								var successCompleteJSONObject = function (data) {
+									self.socket.emit("AnswerCreateUser", self.formatResponse(true, data));
+								};
+
+								user.toCompleteJSONObject(successCompleteJSONObject, fail);
 							};
 
-							user.toCompleteJSONObject(successCompleteJSONObject, fail);
+							team.addUser(user.getId(), successAddUser, fail);
 						};
 
-						team.addUser(user.getId(), successAddUser, fail);
+						team.linkOwner(user.getId(), successLinkOwner, fail);
 					};
 
-					team.linkOwner(user.getId(), successLinkOwner, fail);
+					user.linkDefaultTeam(team.getId(), successLinkDefaultTeam, fail);
 				};
 
-				user.linkDefaultTeam(team.getId(), successLinkDefaultTeam, fail);
+				var teamDescription = {
+					"name" : user.username()+" team"
+				};
+
+				self.createTeamObject(teamDescription, successCreateTeam, fail);
 			};
 
-			var team = new Team(user.username()+" team");
-			team.create(successCreateTeam, fail);
+			if(user.username() == "") {
+				user.setUsername("User" + user.getId());
+			}
+
+			if(user.email() == "") {
+				user.setEmail("User" + user.getId() + "@pulsetotem.fr");
+			}
+
+			user.update(successUpdateUser, fail);
 		};
 
-		var user = User.fromJSONObject(dataUser);
 		user.create(successCreateUser, fail);
 	}
 ////////////////////// END: Manage creating user and her default team //////////////////////
@@ -1849,4 +2053,498 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 		Team.read(teamId, successRead, fail);
 	}
+
+	/**
+	 * Clone a relativeEvent and its call. Change position of the relativeEvent (+1 from original position). Link the newly created relativeEvent to the relativeTimeline
+	 *
+	 * @param eventAndTlData: id of the relativeEvent to clone and the relativeTimeline to link with. (e.g. : {'relativeEventId': 12, 'timelineId' : 15})
+     */
+	cloneRelativeEventAndLinkTimeline(eventAndTlData : any) {
+		var self = this;
+
+		var relativeEventId = eventAndTlData.relativeEventId;
+		var timelineId = eventAndTlData.timelineId;
+
+		var fail = function (error) {
+			self.socket.emit("AnswerCloneRelativeEventAndLinkTimeline", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - cloneRelativeEventAndLinkTimeline failed");
+			Logger.debug(error);
+		};
+
+		var successReadRelativeEvent = function (relativeEvent : RelativeEvent) {
+			var successCloneRelativeEvent = function (clonedRelativeEvent : RelativeEvent) {
+				var successUpdateRelativeEvent = function () {
+					var successReadRelativeTimeline = function (relativeTimeline : RelativeTimeline) {
+						var successLinkRelativeEvent = function () {
+							self.socket.emit("AnswerCloneRelativeEventAndLinkTimeline", self.formatResponse(true,{"cloneId": clonedRelativeEvent.getId()}));
+						};
+
+						relativeTimeline.addRelativeEvent(clonedRelativeEvent.getId(), successLinkRelativeEvent, fail);
+					};
+
+					RelativeTimeline.read(timelineId, successReadRelativeTimeline, fail);
+				};
+
+				var position = clonedRelativeEvent.position();
+				clonedRelativeEvent.setPosition(position+1);
+
+				var name = clonedRelativeEvent.name();
+				clonedRelativeEvent.setName(name+" clone");
+				clonedRelativeEvent.update(successUpdateRelativeEvent, fail);
+			};
+
+			relativeEvent.clone(successCloneRelativeEvent, fail, null);
+		};
+
+		RelativeEvent.read(relativeEventId, successReadRelativeEvent, fail);
+	}
+
+////////////////////// Begin: Check all Data of DB //////////////////////
+
+	private checkModelData(model : any, checkRelations : Function, fail, result : Array<any>) {
+		var nbElementsToUpdate = 0;
+
+		var finalSuccess = function (elements) {
+			if (nbElementsToUpdate > 0) {
+				result.push({
+					'model':model.getTableName(),
+					'msg': 'Several instances of '+model.getTableName()+' ('+nbElementsToUpdate+') change their value of complete. Maybe you should change the way this value is updated.'
+				});
+			}
+			checkRelations(elements);
+		};
+
+		var successAllElements = function (elements : Array<any>) {
+			if (elements.length > 0) {
+				var testElement = function (index) {
+					if (index < elements.length) {
+						var element = elements[index];
+
+						var elementComplete = element.isComplete();
+
+						var finalCheckElement = function () {
+							testElement(index+1);
+						};
+
+						var successCheckCompleteness = function () {
+							var newCompleteValue = element.isComplete();
+							if (elementComplete != newCompleteValue) {
+								nbElementsToUpdate++;
+								element.update(finalCheckElement, fail);
+							} else {
+								finalCheckElement();
+							}
+						};
+
+						element.checkCompleteness(successCheckCompleteness, fail);
+					} else {
+						finalSuccess(elements);
+					}
+
+				};
+
+				testElement(0);
+			} else {
+				finalSuccess(elements);
+			}
+		};
+
+		model.all(successAllElements, fail);
+	}
+
+	checkAllData = function () {
+		var self = this;
+		var result = [];
+
+		var fail = function (error) {
+			self.socket.emit("AnswerCheckAllData", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - checkAllData failed");
+			Logger.debug(error);
+		};
+
+		var finalSuccess = function () {
+			self.socket.emit("AnswerCheckAllData", self.formatResponse(true, result));
+		};
+
+		var checkSDI = function () {
+			Logger.debug("Check SDI");
+			var analyzeSDI = function (sdis : Array<SDI>) {
+				var nbIncompleteSDI = 0;
+
+				for (var i = 0; i < sdis.length; i++) {
+					var sdi = sdis[i];
+
+					if (!sdi.isComplete()) {
+						nbIncompleteSDI++;
+					}
+				}
+
+				if (nbIncompleteSDI > 0) {
+					var msgToPush = {
+						'model': 'SDI',
+						'msg': "Several SDI ("+nbIncompleteSDI+") are incomplete! " +
+							   "It is certainly du to the propagation of incomplete element (e.g. zone)" +
+						       " SDI completeness is determined by assigned name, assigned team, and completeness of all contained zones and profils."
+					};
+					result.push(msgToPush);
+				}
+
+				finalSuccess();
+			};
+
+			self.checkModelData(SDI, analyzeSDI, fail, result);
+		};
+
+		var checkProfil = function () {
+			Logger.debug("Check profil");
+			self.checkModelData(Profil, checkSDI, fail, result);
+		};
+
+		var checkRelativeTL = function () {
+			Logger.debug("Check relativeTL");
+			self.checkModelData(RelativeTimeline, checkProfil, fail, result);
+		};
+
+		var checkAbsoluteTL = function () {
+			Logger.debug("Check absoluteTL");
+			self.checkModelData(AbsoluteTimeline, checkRelativeTL, fail, result);
+		};
+
+		var checkRelativeEvent = function () {
+			Logger.debug("Check relativeEvent");
+			self.checkModelData(RelativeEvent, checkAbsoluteTL, fail, result);
+		};
+
+		var checkAbsoluteEvent = function () {
+			Logger.debug("Check absoluteEvent");
+			self.checkModelData(AbsoluteEvent, checkRelativeEvent, fail, result);
+		};
+
+		var checkCall = function () {
+			Logger.debug("Check call");
+			self.checkModelData(Call, checkAbsoluteEvent, fail, result);
+		};
+
+		var checkParamValue = function () {
+			Logger.debug("Check paramValue");
+			self.checkModelData(ParamValue, checkCall, fail, result);
+		};
+
+		var checkZone = function () {
+			Logger.debug("Check zone");
+			var analyzeZone = function (zones : Array<Zone>) {
+				var nbIncompleteZone = 0;
+
+				for (var i = 0; i < zones.length; i++) {
+					var zone = zones[i];
+
+					if (!zone.isComplete()) {
+						nbIncompleteZone++;
+					}
+				}
+
+				if (nbIncompleteZone > 0) {
+					var msgToPush = {
+						'model': 'zone',
+						'msg': "Several zones ("+nbIncompleteZone+") are incomplete! " +
+						       "It is certainly du to the propagation of incomplete element (e.g. callTypes)" +
+							   " Zone completeness is determined by completeness of behaviour and of all callTypes contained in the zone."
+					};
+					result.push(msgToPush);
+				}
+
+				checkParamValue();
+			};
+
+			self.checkModelData(Zone, analyzeZone, fail, result);
+		};
+
+		var checkCallType = function () {
+			Logger.debug("Check callType");
+			var analyseCallTypes = function (callTypes : Array<CallType>) {
+				var nbIncompleteCallTypes = 0;
+
+				for (var i = 0; i < callTypes.length; i++) {
+					var callType = callTypes[i];
+
+					if (!callType.isComplete()) {
+						nbIncompleteCallTypes++;
+					}
+				}
+
+				if (nbIncompleteCallTypes > 0) {
+					result.push({'model':'callType','msg':"Several calltypes ("+nbIncompleteCallTypes+") are incomplete! It is certainly du to an incomplete migration in database (e.g. rendererTheme not set)"});
+				}
+
+				checkZone();
+			};
+
+			self.checkModelData(CallType, analyseCallTypes, fail, result);
+		};
+
+		var checkTimelineRunner = function () {
+			Logger.debug("Check TLrunner");
+			self.checkModelData(TimelineRunner, checkCallType, fail, result);
+		};
+
+		var checkSource = function () {
+			Logger.debug("Check source");
+			self.checkModelData(Source, checkTimelineRunner, fail, result);
+		};
+
+		var checkService = function () {
+			Logger.debug("Check service");
+			self.checkModelData(Service, checkSource, fail, result);
+		};
+
+		var checkParamType = function () {
+			Logger.debug("Check paramType");
+			self.checkModelData(ParamType, checkService, fail, result);
+		};
+
+		var checkConstraintParamType = function () {
+			Logger.debug("Check constraintParamType");
+			self.checkModelData(ConstraintParamType, checkParamType, fail, result);
+		};
+
+		var checkThemeZone = function () {
+			Logger.debug("Check themeZone");
+			self.checkModelData(ThemeZone, checkConstraintParamType, fail, result);
+		};
+
+		var checkThemeSDI = function () {
+			Logger.debug("Check themeSDI");
+			self.checkModelData(ThemeSDI, checkThemeZone, fail, result);
+		};
+
+		var checkSystemTrigger = function () {
+			Logger.debug("Check systemtrigger");
+			self.checkModelData(SystemTrigger, checkThemeSDI, fail, result);
+		};
+
+		var checkUserTrigger = function () {
+			Logger.debug("Check usretrigger");
+			self.checkModelData(UserTrigger, checkSystemTrigger, fail, result);
+		};
+
+		var checkUser = function () {
+			Logger.debug("Check user");
+			self.checkModelData(User, checkUserTrigger, fail, result);
+		};
+
+		var checkTeam = function () {
+			Logger.debug("Check team");
+			self.checkModelData(Team, checkUser, fail, result);
+		};
+
+		var checkOAuthKey = function () {
+			Logger.debug("Check oauthkey");
+			self.checkModelData(OAuthKey, checkTeam, fail, result);
+		};
+
+		var checkToken = function () {
+			Logger.debug("Check token");
+			var analyzeToken = function (tokens : Array<Token>) {
+				var nbTokenOutdate = 0;
+				var now = moment();
+
+				for (var i = 0; i < tokens.length; i++) {
+					var token : Token = tokens[i];
+
+					if (now.isAfter(token.endDate())) {
+						nbTokenOutdate++;
+					}
+				}
+
+				if (nbTokenOutdate > 0) {
+					result.push({'model':'token','msg': nbTokenOutdate+" tokens are out of date. You need to run a clean for tokens."});
+				}
+
+				checkOAuthKey();
+			};
+
+			self.checkModelData(Token, analyzeToken, fail, result);
+		};
+
+		var checkTypeParamType = function () {
+			Logger.debug("Check typeParamType");
+			self.checkModelData(TypeParamType, checkTeam, fail, result);
+		};
+
+		var checkBehaviour = function () {
+			Logger.debug("Check behaviour");
+			self.checkModelData(Behaviour, checkTypeParamType, fail, result);
+		};
+
+		var checkProvider = function () {
+			Logger.debug("Check provider");
+			self.checkModelData(Provider, checkBehaviour, fail, result);
+		};
+
+		var checkRendererTheme = function () {
+			Logger.debug("Check rendererTheme");
+			self.checkModelData(RendererTheme, checkProvider, fail, result);
+		};
+
+		var checkRenderer = function () {
+			Logger.debug("Check renderer");
+			self.checkModelData(Renderer, checkRendererTheme, fail, result);
+		};
+
+		var checkInfoType = function () {
+			Logger.debug("Check infotype");
+			self.checkModelData(InfoType, checkRenderer, fail, result);
+		};
+
+		Logger.debug("Check policies");
+		self.checkModelData(Policy, checkInfoType, fail, result);
+	};
+
+////////////////////// End: Check all Data of DB //////////////////////
+
+////////////////////// Begin: Check and remove orphans of DB //////////////////////
+
+	private checkModelOrphans(model : any, successCallback : Function, failCallback : Function, result : Array<any>) {
+		var nbElementsToDelete = 0;
+
+		var finalSuccess = function () {
+			if (nbElementsToDelete > 0) {
+				result.push({
+					'model':model.getTableName(),
+					'msg': 'Several instances of '+model.getTableName()+' ('+nbElementsToDelete+') were orphans and have been deleted. Maybe you should change the way this value is updated.'
+				});
+			}
+			successCallback();
+		};
+
+		var successAllElements = function (elements : Array<any>) {
+			if (elements.length > 0) {
+				var testElement = function (index) {
+					if (index < elements.length) {
+						var element = elements[index];
+
+						var finalTestOrphan = function () {
+							testElement(index+1);
+						};
+
+						var successTestOrphan = function (isOrphan) {
+							if (isOrphan) {
+								nbElementsToDelete++;
+								result.push({
+									'model': model.getTableName(),
+									'msg': 'Delete element with id: '+element.getId()
+								});
+								element.delete(finalTestOrphan, failCallback, 1, true); // try to force the delete
+							} else {
+								finalTestOrphan();
+							}
+						};
+
+						element.isOrphan(successTestOrphan, failCallback);
+					} else {
+						finalSuccess();
+					}
+				};
+
+				testElement(0);
+			} else {
+				finalSuccess();
+			}
+		};
+
+		model.all(successAllElements, failCallback);
+	}
+
+	checkAndRemoveOrphans = function () {
+		var self = this;
+		var result = [];
+
+		var fail = function (error) {
+			self.socket.emit("AnswerCheckAndRemoveOrphans", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - checkAllData failed");
+			Logger.debug(error);
+			Logger.info("Results before error: ");
+			Logger.info(result);
+		};
+
+		var finalSuccess = function () {
+			self.socket.emit("AnswerCheckAndRemoveOrphans", self.formatResponse(true, result));
+		};
+
+		var checkParamValue = function () {
+			Logger.debug("Check orphans paramValue");
+			self.checkModelOrphans(ParamValue, finalSuccess, fail, result);
+		};
+
+		var checkCall = function () {
+			Logger.debug("Check orphans call");
+			self.checkModelOrphans(Call, checkParamValue, fail, result);
+		};
+
+		var checkAbsoluteEvent = function () {
+			Logger.debug("Check orphans absoluteEvent");
+			self.checkModelOrphans(AbsoluteEvent, checkCall, fail, result);
+		};
+
+		var checkAbsoluteTL = function () {
+			Logger.debug("Check orphans absoluteTL");
+			self.checkModelOrphans(AbsoluteTimeline, checkAbsoluteEvent, fail, result);
+		};
+
+		var checkRelativeEvent = function () {
+			Logger.debug("Check orphans relativeEvent");
+			self.checkModelOrphans(RelativeEvent, checkAbsoluteTL, fail, result);
+		};
+
+		var checkRelativeTL = function () {
+			Logger.debug("Check orphans relativeTL");
+			self.checkModelOrphans(RelativeTimeline, checkRelativeEvent, fail, result);
+		};
+
+		var checkZoneContent = function () {
+			Logger.debug("Check orphans zoneContent");
+			self.checkModelOrphans(ZoneContent, checkRelativeTL, fail, result);
+		};
+
+		var checkRendererTheme = function () {
+			Logger.debug("Check orphans rendererTheme");
+			self.checkModelOrphans(RendererTheme, checkZoneContent, fail, result);
+		};
+
+		var checkOAuth = function () {
+			Logger.debug("Check orphans oAuth");
+			self.checkModelOrphans(OAuthKey, checkRendererTheme, fail, result);
+		};
+
+		var checkToken = function () {
+			Logger.debug("Check orphans token");
+			self.checkModelOrphans(Token, checkOAuth, fail, result);
+		};
+
+		var checkCallType = function () {
+			Logger.debug("Check orphans callType");
+			self.checkModelOrphans(CallType, checkToken, fail, result);
+		};
+
+		var checkProfil = function () {
+			Logger.debug("Check orphans profil");
+			self.checkModelOrphans(Profil, checkCallType, fail, result);
+		};
+
+		var checkZone = function () {
+			Logger.debug("Check orphans zone");
+			self.checkModelOrphans(Zone, checkProfil, fail, result);
+		};
+
+		var checkTeam = function () {
+			Logger.debug("Check orphans team");
+			self.checkModelOrphans(Team, checkZone, fail, result);
+		};
+
+		Logger.debug("Check orphans user");
+		self.checkModelOrphans(User, checkTeam, fail, result);
+	};
+
+////////////////////// End: Check and remove orphans of DB //////////////////////
+
 }

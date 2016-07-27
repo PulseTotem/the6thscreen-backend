@@ -39,22 +39,6 @@ class Service extends ModelItf {
 	private _host : string;
 
 	/**
-	 * OAuth property : determine if Service needs OAuth to be used.
-	 *
-	 * @property _oauth
-	 * @type boolean
-	 */
-	private _oauth : boolean;
-
-	/**
-	 * Provider property.
-	 *
-	 * @property _provider
-	 * @type string
-	 */
-	private _provider : string;
-
-	/**
 	 * Logo property.
 	 *
 	 * @property _logo
@@ -91,14 +75,12 @@ class Service extends ModelItf {
 	 * @param {string} createdAt - The Service's createdAt.
 	 * @param {string} updatedAt - The Service's updatedAt.
 	 */
-	constructor(name : string = "", description : string = "", host : string = "", oauth : boolean = false, provider : string = "", logo : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
+	constructor(name : string = "", description : string = "", host : string = "", logo : string = "", id : number = null, complete : boolean = false, createdAt : string = null, updatedAt : string = null) {
 		super(id, complete, createdAt, updatedAt);
 
 		this.setName(name);
 		this.setDescription(description);
 		this.setHost(host);
-		this.setOAuth(oauth);
-		this.setProvider(provider);
 		this.setLogo(logo);
 
 		this._sources = new Array<Source>();
@@ -130,24 +112,6 @@ class Service extends ModelItf {
 	 */
 	setHost(host : string) {
 		this._host = host;
-	}
-
-	/**
-	 * Set the Service's oauth.
-	 *
-	 * @method setOAuth
-	 */
-	setOAuth(oauth : boolean) {
-		this._oauth = oauth;
-	}
-
-	/**
-	 * Set the Service's provider.
-	 *
-	 * @method setProvider
-	 */
-	setProvider(provider : string) {
-		this._provider = provider;
 	}
 
 	/**
@@ -184,24 +148,6 @@ class Service extends ModelItf {
 	 */
 	host() {
 		return this._host;
-	}
-
-	/**
-	 * Return the Service's oauth.
-	 *
-	 * @method oauth
-	 */
-	oauth() {
-		return this._oauth;
-	}
-
-	/**
-	 * Return the Service's provider.
-	 *
-	 * @method provider
-	 */
-	provider() {
-		return this._provider;
 	}
 
 	/**
@@ -296,8 +242,6 @@ class Service extends ModelItf {
 			"name": this.name(),
 			"description": this.description(),
 			"host": this.host(),
-			"oauth": this.oauth(),
-			"provider": this.provider(),
 			"logo": this.logo(),
 			"complete": this.isComplete(),
 			"createdAt" : this.getCreatedAt(),
@@ -316,9 +260,6 @@ class Service extends ModelItf {
 
 		var succces : Function = function () {
 			self._complete = (self._complete && !!self.name() && !!self.host());
-			if(self.oauth()) {
-				self._complete = (self._complete && !!self.provider());
-			}
 			successCallback();
 		};
 
@@ -433,7 +374,7 @@ class Service extends ModelItf {
 	 * @return {Service} The model instance.
 	 */
 	static fromJSONObject(jsonObject : any) : Service {
-		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.oauth, jsonObject.provider, jsonObject.logo, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
+		return new Service(jsonObject.name, jsonObject.description, jsonObject.host, jsonObject.logo, jsonObject.id, jsonObject.complete, jsonObject.createdAt, jsonObject.updatedAt);
 	}
 
 	/**

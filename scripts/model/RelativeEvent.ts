@@ -70,6 +70,22 @@ class RelativeEvent extends ModelItf {
      */
     private _origineRelativeEvent_loaded : boolean;
 
+    /**
+     * RelativeTimeline property
+     *
+     * @property _relativeTimeline
+     * @type RelativeTimeline
+     */
+    private _relativeTimeline : RelativeTimeline;
+
+    /**
+     * Lazy loading for the relativeTimeline property
+     *
+     * @property _relativeTimeline_loaded
+     * @type boolean
+     */
+    private _relativeTimeline_loaded : boolean;
+
 
     /**
      * Constructor.
@@ -92,6 +108,9 @@ class RelativeEvent extends ModelItf {
 
         this._origineRelativeEvent = null;
         this._origineRelativeEvent_loaded = false;
+
+        this._relativeTimeline = null;
+        this._relativeTimeline_loaded = false;
     }
 
 	/**
@@ -232,6 +251,44 @@ class RelativeEvent extends ModelItf {
             if (successCallback != null) {
                 successCallback();
             }
+        }
+    }
+
+    /**
+     * Return the relativeTimeline of the event
+     *
+     * @method relativeTimeline
+     * @returns {RelativeTimeline}
+     */
+    relativeTimeline() {
+        return this._relativeTimeline;
+    }
+
+    /**
+     * Load the relativeTimeline attribute
+     *
+     * @method loadRelativeTimeline
+     * @param successCallback
+     * @param failCallback
+     */
+    loadRelativeTimeline(successCallback : Function, failCallback : Function) {
+        if (! this._relativeTimeline_loaded) {
+            var self = this;
+
+            var successLoad = function (relativeTimeline) {
+                self._relativeTimeline = relativeTimeline;
+                self._relativeTimeline_loaded = true;
+
+                successCallback();
+            };
+
+            var fail = function (error) {
+                failCallback(error);
+            };
+
+            this.getUniquelyAssociatedObject(RelativeEvent, RelativeTimeline, successLoad, fail);
+        } else {
+            successCallback();
         }
     }
 
@@ -467,7 +524,7 @@ class RelativeEvent extends ModelItf {
 		var successLoadCall = function() {
 			var successDeleteCall = function() {
 				ModelItf.deleteObject(RelativeEvent, self.getId(), successCallback, failCallback, attemptNumber);
-			}
+			};
 
 			self.call().delete(successDeleteCall, fail);
 		};
@@ -566,6 +623,22 @@ class RelativeEvent extends ModelItf {
         };
 
         super.cloneObject(RelativeEvent, successCloneRelativeEvent, failCallback);
+    }
+
+    /**
+     * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+     * @param successCallback
+     * @param failCallback
+     */
+    isOrphan(successCallback, failCallback) {
+        var self = this;
+
+        var successLoadRelativeTL = function () {
+            var result = (self.relativeTimeline() == null);
+            successCallback(result);
+        };
+
+        this.loadRelativeTimeline(successLoadRelativeTL, failCallback);
     }
 
     /**

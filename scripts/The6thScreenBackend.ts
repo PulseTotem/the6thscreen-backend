@@ -8,7 +8,7 @@
 /// <reference path="./namespacemanager/ClientsNamespaceManager.ts" />
 /// <reference path="./namespacemanager/SourcesNamespaceManager.ts" />
 /// <reference path="./namespacemanager/AdminsNamespaceManager.ts" />
-/// <reference path="./namespacemanager/BackendAuthNamespaceManager.ts" />
+/// <reference path="./namespacemanager/ManagersNamespaceManager.ts" />
 
 /// <reference path="./routers/ContactFormRouter.ts" />
 
@@ -28,22 +28,6 @@ var moment : any = require("moment");
  */
 class The6thScreenBackend extends Server {
 
-    private pushStat(socket : string, ip : string, status: string, username : string, userId: number) : void {
-        var result : StatObject = new StatObject();
-
-        result.setCollection("backend-auth");
-        result.setIp(ip);
-        result.setSocketId(socket);
-
-        var data = {};
-        data["status"] = status;
-        data["username"] = username;
-        data["userid"] = userId;
-        result.setData(data);
-
-        StatsClient.pushStats(result);
-    }
-
     /**
      * Constructor.
      *
@@ -57,6 +41,8 @@ class The6thScreenBackend extends Server {
         this.app.post('/login', function (req, res) {
             var clientIp = req.header("x-forwarded-for");
             Logger.info("Login with following IP: "+clientIp);
+
+            var rememberme = req.body.rememberme;
 
             var fail = function(error) {
                 res.status(500).send({ 'error': JSON.stringify(error) });
@@ -81,6 +67,10 @@ class The6thScreenBackend extends Server {
 
                     var now = moment();
                     var tomorrow = moment().add(7, 'days');
+
+                    if (rememberme) {
+                        tomorrow = moment().add(31, 'days');
+                    }
 
                     var token : Token = new Token(tokenString, tomorrow.toDate());
 
@@ -126,6 +116,31 @@ class The6thScreenBackend extends Server {
         });
 
 		this.app.post('/loginFromToken', function(req, res) {
+
+            var cleanOldTokens = function () {
+
+                var fail = function (error) {
+                    Logger.error("Error while cleaning old tokens");
+                    Logger.debug(error);
+                };
+
+                var successLoadAllTokens = function (tokens : Array<Token>) {
+                    var successDelete = function () {
+                        Logger.debug("Succeed to delete one old token.");
+                    };
+
+                    for (var i = 0; i < tokens.length; i++) {
+                        var token = tokens[i];
+
+                        if (moment().isAfter(token.endDate())) {
+                            token.delete(successDelete, fail);
+                        }
+                    }
+                };
+
+                Token.all(successLoadAllTokens, fail);
+            };
+
             var clientIp = req.header("x-forwarded-for");
             Logger.info("Login by token with IP: " + clientIp);
 
@@ -167,6 +182,7 @@ class The6thScreenBackend extends Server {
                         // we are sending the profile in the token
                         var tokenStr = jwt.sign(profile, BackendConfig.getJWTSecret());
                         var finalSuccess = function () {
+                            cleanOldTokens();
                             res.json({token: tokenStr});
                         };
 
@@ -255,14 +271,14 @@ class The6thScreenBackend extends Server {
             // else just call next
         });
 
-        var backendAuthNamespaceManager : any = self.addNamespace("backendAuth", BackendAuthNamespaceManager);
+        var managersNamespaceManager : any = self.addNamespace("managers", ManagersNamespaceManager);
 
-        backendAuthNamespaceManager.use(socketioJwt.authorize({
+		managersNamespaceManager.use(socketioJwt.authorize({
             secret: BackendConfig.getJWTSecret(),
             handshake: true
         }));
 
-        backendAuthNamespaceManager.use(function(socket, next) {
+		managersNamespaceManager.use(function(socket, next) {
             var handshakeData : any = socket.request;
 
             var success = function(token : Token) {
@@ -296,6 +312,31 @@ class The6thScreenBackend extends Server {
 
         self.addAPIEndpoint("contact", ContactFormRouter);
     }
+
+	/**
+	 * Push some infos in Stats service.
+	 *
+	 * @param {string} socket - Socket's id.
+	 * @param {string} ip - Client's ip address.
+	 * @param {string} status - Connection's status.
+	 * @param {string} username - User's username
+	 * @param {number} userId - User's userid.
+	 */
+	private pushStat(socket : string, ip : string, status: string, username : string, userId: number) : void {
+		var result : StatObject = new StatObject();
+
+		result.setCollection("backend-auth");
+		result.setIp(ip);
+		result.setSocketId(socket);
+
+		var data = {};
+		data["status"] = status;
+		data["username"] = username;
+		data["userid"] = userId;
+		result.setData(data);
+
+		StatsClient.pushStats(result);
+	}
 }
 
 /**

@@ -433,7 +433,35 @@ class Renderer extends ModelItf {
      * @param {number} attemptNumber - The attempt number.
      */
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
-        return ModelItf.deleteObject(Renderer, this.getId(), successCallback, failCallback, attemptNumber);
+		var self = this;
+
+		var finalSuccess = function () {
+			ModelItf.deleteObject(Renderer, self.getId(), successCallback, failCallback, attemptNumber);
+		};
+
+		var successLoadRendererThemes = function () {
+			if (self.rendererThemes().length > 0) {
+				var nbThemes = self.rendererThemes().length;
+
+				var successDeleteRendererTheme = function () {
+					nbThemes--;
+
+					if (nbThemes == 0) {
+						finalSuccess();
+					}
+				};
+
+				for (var i = 0; i < self.rendererThemes().length; i++) {
+					var rendererTheme = self.rendererThemes()[i];
+
+					rendererTheme.delete(successDeleteRendererTheme, failCallback);
+				}
+			} else {
+				finalSuccess();
+			}
+		};
+
+		this.loadRendererThemes(successLoadRendererThemes, failCallback);
     }
 
     /**

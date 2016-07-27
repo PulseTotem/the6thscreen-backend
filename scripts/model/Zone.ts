@@ -146,6 +146,21 @@ class Zone extends ModelItf {
 	 */
 	private _origineZone_loaded : boolean;
 
+	/**
+	 * The SDI which contain this zone
+	 * @property _sdi
+	 * @type SDI
+	 */
+	private _sdi : SDI;
+
+	/**
+	 * Lazy loading for _sdi property
+	 *
+	 * @property _sdi_loaded
+	 * @type boolean
+	 */
+	private _sdi_loaded : boolean;
+
     /**
      * Constructor.
      *
@@ -181,6 +196,9 @@ class Zone extends ModelItf {
 
 	    this._origineZone = null;
 	    this._origineZone_loaded = false;
+
+		this._sdi = null;
+		this._sdi_loaded = false;
     }
 
 	/**
@@ -507,6 +525,31 @@ class Zone extends ModelItf {
 		}
 	}
 
+	sdi() : SDI {
+		return this._sdi;
+	}
+
+	loadSDI(successCallback : Function, failCallback : Function) {
+		if (!this._sdi_loaded) {
+			var self = this;
+
+			var successLoad = function (sdi) {
+				self._sdi = sdi;
+				self._sdi_loaded = true;
+
+				successCallback();
+			};
+
+			var fail = function (error) {
+				failCallback(error);
+			};
+
+			this.getUniquelyAssociatedObject(Zone, SDI, successLoad, fail);
+		} else {
+			successCallback();
+		}
+	}
+
 
 	//////////////////// Methods managing model. Connections to database. ///////////////////////////
 
@@ -591,31 +634,40 @@ class Zone extends ModelItf {
 	checkCompleteness(successCallback : Function, failCallback : Function) {
 		var self = this;
 
-		var success : Function = function () {
+		var successCheckId : Function = function () {
 			if (self.isComplete() && !!self.name()) {
 
-				var success:Function = function () {
-					self._complete = (!!self.behaviour() && self.behaviour().isComplete());
-					successCallback();
+				var successLoad:Function = function () {
+					if (self._behaviour_loaded && self._callTypes_loaded) {
+
+						for (var i = 0; i < self._callTypes.length; i++) {
+							var callType = self._callTypes[i];
+
+							self._complete = self._complete && (!!callType && callType.isComplete());
+						}
+
+						self._complete = self._complete && (!!self.behaviour() && self.behaviour().isComplete());
+						successCallback();
+					}
 				};
 
 				var fail:Function = function (error) {
 					failCallback(error);
 				};
 
-				if (!self._behaviour_loaded) {
-					self.loadBehaviour(success, fail);
+				if (!self._behaviour_loaded || !self._callTypes_loaded) {
+					self.loadAssociations(successLoad, fail);
 				} else {
-					success();
+					successLoad();
 				}
 
 			} else {
 				self._complete = false;
 				successCallback();
 			}
-		}
+		};
 
-		super.checkCompleteness(success, failCallback);
+		super.checkCompleteness(successCheckId, failCallback);
 	}
 
     /**
@@ -815,7 +867,6 @@ class Zone extends ModelItf {
     /**
      * Delete in database the Zone with current id.
      * This method also deletes all the containing CallTypes of the Zone.
-     * If the Zone contains some ZoneContents it fails with a message.
      *
      * @method delete
      * @param {Function} successCallback - The callback function when success.
@@ -825,35 +876,52 @@ class Zone extends ModelItf {
     delete(successCallback : Function, failCallback : Function, attemptNumber : number = 0) {
 	    var self = this;
 
-	    var successLoadZone : Function = function () {
-		    if (self.zoneContents().length > 0) {
-			    failCallback("You can't delete a zone containing some zone contents.");
-		    } else {
-			    var sizeCT = self.callTypes().length;
-			    var deleted = 0;
+	    var successLoadAsso : Function = function () {
 
-			    var successDeleteCT:Function = function () {
-				    deleted++;
+			var nbZoneContents = self.zoneContents().length;
 
-				    if (deleted == sizeCT) {
-					    ModelItf.deleteObject(Zone, self.getId(), successCallback, failCallback, attemptNumber);
-				    }
-			    };
+			var finalDelete  = function () {
+				var sizeCT = self.callTypes().length;
+				var deleted = 0;
 
-			    if (sizeCT == 0) {
-				    deleted = -1;
-				    successDeleteCT();
-			    }
+				var successDeleteCT:Function = function () {
+					deleted++;
 
-			    for (var ctIndex in self.callTypes()) {
-				    var ct:CallType = self.callTypes()[ctIndex];
+					if (deleted == sizeCT) {
+						ModelItf.deleteObject(Zone, self.getId(), successCallback, failCallback, attemptNumber);
+					}
+				};
 
-				    ct.delete(successDeleteCT, failCallback);
-			    }
-		    }
+				if (sizeCT == 0) {
+					deleted = -1;
+					successDeleteCT();
+				}
+
+				for (var ctIndex in self.callTypes()) {
+					var ct:CallType = self.callTypes()[ctIndex];
+
+					ct.delete(successDeleteCT, failCallback);
+				}
+			};
+
+			var successDeleteZoneContent = function () {
+				nbZoneContents--;
+
+				if (nbZoneContents == 0) {
+					finalDelete();
+				}
+			};
+
+			if (nbZoneContents > 0) {
+				self.zoneContents().forEach(function (zoneContent : ZoneContent) {
+					zoneContent.delete(successDeleteZoneContent, failCallback);
+				});
+			} else {
+				finalDelete();
+			}
 	    };
 
-	    this.loadAssociations(successLoadZone, failCallback);
+	    this.loadAssociations(successLoadAsso, failCallback);
     }
 
     /**
@@ -915,62 +983,72 @@ class Zone extends ModelItf {
 
 				var successLoadAsso = function () {
 					Logger.debug("Success load asso in zone");
+
 					var successLinkBehaviour = function () {
 						Logger.debug("Success link behaviour in zone");
 						var successLinkTheme = function () {
 							Logger.debug("Success link theme in zone");
 
-							var callTypesSize = self.callTypes().length;
-							var callTypeCounter = 0;
+							var successCheckComplete = function () {
+								Logger.debug("Zone check completeness : "+clonedZone.isComplete());
+								var finalSuccess = function () {
+									successCallback(clonedZone);
+								};
 
-							Logger.debug("CallTypes size : "+callTypesSize);
+								var checkCallTypes = function () {
+									var callTypesSize = self.callTypes().length;
+									var callTypeCounter = 0;
 
-							var successCloneCallType = function (clonedCallType : CallType) {
-								Logger.debug("Success clone call type in zone ("+callTypeCounter+"/"+callTypesSize+")");
+									Logger.debug("CallTypes size : "+callTypesSize);
 
-								var successLinkCallType = function () {
+									var successCloneCallType = function (clonedCallType : CallType) {
+										Logger.debug("Success clone call type in zone ("+callTypeCounter+"/"+callTypesSize+")");
 
-									clonedCallType.desynchronize();
-									var ctComplete = clonedCallType.isComplete();
+										var successLinkCallType = function () {
 
-									var successCTCheckComplete = function () {
-										var successEitherWay = function () {
-											callTypeCounter++;
+											clonedCallType.desynchronize();
+											var ctComplete = clonedCallType.isComplete();
 
-											if (callTypeCounter >= callTypesSize) {
+											var successCTCheckComplete = function () {
+												var successEitherWay = function () {
+													callTypeCounter++;
 
-												var successCheckComplete = function () {
-													var finalSuccess = function () {
-														successCallback(clonedZone);
-													};
-
-													if (clonedZone.isComplete() != isComplete) {
-														clonedZone.update(finalSuccess, failCallback);
-													} else {
+													if (callTypeCounter >= callTypesSize) {
 														finalSuccess();
 													}
 												};
 
-												clonedZone.checkCompleteness(successCheckComplete, failCallback);
-											}
+												if (clonedCallType.isComplete() != ctComplete) {
+													clonedCallType.update(successEitherWay, failCallback);
+												} else {
+													successEitherWay();
+												}
+											};
+
+											clonedCallType.checkCompleteness(successCTCheckComplete, failCallback);
 										};
 
-										if (clonedCallType.isComplete() != ctComplete) {
-											clonedCallType.update(successEitherWay, failCallback);
-										} else {
-											successEitherWay();
-										}
+										clonedZone.addCallType(clonedCallType.getId(), successLinkCallType, failCallback);
 									};
 
-									clonedCallType.checkCompleteness(successCTCheckComplete, failCallback);
+									if (callTypesSize > 0) {
+										self.callTypes().forEach( function (callType : CallType) {
+											callType.clone(successCloneCallType, failCallback);
+										});
+									} else {
+										finalSuccess();
+									}
 								};
 
-								clonedZone.addCallType(clonedCallType.getId(), successLinkCallType, failCallback);
+
+								if (clonedZone.isComplete() != isComplete) {
+									clonedZone.update(checkCallTypes, failCallback);
+								} else {
+									checkCallTypes();
+								}
 							};
 
-							self.callTypes().forEach( function (callType : CallType) {
-								callType.clone(successCloneCallType, failCallback);
-							});
+							clonedZone.checkCompleteness(successCheckComplete, failCallback);
 						};
 
 						if (self.theme() != null) {
@@ -981,7 +1059,13 @@ class Zone extends ModelItf {
 
 					};
 
-					clonedZone.linkBehaviour(self.behaviour().getId(), successLinkBehaviour, failCallback);
+					if (self.behaviour() != null) {
+						clonedZone.linkBehaviour(self.behaviour().getId(), successLinkBehaviour, failCallback);
+					} else {
+						Logger.warn("The zone "+self.getId()+" does not have any behaviour! Clonage keep going");
+						successLinkBehaviour();
+					}
+
 				};
 
 				self.loadAssociations(successLoadAsso, failCallback);
@@ -992,6 +1076,22 @@ class Zone extends ModelItf {
 		};
 
 		super.cloneObject(Zone, successCloneZone, failCallback);
+	}
+
+	/**
+	 * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+	 * @param successCallback
+	 * @param failCallback
+     */
+	isOrphan(successCallback, failCallback) {
+		var self = this;
+
+		var successLoadSDI = function () {
+			var result = (self.sdi() == null);
+			successCallback(result);
+		};
+
+		this.loadSDI(successLoadSDI, failCallback);
 	}
 
     /**

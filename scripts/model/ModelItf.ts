@@ -152,7 +152,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to create an object with URL:"+urlCreateObject+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())), attemptNumber);
         };
 
 	    var urlCreateObject = BackendConfig.getDBBaseURL() + BackendConfig.modelEndpoint(modelClass.getTableName());
@@ -191,7 +191,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), id, attemptNumber);
+            failCallback(new RequestException("The request failed when trying to read an object with URL:"+urlReadObject+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())), id, attemptNumber);
         };
 
         var urlReadObject = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(modelClass.getTableName(), id.toString());
@@ -240,7 +240,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to find an object with URL:"+urlSearchObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
+            failCallback(new RequestException("The request failed when trying to find an object with URL:"+urlSearchObject+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())));
         };
 
         var urlSearchObject = BackendConfig.getDBBaseURL() + BackendConfig.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
@@ -289,7 +289,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to find an object with URL:"+urlSearchObject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()));
+            failCallback(new RequestException("The request failed when trying to find an object with URL:"+urlSearchObject+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())));
         };
 
         var urlSearchObject = BackendConfig.getDBBaseURL() + BackendConfig.searchEndpoint(modelClass.getTableName(), paramName, paramValue);
@@ -332,7 +332,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+result.data()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to update an object with URL:"+urlUpdate+" and datas : "+JSON.stringify(data)+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())), attemptNumber);
         };
 
 	    var urlUpdate = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(modelClass.getTableName(), this.getId().toString());
@@ -368,7 +368,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to delete an object with URL:"+urlDelete+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to delete an object with URL:"+urlDelete+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())), attemptNumber);
         };
 
 	    var urlDelete = BackendConfig.getDBBaseURL() + BackendConfig.objectEndpoint(modelClass.getTableName(), objectId.toString());
@@ -415,7 +415,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to retrieve all objects with URL:"+urlAll+".\nCode : "+result.statusCode()+"\nMessage : " + result.response()+"\nData : "+JSON.stringify(result.data())), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to retrieve all objects with URL:"+urlAll+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())), attemptNumber);
         };
 
 		var urlAll = BackendConfig.getDBBaseURL() + BackendConfig.modelEndpoint(modelClass.getTableName());
@@ -451,7 +451,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to associate objects with URL:"+associationURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to associate objects with URL:"+associationURL+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())), attemptNumber);
         };
 
 		var associationURL;
@@ -493,7 +493,9 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to delete an association between objects with URL:"+deleteAssoURL+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+			Logger.debug("Error while deleting association with url: "+deleteAssoURL);
+			Logger.debug(result.data());
+            failCallback(new RequestException("The request failed when trying to delete an association between objects with URL:"+deleteAssoURL+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())), attemptNumber);
         };
 
 		var deleteAssoURL;
@@ -548,7 +550,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to retrieve all associated objects with URL:"+urlAssociatedObjects+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())), attemptNumber);
         };
 
         var urlAssociatedObjects;
@@ -599,7 +601,7 @@ class ModelItf {
         };
 
         var fail : Function = function(result) {
-            failCallback(new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+result.response()), attemptNumber);
+            failCallback(new RequestException("The request failed when trying to retrieve a uniquely associated objects with URL:"+urlUniqueAssociatedOject+".\nCode : "+result.statusCode()+"\nMessage : "+JSON.stringify(result.data())), attemptNumber);
         };
 
         var urlUniqueAssociatedOject;
@@ -621,8 +623,9 @@ class ModelItf {
 	 * @param informations The informations for the update with the following format : {'id': 12, 'method':'setName', 'value':'toto'}. Only method starting by the name 'set', 'add', 'link', 'unlink' or 'remove' are allowed.
 	 * @param successCallback The function to call if the object is successfully updated.
 	 * @param failCallback The function to call in case of failure.
+	 * @param {string} cmsAuthKey - The callback function when fail.
 	 */
-	static updateAttribute(modelClass : any, informations : any, successCallback : Function, failCallback : Function) {
+	static updateAttribute(modelClass : any, informations : any, successCallback : Function, failCallback : Function, cmsAuthKey : string = "") {
 		if (!modelClass) {
 			failCallback(new ModelException("You must specify the modelClass in order to update one of its attribute."));
 			return;
@@ -669,7 +672,7 @@ class ModelItf {
 					self[informations.method](informations.value);
 					self.checkCompleteness(doUpdate, failCallback);
 				} else {
-					self[informations.method](informations.value, successCheck, failCallback);
+					self[informations.method](informations.value, successCheck, failCallback, cmsAuthKey);
 				}
 			} catch (error) {
 				if (error instanceof TypeError) {
@@ -925,7 +928,7 @@ class ModelItf {
 
 	    var successCheckCompletenessModelItf = function () {
 		    Logger.debug("Success check completeness model itf ! "+self.getId());
-
+			clone.desynchronize();
 		    if (clone.isComplete()) {
 			    clone.update(successUpdateModelItf, failCallback);
 		    } else {

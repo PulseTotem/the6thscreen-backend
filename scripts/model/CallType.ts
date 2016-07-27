@@ -908,10 +908,38 @@ class CallType extends ModelItf {
 
         var self = this;
         var successLoadCalls = function () {
+
+            var nbCalls = self.calls().length;
+
+            var finalSuccess = function () {
+                ModelItf.deleteObject(CallType, self.getId(), successCallback, failCallback, attemptNumber);
+            };
+
+            var successLoadEvent = function() {
+                nbCalls--;
+                if (nbCalls <= 0) {
+                    nbCalls = self.calls().length;
+
+                    var successDeleteRelativeEvent = function () {
+                        nbCalls--;
+
+                        if (nbCalls <= 0) {
+                            finalSuccess();
+                        }
+                    };
+
+                    self.calls().forEach(function (call : Call) {
+                        call.relativeEvent().delete(successDeleteRelativeEvent, failCallback);
+                    });
+                }
+            };
+
             if (self.calls().length > 0) {
-                failCallback("You cannot delete a CallBack which owns some calls. Delete the calls first.");
+                self.calls().forEach(function (call : Call) {
+                    call.loadEvent(successLoadEvent, failCallback);
+                });
             } else {
-                return ModelItf.deleteObject(CallType, self.getId(), successCallback, failCallback, attemptNumber);
+                finalSuccess();
             }
         };
 
@@ -989,16 +1017,39 @@ class CallType extends ModelItf {
 									clonedCallType.checkCompleteness(successCheckComplete, failCallback);
 								};
 
-								clonedCallType.linkSource(self.source().getId(), successLinkSource, failCallback);
+                                if (self.source() != null) {
+                                    clonedCallType.linkSource(self.source().getId(), successLinkSource, failCallback);
+                                } else {
+                                    Logger.warn("The callType "+self.getId()+" does not have any source ! Clonage keep going");
+                                    successLinkSource();
+                                }
+
 							};
 
-							clonedCallType.linkRendererTheme(self.rendererTheme().getId(), successLinkRendererTheme, failCallback);
+                            if (self.rendererTheme() != null) {
+                                clonedCallType.linkRendererTheme(self.rendererTheme().getId(), successLinkRendererTheme, failCallback);
+                            } else {
+                                Logger.warn("The callType "+self.getId()+" does not have any renderer theme ! Clonage keep going");
+                                successLinkRendererTheme();
+                            }
+
                         };
 
-                        clonedCallType.linkRenderer(self.renderer().getId(), successLinkRenderer, failCallback);
+                        if (self.renderer() != null) {
+                            clonedCallType.linkRenderer(self.renderer().getId(), successLinkRenderer, failCallback);
+                        } else {
+                            Logger.warn("The callType "+self.getId()+" does not have any renderer ! Clonage keep going.");
+                            successLinkRenderer();
+                        }
+
                     };
 
-                    clonedCallType.linkPolicy(self.policy().getId(), successLinkPolicy, failCallback);
+                    if (self.policy() != null) {
+                        clonedCallType.linkPolicy(self.policy().getId(), successLinkPolicy, failCallback);
+                    } else {
+                        successLinkPolicy();
+                    }
+
                 };
 
                 self.loadAssociations(successLoadAsso, failCallback);
@@ -1008,6 +1059,30 @@ class CallType extends ModelItf {
         };
 
         super.cloneObject(CallType, successCloneCallType, failCallback);
+    }
+
+    /**
+     * Determine if the object is an orphan or not. Sucesscallback return a boolean.
+     * @param successCallback
+     * @param failCallback
+     */
+    isOrphan(successCallback, failCallback) {
+        var self = this;
+
+        var successLoadSource = function () {
+            var result = (self.source() == null);
+            successCallback(result);
+        };
+
+        var successLoadZone = function () {
+            if (self.zone() == null) {
+                successCallback(true);
+            } else {
+                self.loadSource(successLoadSource, failCallback);
+            }
+        };
+
+        this.loadZone(successLoadZone, failCallback);
     }
 
     /**
