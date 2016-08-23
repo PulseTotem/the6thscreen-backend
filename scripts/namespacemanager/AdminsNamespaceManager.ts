@@ -216,6 +216,7 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 		this.addListenerToSocket('RefreshCommand', function (clientDescription) { self.sendRefreshCommandToClient(clientDescription); });
 		this.addListenerToSocket('IdentifyCommand', function (clientDescription) { self.sendIdentifyCommandToClient(clientDescription); });
 
+		this.addListenerToSocket('CheckSDICompleteness', function (sdiDescription) { self.checkSDICompleteness(sdiDescription); });
 	}
 
 	/**
@@ -2547,4 +2548,37 @@ class AdminsNamespaceManager extends BackendAuthNamespaceManager {
 
 ////////////////////// End: Check and remove orphans of DB //////////////////////
 
+////////////////////// Begin: checkSDICompleteness //////////////////////
+
+	checkSDICompleteness = function (sdiDescription) {
+		var sdiDescriptionId = sdiDescription.SDIid;
+		var self = this;
+
+		var fail = function (error) {
+			self.socket.emit("AnswerCheckSDICompleteness", self.formatResponse(false, error));
+			Logger.error("SocketId: "+self.socket.id+" - checkSDICompleteness failed");
+			Logger.debug(error);
+		};
+
+		var successReadSDI = function (sdi : SDI) {
+			var completeSDI = sdi.isComplete();
+
+			var finalSuccess = function () {
+				self.socket.emit("AnswerCheckSDICompleteness", self.formatResponse(true, sdi.toJSONObject()));
+				Logger.error("SocketId: "+self.socket.id+" - checkSDICompleteness success");
+			};
+
+			var successCheckCompleteness = function () {
+				if (sdi.isComplete() != completeSDI) {
+					sdi.update(finalSuccess, fail);
+				} else {
+					finalSuccess();
+				}
+			};
+
+			sdi.checkCompleteness(successCheckCompleteness, fail);
+		};
+
+		SDI.read(sdiDescriptionId, successReadSDI, fail);
+	}
 }
